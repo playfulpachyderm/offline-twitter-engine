@@ -1,0 +1,29 @@
+image: ubuntu/focal
+
+secrets:
+  - 31c0c342-c396-4190-9637-1c3cedd705a5 # SSH key
+  - 8803f94a-8b8b-4966-aac7-4b8e24c328ce # Gitlab access token
+  - c84e3f2c-7c97-4cef-859e-8b13de32a7be # ~/.ssh/known_hosts (gitlab.com)
+
+sources:
+  - git@gitlab.com:playfulpachyderm/twitter_offline_engine.git
+
+packages:
+  - wget
+  - build-essential
+
+tasks:
+  - install go: |
+      SECONDS=0
+
+      wget https://golang.org/dl/go1.16.4.linux-amd64.tar.gz
+      rm -rf /usr/local/go && tar -C /usr/local -xzf go1.16.4.linux-amd64.tar.gz
+      export PATH=$PATH:/usr/local/go/bin
+
+      duration=$SECONDS
+      echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
+
+  - run tests: |
+      cd twitter_offline_engine/scraper
+
+      go test -bench=.
