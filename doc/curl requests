@@ -1,0 +1,15 @@
+curl -X POST \
+    -H "Authorization: Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA" \
+    https://api.twitter.com/1.1/guest/activate.json
+
+
+curl \
+    -H "Authorization: Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA" \
+    -H "X-Guest-Token: 1391174194361217029" \
+    https://api.twitter.com/graphql/4S2ihIKfF3xhp-ENxvUAfQ/UserByScreenName?variables=%7B%22screen_name%22%3A%22michaelmalice%22%2C%22withHighlightedLabel%22%3Atrue%7D
+
+
+curl \
+    -H "Authorization: Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA" \
+    -H "X-Guest-Token: 1391214296126967816" \
+    https://api.twitter.com/2/timeline/profile/44067298.json
