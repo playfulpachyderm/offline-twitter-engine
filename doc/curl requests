@@ -3,13 +3,25 @@ curl -X POST \
     https://api.twitter.com/1.1/guest/activate.json
 
 
+#
+# A user profile:
 curl \
     -H "Authorization: Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA" \
-    -H "X-Guest-Token: 1391174194361217029" \
+    -H "X-Guest-Token: 1396177150890348547" \
     https://api.twitter.com/graphql/4S2ihIKfF3xhp-ENxvUAfQ/UserByScreenName?variables=%7B%22screen_name%22%3A%22michaelmalice%22%2C%22withHighlightedLabel%22%3Atrue%7D
 
 
+#
+# A user's feed:
 curl \
     -H "Authorization: Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA" \
-    -H "X-Guest-Token: 1391214296126967816" \
+    -H "X-Guest-Token: 1396177150890348547" \
     https://api.twitter.com/2/timeline/profile/44067298.json
+
+
+#
+# A tweet and replies (conversation):
+curl \
+    -H "Authorization: Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA" \
+    -H "X-Guest-Token: 1396177150890348547" \
+    https://twitter.com/i/api/2/timeline/conversation/1395881699142160387.json
