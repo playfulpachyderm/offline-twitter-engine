@@ -1,6 +1,10 @@
 package scraper
 
-import "time"
+import (
+	"time"
+	"strings"
+	"encoding/json"
+)
 
 type APITweet struct {
 	ID                string `json:"id_str"`
@@ -24,7 +28,7 @@ type APITweet struct {
 		Mentions []struct {
 			UserName string `json:"screen_name"`
 			UserID   string `json:"id_str"`
-		}
+		} `json:"user_mentions"`
 	} `json:"entities"`
 	ExtendedEntities struct {
 		Media []struct {
@@ -48,6 +52,37 @@ type APITweet struct {
 	QuotedStatusIDStr    string    `json:"quoted_status_id_str"`
 	Time                 time.Time `json:"time"`
 	UserIDStr            string    `json:"user_id_str"`
+}
+
+func (t *APITweet) NormalizeContent() {
+	// Remove embedded links at the end of the text
+	if len(t.Entities.URLs) == 1 {
+		url := t.Entities.URLs[0].URL
+		if strings.Index(t.FullText, url) == len(t.FullText) - len(url) {
+			t.FullText = t.FullText[0:len(t.FullText) - len(url)]  // Also strip the newline
+		}
+	}
+	if len(t.Entities.Media) == 1 {
+		url := t.Entities.Media[0].URL
+		if strings.Index(t.FullText, url) == len(t.FullText) - len(url) {
+			t.FullText = t.FullText[0:len(t.FullText) - len(url)]  // Also strip the trailing space
+		}
+	}
+	// Remove leading `@username` for replies
+	if t.InReplyToScreenName != "" {
+		if strings.Index(t.FullText, "@" + t.InReplyToScreenName) == 0 {
+			t.FullText = t.FullText[len(t.InReplyToScreenName) + 1:]  // `@`, username, space
+		}
+	}
+	t.FullText = strings.TrimSpace(t.FullText)
+}
+
+func (t APITweet) String() string {
+	data, err := json.Marshal(t)
+	if err != nil {
+		panic(err)
+	}
+	return string(data)
 }
 
 type TweetResponse struct {
@@ -79,7 +114,33 @@ type TweetResponse struct {
 			Verified             bool     `json:"verified"`
 		} `json:"users"`
 	} `json:"globalObjects"`
+	Timeline struct {
+		Instructions []struct {
+			AddEntries struct {
+				Entries []struct {
+					EntryID string `json:"entryId"`
+					Content struct {
+						Operation struct {
+							Cursor struct {
+								Value string `json:"value"`
+							} `json:"cursor"`
+						} `json:"operation`
+					} `json:"content"`
+				} `json:"entries"`
+			} `json:"addEntries"`
+		} `json:"instructions"`
+	} `json:"timeline"`
 }
+
+func (t *TweetResponse) GetCursor() string {
+	entries := t.Timeline.Instructions[0].AddEntries.Entries
+	last_entry := entries[len(entries) - 1]
+	if strings.Contains(last_entry.EntryID, "cursor") {
+		return last_entry.Content.Operation.Cursor.Value
+	}
+	return ""
+}
+
 
 type UserResponse struct {
 	Data struct {
