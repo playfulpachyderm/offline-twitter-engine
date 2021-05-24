@@ -3,7 +3,6 @@ package scraper
 import (
 	"time"
 	"fmt"
-	"strings"
 )
 
 
@@ -35,31 +34,13 @@ Urls: %v   Images: %v   Mentions: %v   Hashtags: %v`,
 	t.ID, t.User, t.Text, t.PostedAt, t.NumLikes, t.NumRetweets, t.NumQuoteTweets, t.NumReplies, t.Urls, t.Images, t.Mentions, t.Hashtags)
 }
 
+// Turn an APITweet, as returned from the scraper, into a properly structured Tweet object
 func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
+	apiTweet.NormalizeContent()
+
 	ret.ID = TweetID(apiTweet.ID)
 	ret.User = UserID(apiTweet.UserIDStr)
 	ret.Text = apiTweet.FullText
-
-	// Remove embedded links at the end of the text
-	if len(apiTweet.Entities.URLs) == 1 {
-		url := apiTweet.Entities.URLs[0].URL
-		if strings.Index(ret.Text, url) == len(ret.Text) - len(url) {
-			ret.Text = ret.Text[0:len(ret.Text) - len(url) - 1]  // Also strip the newline
-		}
-	}
-	if len(apiTweet.Entities.Media) == 1 {
-		url := apiTweet.Entities.Media[0].URL
-		if strings.Index(ret.Text, url) == len(ret.Text) - len(url) {
-			ret.Text = ret.Text[0:len(ret.Text) - len(url) - 1]  // Also strip the trailing space
-		}
-	}
-
-	// Remove leading `@username` for replies
-	if apiTweet.InReplyToScreenName != "" {
-		if strings.Index(ret.Text, "@" + apiTweet.InReplyToScreenName) == 0 {
-			ret.Text = ret.Text[len(apiTweet.InReplyToScreenName) + 2:]  // `@`, username, space
-		}
-	}
 
 	ret.PostedAt, err = time.Parse(time.RubyDate, apiTweet.CreatedAt)
 	if err != nil {
