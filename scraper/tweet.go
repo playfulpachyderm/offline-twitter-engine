@@ -22,7 +22,7 @@ type Tweet struct {
 
 	Urls        []string
 	Images      []string
-	Mentions    []UserID
+	Mentions    []string
 	Hashtags    []string
 	QuotedTweet TweetID
 }
@@ -66,7 +66,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		ret.Hashtags = append(ret.Hashtags, hashtag.Text)
 	}
 	for _, mention := range apiTweet.Entities.Mentions {
-		ret.Mentions = append(ret.Mentions, UserID(mention.UserID))
+		ret.Mentions = append(ret.Mentions, mention.UserName)
 	}
 
 	ret.QuotedTweet = TweetID(apiTweet.QuotedStatusIDStr)

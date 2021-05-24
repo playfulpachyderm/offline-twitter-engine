@@ -47,6 +47,10 @@ func TestParseSingleTweet(t *testing.T) {
 	if actual_text != expected_text {
 		t.Errorf("Expected: %q; got %q", expected_text, actual_text)
 	}
+
+	if len(tweet.Mentions) != 1 || tweet.Mentions[0] != "michaelmalice" {
+		t.Errorf("Expected %v, got %v", []string{"michaelmalice"}, tweet.Mentions)
+	}
 }
 
 func TestParseSingleTweet2(t *testing.T) {
@@ -100,6 +104,10 @@ func TestParseSingleTweet2(t *testing.T) {
 
 	if len(tweet1.Images) != 1 {
 		t.Errorf("Expected 1 images but got %d", len(tweet1.Images))
+	}
+
+	if tweet2.InReplyTo != tweet1.ID {
+		t.Errorf("Expected %q, got %q", tweet1.ID, tweet2.InReplyTo)
 	}
 	if tweet1.QuotedTweet != "" {
 		t.Errorf("Incorrectly believes it quote-tweets %q", tweet1.QuotedTweet)
