@@ -51,6 +51,10 @@ func TestParseSingleTweet(t *testing.T) {
 	if len(tweet.Mentions) != 1 || tweet.Mentions[0] != "michaelmalice" {
 		t.Errorf("Expected %v, got %v", []string{"michaelmalice"}, tweet.Mentions)
 	}
+
+	if tweet.PostedAt.Unix() != 1621639105 {
+		t.Errorf("Expected %d, got %d", 1621639105, tweet.PostedAt.Unix())
+	}
 }
 
 func TestParseSingleTweet2(t *testing.T) {
