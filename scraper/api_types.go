@@ -85,34 +85,52 @@ func (t APITweet) String() string {
 	return string(data)
 }
 
+
+type APIUser struct {
+	CreatedAt   string `json:"created_at"`
+	Description string `json:"description"`
+	Entities    struct {
+		URL struct {
+			Urls []struct {
+				ExpandedURL string `json:"expanded_url"`
+			} `json:"urls"`
+		} `json:"url"`
+	} `json:"entities"`
+	FavouritesCount      int      `json:"favourites_count"`
+	FollowersCount       int      `json:"followers_count"`
+	FriendsCount         int      `json:"friends_count"`
+	IDStr                string   `json:"id_str"`
+	ListedCount          int      `json:"listed_count"`
+	Name                 string   `json:"name"`
+	Location             string   `json:"location"`
+	PinnedTweetIdsStr    []string `json:"pinned_tweet_ids_str"`
+	ProfileBannerURL     string   `json:"profile_banner_url"`
+	ProfileImageURLHTTPS string   `json:"profile_image_url_https"`
+	Protected            bool     `json:"protected"`
+	ScreenName           string   `json:"screen_name"`
+	StatusesCount        int      `json:"statuses_count"`
+	Verified             bool     `json:"verified"`
+}
+
+
+type UserResponse struct {
+	Data struct {
+		User struct {
+			ID     string  `json:"rest_id"`
+			Legacy APIUser `json:"legacy"`
+		} `json:"user"`
+	} `json:"data"`
+}
+func (u UserResponse) ConvertToAPIUser() APIUser {
+	ret := u.Data.User.Legacy
+	ret.IDStr = u.Data.User.ID
+	return ret
+}
+
 type TweetResponse struct {
 	GlobalObjects struct {
 		Tweets map[string]APITweet `json:"tweets"`
-		Users  map[string]struct {
-			CreatedAt   string `json:"created_at"`
-			Description string `json:"description"`
-			Entities    struct {
-				URL struct {
-					Urls []struct {
-						ExpandedURL string `json:"expanded_url"`
-					} `json:"urls"`
-				} `json:"url"`
-			} `json:"entities"`
-			FavouritesCount      int      `json:"favourites_count"`
-			FollowersCount       int      `json:"followers_count"`
-			FriendsCount         int      `json:"friends_count"`
-			IDStr                string   `json:"id_str"`
-			ListedCount          int      `json:"listed_count"`
-			Name                 string   `json:"name"`
-			Location             string   `json:"location"`
-			PinnedTweetIdsStr    []string `json:"pinned_tweet_ids_str"`
-			ProfileBannerURL     string   `json:"profile_banner_url"`
-			ProfileImageURLHTTPS string   `json:"profile_image_url_https"`
-			Protected            bool     `json:"protected"`
-			ScreenName           string   `json:"screen_name"`
-			StatusesCount        int      `json:"statuses_count"`
-			Verified             bool     `json:"verified"`
-		} `json:"users"`
+		Users  map[string]APIUser  `json:"users"`
 	} `json:"globalObjects"`
 	Timeline struct {
 		Instructions []struct {
@@ -139,37 +157,4 @@ func (t *TweetResponse) GetCursor() string {
 		return last_entry.Content.Operation.Cursor.Value
 	}
 	return ""
-}
-
-
-type UserResponse struct {
-	Data struct {
-		User struct {
-			ID     string `json:"rest_id"`
-			Legacy struct {
-				CreatedAt   string `json:"created_at"`
-				Description string `json:"description"`
-				Entities    struct {
-					URL struct {
-						Urls []struct {
-							ExpandedURL string `json:"expanded_url"`
-						} `json:"urls"`
-					} `json:"url"`
-				} `json:"entities"`
-				FavouritesCount      int      `json:"favourites_count"`
-				FollowersCount       int      `json:"followers_count"`
-				FriendsCount         int      `json:"friends_count"`
-				ListedCount          int      `json:"listed_count"`
-				Name                 string   `json:"name"`
-				Location             string   `json:"location"`
-				PinnedTweetIdsStr    []string `json:"pinned_tweet_ids_str"`
-				ProfileBannerURL     string   `json:"profile_banner_url"`
-				ProfileImageURLHTTPS string   `json:"profile_image_url_https"`
-				Protected            bool     `json:"protected"`
-				ScreenName           string   `json:"screen_name"`
-				StatusesCount        int      `json:"statuses_count"`
-				Verified             bool     `json:"verified"`
-			} `json:"legacy"`
-		} `json:"user"`
-	} `json:"data"`
 }

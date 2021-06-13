@@ -38,6 +38,28 @@ func TestNormalizeContent(t *testing.T) {
 }
 
 
+func TestUserProfileToAPIUser(t *testing.T) {
+	data, err := ioutil.ReadFile("test_responses/michael_malice_user_profile.json")
+	if err != nil {
+		panic(err)
+	}
+	var user_resp scraper.UserResponse
+	err = json.Unmarshal(data, &user_resp)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	result := user_resp.ConvertToAPIUser()
+
+	if result.IDStr != "44067298" {
+		t.Errorf("Expected IDStr %q, got %q", "44067298", result.IDStr)
+	}
+	if result.FollowersCount != user_resp.Data.User.Legacy.FollowersCount {
+		t.Errorf("Expected user count %d, got %d", user_resp.Data.User.Legacy.FollowersCount, result.FollowersCount)
+	}
+}
+
+
 func TestGetCursor(t *testing.T) {
 	data, err := ioutil.ReadFile("test_responses/midriffs_anarchist_cookbook.json")
 	if err != nil {
