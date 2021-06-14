@@ -1,0 +1,34 @@
+{
+  "created_at": "Mon Jun 14 02:50:42 +0000 2021",
+  "id_str": "1404270043018448896",
+  "text": "RT @nofunin10ded: @michaelmalice We're dealing with people who will napalm your children and then laugh about it",
+  "entities": {
+    "user_mentions": [
+      {
+        "screen_name": "nofunin10ded",
+        "name": "Adam",
+        "id_str": "1265866918835236865",
+        "indices": [
+          3,
+          16
+        ]
+      },
+      {
+        "screen_name": "michaelmalice",
+        "name": "Michael Malice",
+        "id_str": "44067298",
+        "indices": [
+          18,
+          32
+        ]
+      }
+    ]
+  },
+  "source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
+  "user_id_str": "44067298",
+  "retweeted_status_id_str": "1404269989646028804",
+  "retweet_count": 17,
+  "favorite_count": 0,
+  "conversation_id_str": "1404270043018448896",
+  "lang": "en"
+}
