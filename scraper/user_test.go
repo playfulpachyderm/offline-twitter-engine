@@ -21,6 +21,9 @@ func TestParseSingleUser(t *testing.T) {
 	apiUser := user_resp.ConvertToAPIUser()
 
 	user, err := scraper.ParseSingleUser(apiUser)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
 
 	if user.ID != "44067298" {
 		t.Errorf("Expected %q, got %q", "44067298", user.ID)

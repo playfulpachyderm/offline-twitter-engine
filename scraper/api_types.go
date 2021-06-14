@@ -142,7 +142,7 @@ type TweetResponse struct {
 							Cursor struct {
 								Value string `json:"value"`
 							} `json:"cursor"`
-						} `json:"operation`
+						} `json:"operation"`
 					} `json:"content"`
 				} `json:"entries"`
 			} `json:"addEntries"`
