@@ -73,3 +73,33 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	ret.HasVideo = false  // TODO
 	return
 }
+
+
+func ParseTweetResponse(resp TweetResponse) (tweets []Tweet, retweets []Retweet, users []User, err error) {
+	var new_tweet Tweet
+	var new_retweet Retweet
+	for _, single_tweet := range resp.GlobalObjects.Tweets {
+		if single_tweet.RetweetedStatusIDStr == "" {
+			new_tweet, err = ParseSingleTweet(single_tweet)
+			if err != nil {
+				return
+			}
+			tweets = append(tweets, new_tweet)
+		} else {
+			new_retweet, err = ParseSingleRetweet(single_tweet)
+			if err != nil {
+				return
+			}
+			retweets = append(retweets, new_retweet)
+		}
+	}
+	var new_user User
+	for _, user := range resp.GlobalObjects.Users {
+		new_user, err = ParseSingleUser(user)
+		if err != nil {
+			return
+		}
+		users = append(users, new_user)
+	}
+	return
+}

@@ -136,3 +136,31 @@ func TestParseSingleTweet2(t *testing.T) {
 		t.Errorf("Expected %q, got %q", expected_text, quoted_tweet.Text)
 	}
 }
+
+
+func TestParseTweetResponse(t *testing.T) {
+	data, err := ioutil.ReadFile("test_responses/michael_malice_feed.json")
+	if err != nil {
+		panic(err)
+	}
+	var tweet_resp scraper.TweetResponse
+	err = json.Unmarshal(data, &tweet_resp)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	tweets, retweets, users, err := scraper.ParseTweetResponse(tweet_resp)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	if len(tweets) != 29 - 3 {
+		t.Errorf("Expected %d tweets, got %d", 29-3, len(tweets))
+	}
+	if len(retweets) != 3 {
+		t.Errorf("Expected %d tweets, got %d", 3, len(retweets))
+	}
+	if len(users) != 9 {
+		t.Errorf("Expected %d tweets, got %d", 9, len(users))
+	}
+}
