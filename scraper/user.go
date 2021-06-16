@@ -6,11 +6,12 @@ import (
 )
 
 type UserID string
+type UserHandle string
 
 type User struct {
     ID              UserID
     DisplayName     string
-    Handle          string
+    Handle          UserHandle
     Bio             string
     FollowingCount  int
     FollowersCount  int
@@ -32,7 +33,7 @@ func (u User) String() string {
 func ParseSingleUser(apiUser APIUser) (ret User, err error) {
     ret.ID = UserID(apiUser.IDStr)
     ret.DisplayName = apiUser.Name
-    ret.Handle = apiUser.ScreenName
+    ret.Handle = UserHandle(apiUser.ScreenName)
     ret.Bio = apiUser.Description
     ret.FollowingCount = apiUser.FriendsCount
     ret.FollowersCount = apiUser.FollowersCount
