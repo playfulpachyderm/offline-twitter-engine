@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+const DEFAULT_MAX_REPLIES_EAGER_LOAD = 50
 
 type TweetID string
 
@@ -74,6 +75,43 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	return
 }
 
+
+// Return a single tweet, nothing else
+func GetTweet(id string) (Tweet, error) {
+	api := API{}
+	tweet_response, err := api.GetTweet(id, "")
+	if err != nil {
+		return Tweet{}, err
+	}
+
+	single_tweet, ok := tweet_response.GlobalObjects.Tweets[id]
+
+	if !ok {
+		return Tweet{}, fmt.Errorf("Didn't get the tweet!\n%v", tweet_response)
+	}
+
+	return ParseSingleTweet(single_tweet)
+}
+
+
+// Return a list of tweets, including the original and the rest of its thread,
+// along with a list of associated users
+func GetTweetFull(id string) (tweets []Tweet, retweets []Retweet, users []User, err error) {
+	api := API{}
+	tweet_response, err := api.GetTweet(id, "")
+	if err != nil {
+		return
+	}
+	if len(tweet_response.GlobalObjects.Tweets) < DEFAULT_MAX_REPLIES_EAGER_LOAD &&
+			tweet_response.GetCursor() != "" {
+		err = api.GetMoreReplies(id, &tweet_response, DEFAULT_MAX_REPLIES_EAGER_LOAD)
+		if err != nil {
+			return
+		}
+	}
+
+	return ParseTweetResponse(tweet_response)
+}
 
 func ParseTweetResponse(resp TweetResponse) (tweets []Tweet, retweets []Retweet, users []User, err error) {
 	var new_tweet Tweet

@@ -8,6 +8,14 @@ import (
 type UserID string
 type UserHandle string
 
+func UIDArrayToStrArray(uids []UserID) []string {
+    ret := []string{}
+    for _, uid := range uids {
+        ret = append(ret, string(uid))
+    }
+    return ret
+}
+
 type User struct {
     ID              UserID
     DisplayName     string
@@ -53,4 +61,14 @@ func ParseSingleUser(apiUser APIUser) (ret User, err error) {
         ret.PinnedTweet = TweetID(apiUser.PinnedTweetIdsStr[0])
     }
     return
+}
+
+// Calls API#GetUser and returns the parsed result
+func GetUser(handle UserHandle) (User, error) {
+    api := API{}
+    apiUser, err := api.GetUser(handle)
+    if err != nil {
+        return User{}, err
+    }
+    return ParseSingleUser(apiUser)
 }
