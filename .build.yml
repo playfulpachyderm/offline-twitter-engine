@@ -23,10 +23,16 @@ tasks:
       duration=$SECONDS
       echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
 
-  - run_tests: |
+  - test_scraper: |
       cd twitter_offline_engine/scraper
 
-      go test -bench=.
+      go test -bench=. -cover
+
+  - test_persistence: |
+      cd twitter_offline_engine/persistence
+
+      mkdir test_profiles/
+      go test -bench=. -cover
 
   - install_golangci-lint: |
       SECONDS=0
@@ -37,10 +43,22 @@ tasks:
       duration=$SECONDS
       echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
 
-  - run_lint: |
+  - lint_scraper: |
       SECONDS=0
 
       cd twitter_offline_engine/scraper
+      golangci-lint run
+
+      cd ../cmd
+      golangci-lint run
+
+      duration=$SECONDS
+      echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
+
+  - lint_persistence: |
+      SECONDS=0
+
+      cd twitter_offline_engine/persistence
       golangci-lint run
 
       cd ../cmd
