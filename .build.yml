@@ -26,11 +26,13 @@ tasks:
   - test_scraper: |
       cd twitter_offline_engine/scraper
 
+      go get .
       go test -bench=. -cover
 
   - test_persistence: |
       cd twitter_offline_engine/persistence
 
+      go get .
       mkdir test_profiles/
       go test -bench=. -cover
 
