@@ -12,7 +12,7 @@ import (
 const INCLUDE_REPLIES = true;
 
 // input: e.g., "https://twitter.com/michaelmalice/status/1395882872729477131"
-func parse_tweet(url string) (string, error) {
+func parse_tweet(url string) (scraper.TweetID, error) {
 	parts := strings.Split(url, "/")
 	if len(parts) != 6 {
 		return "", fmt.Errorf("Tweet format isn't right (%d)", len(parts))
@@ -20,7 +20,7 @@ func parse_tweet(url string) (string, error) {
 	if parts[0] != "https:" || parts[1] != "" || parts[2] != "twitter.com" || parts[4] != "status" {
 		return "", fmt.Errorf("Tweet format isn't right")
 	}
-	return parts[5], nil
+	return scraper.TweetID(parts[5]), nil
 }
 
 func main() {

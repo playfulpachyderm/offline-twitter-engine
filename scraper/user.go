@@ -3,17 +3,18 @@ package scraper
 import (
     "time"
     "fmt"
+    "strings"
 )
 
 type UserID string
 type UserHandle string
 
-func UIDArrayToStrArray(uids []UserID) []string {
+func JoinArrayOfHandles(handles []UserHandle) string {
     ret := []string{}
-    for _, uid := range uids {
-        ret = append(ret, string(uid))
+    for _, h := range handles {
+        ret = append(ret, string(h))
     }
-    return ret
+    return strings.Join(ret, ",")
 }
 
 type User struct {

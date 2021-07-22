@@ -23,7 +23,7 @@ type Tweet struct {
 
 	Urls        []string
 	Images      []string
-	Mentions    []string
+	Mentions    []UserHandle
 	Hashtags    []string
 	QuotedTweet TweetID
 }
@@ -67,7 +67,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		ret.Hashtags = append(ret.Hashtags, hashtag.Text)
 	}
 	for _, mention := range apiTweet.Entities.Mentions {
-		ret.Mentions = append(ret.Mentions, mention.UserName)
+		ret.Mentions = append(ret.Mentions, UserHandle(mention.UserName))
 	}
 
 	ret.QuotedTweet = TweetID(apiTweet.QuotedStatusIDStr)
@@ -77,14 +77,14 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 
 
 // Return a single tweet, nothing else
-func GetTweet(id string) (Tweet, error) {
+func GetTweet(id TweetID) (Tweet, error) {
 	api := API{}
 	tweet_response, err := api.GetTweet(id, "")
 	if err != nil {
-		return Tweet{}, err
+		return Tweet{}, fmt.Errorf("Error in API call: %s", err)
 	}
 
-	single_tweet, ok := tweet_response.GlobalObjects.Tweets[id]
+	single_tweet, ok := tweet_response.GlobalObjects.Tweets[string(id)]
 
 	if !ok {
 		return Tweet{}, fmt.Errorf("Didn't get the tweet!\n%v", tweet_response)
@@ -96,7 +96,7 @@ func GetTweet(id string) (Tweet, error) {
 
 // Return a list of tweets, including the original and the rest of its thread,
 // along with a list of associated users
-func GetTweetFull(id string) (tweets []Tweet, retweets []Retweet, users []User, err error) {
+func GetTweetFull(id TweetID) (tweets []Tweet, retweets []Retweet, users []User, err error) {
 	api := API{}
 	tweet_response, err := api.GetTweet(id, "")
 	if err != nil {

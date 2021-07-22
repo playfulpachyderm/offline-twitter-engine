@@ -75,9 +75,9 @@ func (api API) GetMoreTweets(user_id UserID, response *TweetResponse, max_tweets
 }
 
 
-func (api API) GetTweet(id string, cursor string) (TweetResponse, error) {
+func (api API) GetTweet(id TweetID, cursor string) (TweetResponse, error) {
 	client := &http.Client{Timeout: 10 * time.Second}
-	req, err := http.NewRequest("GET", API_CONVERSATION_BASE_PATH + id + ".json", nil)
+	req, err := http.NewRequest("GET", API_CONVERSATION_BASE_PATH + string(id) + ".json", nil)
 	if err != nil {
 		return TweetResponse{}, err
 	}
@@ -100,7 +100,7 @@ func (api API) GetTweet(id string, cursor string) (TweetResponse, error) {
 
 	if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusForbidden) {
 		content, _ := ioutil.ReadAll(resp.Body)
-		return TweetResponse{}, fmt.Errorf("HTTP %d %s: %s", resp.StatusCode, resp.Status, content)
+		return TweetResponse{}, fmt.Errorf("Error getting %q.  HTTP %s: %s", req.URL, resp.Status, content)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -114,7 +114,7 @@ func (api API) GetTweet(id string, cursor string) (TweetResponse, error) {
 }
 
 // Resend the request to get more replies if necessary
-func (api API) GetMoreReplies(tweet_id string, response *TweetResponse, max_replies int) error {
+func (api API) GetMoreReplies(tweet_id TweetID, response *TweetResponse, max_replies int) error {
 	last_response := response
 	for last_response.GetCursor() != "" && len(response.GlobalObjects.Tweets) < max_replies {
 		fresh_response, err := api.GetTweet(tweet_id, last_response.GetCursor())
