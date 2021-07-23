@@ -45,25 +45,10 @@ tasks:
       duration=$SECONDS
       echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
 
-  - lint_scraper: |
+  - lint: |
       SECONDS=0
 
-      cd twitter_offline_engine/scraper
-      golangci-lint run
-
-      cd ../cmd
-      golangci-lint run
-
-      duration=$SECONDS
-      echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
-
-  - lint_persistence: |
-      SECONDS=0
-
-      cd twitter_offline_engine/persistence
-      golangci-lint run
-
-      cd ../cmd
+      cd twitter_offline_engine
       golangci-lint run
 
       duration=$SECONDS
