@@ -21,6 +21,7 @@ curl \
 
 #
 # A tweet and replies (conversation):
+-----------------------------------NOTE: this one doesn't work, because it's missing a lot of GET params!-----------------------------------
 curl \
     -H "Authorization: Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA" \
     -H "X-Guest-Token: 1396177150890348547" \

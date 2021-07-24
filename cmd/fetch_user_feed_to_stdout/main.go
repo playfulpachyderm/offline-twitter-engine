@@ -47,14 +47,14 @@ func display_feed(user scraper.User, tweets []scraper.Tweet, retweets []scraper.
 	for i < len(tweets) && j < len(retweets) {
 		if !tweets[i].PostedAt.Before(retweets[j].RetweetedAt) {
 			tweet := tweets[i]
-			if tweet.User != user.ID {
+			if tweet.UserID != user.ID {
 				i += 1
 				continue
 			}
 
-			user, ok := users_dict[tweet.User]
+			user, ok := users_dict[tweet.UserID]
 			if !ok {
-				log.Fatalf("User not found: %q", tweet.User)
+				log.Fatalf("User not found: %q", tweet.UserID)
 			}
 
 			print_tweet(tweets[i], user)
@@ -69,9 +69,9 @@ func display_feed(user scraper.User, tweets []scraper.Tweet, retweets []scraper.
 			if !ok {
 				log.Fatalf("Tweet not found: %q", retweet.TweetID)
 			}
-			original_poster, ok := users_dict[tweet.User]
+			original_poster, ok := users_dict[tweet.UserID]
 			if !ok {
-				log.Fatalf("User not found: %q", tweet.User)
+				log.Fatalf("User not found: %q", tweet.UserID)
 			}
 			retweeter, ok := users_dict[retweet.RetweetedBy]
 			if !ok {
@@ -83,14 +83,14 @@ func display_feed(user scraper.User, tweets []scraper.Tweet, retweets []scraper.
 	}
 	for i < len(tweets) {
 		tweet := tweets[i]
-		if tweet.User != user.ID {
+		if tweet.UserID != user.ID {
 			i += 1
 			continue
 		}
 
-		user, ok := users_dict[tweet.User]
+		user, ok := users_dict[tweet.UserID]
 		if !ok {
-			log.Fatalf("User not found: %q", tweet.User)
+			log.Fatalf("User not found: %q", tweet.UserID)
 		}
 
 		print_tweet(tweets[i], user)
@@ -106,9 +106,9 @@ func display_feed(user scraper.User, tweets []scraper.Tweet, retweets []scraper.
 		if !ok {
 			log.Fatalf("Tweet not found: %q", retweet.TweetID)
 		}
-		original_poster, ok := users_dict[tweet.User]
+		original_poster, ok := users_dict[tweet.UserID]
 		if !ok {
-			log.Fatalf("User not found: %q", tweet.User)
+			log.Fatalf("User not found: %q", tweet.UserID)
 		}
 		retweeter, ok := users_dict[retweet.RetweetedBy]
 		if !ok {

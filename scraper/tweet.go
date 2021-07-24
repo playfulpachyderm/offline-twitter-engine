@@ -11,7 +11,8 @@ type TweetID string
 
 type Tweet struct {
 	ID             TweetID
-	User           UserID
+	UserID         UserID
+	User           *User
 	Text           string
 	PostedAt       time.Time
 	NumLikes       int
@@ -32,7 +33,7 @@ func (t Tweet) String() string {
 	return fmt.Sprintf(
 `ID %s, User %s: %q (%s). Likes: %d, Retweets: %d, QTs: %d, Replies: %d.
 Urls: %v   Images: %v   Mentions: %v   Hashtags: %v`,
-	t.ID, t.User, t.Text, t.PostedAt, t.NumLikes, t.NumRetweets, t.NumQuoteTweets, t.NumReplies, t.Urls, t.Images, t.Mentions, t.Hashtags)
+	t.ID, t.UserID, t.Text, t.PostedAt, t.NumLikes, t.NumRetweets, t.NumQuoteTweets, t.NumReplies, t.Urls, t.Images, t.Mentions, t.Hashtags)
 }
 
 // Turn an APITweet, as returned from the scraper, into a properly structured Tweet object
@@ -40,7 +41,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	apiTweet.NormalizeContent()
 
 	ret.ID = TweetID(apiTweet.ID)
-	ret.User = UserID(apiTweet.UserIDStr)
+	ret.UserID = UserID(apiTweet.UserIDStr)
 	ret.Text = apiTweet.FullText
 
 	ret.PostedAt, err = time.Parse(time.RubyDate, apiTweet.CreatedAt)

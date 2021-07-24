@@ -31,7 +31,8 @@ type User struct {
     IsVerified      bool
     ProfileImageUrl string
     BannerImageUrl  string
-    PinnedTweet     TweetID
+    PinnedTweetID   TweetID
+    PinnedTweet     *Tweet
 }
 
 func (u User) String() string {
@@ -59,7 +60,7 @@ func ParseSingleUser(apiUser APIUser) (ret User, err error) {
     ret.ProfileImageUrl = apiUser.ProfileImageURLHTTPS
     ret.BannerImageUrl = apiUser.ProfileBannerURL
     if len(apiUser.PinnedTweetIdsStr) > 0 {
-        ret.PinnedTweet = TweetID(apiUser.PinnedTweetIdsStr[0])
+        ret.PinnedTweetID = TweetID(apiUser.PinnedTweetIdsStr[0])
     }
     return
 }

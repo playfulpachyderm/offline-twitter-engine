@@ -67,7 +67,7 @@ func TestParseSingleUser(t *testing.T) {
 	if user.BannerImageUrl != expectedBannerImage {
 		t.Errorf("Expected %q, got %q", expectedBannerImage, user.BannerImageUrl)
 	}
-	if user.PinnedTweet != scraper.TweetID("1403835414373339136") {
+	if user.PinnedTweetID != scraper.TweetID("1403835414373339136") {
 		t.Errorf("Expected %q, got %q", scraper.TweetID("1403835414373339136"), user.PinnedTweet)
 	}
 }

@@ -14,12 +14,14 @@ create table users (rowid integer primary key,
     is_verified boolean default 0,
     profile_image_url text,
     banner_image_url text,
-    pinned_tweet integer
+    pinned_tweet_id integer
+
+    -- foreign key(pinned_tweet_id) references tweets(id)
 );
 
 create table tweets (rowid integer primary key,
     id integer unique not null,
-    user integer not null,
+    user_id integer not null,
     text text not null,
     posted_at integer,
     num_likes integer,
@@ -32,9 +34,9 @@ create table tweets (rowid integer primary key,
     mentions text,  -- comma-separated
     hashtags text,  -- comma-separated
 
-    foreign key(user) references users(id),
-    foreign key(in_reply_to) references tweets(id),
-    foreign key(quoted_tweet) references tweets(id)
+    foreign key(user_id) references users(id)
+    -- foreign key(in_reply_to) references tweets(id),
+    -- foreign key(quoted_tweet) references tweets(id)
 );
 
 create table retweets(rowid integer primary key,
