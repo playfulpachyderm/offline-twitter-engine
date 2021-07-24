@@ -24,10 +24,32 @@ type Profile struct {
 	DB *sql.DB
 }
 
+/**
+ * Custom error
+ */
+type ErrTargetAlreadyExists struct {
+	target string
+}
+func (err ErrTargetAlreadyExists) Error() string {
+	return fmt.Sprintf("Target already exists: %s", err.target)
+}
 
-// Create a new profile in the given location.
-// `path` is a directory
+
+/**
+ * Create a new profile in the given location.
+ * Fails if target location already exists (i.e., is a file or directory).
+ *
+ * args:
+ * - target_dir: location to create the new profile directory
+ *
+ * returns:
+ * - the newly created Profile
+ */
 func NewProfile(target_dir string) (Profile, error) {
+	if file_exists(target_dir) {
+		return Profile{}, ErrTargetAlreadyExists{target_dir}
+	}
+
 	user_list_file := path.Join(target_dir, "users.txt")
 	settings_file := path.Join(target_dir, "settings.yaml")
 	sqlite_file := path.Join(target_dir, "twitter.db")
@@ -35,23 +57,16 @@ func NewProfile(target_dir string) (Profile, error) {
 	images_dir := path.Join(target_dir, "images")
 	videos_dir := path.Join(target_dir, "videos")
 
-
-	for _, file := range []string{
-			user_list_file,
-			settings_file,
-			sqlite_file,
-			profile_images_dir,
-			images_dir,
-			videos_dir,
-		} {
-		if file_exists(file) {
-			return Profile{}, fmt.Errorf("File already exists: %s", file)
-		}
+	// Create the directory
+	fmt.Printf("Creating new profile: %s\n", target_dir)
+	err := os.Mkdir(target_dir, os.FileMode(0755))
+	if err != nil {
+		return Profile{}, err
 	}
 
 	// Create `twitter.db`
-	fmt.Printf("Creating %s\n", sqlite_file)
-	db, err := sql.Open("sqlite3", sqlite_file)
+	fmt.Printf("Creating............. %s\n", sqlite_file)
+	db, err := sql.Open("sqlite3", sqlite_file + "?_foreign_keys=on")
 	if err != nil {
 		return Profile{}, err
 	}
@@ -61,14 +76,14 @@ func NewProfile(target_dir string) (Profile, error) {
 	}
 
 	// Create `users.txt`
-	fmt.Printf("Creating %s\n", user_list_file)
+	fmt.Printf("Creating............. %s\n", user_list_file)
 	err = os.WriteFile(user_list_file, []byte{}, os.FileMode(0644))
 	if err != nil {
 		return Profile{}, err
 	}
 
 	// Create `settings.yaml`
-	fmt.Printf("Creating %s\n", settings_file)
+	fmt.Printf("Creating............. %s\n", settings_file)
 	settings := Settings{}
 	data, err := yaml.Marshal(&settings)
 	if err != nil {
@@ -80,21 +95,21 @@ func NewProfile(target_dir string) (Profile, error) {
 	}
 
 	// Create `profile_images`
-	fmt.Printf("Creating %s/\n", profile_images_dir)
+	fmt.Printf("Creating............. %s/\n", profile_images_dir)
 	err = os.Mkdir(profile_images_dir, os.FileMode(0755))
 	if err != nil {
 		return Profile{}, err
 	}
 
 	// Create `images`
-	fmt.Printf("Creating %s/\n", images_dir)
+	fmt.Printf("Creating............. %s/\n", images_dir)
 	err = os.Mkdir(images_dir, os.FileMode(0755))
 	if err != nil {
 		return Profile{}, err
 	}
 
 	// Create `videos`
-	fmt.Printf("Creating %s/\n", videos_dir)
+	fmt.Printf("Creating............. %s/\n", videos_dir)
 	err = os.Mkdir(videos_dir, os.FileMode(0755))
 	if err != nil {
 		return Profile{}, err
@@ -104,6 +119,15 @@ func NewProfile(target_dir string) (Profile, error) {
 }
 
 
+/**
+ * Loads the profile at the given location.  Fails if the given directory is not a Profile.
+ *
+ * args:
+ * - profile_dir: location to check for the profile
+ *
+ * returns:
+ * - the loaded Profile
+ */
 func LoadProfile(profile_dir string) (Profile, error) {
 	user_list_file := path.Join(profile_dir, "users.txt")
 	settings_file := path.Join(profile_dir, "settings.yaml")

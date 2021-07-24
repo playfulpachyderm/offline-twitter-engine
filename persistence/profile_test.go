@@ -29,21 +29,41 @@ func isdir_map(is_dir bool) string {
 }
 
 
-func TestNewProfile(t *testing.T) {
-	profile_path := "test_profiles/TestNewProfile"
-	if !file_exists(profile_path) {
-		err := os.Mkdir(profile_path, 0755)
+/**
+ * Should refuse to create a Profile if the target already exists (i.e., is a file or directory).
+ */
+func TestNewProfileInvalidPath(t *testing.T) {
+	gibberish_path := "test_profiles/fjlwrefuvaaw23efwm"
+	if file_exists(gibberish_path) {
+		err := os.RemoveAll(gibberish_path)
 		if err != nil {
 			panic(err)
 		}
 	}
-
-	contents, err := os.ReadDir(profile_path)
+	err := os.Mkdir(gibberish_path, 0755)
 	if err != nil {
 		panic(err)
 	}
-	if len(contents) != 0 {
-		t.Fatalf("test_profile not empty at start of test!")
+	_, err = persistence.NewProfile(gibberish_path)
+	if err == nil {
+		t.Errorf("Should have failed to create a profile in an already existing directory!")
+	}
+	if _, is_right_type := err.(persistence.ErrTargetAlreadyExists); !is_right_type {
+		t.Errorf("Expected 'ErrTargetAlreadyExists' error, got %T instead", err)
+	}
+}
+
+
+/**
+ * Should correctly create a new Profile
+ */
+func TestNewProfile(t *testing.T) {
+	profile_path := "test_profiles/TestNewProfile"
+	if file_exists(profile_path) {
+		err := os.RemoveAll(profile_path)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	profile, err := persistence.NewProfile(profile_path)
@@ -59,7 +79,7 @@ func TestNewProfile(t *testing.T) {
 	}
 
 	// Check files were created
-	contents, err = os.ReadDir(profile_path)
+	contents, err := os.ReadDir(profile_path)
 	if err != nil {
 		panic(err)
 	}
@@ -86,24 +106,20 @@ func TestNewProfile(t *testing.T) {
 	}
 }
 
+
+/**
+ * Should correctly load the Profile
+ */
 func TestLoadProfile(t *testing.T) {
 	profile_path := "test_profiles/TestLoadProfile"
-	if !file_exists(profile_path) {
-		err := os.Mkdir(profile_path, 0755)
+	if file_exists(profile_path) {
+		err := os.RemoveAll(profile_path)
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	contents, err := os.ReadDir(profile_path)
-	if err != nil {
-		panic(err)
-	}
-	if len(contents) != 0 {
-		t.Fatalf("test_profile not empty at start of test!")
-	}
-
-	_, err = persistence.NewProfile(profile_path)
+	_, err := persistence.NewProfile(profile_path)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -126,5 +142,4 @@ func TestLoadProfile(t *testing.T) {
 	if len(profile.UsersList) != 2 {
 		t.Errorf("Expected 2 users, got %v", profile.UsersList)
 	}
-
 }
