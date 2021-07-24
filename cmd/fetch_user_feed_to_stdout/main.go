@@ -61,7 +61,7 @@ func display_feed(user scraper.User, tweets []scraper.Tweet, retweets []scraper.
 			i += 1
 		} else {
 			retweet := retweets[j]
-			if retweet.RetweetedBy != user.ID {
+			if retweet.RetweetedByID != user.ID {
 				j += 1
 				continue
 			}
@@ -73,9 +73,9 @@ func display_feed(user scraper.User, tweets []scraper.Tweet, retweets []scraper.
 			if !ok {
 				log.Fatalf("User not found: %q", tweet.UserID)
 			}
-			retweeter, ok := users_dict[retweet.RetweetedBy]
+			retweeter, ok := users_dict[retweet.RetweetedByID]
 			if !ok {
-				log.Fatalf("User not found: %q", retweet.RetweetedBy)
+				log.Fatalf("User not found: %q", retweet.RetweetedByID)
 			}
 			print_retweet(retweet, tweet, original_poster, retweeter)
 			j += 1
@@ -98,7 +98,7 @@ func display_feed(user scraper.User, tweets []scraper.Tweet, retweets []scraper.
 	}
 	for j < len(retweets) {
 		retweet := retweets[j]
-		if retweet.RetweetedBy != user.ID {
+		if retweet.RetweetedByID != user.ID {
 			j += 1
 			continue
 		}
@@ -110,9 +110,9 @@ func display_feed(user scraper.User, tweets []scraper.Tweet, retweets []scraper.
 		if !ok {
 			log.Fatalf("User not found: %q", tweet.UserID)
 		}
-		retweeter, ok := users_dict[retweet.RetweetedBy]
+		retweeter, ok := users_dict[retweet.RetweetedByID]
 		if !ok {
-			log.Fatalf("User not found: %q", retweet.RetweetedBy)
+			log.Fatalf("User not found: %q", retweet.RetweetedByID)
 		}
 		print_retweet(retweet, tweet, original_poster, retweeter)
 		j += 1
