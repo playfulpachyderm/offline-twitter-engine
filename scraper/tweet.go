@@ -3,6 +3,8 @@ package scraper
 import (
 	"time"
 	"fmt"
+
+	"offline_twitter/terminal_utils"
 )
 
 const DEFAULT_MAX_REPLIES_EAGER_LOAD = 50
@@ -29,11 +31,42 @@ type Tweet struct {
 	QuotedTweet TweetID
 }
 
+
 func (t Tweet) String() string {
-	return fmt.Sprintf(
-`ID %s, User %s: %q (%s). Likes: %d, Retweets: %d, QTs: %d, Replies: %d.
-Urls: %v   Images: %v   Mentions: %v   Hashtags: %v`,
-	t.ID, t.UserID, t.Text, t.PostedAt, t.NumLikes, t.NumRetweets, t.NumQuoteTweets, t.NumReplies, t.Urls, t.Images, t.Mentions, t.Hashtags)
+	var author string
+	if t.User != nil {
+		author = fmt.Sprintf("%s\n@%s", t.User.DisplayName, t.User.Handle)
+	} else {
+		author = "@???"
+	}
+
+	ret := fmt.Sprintf(
+`%s
+%s
+%s
+Replies: %d      RT: %d      QT: %d      Likes: %d
+`,
+		author,
+		terminal_utils.FormatDate(t.PostedAt),
+		terminal_utils.WrapText(t.Text, 60),
+		t.NumReplies,
+		t.NumRetweets,
+		t.NumQuoteTweets,
+		t.NumLikes,
+	)
+
+	if len(t.Images) > 0 {
+		ret += fmt.Sprintf(terminal_utils.COLOR_GREEN + "images: %d\n" + terminal_utils.COLOR_RESET, len(t.Images))
+	}
+	if len(t.Urls) > 0 {
+		ret += "urls: [\n"
+		for _, url := range(t.Urls) {
+			ret += "  " + url + "\n"
+		}
+		ret += "]"
+	}
+
+	return ret
 }
 
 // Turn an APITweet, as returned from the scraper, into a properly structured Tweet object

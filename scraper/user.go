@@ -4,6 +4,8 @@ import (
     "time"
     "fmt"
     "strings"
+
+    "offline_twitter/terminal_utils"
 )
 
 type UserID string
@@ -36,7 +38,37 @@ type User struct {
 }
 
 func (u User) String() string {
-    return fmt.Sprintf("%s (@%s)[%s]: %q", u.DisplayName, u.Handle, u.ID, u.Bio)
+    var verified string
+    if u.IsVerified {
+        verified = "[\u2713]"
+    }
+    ret := fmt.Sprintf(
+`%s%s
+@%s
+    %s
+
+Following: %d      Followers: %d
+
+Joined %s
+%s
+%s
+`,
+        u.DisplayName,
+        verified,
+        u.Handle,
+        terminal_utils.WrapText(u.Bio, 60),
+        u.FollowingCount,
+        u.FollowersCount,
+        terminal_utils.FormatDate(u.JoinDate),
+        u.Location,
+        u.Website,
+    )
+    if u.PinnedTweet != nil {
+        ret += "\n" + terminal_utils.WrapText(u.PinnedTweet.Text, 60)
+    } else {
+        println("Pinned tweet id:", u.PinnedTweetID)
+    }
+    return ret
 }
 
 // Turn an APIUser, as returned from the scraper, into a properly structured User object
