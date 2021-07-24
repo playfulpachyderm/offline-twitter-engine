@@ -23,6 +23,12 @@ tasks:
       duration=$SECONDS
       echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
 
+  - test_terminal_utils: |
+      cd twitter_offline_engine/terminal_utils
+
+      go get .
+      go test -bench=. -cover
+
   - test_scraper: |
       cd twitter_offline_engine/scraper
 
