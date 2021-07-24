@@ -17,6 +17,7 @@ func TestNormalizeContent(t *testing.T) {
 		{"test_responses/tweet_with_gif_reply.json", ""},
 		{"test_responses/tweet_with_image.json", "this saddens me every time"},
 		{"test_responses/tweet_with_reply.json", "I always liked \"The Anarchist's Cookbook.\""},
+		{"test_responses/tweet_with_4_images.json", "These are public health officials who are making decisions about your lifestyle because they know more about health, fitness and well-being than you do"},
 	}
 	for _, v := range test_cases {
 		data, err := ioutil.ReadFile(v.filename)

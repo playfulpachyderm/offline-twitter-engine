@@ -56,13 +56,13 @@ type APITweet struct {
 
 func (t *APITweet) NormalizeContent() {
 	// Remove embedded links at the end of the text
-	if len(t.Entities.URLs) == 1 {
+	if len(t.Entities.URLs) == 1 {  // TODO: should this be `>= 1`, like below?
 		url := t.Entities.URLs[0].URL
 		if strings.Index(t.FullText, url) == len(t.FullText) - len(url) {
 			t.FullText = t.FullText[0:len(t.FullText) - len(url)]  // Also strip the newline
 		}
 	}
-	if len(t.Entities.Media) == 1 {
+	if len(t.Entities.Media) >= 1 {
 		url := t.Entities.Media[0].URL
 		if strings.Index(t.FullText, url) == len(t.FullText) - len(url) {
 			t.FullText = t.FullText[0:len(t.FullText) - len(url)]  // Also strip the trailing space
