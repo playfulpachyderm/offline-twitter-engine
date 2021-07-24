@@ -24,13 +24,13 @@ func TestParseSingleRetweet(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	if retweet.RetweetID != scraper.TweetID("1404270043018448896") {
-		t.Errorf("Expected %q, got %q", scraper.TweetID("1404270043018448896"), retweet.RetweetID)
+	if retweet.RetweetID != "1404270043018448896" {
+		t.Errorf("Expected %q, got %q", "1404270043018448896", retweet.RetweetID)
 	}
-	if retweet.TweetID != scraper.TweetID("1404269989646028804") {
-		t.Errorf("Expected %q, got %q", scraper.TweetID("1404269989646028804"), retweet.TweetID)
+	if retweet.TweetID != "1404269989646028804" {
+		t.Errorf("Expected %q, got %q", "1404269989646028804", retweet.TweetID)
 	}
-	if retweet.RetweetedBy != "44067298" {
+	if retweet.RetweetedByID != "44067298" {
 		t.Errorf("Expected %q, got %q", "44067298", retweet.RetweetedBy)
 	}
 	if retweet.RetweetedAt.Unix() != 1623639042 {
