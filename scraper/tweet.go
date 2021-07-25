@@ -21,7 +21,7 @@ type Tweet struct {
 	NumRetweets    int
 	NumReplies     int
 	NumQuoteTweets int
-	HasVideo       bool
+	Video          string
 	InReplyTo      TweetID
 
 	Urls        []string
@@ -105,7 +105,6 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	}
 
 	ret.QuotedTweet = TweetID(apiTweet.QuotedStatusIDStr)
-	ret.HasVideo = false  // TODO
 	return
 }
 

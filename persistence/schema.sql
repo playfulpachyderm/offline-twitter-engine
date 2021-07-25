@@ -1,12 +1,12 @@
 PRAGMA foreign_keys = on;
 
 create table users (rowid integer primary key,
-    id integer unique not null,
+    id integer unique not null check(typeof(id) = 'integer'),
     display_name text not null,
     handle text unique not null,
     bio text,
-    following_count integer not null,
-    followers_count integer not null,
+    following_count integer,
+    followers_count integer,
     location text,
     website text,
     join_date integer,
@@ -14,21 +14,21 @@ create table users (rowid integer primary key,
     is_verified boolean default 0,
     profile_image_url text,
     banner_image_url text,
-    pinned_tweet_id integer
+    pinned_tweet_id integer check(typeof(pinned_tweet_id) = 'integer' or pinned_tweet_id = '')
 
     -- foreign key(pinned_tweet_id) references tweets(id)
 );
 
 create table tweets (rowid integer primary key,
-    id integer unique not null,
-    user_id integer not null,
+    id integer unique not null check(typeof(id) = 'integer'),
+    user_id integer not null check(typeof(id) = 'integer'),
     text text not null,
     posted_at integer,
     num_likes integer,
     num_retweets integer,
     num_replies integer,
     num_quote_tweets integer,
-    has_video boolean,
+    video_url text,
     in_reply_to integer,
     quoted_tweet integer,
     mentions text,  -- comma-separated
