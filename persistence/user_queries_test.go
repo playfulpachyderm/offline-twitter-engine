@@ -4,8 +4,6 @@ import (
 	"testing"
 
 	"github.com/go-test/deep"
-
-	"offline_twitter/scraper"
 )
 
 
@@ -33,7 +31,7 @@ func TestSaveAndLoadUser(t *testing.T) {
 	}
 
 	// Same thing, but get by handle
-	new_fake_user2, err := profile.GetUserByHandle(scraper.UserHandle(fake_user.Handle))
+	new_fake_user2, err := profile.GetUserByHandle(fake_user.Handle)
 	if err != nil {
 		panic(err)
 	}
@@ -53,7 +51,7 @@ func TestUserExists(t *testing.T) {
 
 	user := create_dummy_user()
 
-	exists := profile.UserExists(scraper.UserHandle(user.Handle))
+	exists := profile.UserExists(user.Handle)
 	if exists {
 		t.Errorf("It shouldn't exist, but it does: %s", user.ID)
 	}
@@ -61,7 +59,7 @@ func TestUserExists(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	exists = profile.UserExists(scraper.UserHandle(user.Handle))
+	exists = profile.UserExists(user.Handle)
 	if !exists {
 		t.Errorf("It should exist, but it doesn't: %s", user.ID)
 	}
