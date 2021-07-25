@@ -138,6 +138,30 @@ func TestParseSingleTweet2(t *testing.T) {
 }
 
 
+func TestParseTweetWithVideo(t *testing.T) {
+	data, err := ioutil.ReadFile("test_responses/tweet_with_video.json")
+	if err != nil {
+		panic(err)
+	}
+	var apitweet scraper.APITweet
+	err = json.Unmarshal(data, &apitweet)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	tweet, err := scraper.ParseSingleTweet(apitweet)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	expected_video := "https://video.twimg.com/ext_tw_video/1418951950020845568/pu/vid/720x1280/sm4iL9_f8Lclh0aa.mp4?tag=12"
+	if tweet.Video != expected_video {
+		t.Errorf("Expected video %q, but got %q", expected_video, tweet.Video)
+	}
+
+	if len(tweet.Images) != 0 {
+		t.Errorf("Should not have any images, but has %d", len(tweet.Images))
+	}
+}
+
 func TestParseTweetResponse(t *testing.T) {
 	data, err := ioutil.ReadFile("test_responses/michael_malice_feed.json")
 	if err != nil {

@@ -6,6 +6,14 @@ import (
 	"encoding/json"
 )
 
+type SortableVariants []struct {
+	Bitrate     int    `json:"bitrate,omitempty"`
+	URL         string `json:"url"`
+}
+func (v SortableVariants) Len() int { return len(v) }
+func (v SortableVariants) Swap(i, j int) { v[i], v[j] = v[j], v[i] }
+func (v SortableVariants) Less(i, j int) bool { return v[i].Bitrate > v[j].Bitrate }
+
 type APITweet struct {
 	ID                string `json:"id_str"`
 	ConversationIDStr string `json:"conversation_id_str"`
@@ -36,10 +44,7 @@ type APITweet struct {
 			MediaURLHttps string `json:"media_url_https"`
 			Type          string `json:"type"`
 			VideoInfo     struct {
-				Variants []struct {
-					Bitrate int    `json:"bitrate,omitempty"`
-					URL     string `json:"url"`
-				} `json:"variants"`
+				Variants  SortableVariants `json:"variants"`
 			} `json:"video_info"`
 		} `json:"media"`
 	} `json:"extended_entities"`

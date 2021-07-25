@@ -158,7 +158,7 @@ func LoadProfile(profile_dir string) (Profile, error) {
 	if err != nil {
 		return Profile{}, err
 	}
-	db, err := sql.Open("sqlite3", sqlite_file)
+	db, err := sql.Open("sqlite3", sqlite_file + "?_foreign_keys=on")
 	if err != nil {
 		return Profile{}, err
 	}
