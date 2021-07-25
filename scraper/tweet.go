@@ -22,11 +22,11 @@ type Tweet struct {
 	NumRetweets    int
 	NumReplies     int
 	NumQuoteTweets int
-	Video          string
 	InReplyTo      TweetID
 
 	Urls        []string
 	Images      []string
+	Videos      []string
 	Mentions    []UserHandle
 	Hashtags    []string
 	QuotedTweet TweetID
@@ -116,7 +116,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		}
 		variants := apiTweet.ExtendedEntities.Media[0].VideoInfo.Variants
 		sort.Sort(variants)
-		ret.Video = variants[0].URL
+		ret.Videos = []string{variants[0].URL}
 		ret.Images = []string{}
 	}
 	return

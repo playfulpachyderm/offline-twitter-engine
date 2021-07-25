@@ -28,13 +28,13 @@ func TestSaveAndLoadTweet(t *testing.T) {
     // Save the tweet
     err = profile.SaveTweet(tweet)
     if err != nil {
-        t.Errorf("Failed to save the tweet: %s", err.Error())
+        t.Fatalf("Failed to save the tweet: %s", err.Error())
     }
 
     // Reload the tweet
     new_tweet, err := profile.GetTweetById(tweet.ID)
     if err != nil {
-        t.Errorf("Failed to load the tweet: %s", err.Error())
+        t.Fatalf("Failed to load the tweet: %s", err.Error())
     }
 
     if diff := deep.Equal(tweet, new_tweet); diff != nil {

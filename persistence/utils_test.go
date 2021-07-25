@@ -69,7 +69,7 @@ func create_dummy_tweet() scraper.Tweet {
 		NumRetweets: 2,
 		NumReplies: 3,
 		NumQuoteTweets: 4,
-		Video: "video",
+		Videos: []string{"video"},
 		Urls: []string{"url1", "url2"},
 		Images: []string{"image1", "image2"},
 		Mentions: []scraper.UserHandle{"mention1", "mention2"},
