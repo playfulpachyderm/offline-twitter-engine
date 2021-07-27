@@ -25,8 +25,8 @@ type Tweet struct {
 	InReplyTo      TweetID
 
 	Urls        []string
-	Images      []string
-	Videos      []string
+	Images      []Image
+	Videos      []Video
 	Mentions    []UserHandle
 	Hashtags    []string
 	QuotedTweet TweetID
@@ -96,7 +96,8 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 			panic_str := fmt.Sprintf("Unknown media type: %q", media.Type)
 			panic(panic_str)
 		}
-		ret.Images = append(ret.Images, media.MediaURLHttps)
+		new_image := Image{TweetID: ret.ID, Filename: media.MediaURLHttps, IsDownloaded: false}
+		ret.Images = append(ret.Images, new_image)
 	}
 	for _, hashtag := range apiTweet.Entities.Hashtags {
 		ret.Hashtags = append(ret.Hashtags, hashtag.Text)
@@ -116,8 +117,8 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		}
 		variants := apiTweet.ExtendedEntities.Media[0].VideoInfo.Variants
 		sort.Sort(variants)
-		ret.Videos = []string{variants[0].URL}
-		ret.Images = []string{}
+		ret.Videos = []Video{Video{TweetID: ret.ID, Filename: variants[0].URL}}
+		ret.Images = []Image{}
 	}
 	return
 }

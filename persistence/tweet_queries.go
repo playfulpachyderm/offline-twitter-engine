@@ -39,13 +39,13 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
         }
     }
     for _, image := range t.Images {
-        _, err := db.Exec("insert into images (tweet_id, filename) values (?, ?) on conflict do nothing", t.ID, image)
+        _, err := db.Exec("insert into images (tweet_id, filename) values (?, ?) on conflict do nothing", t.ID, image.Filename)
         if err != nil {
             return err
         }
     }
     for _, video := range t.Videos {
-        _, err := db.Exec("insert into videos (tweet_id, filename) values (?, ?) on conflict do nothing", t.ID, video)
+        _, err := db.Exec("insert into videos (tweet_id, filename) values (?, ?) on conflict do nothing", t.ID, video.Filename)
         if err != nil {
             return err
         }
@@ -81,7 +81,7 @@ func (p Profile) IsTweetInDatabase(id scraper.TweetID) bool {
 
 func (p Profile) attach_images(t *scraper.Tweet) error {
     println("Attaching images")
-    stmt, err := p.DB.Prepare("select filename from images where tweet_id = ?")
+    stmt, err := p.DB.Prepare("select filename, is_downloaded from images where tweet_id = ?")
     if err != nil {
         return err
     }
@@ -90,14 +90,15 @@ func (p Profile) attach_images(t *scraper.Tweet) error {
     if err != nil {
         return err
     }
-    var img string
+    var filename string
+    var is_downloaded bool
     for rows.Next() {
-        err = rows.Scan(&img)
+        err = rows.Scan(&filename, &is_downloaded)
         if err != nil {
             return err
         }
-        println(img)
-        t.Images = append(t.Images, img)
+        new_img := scraper.Image{TweetID: t.ID, Filename: filename, IsDownloaded: is_downloaded}
+        t.Images = append(t.Images, new_img)
         fmt.Printf("%v\n", t.Images)
     }
     return nil
@@ -105,7 +106,7 @@ func (p Profile) attach_images(t *scraper.Tweet) error {
 
 func (p Profile) attach_videos(t *scraper.Tweet) error {
     println("Attaching videos")
-    stmt, err := p.DB.Prepare("select filename from videos where tweet_id = ?")
+    stmt, err := p.DB.Prepare("select filename, is_downloaded from videos where tweet_id = ?")
     if err != nil {
         return err
     }
@@ -114,14 +115,15 @@ func (p Profile) attach_videos(t *scraper.Tweet) error {
     if err != nil {
         return err
     }
-    var video string
+    var filename string
+    var is_downloaded bool
     for rows.Next() {
-        err = rows.Scan(&video)
+        err = rows.Scan(&filename, &is_downloaded)
         if err != nil {
             return err
         }
-        println(video)
-        t.Videos = append(t.Videos, video)
+        new_video := scraper.Video{TweetID: t.ID, Filename: filename, IsDownloaded: is_downloaded}
+        t.Videos = append(t.Videos, new_video)
         fmt.Printf("%v\n", t.Videos)
     }
     return nil
@@ -144,7 +146,6 @@ func (p Profile) attach_urls(t *scraper.Tweet) error {
         if err != nil {
             return err
         }
-        println(url)
         t.Urls = append(t.Urls, url)
         fmt.Printf("%v\n", t.Urls)
     }
@@ -199,6 +200,9 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
 }
 
 
+/**
+ * Populate the `User` field on a tweet with an actual User
+ */
 func (p Profile) LoadUserFor(t *scraper.Tweet) error {
     if t.User != nil {
         // Already there, no need to load it

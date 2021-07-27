@@ -153,7 +153,7 @@ func TestParseTweetWithVideo(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 	expected_video := "https://video.twimg.com/ext_tw_video/1418951950020845568/pu/vid/720x1280/sm4iL9_f8Lclh0aa.mp4?tag=12"
-	if len(tweet.Videos) != 1 || tweet.Videos[0] != expected_video {
+	if len(tweet.Videos) != 1 || tweet.Videos[0].Filename != expected_video {
 		t.Errorf("Expected video %q, but got %+v", expected_video, tweet.Videos)
 	}
 

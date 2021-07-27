@@ -58,10 +58,10 @@ func create_dummy_user() scraper.User {
  */
 func create_dummy_tweet() scraper.Tweet {
 	rand.Seed(time.Now().UnixNano())
-	tweet_id := fmt.Sprint(rand.Int())
+	tweet_id := scraper.TweetID(fmt.Sprint(rand.Int()))
 
 	return scraper.Tweet{
-		ID: scraper.TweetID(tweet_id),
+		ID: tweet_id,
 		UserID: "user",
 		Text: "text",
 		PostedAt: time.Now().Truncate(1e9),  // Round to nearest second
@@ -69,9 +69,12 @@ func create_dummy_tweet() scraper.Tweet {
 		NumRetweets: 2,
 		NumReplies: 3,
 		NumQuoteTweets: 4,
-		Videos: []string{"video"},
+		Videos: []scraper.Video{scraper.Video{TweetID: tweet_id, Filename: "video", IsDownloaded: false}},
 		Urls: []string{"url1", "url2"},
-		Images: []string{"image1", "image2"},
+		Images: []scraper.Image{
+			scraper.Image{TweetID: tweet_id, Filename: "image1", IsDownloaded: false},
+			scraper.Image{TweetID: tweet_id, Filename: "image2", IsDownloaded: false},
+		},
 		Mentions: []scraper.UserHandle{"mention1", "mention2"},
 		Hashtags: []string{"hash1", "hash2"},
 	}

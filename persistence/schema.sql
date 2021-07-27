@@ -61,7 +61,7 @@ create table urls (rowid integer primary key,
 create table images (rowid integer primary key,
     tweet_id integer not null,
     filename text not null,
-    is_downloaded,
+    is_downloaded boolean default 0,
 
     unique (tweet_id, filename)
     foreign key(tweet_id) references tweets(id)
@@ -70,7 +70,7 @@ create table images (rowid integer primary key,
 create table videos (rowid integer primary key,
     tweet_id integer not null,
     filename text not null,
-    is_downloaded,
+    is_downloaded boolean default 0,
 
     unique (tweet_id, filename)
     foreign key(tweet_id) references tweets(id)
