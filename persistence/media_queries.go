@@ -1,7 +1,6 @@
 package persistence
 
 import (
-    "database/sql"
 
     "offline_twitter/scraper"
 )
