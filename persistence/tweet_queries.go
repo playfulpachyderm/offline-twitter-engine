@@ -79,56 +79,6 @@ func (p Profile) IsTweetInDatabase(id scraper.TweetID) bool {
     return true
 }
 
-func (p Profile) attach_images(t *scraper.Tweet) error {
-    println("Attaching images")
-    stmt, err := p.DB.Prepare("select filename, is_downloaded from images where tweet_id = ?")
-    if err != nil {
-        return err
-    }
-    defer stmt.Close()
-    rows, err := stmt.Query(t.ID)
-    if err != nil {
-        return err
-    }
-    var filename string
-    var is_downloaded bool
-    for rows.Next() {
-        err = rows.Scan(&filename, &is_downloaded)
-        if err != nil {
-            return err
-        }
-        new_img := scraper.Image{TweetID: t.ID, Filename: filename, IsDownloaded: is_downloaded}
-        t.Images = append(t.Images, new_img)
-        fmt.Printf("%v\n", t.Images)
-    }
-    return nil
-}
-
-func (p Profile) attach_videos(t *scraper.Tweet) error {
-    println("Attaching videos")
-    stmt, err := p.DB.Prepare("select filename, is_downloaded from videos where tweet_id = ?")
-    if err != nil {
-        return err
-    }
-    defer stmt.Close()
-    rows, err := stmt.Query(t.ID)
-    if err != nil {
-        return err
-    }
-    var filename string
-    var is_downloaded bool
-    for rows.Next() {
-        err = rows.Scan(&filename, &is_downloaded)
-        if err != nil {
-            return err
-        }
-        new_video := scraper.Video{TweetID: t.ID, Filename: filename, IsDownloaded: is_downloaded}
-        t.Videos = append(t.Videos, new_video)
-        fmt.Printf("%v\n", t.Videos)
-    }
-    return nil
-}
-
 func (p Profile) attach_urls(t *scraper.Tweet) error {
     println("Attaching urls")
     stmt, err := p.DB.Prepare("select text from urls where tweet_id = ?")
@@ -187,14 +137,18 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
     t.ID = scraper.TweetID(fmt.Sprint(tweet_id))
     t.UserID = scraper.UserID(fmt.Sprint(user_id))
 
-    err = p.attach_images(&t)
+    imgs, err := p.GetImagesForTweet(t)
     if err != nil {
         return t, err
     }
-    err = p.attach_videos(&t)
+    t.Images = imgs
+
+    vids, err := p.GetVideosForTweet(t)
     if err != nil {
         return t, err
     }
+    t.Videos = vids
+
     err = p.attach_urls(&t)
     return t, err
 }
