@@ -10,7 +10,7 @@ import (
 )
 
 /**
- * Load a test profile, or create it if it doesn't exist
+ * Load a test profile, or create it if it doesn't exist.
  */
 func create_or_load_profile(profile_path string) persistence.Profile {
 	var profile persistence.Profile
@@ -18,6 +18,14 @@ func create_or_load_profile(profile_path string) persistence.Profile {
 
 	if !file_exists(profile_path) {
 		profile, err = persistence.NewProfile(profile_path)
+		if err != nil {
+			panic(err)
+		}
+		err = profile.SaveUser(create_stable_user())
+		if err != nil {
+			panic(err)
+		}
+		err = profile.SaveTweet(create_stable_tweet())
 	} else {
 		profile, err = persistence.LoadProfile(profile_path)
 	}
@@ -26,6 +34,53 @@ func create_or_load_profile(profile_path string) persistence.Profile {
 	}
 	return profile
 }
+
+
+/**
+ * Create a stable user with a fixed ID and handle
+ */
+func create_stable_user() scraper.User {
+	return scraper.User{
+		ID: scraper.UserID("-1"),
+		DisplayName: "stable display name",
+		Handle: scraper.UserHandle("handle stable"),
+		Bio: "stable bio",
+		FollowersCount: 10,
+		FollowingCount: 2000,
+		Location: "stable location",
+		Website:"stable website",
+		JoinDate: time.Unix(10000000, 0),
+		IsVerified: true,
+		IsPrivate: false,
+		ProfileImageUrl: "stable profile image url",
+		BannerImageUrl: "stable banner image url",
+		PinnedTweetID: scraper.TweetID("345"),
+	}
+}
+
+
+/**
+ * Create a stable tweet with a fixed ID and content
+ */
+func create_stable_tweet() scraper.Tweet {
+	tweet_id := scraper.TweetID("-1")
+	return scraper.Tweet{
+		ID: tweet_id,
+		UserID: "-1",
+		Text: "stable text",
+		PostedAt: time.Unix(10000000, 0),
+		NumLikes: 10,
+		NumRetweets: 10,
+		NumReplies: 10,
+		NumQuoteTweets: 10,
+		Videos: []scraper.Video{},
+		Urls: []string{},
+		Images: []scraper.Image{},
+		Mentions: []scraper.UserHandle{},
+		Hashtags: []string{},
+	}
+}
+
 
 /**
  * Create a new user with a random ID and handle
@@ -69,11 +124,11 @@ func create_dummy_tweet() scraper.Tweet {
 		NumRetweets: 2,
 		NumReplies: 3,
 		NumQuoteTweets: 4,
-		Videos: []scraper.Video{scraper.Video{TweetID: tweet_id, Filename: "video", IsDownloaded: false}},
+		Videos: []scraper.Video{scraper.Video{TweetID: tweet_id, Filename: "video" + string(tweet_id), IsDownloaded: false}},
 		Urls: []string{"url1", "url2"},
 		Images: []scraper.Image{
-			scraper.Image{TweetID: tweet_id, Filename: "image1", IsDownloaded: false},
-			scraper.Image{TweetID: tweet_id, Filename: "image2", IsDownloaded: false},
+			scraper.Image{TweetID: tweet_id, Filename: "image1" + string(tweet_id), IsDownloaded: false},
+			scraper.Image{TweetID: tweet_id, Filename: "image2" + string(tweet_id), IsDownloaded: false},
 		},
 		Mentions: []scraper.UserHandle{"mention1", "mention2"},
 		Hashtags: []string{"hash1", "hash2"},

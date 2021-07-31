@@ -4,8 +4,8 @@ import (
     "testing"
 
     "github.com/go-test/deep"
-
 )
+
 
 /**
  * Create a Tweet, save it, reload it, and make sure it comes back the same
@@ -15,18 +15,11 @@ func TestSaveAndLoadTweet(t *testing.T) {
     profile := create_or_load_profile(profile_path)
 
     tweet := create_dummy_tweet()
-    user := create_dummy_user()
-
+    user := create_stable_user()
     tweet.UserID = user.ID
 
-    // Save the user
-    err := profile.SaveUser(user)
-    if err != nil {
-        t.Fatalf("Failed to save the user, so no point in continuing the test: %s", err.Error())
-    }
-
     // Save the tweet
-    err = profile.SaveTweet(tweet)
+    err := profile.SaveTweet(tweet)
     if err != nil {
         t.Fatalf("Failed to save the tweet: %s", err.Error())
     }
@@ -50,20 +43,14 @@ func TestIsTweetInDatabase(t *testing.T) {
     profile := create_or_load_profile(profile_path)
 
     tweet := create_dummy_tweet()
-    user := create_dummy_user()
+    user := create_stable_user()
     tweet.UserID = user.ID
-
-    // Save the user
-    err := profile.SaveUser(user)
-    if err != nil {
-        t.Fatalf("Failed to save the user, so no point in continuing the test: %s", err.Error())
-    }
 
     exists := profile.IsTweetInDatabase(tweet.ID)
     if exists {
         t.Errorf("It shouldn't exist, but it does: %s", tweet.ID)
     }
-    err = profile.SaveTweet(tweet)
+    err := profile.SaveTweet(tweet)
     if err != nil {
         panic(err)
     }
@@ -81,18 +68,11 @@ func TestLoadUserForTweet(t *testing.T) {
     profile := create_or_load_profile(profile_path)
 
     tweet := create_dummy_tweet()
-    user := create_dummy_user()
-
+    user := create_stable_user()
     tweet.UserID = user.ID
 
-    // Save the user
-    err := profile.SaveUser(user)
-    if err != nil {
-        t.Fatalf("Failed to save the user, so no point in continuing the test: %s", err.Error())
-    }
-
     // Save the tweet
-    err = profile.SaveTweet(tweet)
+    err := profile.SaveTweet(tweet)
     if err != nil {
         t.Errorf("Failed to save the tweet: %s", err.Error())
     }
