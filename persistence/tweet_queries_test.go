@@ -15,8 +15,6 @@ func TestSaveAndLoadTweet(t *testing.T) {
     profile := create_or_load_profile(profile_path)
 
     tweet := create_dummy_tweet()
-    user := create_stable_user()
-    tweet.UserID = user.ID
 
     // Save the tweet
     err := profile.SaveTweet(tweet)
@@ -28,6 +26,15 @@ func TestSaveAndLoadTweet(t *testing.T) {
     new_tweet, err := profile.GetTweetById(tweet.ID)
     if err != nil {
         t.Fatalf("Failed to load the tweet: %s", err.Error())
+    }
+
+    // Spoof the image and video IDs
+    // TODO: This feels clumsy-- possible bad design
+    for i := range tweet.Images {
+        tweet.Images[i].ID = new_tweet.Images[i].ID
+    }
+    for i := range tweet.Videos {
+        tweet.Videos[i].ID = new_tweet.Videos[i].ID
     }
 
     if diff := deep.Equal(tweet, new_tweet); diff != nil {
@@ -43,8 +50,6 @@ func TestIsTweetInDatabase(t *testing.T) {
     profile := create_or_load_profile(profile_path)
 
     tweet := create_dummy_tweet()
-    user := create_stable_user()
-    tweet.UserID = user.ID
 
     exists := profile.IsTweetInDatabase(tweet.ID)
     if exists {
@@ -68,8 +73,6 @@ func TestLoadUserForTweet(t *testing.T) {
     profile := create_or_load_profile(profile_path)
 
     tweet := create_dummy_tweet()
-    user := create_stable_user()
-    tweet.UserID = user.ID
 
     // Save the tweet
     err := profile.SaveTweet(tweet)

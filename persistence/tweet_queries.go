@@ -39,13 +39,13 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
         }
     }
     for _, image := range t.Images {
-        _, err := db.Exec("insert into images (tweet_id, filename) values (?, ?) on conflict do nothing", t.ID, image.Filename)
+        _, err := p.SaveImage(image)
         if err != nil {
             return err
         }
     }
     for _, video := range t.Videos {
-        _, err := db.Exec("insert into videos (tweet_id, filename) values (?, ?) on conflict do nothing", t.ID, video.Filename)
+        _, err := p.SaveVideo(video)
         if err != nil {
             return err
         }
