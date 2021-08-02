@@ -17,6 +17,6 @@ test $(sqlite3 data/twitter.db "select count(*) from users") = "1"
 # Fetch a tweet with images
 go run ./twitter fetch_tweet_only data https://twitter.com/Denlesks/status/1261483383483293700
 test $(sqlite3 data/twitter.db "select count(*) from tweets") = "1"
-test $(sqlite3 data/twitter.db "select text from tweets") = "These are public health officials who are making decisions about your lifestyle because they know more about health, fitness and well-being than you do"
+test "$(sqlite3 data/twitter.db "select text from tweets")" = "These are public health officials who are making decisions about your lifestyle because they know more about health, fitness and well-being than you do"
 go run ./twitter fetch_tweet_only data https://twitter.com/Denlesks/status/1261483383483293700
 test $(sqlite3 data/twitter.db "select count(*) from tweets") = "1"

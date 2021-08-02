@@ -32,10 +32,10 @@ TARGET is optional depending on <operation>
  */
 func die(text string, display_help bool, exit_code int) {
 	if text != "" {
-		fmt.Print(terminal_utils.COLOR_RED + text + terminal_utils.COLOR_RESET + "\n")
+		fmt.Fprint(os.Stderr, terminal_utils.COLOR_RED + text + terminal_utils.COLOR_RESET + "\n")
 	}
 	if display_help {
-		fmt.Print(help_message)
+		fmt.Fprint(os.Stderr, help_message)
 	}
 	os.Exit(exit_code)
 }
