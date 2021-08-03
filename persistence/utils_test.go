@@ -73,9 +73,9 @@ func create_stable_tweet() scraper.Tweet {
 		NumRetweets: 10,
 		NumReplies: 10,
 		NumQuoteTweets: 10,
-		Videos: []scraper.Video{},
+		Videos: []scraper.Video{{ID: scraper.VideoID(1), TweetID: tweet_id, Filename: "asdf", IsDownloaded: false}},
 		Urls: []string{},
-		Images: []scraper.Image{},
+		Images: []scraper.Image{{ID: scraper.ImageID(1), TweetID: tweet_id, Filename: "asdf", IsDownloaded: false}},
 		Mentions: []scraper.UserHandle{},
 		Hashtags: []string{},
 	}
