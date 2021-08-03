@@ -11,6 +11,7 @@ sources:
 packages:
   - wget
   - build-essential
+  - sqlite3
 
 tasks:
   - install_go: |

@@ -18,7 +18,7 @@ import (
 func (p Profile) SaveImage(img scraper.Image) (sql.Result, error) {
     if img.ID == 0 {
         // New image
-        return p.DB.Exec("insert into images (tweet_id, filename) values (?, ?)", img.TweetID, img.Filename)
+        return p.DB.Exec("insert into images (tweet_id, filename) values (?, ?) on conflict do nothing", img.TweetID, img.Filename)
     } else {
         // Updating an existing image
         return p.DB.Exec("update images set filename=?, is_downloaded=? where rowid=?", img.Filename, img.IsDownloaded, img.ID)
@@ -37,7 +37,7 @@ func (p Profile) SaveImage(img scraper.Image) (sql.Result, error) {
 func (p Profile) SaveVideo(vid scraper.Video) (sql.Result, error) {
     if vid.ID == 0 {
         // New image
-        return p.DB.Exec("insert into videos (tweet_id, filename) values (?, ?)", vid.TweetID, vid.Filename)
+        return p.DB.Exec("insert into videos (tweet_id, filename) values (?, ?) on conflict do nothing", vid.TweetID, vid.Filename)
     } else {
         // Updating an existing image
         return p.DB.Exec("update videos set filename=?, is_downloaded=? where rowid=?", vid.Filename, vid.IsDownloaded, vid.ID)
