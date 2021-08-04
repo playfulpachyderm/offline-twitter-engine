@@ -39,7 +39,7 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
         }
     }
     for _, image := range t.Images {
-        _, err := p.SaveImage(image)
+        err := p.SaveImage(image)
         if err != nil {
             return err
         }

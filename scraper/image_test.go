@@ -20,6 +20,10 @@ func TestParseAPIMedia(t *testing.T) {
     }
     image := scraper.ParseAPIMedia(apimedia)
 
+    expected_id := 1395882862289772553
+    if image.ID != scraper.ImageID(expected_id) {
+        t.Errorf("Expected ID of %q, got %q", expected_id, image.ID)
+    }
     expected_remote_url := "https://pbs.twimg.com/media/E18sEUrWYAk8dBl.jpg"
     if image.RemoteURL != expected_remote_url {
         t.Errorf("Expected %q, got %q", expected_remote_url, image.RemoteURL)

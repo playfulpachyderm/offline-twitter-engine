@@ -15,6 +15,7 @@ func (v SortableVariants) Swap(i, j int) { v[i], v[j] = v[j], v[i] }
 func (v SortableVariants) Less(i, j int) bool { return v[i].Bitrate > v[j].Bitrate }
 
 type APIMedia struct {
+	ID            int64  `json:"id_str,string"`
 	MediaURLHttps string `json:"media_url_https"`
 	Type          string `json:"type"`
 	URL           string `json:"url"`

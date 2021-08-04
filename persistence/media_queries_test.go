@@ -23,19 +23,14 @@ func TestSaveAndLoadImage(t *testing.T) {
 
     // Create a fresh Image to test on
     rand.Seed(time.Now().UnixNano())
-    filename := fmt.Sprint(rand.Int())
-    img := scraper.Image{TweetID: tweet.ID, Filename: filename, IsDownloaded: false}
+    img := create_image_from_id(rand.Int())
+    img.TweetID = tweet.ID
 
     // Save the Image
-    result, err := profile.SaveImage(img)
+    err := profile.SaveImage(img)
     if err != nil {
         t.Fatalf("Failed to save the image: %s", err.Error())
     }
-    last_insert, err := result.LastInsertId()
-    if err != nil {
-        t.Fatalf("last insert??? %s", err.Error())
-    }
-    img.ID = scraper.ImageID(last_insert)
 
     // Reload the Image
     imgs, err := profile.GetImagesForTweet(tweet)
@@ -67,24 +62,16 @@ func TestModifyImage(t *testing.T) {
     tweet := create_stable_tweet()
     img := tweet.Images[0]
 
-    if img.ID != 1 {
-        t.Fatalf("Got the wrong image back: wanted ID %d, got %d", 1, img.ID)
+    if img.ID != -1 {
+        t.Fatalf("Got the wrong image back: wanted ID %d, got %d", -1, img.ID)
     }
 
-    img.Filename = "local/sdfjk.jpg"
     img.IsDownloaded = true
 
     // Save the changes
-    result, err := profile.SaveImage(img)
+    err := profile.SaveImage(img)
     if err != nil {
         t.Error(err)
-    }
-    rows_affected, err := result.RowsAffected()
-    if err != nil {
-        t.Error(err)
-    }
-    if rows_affected != 1 {
-        t.Errorf("Expected 1 row changed, but got %d", rows_affected)
     }
 
     // Reload it
@@ -94,7 +81,7 @@ func TestModifyImage(t *testing.T) {
     }
     new_img := imgs[0]
     if new_img.ID != img.ID {
-        t.Fatalf("Got the wrong image back: wanted ID %d, got %d", 1, new_img.ID)
+        t.Fatalf("Got the wrong image back: wanted ID %d, got %d", -1, new_img.ID)
     }
 
     if diff := deep.Equal(img, new_img); diff != nil {

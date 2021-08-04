@@ -7,22 +7,22 @@ import (
 )
 
 /**
- * Save an Image.  If it's a new Image (no rowid), does an insert; otherwise, does an update.
+ * Save an Image
  *
  * args:
  * - img: the Image to save
- *
- * returns:
- * - the rowid
  */
-func (p Profile) SaveImage(img scraper.Image) (sql.Result, error) {
-    if img.ID == 0 {
-        // New image
-        return p.DB.Exec("insert into images (tweet_id, filename) values (?, ?) on conflict do nothing", img.TweetID, img.Filename)
-    } else {
-        // Updating an existing image
-        return p.DB.Exec("update images set filename=?, is_downloaded=? where rowid=?", img.Filename, img.IsDownloaded, img.ID)
-    }
+func (p Profile) SaveImage(img scraper.Image) error {
+    _, err := p.DB.Exec(`
+        insert into images (id, tweet_id, filename, is_downloaded)
+                    values (?, ?, ?, ?, ?, ?)
+               on conflict do update
+                       set is_downloaded=?
+        `,
+        img.ID, img.TweetID, img.Filename, img.IsDownloaded,
+        img.IsDownloaded,
+    )
+    return err
 }
 
 /**
@@ -48,7 +48,7 @@ func (p Profile) SaveVideo(vid scraper.Video) (sql.Result, error) {
  * Get the list of images for a tweet
  */
 func (p Profile) GetImagesForTweet(t scraper.Tweet) (imgs []scraper.Image, err error) {
-    stmt, err := p.DB.Prepare("select rowid, filename, is_downloaded from images where tweet_id=?")
+    stmt, err := p.DB.Prepare("select id, filename, is_downloaded from images where tweet_id=?")
     if err != nil {
         return
     }

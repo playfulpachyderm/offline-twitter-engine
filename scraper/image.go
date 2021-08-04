@@ -4,7 +4,7 @@ import (
     "path"
 )
 
-type ImageID int
+type ImageID int64
 
 type Image struct {
     ID ImageID
@@ -18,6 +18,7 @@ type Image struct {
 func ParseAPIMedia(apiMedia APIMedia) Image {
     local_filename := path.Base(apiMedia.MediaURLHttps)
     return Image{
+        ID: ImageID(apiMedia.ID),
         Filename: apiMedia.MediaURLHttps,  // XXX filename
         RemoteURL: apiMedia.MediaURLHttps,
         LocalFilename: local_filename,

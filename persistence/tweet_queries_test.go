@@ -28,11 +28,6 @@ func TestSaveAndLoadTweet(t *testing.T) {
         t.Fatalf("Failed to load the tweet: %s", err.Error())
     }
 
-    // Spoof the image and video IDs
-    // TODO: This feels clumsy-- possible bad design
-    for i := range tweet.Images {
-        tweet.Images[i].ID = new_tweet.Images[i].ID
-    }
     for i := range tweet.Videos {
         tweet.Videos[i].ID = new_tweet.Videos[i].ID
     }

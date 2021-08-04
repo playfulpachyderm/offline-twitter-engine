@@ -58,6 +58,18 @@ func create_stable_user() scraper.User {
 	}
 }
 
+/**
+ * Create a semi-stable image based on the given ID
+ */
+func create_image_from_id(id int) scraper.Image {
+	filename := fmt.Sprintf("image%d.jpg", id)
+	return scraper.Image{
+		ID: scraper.ImageID(id),
+		TweetID: "-1",
+		Filename: filename,
+		IsDownloaded: false,
+	}
+}
 
 /**
  * Create a stable tweet with a fixed ID and content
@@ -75,7 +87,9 @@ func create_stable_tweet() scraper.Tweet {
 		NumQuoteTweets: 10,
 		Videos: []scraper.Video{{ID: scraper.VideoID(1), TweetID: tweet_id, Filename: "asdf", IsDownloaded: false}},
 		Urls: []string{},
-		Images: []scraper.Image{{ID: scraper.ImageID(1), TweetID: tweet_id, Filename: "asdf", IsDownloaded: false}},
+		Images: []scraper.Image{
+			create_image_from_id(-1),
+		},
 		Mentions: []scraper.UserHandle{},
 		Hashtags: []string{},
 	}
@@ -115,6 +129,11 @@ func create_dummy_tweet() scraper.Tweet {
 	rand.Seed(time.Now().UnixNano())
 	tweet_id := scraper.TweetID(fmt.Sprint(rand.Int()))
 
+	img1 := create_image_from_id(rand.Int())
+	img1.TweetID = tweet_id
+	img2 := create_image_from_id(rand.Int())
+	img2.TweetID = tweet_id
+
 	return scraper.Tweet{
 		ID: tweet_id,
 		UserID: scraper.UserID("-1"),
@@ -126,10 +145,7 @@ func create_dummy_tweet() scraper.Tweet {
 		NumQuoteTweets: 4,
 		Videos: []scraper.Video{scraper.Video{TweetID: tweet_id, Filename: "video" + string(tweet_id), IsDownloaded: false}},
 		Urls: []string{"url1", "url2"},
-		Images: []scraper.Image{
-			scraper.Image{TweetID: tweet_id, Filename: "image1" + string(tweet_id), IsDownloaded: false},
-			scraper.Image{TweetID: tweet_id, Filename: "image2" + string(tweet_id), IsDownloaded: false},
-		},
+		Images: []scraper.Image{img1, img2},
 		Mentions: []scraper.UserHandle{"mention1", "mention2"},
 		Hashtags: []string{"hash1", "hash2"},
 	}
