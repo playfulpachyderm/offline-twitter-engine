@@ -14,5 +14,5 @@ type Video struct {
 }
 
 func (v Video) FilenameWhenDownloaded() string {
-    return fmt.Sprintf("%s.mp4", v.TweetID)
+    return fmt.Sprintf("%d.mp4", v.TweetID)
 }

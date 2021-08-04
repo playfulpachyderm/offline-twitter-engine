@@ -13,11 +13,16 @@ func TestNormalizeContent(t *testing.T) {
 	test_cases := []struct {
 		filename string
 		eventual_full_text string
+		quoted_status_id scraper.TweetID
+		in_reply_to scraper.TweetID
+		retweeted_status_id scraper.TweetID
 	} {
-		{"test_responses/tweet_with_gif_reply.json", ""},
-		{"test_responses/tweet_with_image.json", "this saddens me every time"},
-		{"test_responses/tweet_with_reply.json", "I always liked \"The Anarchist's Cookbook.\""},
-		{"test_responses/tweet_with_4_images.json", "These are public health officials who are making decisions about your lifestyle because they know more about health, fitness and well-being than you do"},
+		{"test_responses/tweet_with_gif_reply.json", "", 0, 1395882872729477131, 0},
+		{"test_responses/tweet_with_image.json", "this saddens me every time", 0, 0, 0},
+		{"test_responses/tweet_with_reply.json", "I always liked \"The Anarchist's Cookbook.\"", 0, 1395978577267593218, 0},
+		{"test_responses/tweet_with_4_images.json", "These are public health officials who are making decisions about your lifestyle because they know more about health, fitness and well-being than you do", 0, 0, 0},
+		{"test_responses/tweet_with_quoted_tweet.json", "", 1422680899670274048, 0, 0},
+		{"test_responses/tweet_that_is_a_retweet.json", "RT @nofunin10ded: @michaelmalice We're dealing with people who will napalm your children and then laugh about it", 0, 0, 1404269989646028804},
 	}
 	for _, v := range test_cases {
 		data, err := ioutil.ReadFile(v.filename)
@@ -34,6 +39,15 @@ func TestNormalizeContent(t *testing.T) {
 
 		if tweet.FullText != v.eventual_full_text {
 			t.Errorf("Expected %q, got %q", v.eventual_full_text, tweet.FullText)
+		}
+		if scraper.TweetID(tweet.QuotedStatusID) != v.quoted_status_id {
+			t.Errorf("Expected quoted status %d, but got %d", v.quoted_status_id, tweet.QuotedStatusID)
+		}
+		if scraper.TweetID(tweet.InReplyToStatusID) != v.in_reply_to {
+			t.Errorf("Expected quoted status %d, but got %d", v.in_reply_to, tweet.InReplyToStatusID)
+		}
+		if scraper.TweetID(tweet.RetweetedStatusID) != v.retweeted_status_id {
+			t.Errorf("Expected quoted status %d, but got %d", v.retweeted_status_id, tweet.RetweetedStatusID)
 		}
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"offline_twitter/scraper"
 	"offline_twitter/terminal_utils"
 	"strings"
+	"strconv"
 )
 
 
@@ -51,10 +52,14 @@ func die(text string, display_help bool, exit_code int) {
 func extract_id_from(url string) (scraper.TweetID, error) {
 	parts := strings.Split(url, "/")
 	if len(parts) != 6 {
-		return "", fmt.Errorf("Tweet format isn't right (%d)", len(parts))
+		return 0, fmt.Errorf("Tweet format isn't right (%d)", len(parts))
 	}
 	if parts[0] != "https:" || parts[1] != "" || parts[2] != "twitter.com" || parts[4] != "status" {
-		return "", fmt.Errorf("Tweet format isn't right")
+		return 0, fmt.Errorf("Tweet format isn't right")
 	}
-	return scraper.TweetID(parts[5]), nil
+	id, err := strconv.Atoi(parts[5])
+	if err != nil {
+		return 0, err
+	}
+	return scraper.TweetID(id), nil
 }

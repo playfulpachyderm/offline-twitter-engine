@@ -10,7 +10,7 @@ import (
 
 const DEFAULT_MAX_REPLIES_EAGER_LOAD = 50
 
-type TweetID string
+type TweetID int64
 
 type Tweet struct {
 	ID             TweetID
@@ -86,7 +86,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	ret.NumRetweets = apiTweet.RetweetCount
 	ret.NumReplies = apiTweet.ReplyCount
 	ret.NumQuoteTweets = apiTweet.QuoteCount
-	ret.InReplyTo = TweetID(apiTweet.InReplyToStatusIDStr)
+	ret.InReplyTo = TweetID(apiTweet.InReplyToStatusID)
 
 	for _, url := range apiTweet.Entities.URLs {
 		ret.Urls = append(ret.Urls, url.ExpandedURL)
@@ -107,7 +107,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		ret.Mentions = append(ret.Mentions, UserHandle(mention.UserName))
 	}
 
-	ret.QuotedTweet = TweetID(apiTweet.QuotedStatusIDStr)
+	ret.QuotedTweet = TweetID(apiTweet.QuotedStatusID)
 
 	for _, entity := range apiTweet.ExtendedEntities.Media {
 		if entity.Type != "video" {
@@ -133,7 +133,7 @@ func GetTweet(id TweetID) (Tweet, error) {
 		return Tweet{}, fmt.Errorf("Error in API call: %s", err)
 	}
 
-	single_tweet, ok := tweet_response.GlobalObjects.Tweets[string(id)]
+	single_tweet, ok := tweet_response.GlobalObjects.Tweets[fmt.Sprint(id)]
 
 	if !ok {
 		return Tweet{}, fmt.Errorf("Didn't get the tweet!\n%v", tweet_response)

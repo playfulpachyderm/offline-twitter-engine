@@ -92,7 +92,7 @@ func ParseSingleUser(apiUser APIUser) (ret User, err error) {
     ret.ProfileImageUrl = apiUser.ProfileImageURLHTTPS
     ret.BannerImageUrl = apiUser.ProfileBannerURL
     if len(apiUser.PinnedTweetIdsStr) > 0 {
-        ret.PinnedTweetID = TweetID(apiUser.PinnedTweetIdsStr[0])
+        ret.PinnedTweetID = TweetID(idstr_to_int(apiUser.PinnedTweetIdsStr[0]))
     }
     return
 }

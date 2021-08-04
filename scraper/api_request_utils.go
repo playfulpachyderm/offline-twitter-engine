@@ -77,7 +77,7 @@ func (api API) GetMoreTweets(user_id UserID, response *TweetResponse, max_tweets
 
 func (api API) GetTweet(id TweetID, cursor string) (TweetResponse, error) {
 	client := &http.Client{Timeout: 10 * time.Second}
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s%s.json", API_CONVERSATION_BASE_PATH, id), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s%d.json", API_CONVERSATION_BASE_PATH, id), nil)
 	if err != nil {
 		return TweetResponse{}, err
 	}

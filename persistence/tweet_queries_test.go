@@ -48,7 +48,7 @@ func TestIsTweetInDatabase(t *testing.T) {
 
     exists := profile.IsTweetInDatabase(tweet.ID)
     if exists {
-        t.Errorf("It shouldn't exist, but it does: %s", tweet.ID)
+        t.Errorf("It shouldn't exist, but it does: %d", tweet.ID)
     }
     err := profile.SaveTweet(tweet)
     if err != nil {
@@ -56,7 +56,7 @@ func TestIsTweetInDatabase(t *testing.T) {
     }
     exists = profile.IsTweetInDatabase(tweet.ID)
     if !exists {
-        t.Errorf("It should exist, but it doesn't: %s", tweet.ID)
+        t.Errorf("It should exist, but it doesn't: %d", tweet.ID)
     }
 }
 

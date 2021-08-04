@@ -1,6 +1,7 @@
 package scraper_test
 
 import (
+	"fmt"
 	"encoding/json"
 	"io/ioutil"
 	"testing"
@@ -112,15 +113,15 @@ func TestParseSingleTweet2(t *testing.T) {
 	if tweet2.InReplyTo != tweet1.ID {
 		t.Errorf("Expected %q, got %q", tweet1.ID, tweet2.InReplyTo)
 	}
-	if tweet1.QuotedTweet != "" {
+	if tweet1.QuotedTweet != 0 {
 		t.Errorf("Incorrectly believes it quote-tweets %q", tweet1.QuotedTweet)
 	}
 
-	if tweet2.QuotedTweet == "" {
+	if tweet2.QuotedTweet == 0 {
 		t.Errorf("Should be a quoted tweet")
 	}
 
-	quoted_tweet_, ok := tweets[string(tweet2.QuotedTweet)]
+	quoted_tweet_, ok := tweets[fmt.Sprint(tweet2.QuotedTweet)]
 	if !ok {
 		t.Errorf("Couldn't find the quoted tweet")
 	}

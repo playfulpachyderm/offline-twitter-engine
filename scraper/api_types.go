@@ -4,6 +4,7 @@ import (
 	"time"
 	"strings"
 	"encoding/json"
+	"strconv"
 )
 
 type SortableVariants []struct {
@@ -22,8 +23,8 @@ type APIMedia struct {
 }
 
 type APITweet struct {
-	ID                string `json:"id_str"`
-	ConversationIDStr string `json:"conversation_id_str"`
+	ID                int64  `json:"id_str,string"`
+	ConversationID    int64  `json:"conversation_id_str,string"`
 	CreatedAt         string `json:"created_at"`
 	FavoriteCount     int    `json:"favorite_count"`
 	FullText          string `json:"full_text"`
@@ -51,13 +52,15 @@ type APITweet struct {
 			} `json:"video_info"`
 		} `json:"media"`
 	} `json:"extended_entities"`
-	InReplyToStatusIDStr string    `json:"in_reply_to_status_id_str"`
+	InReplyToStatusID    int64     `json:"in_reply_to_status_id_str,string"`
 	InReplyToScreenName  string    `json:"in_reply_to_screen_name"`
 	ReplyCount           int       `json:"reply_count"`
 	RetweetCount         int       `json:"retweet_count"`
 	QuoteCount           int       `json:"quote_count"`
-	RetweetedStatusIDStr string    `json:"retweeted_status_id_str"`
-	QuotedStatusIDStr    string    `json:"quoted_status_id_str"`
+	RetweetedStatusIDStr string    `json:"retweeted_status_id_str"`  // Can be empty string
+	RetweetedStatusID    int64
+	QuotedStatusIDStr    string    `json:"quoted_status_id_str"`     // Can be empty string
+	QuotedStatusID       int64
 	Time                 time.Time `json:"time"`
 	UserID               int64     `json:"user_id_str,string"`
 }
@@ -83,6 +86,15 @@ func (t *APITweet) NormalizeContent() {
 		}
 	}
 	t.FullText = strings.TrimSpace(t.FullText)
+
+	id, err := strconv.Atoi(t.QuotedStatusIDStr)
+	if err == nil {
+		t.QuotedStatusID = int64(id)
+	}
+	id, err = strconv.Atoi(t.RetweetedStatusIDStr)
+	if err == nil {
+		t.RetweetedStatusID = int64(id)
+	}
 }
 
 func (t APITweet) String() string {
@@ -165,4 +177,13 @@ func (t *TweetResponse) GetCursor() string {
 		return last_entry.Content.Operation.Cursor.Value
 	}
 	return ""
+}
+
+
+func idstr_to_int(idstr string) int64 {
+	id, err := strconv.Atoi(idstr)
+	if err != nil {
+		panic(err)
+	}
+	return int64(id)
 }
