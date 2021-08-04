@@ -92,11 +92,12 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		ret.Urls = append(ret.Urls, url.ExpandedURL)
 	}
 	for _, media := range apiTweet.Entities.Media {
-		if media.Type != "photo" {
+		if media.Type != "photo" {  // TODO: remove this eventually
 			panic_str := fmt.Sprintf("Unknown media type: %q", media.Type)
 			panic(panic_str)
 		}
-		new_image := Image{TweetID: ret.ID, Filename: media.MediaURLHttps, IsDownloaded: false}
+		new_image := ParseAPIMedia(media)
+		new_image.TweetID = ret.ID
 		ret.Images = append(ret.Images, new_image)
 	}
 	for _, hashtag := range apiTweet.Entities.Hashtags {

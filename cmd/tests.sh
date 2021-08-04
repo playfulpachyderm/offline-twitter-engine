@@ -3,6 +3,8 @@
 set -e
 set -x
 
+PS4='+(${BASH_SOURCE}:${LINENO}): '
+
 test -e data && rm -r data
 
 go run ./twitter create_profile data

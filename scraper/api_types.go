@@ -14,6 +14,12 @@ func (v SortableVariants) Len() int { return len(v) }
 func (v SortableVariants) Swap(i, j int) { v[i], v[j] = v[j], v[i] }
 func (v SortableVariants) Less(i, j int) bool { return v[i].Bitrate > v[j].Bitrate }
 
+type APIMedia struct {
+	MediaURLHttps string `json:"media_url_https"`
+	Type          string `json:"type"`
+	URL           string `json:"url"`
+}
+
 type APITweet struct {
 	ID                string `json:"id_str"`
 	ConversationIDStr string `json:"conversation_id_str"`
@@ -24,11 +30,7 @@ type APITweet struct {
 		Hashtags []struct {
 			Text string `json:"text"`
 		} `json:"hashtags"`
-		Media []struct {
-			MediaURLHttps string `json:"media_url_https"`
-			Type          string `json:"type"`
-			URL           string `json:"url"`
-		} `json:"media"`
+		Media []APIMedia `json:"media"`
 		URLs []struct {
 			ExpandedURL string `json:"expanded_url"`
 			URL         string `json:"url"`
