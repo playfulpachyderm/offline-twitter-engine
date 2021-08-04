@@ -15,7 +15,7 @@ import (
 func (p Profile) SaveImage(img scraper.Image) error {
     _, err := p.DB.Exec(`
         insert into images (id, tweet_id, filename, is_downloaded)
-                    values (?, ?, ?, ?, ?, ?)
+                    values (?, ?, ?, ?)
                on conflict do update
                        set is_downloaded=?
         `,
