@@ -30,7 +30,7 @@ func TestParseSingleRetweet(t *testing.T) {
 	if retweet.TweetID != "1404269989646028804" {
 		t.Errorf("Expected %q, got %q", "1404269989646028804", retweet.TweetID)
 	}
-	expected_id = 44067298
+	expected_id := 44067298
 	if retweet.RetweetedByID != scraper.UserID(expected_id) {
 		t.Errorf("Expected %d, got %d", expected_id, retweet.RetweetedByID)
 	}

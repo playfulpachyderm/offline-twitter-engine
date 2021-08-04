@@ -136,7 +136,7 @@ func create_dummy_tweet() scraper.Tweet {
 
 	return scraper.Tweet{
 		ID: tweet_id,
-		UserID: scraper.UserID("-1"),
+		UserID: -1,
 		Text: "text",
 		PostedAt: time.Now().Truncate(1e9),  // Round to nearest second
 		NumLikes: 1,
