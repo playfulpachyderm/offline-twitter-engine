@@ -121,10 +121,9 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
     var mentions string
     var hashtags string
     var tweet_id int64
-    var user_id int64
 
     row := stmt.QueryRow(id)
-    err = row.Scan(&tweet_id, &user_id, &t.Text, &postedAt, &t.NumLikes, &t.NumRetweets, &t.NumReplies, &t.NumQuoteTweets, &t.InReplyTo, &t.QuotedTweet, &mentions, &hashtags)
+    err = row.Scan(&tweet_id, &t.UserID, &t.Text, &postedAt, &t.NumLikes, &t.NumRetweets, &t.NumReplies, &t.NumQuoteTweets, &t.InReplyTo, &t.QuotedTweet, &mentions, &hashtags)
     if err != nil {
         return t, err
     }
@@ -135,7 +134,6 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
     }
     t.Hashtags = strings.Split(hashtags, ",")
     t.ID = scraper.TweetID(fmt.Sprint(tweet_id))
-    t.UserID = scraper.UserID(fmt.Sprint(user_id))
 
     imgs, err := p.GetImagesForTweet(t)
     if err != nil {

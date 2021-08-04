@@ -15,7 +15,7 @@ type API struct{}
 
 func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) {
 	client := &http.Client{Timeout: 10 * time.Second}
-	req, err := http.NewRequest("GET", API_USER_TIMELINE_BASE_PATH + string(user_id) + ".json", nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s%d.json", API_USER_TIMELINE_BASE_PATH, user_id), nil)
 	if err != nil {
 		return TweetResponse{}, err
 	}
@@ -77,7 +77,7 @@ func (api API) GetMoreTweets(user_id UserID, response *TweetResponse, max_tweets
 
 func (api API) GetTweet(id TweetID, cursor string) (TweetResponse, error) {
 	client := &http.Client{Timeout: 10 * time.Second}
-	req, err := http.NewRequest("GET", API_CONVERSATION_BASE_PATH + string(id) + ".json", nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s%d.json", API_CONVERSATION_BASE_PATH, id), nil)
 	if err != nil {
 		return TweetResponse{}, err
 	}

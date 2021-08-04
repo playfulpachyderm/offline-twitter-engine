@@ -52,8 +52,8 @@ func TestUserProfileToAPIUser(t *testing.T) {
 
 	result := user_resp.ConvertToAPIUser()
 
-	if result.IDStr != "44067298" {
-		t.Errorf("Expected IDStr %q, got %q", "44067298", result.IDStr)
+	if result.ID != 44067298 {
+		t.Errorf("Expected ID %q, got %q", 44067298, result.ID)
 	}
 	if result.FollowersCount != user_resp.Data.User.Legacy.FollowersCount {
 		t.Errorf("Expected user count %d, got %d", user_resp.Data.User.Legacy.FollowersCount, result.FollowersCount)

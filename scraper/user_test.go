@@ -25,8 +25,9 @@ func TestParseSingleUser(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	if user.ID != "44067298" {
-		t.Errorf("Expected %q, got %q", "44067298", user.ID)
+	expected_id := 44067298
+	if user.ID != scraper.UserID(expected_id) {
+		t.Errorf("Expected %q, got %q", expected_id, user.ID)
 	}
 	if user.DisplayName != "Michael Malice" {
 		t.Errorf("Expected %q, got %q", "Michael Malice", user.DisplayName)

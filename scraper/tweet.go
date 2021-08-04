@@ -75,7 +75,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	apiTweet.NormalizeContent()
 
 	ret.ID = TweetID(apiTweet.ID)
-	ret.UserID = UserID(apiTweet.UserIDStr)
+	ret.UserID = UserID(apiTweet.UserID)
 	ret.Text = apiTweet.FullText
 
 	ret.PostedAt, err = time.Parse(time.RubyDate, apiTweet.CreatedAt)

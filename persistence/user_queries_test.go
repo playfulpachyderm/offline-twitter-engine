@@ -53,7 +53,7 @@ func TestUserExists(t *testing.T) {
 
 	exists := profile.UserExists(user.Handle)
 	if exists {
-		t.Errorf("It shouldn't exist, but it does: %s", user.ID)
+		t.Errorf("It shouldn't exist, but it does: %d", user.ID)
 	}
 	err := profile.SaveUser(user)
 	if err != nil {
@@ -61,6 +61,6 @@ func TestUserExists(t *testing.T) {
 	}
 	exists = profile.UserExists(user.Handle)
 	if !exists {
-		t.Errorf("It should exist, but it doesn't: %s", user.ID)
+		t.Errorf("It should exist, but it doesn't: %d", user.ID)
 	}
 }

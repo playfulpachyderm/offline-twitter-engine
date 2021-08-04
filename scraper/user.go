@@ -8,7 +8,7 @@ import (
     "offline_twitter/terminal_utils"
 )
 
-type UserID string
+type UserID int64
 type UserHandle string
 
 func JoinArrayOfHandles(handles []UserHandle) string {
@@ -73,7 +73,7 @@ Joined %s
 
 // Turn an APIUser, as returned from the scraper, into a properly structured User object
 func ParseSingleUser(apiUser APIUser) (ret User, err error) {
-    ret.ID = UserID(apiUser.IDStr)
+    ret.ID = UserID(apiUser.ID)
     ret.DisplayName = apiUser.Name
     ret.Handle = UserHandle(apiUser.ScreenName)
     ret.Bio = apiUser.Description

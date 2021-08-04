@@ -1,7 +1,6 @@
 package scraper_test
 
 import (
-	// "fmt"
 	"encoding/json"
 	"io/ioutil"
 	"testing"

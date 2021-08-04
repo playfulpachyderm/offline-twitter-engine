@@ -41,7 +41,7 @@ func create_or_load_profile(profile_path string) persistence.Profile {
  */
 func create_stable_user() scraper.User {
 	return scraper.User{
-		ID: scraper.UserID("-1"),
+		ID: scraper.UserID(-1),
 		DisplayName: "stable display name",
 		Handle: scraper.UserHandle("handle stable"),
 		Bio: "stable bio",
@@ -78,7 +78,7 @@ func create_stable_tweet() scraper.Tweet {
 	tweet_id := scraper.TweetID("-1")
 	return scraper.Tweet{
 		ID: tweet_id,
-		UserID: "-1",
+		UserID: -1,
 		Text: "stable text",
 		PostedAt: time.Unix(10000000, 0),
 		NumLikes: 10,
@@ -101,12 +101,12 @@ func create_stable_tweet() scraper.Tweet {
  */
 func create_dummy_user() scraper.User {
 	rand.Seed(time.Now().UnixNano())
-	userID := fmt.Sprint(rand.Int())
+	userID := rand.Int()
 
 	return scraper.User{
 		ID: scraper.UserID(userID),
 		DisplayName: "display name",
-		Handle: scraper.UserHandle("handle" + userID),
+		Handle: scraper.UserHandle(fmt.Sprintf("handle%d", userID)),
 		Bio: "bio",
 		FollowersCount: 0,
 		FollowingCount: 1000,

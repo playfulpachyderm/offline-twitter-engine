@@ -38,7 +38,7 @@ type APITweet struct {
 		} `json:"urls"`
 		Mentions []struct {
 			UserName string `json:"screen_name"`
-			UserID   string `json:"id_str"`
+			UserID   int64  `json:"id_str,string"`
 		} `json:"user_mentions"`
 	} `json:"entities"`
 	ExtendedEntities struct {
@@ -59,7 +59,7 @@ type APITweet struct {
 	RetweetedStatusIDStr string    `json:"retweeted_status_id_str"`
 	QuotedStatusIDStr    string    `json:"quoted_status_id_str"`
 	Time                 time.Time `json:"time"`
-	UserIDStr            string    `json:"user_id_str"`
+	UserID               int64     `json:"user_id_str,string"`
 }
 
 func (t *APITweet) NormalizeContent() {
@@ -107,7 +107,7 @@ type APIUser struct {
 	FavouritesCount      int      `json:"favourites_count"`
 	FollowersCount       int      `json:"followers_count"`
 	FriendsCount         int      `json:"friends_count"`
-	IDStr                string   `json:"id_str"`
+	ID                   int64    `json:"id_str,string"`
 	ListedCount          int      `json:"listed_count"`
 	Name                 string   `json:"name"`
 	Location             string   `json:"location"`
@@ -124,14 +124,14 @@ type APIUser struct {
 type UserResponse struct {
 	Data struct {
 		User struct {
-			ID     string  `json:"rest_id"`
+			ID     int64   `json:"rest_id,string"`
 			Legacy APIUser `json:"legacy"`
 		} `json:"user"`
 	} `json:"data"`
 }
 func (u UserResponse) ConvertToAPIUser() APIUser {
 	ret := u.Data.User.Legacy
-	ret.IDStr = u.Data.User.ID
+	ret.ID = u.Data.User.ID
 	return ret
 }
 

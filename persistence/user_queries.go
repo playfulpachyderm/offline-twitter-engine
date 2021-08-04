@@ -81,15 +81,13 @@ func (p Profile) UserExists(handle scraper.UserHandle) bool {
 func parse_user_from_row(row *sql.Row) (scraper.User, error) {
     var u scraper.User
     var joinDate int64
-    var user_id int64
     var pinned_tweet_id int64
 
-    err := row.Scan(&user_id, &u.DisplayName, &u.Handle, &u.Bio, &u.FollowingCount, &u.FollowersCount, &u.Location, &u.Website, &joinDate, &u.IsPrivate, &u.IsVerified, &u.ProfileImageUrl, &u.BannerImageUrl, &pinned_tweet_id)
+    err := row.Scan(&u.ID, &u.DisplayName, &u.Handle, &u.Bio, &u.FollowingCount, &u.FollowersCount, &u.Location, &u.Website, &joinDate, &u.IsPrivate, &u.IsVerified, &u.ProfileImageUrl, &u.BannerImageUrl, &pinned_tweet_id)
     if err != nil {
         return u, err
     }
 
-    u.ID = scraper.UserID(fmt.Sprint(user_id))
     u.JoinDate = time.Unix(joinDate, 0)
     u.PinnedTweetID = scraper.TweetID(fmt.Sprint(pinned_tweet_id))
 
