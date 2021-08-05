@@ -79,7 +79,8 @@ func create_video_from_id(id int) scraper.Video {
 	return scraper.Video{
 		ID: scraper.VideoID(id),
 		TweetID: -1,
-		Filename: filename,
+		RemoteURL: filename,
+		LocalFilename: filename,
 		IsDownloaded: false,
 	}
 }

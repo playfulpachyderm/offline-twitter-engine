@@ -13,7 +13,6 @@ type VideoID int64
 type Video struct {
     ID VideoID
     TweetID TweetID
-    Filename string  // TODO video-filename: delete when it all works
     RemoteURL string
     LocalFilename string
     IsDownloaded bool
@@ -28,13 +27,8 @@ func ParseAPIVideo(apiVideo APIExtendedMedia, tweet_id TweetID) Video {
     return Video{
         ID: VideoID(apiVideo.ID),
         TweetID: tweet_id,
-        Filename: variants[0].URL,
         RemoteURL: variants[0].URL,
         LocalFilename: local_filename,
         IsDownloaded: false,
     }
-}
-
-func (v Video) FilenameWhenDownloaded() string {  // TODO video-filename: delete whole method and associated test
-    return fmt.Sprintf("%d.mp4", v.TweetID)
 }

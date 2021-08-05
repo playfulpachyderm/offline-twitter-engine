@@ -32,9 +32,6 @@ func TestParseAPIVideo(t *testing.T) {
     if video.RemoteURL != expected_remote_url {
         t.Errorf("Expected %q, got %q", expected_remote_url, video.RemoteURL)
     }
-    if video.Filename != expected_remote_url { // TODO video-filename: delete this check
-        t.Errorf("Expected %q, got %q", expected_remote_url, video.Filename)
-    }
 
     expected_local_filename := "28.mp4"
     if video.LocalFilename != expected_local_filename {

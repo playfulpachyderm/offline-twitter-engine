@@ -70,7 +70,8 @@ create table images (rowid integer primary key,
 create table videos (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
     tweet_id integer not null,
-    filename text not null unique,
+    remote_url text not null unique,
+    local_filename text not null unique,
     is_downloaded boolean default 0,
 
     foreign key(tweet_id) references tweets(id)
