@@ -1,7 +1,6 @@
 package persistence
 
 import (
-    "fmt"
     "database/sql"
     "time"
     "offline_twitter/scraper"
