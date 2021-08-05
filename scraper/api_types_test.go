@@ -32,6 +32,7 @@ func TestNormalizeContent(t *testing.T) {
 		var tweet scraper.APITweet
 		err = json.Unmarshal(data, &tweet)
 		if err != nil {
+			println("Failed at " + v.filename)
 			t.Errorf(err.Error())
 		}
 

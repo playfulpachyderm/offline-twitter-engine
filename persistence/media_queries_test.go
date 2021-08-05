@@ -3,7 +3,6 @@ package persistence_test
 import (
 	"testing"
     "math/rand"
-    "fmt"
     "time"
 
     "github.com/go-test/deep"
@@ -101,19 +100,14 @@ func TestSaveAndLoadVideo(t *testing.T) {
 
     // Create a fresh Video to test on
     rand.Seed(time.Now().UnixNano())
-    filename := fmt.Sprint(rand.Int())
-    vid := scraper.Video{TweetID: tweet.ID, Filename: filename, IsDownloaded: false}
+    vid := create_video_from_id(rand.Int())
+    vid.TweetID = tweet.ID
 
     // Save the Video
-    result, err := profile.SaveVideo(vid)
+    err := profile.SaveVideo(vid)
     if err != nil {
         t.Fatalf("Failed to save the video: %s", err.Error())
     }
-    last_insert, err := result.LastInsertId()
-    if err != nil {
-        t.Fatalf("last insert??? %s", err.Error())
-    }
-    vid.ID = scraper.VideoID(last_insert)
 
     // Reload the Video
     vids, err := profile.GetVideosForTweet(tweet)
@@ -145,24 +139,16 @@ func TestModifyVideo(t *testing.T) {
     tweet := create_stable_tweet()
     vid := tweet.Videos[0]
 
-    if vid.ID != 1 {
-        t.Fatalf("Got the wrong video back: wanted ID %d, got %d", 1, vid.ID)
+    if vid.ID != -1 {
+        t.Fatalf("Got the wrong video back: wanted ID %d, got %d", -1, vid.ID)
     }
 
-    vid.Filename = "local/sdfjk.jpg"
     vid.IsDownloaded = true
 
     // Save the changes
-    result, err := profile.SaveVideo(vid)
+    err := profile.SaveVideo(vid)
     if err != nil {
         t.Error(err)
-    }
-    rows_affected, err := result.RowsAffected()
-    if err != nil {
-        t.Error(err)
-    }
-    if rows_affected != 1 {
-        t.Errorf("Expected 1 row changed, but got %d", rows_affected)
     }
 
     // Reload it
@@ -172,7 +158,7 @@ func TestModifyVideo(t *testing.T) {
     }
     new_vid := vids[0]
     if new_vid.ID != vid.ID {
-        t.Fatalf("Got the wrong video back: wanted ID %d, got %d", 1, new_vid.ID)
+        t.Fatalf("Got the wrong video back: wanted ID %d, got %d", -1, new_vid.ID)
     }
 
     if diff := deep.Equal(vid, new_vid); diff != nil {

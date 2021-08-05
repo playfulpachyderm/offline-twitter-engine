@@ -19,7 +19,7 @@ func ParseAPIMedia(apiMedia APIMedia) Image {
     local_filename := path.Base(apiMedia.MediaURLHttps)
     return Image{
         ID: ImageID(apiMedia.ID),
-        Filename: apiMedia.MediaURLHttps,  // XXX filename
+        Filename: apiMedia.MediaURLHttps,  // TODO filename
         RemoteURL: apiMedia.MediaURLHttps,
         LocalFilename: local_filename,
         IsDownloaded: false,

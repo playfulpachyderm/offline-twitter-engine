@@ -45,7 +45,7 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
         }
     }
     for _, video := range t.Videos {
-        _, err := p.SaveVideo(video)
+        err := p.SaveVideo(video)
         if err != nil {
             return err
         }

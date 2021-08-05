@@ -85,7 +85,6 @@ func parse_user_from_row(row *sql.Row) (scraper.User, error) {
     if err != nil {
         return u, err
     }
-
     u.JoinDate = time.Unix(joinDate, 0)
 
     return u, nil

@@ -3,7 +3,6 @@ package scraper
 import (
 	"time"
 	"fmt"
-	"sort"
 
 	"offline_twitter/terminal_utils"
 )
@@ -116,9 +115,8 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		if len(apiTweet.ExtendedEntities.Media) != 1 {
 			panic(fmt.Sprintf("Surprising ExtendedEntities: %v", apiTweet.ExtendedEntities.Media))
 		}
-		variants := apiTweet.ExtendedEntities.Media[0].VideoInfo.Variants
-		sort.Sort(variants)
-		ret.Videos = []Video{Video{TweetID: ret.ID, Filename: variants[0].URL}}
+		new_video := ParseAPIVideo(apiTweet.ExtendedEntities.Media[0], ret.ID)
+		ret.Videos = []Video{new_video}
 		ret.Images = []Image{}
 	}
 	return

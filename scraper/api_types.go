@@ -7,6 +7,14 @@ import (
 	"strconv"
 )
 
+
+type APIMedia struct {
+	ID            int64  `json:"id_str,string"`
+	MediaURLHttps string `json:"media_url_https"`
+	Type          string `json:"type"`
+	URL           string `json:"url"`
+}
+
 type SortableVariants []struct {
 	Bitrate     int    `json:"bitrate,omitempty"`
 	URL         string `json:"url"`
@@ -15,11 +23,13 @@ func (v SortableVariants) Len() int { return len(v) }
 func (v SortableVariants) Swap(i, j int) { v[i], v[j] = v[j], v[i] }
 func (v SortableVariants) Less(i, j int) bool { return v[i].Bitrate > v[j].Bitrate }
 
-type APIMedia struct {
+type APIExtendedMedia struct {
 	ID            int64  `json:"id_str,string"`
 	MediaURLHttps string `json:"media_url_https"`
 	Type          string `json:"type"`
-	URL           string `json:"url"`
+	VideoInfo     struct {
+		Variants  SortableVariants `json:"variants"`
+	} `json:"video_info"`
 }
 
 type APITweet struct {
@@ -43,14 +53,7 @@ type APITweet struct {
 		} `json:"user_mentions"`
 	} `json:"entities"`
 	ExtendedEntities struct {
-		Media []struct {
-			IDStr         string `json:"id_str"`
-			MediaURLHttps string `json:"media_url_https"`
-			Type          string `json:"type"`
-			VideoInfo     struct {
-				Variants  SortableVariants `json:"variants"`
-			} `json:"video_info"`
-		} `json:"media"`
+		Media []APIExtendedMedia `json:"media"`
 	} `json:"extended_entities"`
 	InReplyToStatusID    int64     `json:"in_reply_to_status_id_str,string"`
 	InReplyToScreenName  string    `json:"in_reply_to_screen_name"`
@@ -123,7 +126,7 @@ type APIUser struct {
 	ListedCount          int      `json:"listed_count"`
 	Name                 string   `json:"name"`
 	Location             string   `json:"location"`
-	PinnedTweetIdsStr    []string `json:"pinned_tweet_ids_str"`
+	PinnedTweetIdsStr    []string `json:"pinned_tweet_ids_str"`  // Dunno how to type-convert an array
 	ProfileBannerURL     string   `json:"profile_banner_url"`
 	ProfileImageURLHTTPS string   `json:"profile_image_url_https"`
 	Protected            bool     `json:"protected"`

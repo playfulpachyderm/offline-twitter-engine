@@ -68,6 +68,7 @@ create table images (rowid integer primary key,
 );
 
 create table videos (rowid integer primary key,
+    id integer unique not null check(typeof(id) = 'integer'),
     tweet_id integer not null,
     filename text not null unique,
     is_downloaded boolean default 0,

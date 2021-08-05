@@ -1,7 +1,7 @@
 package persistence
 
 import (
-    "database/sql"
+    "fmt"
 
     "offline_twitter/scraper"
 )
@@ -26,22 +26,22 @@ func (p Profile) SaveImage(img scraper.Image) error {
 }
 
 /**
- * Save a Video.  If it's a new Video (no rowid), does an insert; otherwise, does an update.
+ * Save a Video
  *
  * args:
  * - img: the Video to save
- *
- * returns:
- * - the rowid
  */
-func (p Profile) SaveVideo(vid scraper.Video) (sql.Result, error) {
-    if vid.ID == 0 {
-        // New image
-        return p.DB.Exec("insert into videos (tweet_id, filename) values (?, ?) on conflict do nothing", vid.TweetID, vid.Filename)
-    } else {
-        // Updating an existing image
-        return p.DB.Exec("update videos set filename=?, is_downloaded=? where rowid=?", vid.Filename, vid.IsDownloaded, vid.ID)
-    }
+func (p Profile) SaveVideo(vid scraper.Video) error {
+    _, err := p.DB.Exec(`
+        insert into videos (id, tweet_id, filename, is_downloaded)
+                    values (?, ?, ?, ?)
+               on conflict do update
+                       set is_downloaded=?
+        `,
+        vid.ID, vid.TweetID, vid.Filename, vid.IsDownloaded,
+        vid.IsDownloaded,
+    )
+    return err
 }
 
 /**
@@ -75,7 +75,7 @@ func (p Profile) GetImagesForTweet(t scraper.Tweet) (imgs []scraper.Image, err e
  * Get the list of videos for a tweet
  */
 func (p Profile) GetVideosForTweet(t scraper.Tweet) (vids []scraper.Video, err error) {
-    stmt, err := p.DB.Prepare("select rowid, filename, is_downloaded from videos where tweet_id=?")
+    stmt, err := p.DB.Prepare("select id, filename, is_downloaded from videos where tweet_id=?")
     if err != nil {
         return
     }

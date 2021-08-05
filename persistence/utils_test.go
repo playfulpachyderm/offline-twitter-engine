@@ -59,12 +59,25 @@ func create_stable_user() scraper.User {
 }
 
 /**
- * Create a semi-stable image based on the given ID
+ * Create a semi-stable Image based on the given ID
  */
 func create_image_from_id(id int) scraper.Image {
 	filename := fmt.Sprintf("image%d.jpg", id)
 	return scraper.Image{
 		ID: scraper.ImageID(id),
+		TweetID: -1,
+		Filename: filename,
+		IsDownloaded: false,
+	}
+}
+
+/**
+ * Create a semi-stable Video based on the given ID
+ */
+func create_video_from_id(id int) scraper.Video {
+	filename := fmt.Sprintf("video%d.jpg", id)
+	return scraper.Video{
+		ID: scraper.VideoID(id),
 		TweetID: -1,
 		Filename: filename,
 		IsDownloaded: false,
@@ -85,7 +98,9 @@ func create_stable_tweet() scraper.Tweet {
 		NumRetweets: 10,
 		NumReplies: 10,
 		NumQuoteTweets: 10,
-		Videos: []scraper.Video{{ID: scraper.VideoID(1), TweetID: tweet_id, Filename: "asdf", IsDownloaded: false}},
+		Videos: []scraper.Video{
+			create_video_from_id(-1),
+		},
 		Urls: []string{},
 		Images: []scraper.Image{
 			create_image_from_id(-1),
@@ -133,6 +148,8 @@ func create_dummy_tweet() scraper.Tweet {
 	img1.TweetID = tweet_id
 	img2 := create_image_from_id(rand.Int())
 	img2.TweetID = tweet_id
+	vid := create_video_from_id(rand.Int())
+	vid.TweetID = tweet_id
 
 	return scraper.Tweet{
 		ID: tweet_id,
@@ -143,7 +160,7 @@ func create_dummy_tweet() scraper.Tweet {
 		NumRetweets: 2,
 		NumReplies: 3,
 		NumQuoteTweets: 4,
-		Videos: []scraper.Video{scraper.Video{TweetID: tweet_id, Filename: "video" + fmt.Sprint(tweet_id), IsDownloaded: false}},
+		Videos: []scraper.Video{vid},
 		Urls: []string{"url1", "url2"},
 		Images: []scraper.Image{img1, img2},
 		Mentions: []scraper.UserHandle{"mention1", "mention2"},

@@ -28,10 +28,6 @@ func TestSaveAndLoadTweet(t *testing.T) {
         t.Fatalf("Failed to load the tweet: %s", err.Error())
     }
 
-    for i := range tweet.Videos {
-        tweet.Videos[i].ID = new_tweet.Videos[i].ID
-    }
-
     if diff := deep.Equal(tweet, new_tweet); diff != nil {
         t.Error(diff)
     }
