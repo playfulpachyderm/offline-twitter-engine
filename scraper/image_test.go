@@ -28,9 +28,6 @@ func TestParseAPIMedia(t *testing.T) {
     if image.RemoteURL != expected_remote_url {
         t.Errorf("Expected %q, got %q", expected_remote_url, image.RemoteURL)
     }
-    if image.Filename != expected_remote_url { // XXX filename: delete this check
-        t.Errorf("Expected %q, got %q", expected_remote_url, image.Filename)
-    }
     expected_local_filename := "E18sEUrWYAk8dBl.jpg"
     if image.LocalFilename != expected_local_filename {
         t.Errorf("Expected %q, got %q", expected_local_filename, image.LocalFilename)

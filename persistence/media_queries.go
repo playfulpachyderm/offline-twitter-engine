@@ -12,12 +12,12 @@ import (
  */
 func (p Profile) SaveImage(img scraper.Image) error {
     _, err := p.DB.Exec(`
-        insert into images (id, tweet_id, filename, is_downloaded)
-                    values (?, ?, ?, ?)
+        insert into images (id, tweet_id, remote_url, local_filename, is_downloaded)
+                    values (?, ?, ?, ?, ?)
                on conflict do update
                        set is_downloaded=?
         `,
-        img.ID, img.TweetID, img.Filename, img.IsDownloaded,
+        img.ID, img.TweetID, img.RemoteURL, img.LocalFilename, img.IsDownloaded,
         img.IsDownloaded,
     )
     return err
@@ -46,7 +46,7 @@ func (p Profile) SaveVideo(vid scraper.Video) error {
  * Get the list of images for a tweet
  */
 func (p Profile) GetImagesForTweet(t scraper.Tweet) (imgs []scraper.Image, err error) {
-    stmt, err := p.DB.Prepare("select id, filename, is_downloaded from images where tweet_id=?")
+    stmt, err := p.DB.Prepare("select id, remote_url, local_filename, is_downloaded from images where tweet_id=?")
     if err != nil {
         return
     }
@@ -58,7 +58,7 @@ func (p Profile) GetImagesForTweet(t scraper.Tweet) (imgs []scraper.Image, err e
     var img scraper.Image
 
     for rows.Next() {
-        err = rows.Scan(&img.ID, &img.Filename, &img.IsDownloaded)
+        err = rows.Scan(&img.ID, &img.RemoteURL, &img.LocalFilename, &img.IsDownloaded)
         if err != nil {
             return
         }

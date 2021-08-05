@@ -66,7 +66,8 @@ func create_image_from_id(id int) scraper.Image {
 	return scraper.Image{
 		ID: scraper.ImageID(id),
 		TweetID: -1,
-		Filename: filename,
+		RemoteURL: filename,
+		LocalFilename: filename,
 		IsDownloaded: false,
 	}
 }
