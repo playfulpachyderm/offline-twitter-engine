@@ -1,8 +1,6 @@
 package persistence
 
 import (
-    "fmt"
-
     "offline_twitter/scraper"
 )
 
