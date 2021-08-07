@@ -15,6 +15,7 @@ func TestSaveAndLoadTweet(t *testing.T) {
     profile := create_or_load_profile(profile_path)
 
     tweet := create_dummy_tweet()
+    tweet.IsContentDownloaded = true
 
     // Save the tweet
     err := profile.SaveTweet(tweet)

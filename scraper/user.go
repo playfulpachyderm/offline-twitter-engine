@@ -35,6 +35,8 @@ type User struct {
     BannerImageUrl  string
     PinnedTweetID   TweetID
     PinnedTweet     *Tweet
+
+    IsContentDownloaded bool
 }
 
 func (u User) String() string {

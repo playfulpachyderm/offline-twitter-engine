@@ -29,6 +29,8 @@ type Tweet struct {
 	Mentions    []UserHandle
 	Hashtags    []string
 	QuotedTweet TweetID
+
+	IsContentDownloaded bool
 }
 
 
