@@ -69,17 +69,3 @@ tasks:
 
       duration=$SECONDS
       echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
-
-  - compile: |
-      SECONDS=0
-
-      cd twitter_offline_engine/cmd
-      go build -o ../../twitter ./twitter
-      cd ../..
-      chmod +x twitter
-      sudo mv twitter /usr/local/bin
-
-      which twitter
-
-      duration=$SECONDS
-      echo "Task completed in $(($duration / 60))m$(($duration % 60))s."

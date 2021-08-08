@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strconv"
 	"fmt"
 	"offline_twitter/scraper"
 	"offline_twitter/persistence"
@@ -48,6 +49,8 @@ func main() {
 		fetch_user(scraper.UserHandle(target))
 	case "fetch_tweet_only":
 		fetch_tweet_only(target)
+	case "download_tweet_content":
+		download_tweet_content(target)
 	default:
 		die("Invalid operation: " + operation, true, 3)
 	}
@@ -115,4 +118,20 @@ func fetch_tweet_only(tweet_url string) {
 		die("Error saving tweet: " + err.Error(), false, 4)
 	}
 	fmt.Println("Saved the tweet.  Exiting successfully")
+}
+
+
+func download_tweet_content(tweet_id string) {
+	id, err := strconv.Atoi(tweet_id)
+	if err != nil {
+		panic(err)
+	}
+	tweet, err := profile.GetTweetById(scraper.TweetID(id))
+	if err != nil {
+		panic("Couldn't get tweet from database: " + err.Error())
+	}
+	err = profile.DownloadTweetContentFor(&tweet)
+	if err != nil {
+		panic("Error getting content: " + err.Error())
+	}
 }
