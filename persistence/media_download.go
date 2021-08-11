@@ -102,3 +102,36 @@ func (p Profile) DownloadTweetContentWithInjector(t *scraper.Tweet, downloader M
     t.IsContentDownloaded = true
     return p.SaveTweet(*t)
 }
+
+/**
+ * Download a user's banner and profile images
+ */
+func (p Profile) DownloadUserContentFor(u *scraper.User) error {
+    return p.DownloadUserContentWithInjector(u, DefaultDownloader{})
+}
+
+/**
+ * Enable injecting a custom MediaDownloader (i.e., for testing)
+ */
+func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader MediaDownloader) error {
+    var err error
+    var outfile string
+
+    outfile = path.Join(p.ProfileDir, "profile_images", u.ProfileImageLocalPath)
+    err = downloader.Curl(u.ProfileImageUrl, outfile)
+    if err != nil {
+        return err
+    }
+
+    // Skip it if there's no banner image
+    if u.BannerImageLocalPath != "" {
+        outfile = path.Join(p.ProfileDir, "profile_images", u.BannerImageLocalPath)
+        err = downloader.Curl(u.BannerImageUrl, outfile)
+        if err != nil {
+            return err
+        }
+    }
+
+    u.IsContentDownloaded = true
+    return p.SaveUser(*u)
+}

@@ -37,7 +37,7 @@ func test_all_downloaded(tweet scraper.Tweet, yes_or_no bool, t *testing.T) {
 }
 
 /**
- * Create an Image, save it, reload it, and make sure it comes back the same
+ * Downloading a Tweet's contents should mark the Tweet as downloaded
  */
 func TestDownloadTweetContent(t *testing.T) {
     profile_path := "test_profiles/TestMediaQueries"
@@ -63,10 +63,50 @@ func TestDownloadTweetContent(t *testing.T) {
     // It should all be marked "yes downloaded" now
     test_all_downloaded(tweet, true, t)
 
-    // Reload the tweet (check db); should also be "yes downloaded"
+    // Reload the Tweet (check db); should also be "yes downloaded"
     new_tweet, err := profile.GetTweetById(tweet.ID)
     if err != nil {
-        t.Fatalf("Couldn't reload the tweet: %s", err.Error())
+        t.Fatalf("Couldn't reload the Tweet: %s", err.Error())
     }
     test_all_downloaded(new_tweet, true, t)
 }
+
+/**
+ * Downloading a User's contents should mark the User as downloaded
+ */
+func TestDownloadUserContent(t *testing.T) {
+    profile_path := "test_profiles/TestMediaQueries"
+    profile := create_or_load_profile(profile_path)
+
+    user := create_dummy_user()
+
+    // Persist the User
+    err := profile.SaveUser(user)
+    if err != nil {
+        t.Fatalf("Failed to save the user: %s", err.Error())
+    }
+
+    // Make sure the User is marked "not downloaded"
+    if user.IsContentDownloaded {
+        t.Errorf("User shouldn't be marked downloaded, but it was")
+    }
+
+    // Do the (fake) downloading
+    err = profile.DownloadUserContentWithInjector(&user, FakeDownloader{})
+    if err != nil {
+        t.Fatalf("Error running fake download: %s", err.Error())
+    }
+
+    // The User should now be marked "yes downloaded"
+    if !user.IsContentDownloaded {
+        t.Errorf("User should be marked downloaded, but it wasn't")
+    }
+
+    // Reload the User (check db); should also be "yes downloaded"
+    new_user, err := profile.GetUserByID(user.ID)
+    if err != nil {
+        t.Fatalf("Couldn't reload the User: %s", err.Error())
+    }
+    if !new_user.IsContentDownloaded {
+        t.Errorf("User should be marked downloaded, but it wasn't")
+    }}
