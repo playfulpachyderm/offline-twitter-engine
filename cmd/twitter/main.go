@@ -53,6 +53,8 @@ func main() {
 		fetch_tweet_only(target)
 	case "download_tweet_content":
 		download_tweet_content(target)
+	case "download_user_content":
+		download_user_content(scraper.UserHandle(target))
 	default:
 		die("Invalid operation: " + operation, true, 3)
 	}
@@ -133,6 +135,17 @@ func download_tweet_content(tweet_id string) {
 		panic("Couldn't get tweet from database: " + err.Error())
 	}
 	err = profile.DownloadTweetContentFor(&tweet)
+	if err != nil {
+		panic("Error getting content: " + err.Error())
+	}
+}
+
+func download_user_content(handle scraper.UserHandle) {
+	user, err := profile.GetUserByHandle(handle)
+	if err != nil {
+		panic("Couldn't get the user from database: " + err.Error())
+	}
+	err = profile.DownloadUserContentFor(&user)
 	if err != nil {
 		panic("Error getting content: " + err.Error())
 	}

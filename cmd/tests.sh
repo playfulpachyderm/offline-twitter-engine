@@ -65,4 +65,11 @@ test $(sqlite3 data/twitter.db "select count(*) from tweets") = "2"
 test $(sqlite3 data/twitter.db "select count(*) from videos") = "1"
 
 
+# Download a user's profile image and banner image
+test $(sqlite3 data/twitter.db "select is_content_downloaded from users where handle = 'DiamondChariots'") = "0"
+./tw download_user_content data DiamondChariots
+test $(sqlite3 data/twitter.db "select is_content_downloaded from users where handle = 'DiamondChariots'") = "1"
+test -f data/profile_images/DiamondChariots_profile_rE4OTedS.jpg
+test -f data/profile_images/DiamondChariots_banner_1615811094.jpg
+
 echo -e "\033[32mAll tests passed.  Finished successfully.\033[0m"
