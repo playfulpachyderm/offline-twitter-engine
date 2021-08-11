@@ -53,7 +53,9 @@ func create_stable_user() scraper.User {
 		IsVerified: true,
 		IsPrivate: false,
 		ProfileImageUrl: "stable profile image url",
+		ProfileImageLocalPath: "stable profile image local path",
 		BannerImageUrl: "stable banner image url",
+		BannerImageLocalPath: "stable image local path",
 		PinnedTweetID: scraper.TweetID(345),
 	}
 }
@@ -133,7 +135,9 @@ func create_dummy_user() scraper.User {
 		IsVerified: false,
 		IsPrivate: true,
 		ProfileImageUrl: "profile image url",
+		ProfileImageLocalPath: "profile image local path",
 		BannerImageUrl: "banner image url",
+		BannerImageLocalPath: "banner image local path",
 		PinnedTweetID: scraper.TweetID(234),
 	}
 }

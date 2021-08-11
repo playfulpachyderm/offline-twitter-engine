@@ -14,6 +14,8 @@ import (
 var profile persistence.Profile
 
 
+// TODO: use the current directory by default, add flag to set data-dir
+
 /**
  * Main method
  */

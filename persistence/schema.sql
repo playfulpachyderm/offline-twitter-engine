@@ -13,7 +13,9 @@ create table users (rowid integer primary key,
     is_private boolean default 0,
     is_verified boolean default 0,
     profile_image_url text,
+    profile_image_local_path text,
     banner_image_url text,
+    banner_image_local_path text,
     pinned_tweet_id integer check(typeof(pinned_tweet_id) = 'integer' or pinned_tweet_id = ''),
 
     is_content_downloaded boolean default 0
