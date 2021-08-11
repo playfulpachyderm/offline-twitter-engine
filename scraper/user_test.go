@@ -60,7 +60,7 @@ func TestParseSingleUser(t *testing.T) {
 	if user.IsVerified != true {
 		t.Errorf("Expected %v, got %v", true, user.IsPrivate)
 	}
-	expectedProfileImage := "https://pbs.twimg.com/profile_images/1064051934812913664/Lbwdb_C9_normal.jpg"
+	expectedProfileImage := "https://pbs.twimg.com/profile_images/1064051934812913664/Lbwdb_C9.jpg"
 	if user.ProfileImageUrl != expectedProfileImage {
 		t.Errorf("Expected %q, got %q", expectedProfileImage, user.ProfileImageUrl)
 	}
@@ -68,7 +68,7 @@ func TestParseSingleUser(t *testing.T) {
 	if user.BannerImageUrl != expectedBannerImage {
 		t.Errorf("Expected %q, got %q", expectedBannerImage, user.BannerImageUrl)
 	}
-	expected_profile_image_local := "michaelmalice_profile_Lbwdb_C9_normal.jpg"
+	expected_profile_image_local := "michaelmalice_profile_Lbwdb_C9.jpg"
 	if user.ProfileImageLocalPath != expected_profile_image_local {
 		t.Errorf("Expected %q, got %q", expected_profile_image_local, user.ProfileImageLocalPath)
 	}

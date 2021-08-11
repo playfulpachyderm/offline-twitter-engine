@@ -97,6 +97,11 @@ func ParseSingleUser(apiUser APIUser) (ret User, err error) {
     ret.IsPrivate = apiUser.Protected
     ret.IsVerified = apiUser.Verified
     ret.ProfileImageUrl = apiUser.ProfileImageURLHTTPS
+
+
+    if regexp.MustCompile("_normal\\.\\w{2,4}").MatchString(ret.ProfileImageUrl) {
+        ret.ProfileImageUrl = strings.ReplaceAll(ret.ProfileImageUrl, "_normal.", ".")
+    }
     ret.BannerImageUrl = apiUser.ProfileBannerURL
 
     ret.ProfileImageLocalPath = ret.compute_profile_image_local_path()
@@ -137,12 +142,8 @@ func (u User) compute_banner_image_local_path() string {
     base_name := path.Base(u.BannerImageUrl)
 
     // Check if it has an extension (e.g., ".png" or ".jpeg")
-    match, err := regexp.MatchString("\\.\\w{2,4}$", base_name)
-    if err != nil {
-        panic(err)
-    }
-    // If it doesn't have an extension, add one
-    if !match {
+    if !regexp.MustCompile("\\.\\w{2,4}$").MatchString(base_name) {
+        // If it doesn't have an extension, add one
         base_name += ".jpg"
     }
     return string(u.Handle) + "_banner_" + base_name
