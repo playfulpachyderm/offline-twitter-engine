@@ -68,6 +68,14 @@ func TestParseSingleUser(t *testing.T) {
 	if user.BannerImageUrl != expectedBannerImage {
 		t.Errorf("Expected %q, got %q", expectedBannerImage, user.BannerImageUrl)
 	}
+	expected_profile_image_local := "michaelmalice_profile_Lbwdb_C9_normal.jpg"
+	if user.ProfileImageLocalPath != expected_profile_image_local {
+		t.Errorf("Expected %q, got %q", expected_profile_image_local, user.ProfileImageLocalPath)
+	}
+	expected_banner_image_local := "michaelmalice_banner_1615134676.jpg"
+	if user.BannerImageLocalPath != expected_banner_image_local {
+		t.Errorf("Expected %q, got %q", expected_banner_image_local, user.BannerImageLocalPath)
+	}
 	expected_id = 1403835414373339136
 	if user.PinnedTweetID != scraper.TweetID(expected_id) {
 		t.Errorf("Expected %q, got %q", expected_id, user.PinnedTweet)

@@ -4,6 +4,8 @@ import (
     "time"
     "fmt"
     "strings"
+    "regexp"
+    "path"
 
     "offline_twitter/terminal_utils"
 )
@@ -20,19 +22,22 @@ func JoinArrayOfHandles(handles []UserHandle) string {
 }
 
 type User struct {
-    ID              UserID
-    DisplayName     string
-    Handle          UserHandle
-    Bio             string
-    FollowingCount  int
-    FollowersCount  int
-    Location        string
-    Website         string
-    JoinDate        time.Time
-    IsPrivate       bool
-    IsVerified      bool
-    ProfileImageUrl string
-    BannerImageUrl  string
+    ID                    UserID
+    DisplayName           string
+    Handle                UserHandle
+    Bio                   string
+    FollowingCount        int
+    FollowersCount        int
+    Location              string
+    Website               string
+    JoinDate              time.Time
+    IsPrivate             bool
+    IsVerified            bool
+    ProfileImageUrl       string
+    ProfileImageLocalPath string
+    BannerImageUrl        string
+    BannerImageLocalPath  string
+
     PinnedTweetID   TweetID
     PinnedTweet     *Tweet
 
@@ -93,6 +98,10 @@ func ParseSingleUser(apiUser APIUser) (ret User, err error) {
     ret.IsVerified = apiUser.Verified
     ret.ProfileImageUrl = apiUser.ProfileImageURLHTTPS
     ret.BannerImageUrl = apiUser.ProfileBannerURL
+
+    ret.ProfileImageLocalPath = ret.compute_profile_image_local_path()
+    ret.BannerImageLocalPath = ret.compute_banner_image_local_path()
+
     if len(apiUser.PinnedTweetIdsStr) > 0 {
         ret.PinnedTweetID = TweetID(idstr_to_int(apiUser.PinnedTweetIdsStr[0]))
     }
@@ -107,4 +116,34 @@ func GetUser(handle UserHandle) (User, error) {
         return User{}, err
     }
     return ParseSingleUser(apiUser)
+}
+
+/**
+ * Make a filename for the profile image, that hopefully won't clobber other ones
+ */
+func (u User) compute_profile_image_local_path() string {
+    return string(u.Handle) + "_profile_" + path.Base(u.ProfileImageUrl)
+}
+
+/**
+ * Make a filename for the banner image, that hopefully won't clobber other ones.
+ * Add a file extension if necessary (seems to be necessary).
+ * If there is no banner image, just return nothing.
+ */
+func (u User) compute_banner_image_local_path() string {
+    if u.BannerImageUrl == "" {
+        return ""
+    }
+    base_name := path.Base(u.BannerImageUrl)
+
+    // Check if it has an extension (e.g., ".png" or ".jpeg")
+    match, err := regexp.MatchString("\\.\\w{2,4}$", base_name)
+    if err != nil {
+        panic(err)
+    }
+    // If it doesn't have an extension, add one
+    if !match {
+        base_name += ".jpg"
+    }
+    return string(u.Handle) + "_banner_" + base_name
 }
