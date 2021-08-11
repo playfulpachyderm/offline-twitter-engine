@@ -4,6 +4,7 @@ import (
 	"os"
 	"strconv"
 	"fmt"
+	"flag"
 	"offline_twitter/scraper"
 	"offline_twitter/persistence"
 )
@@ -14,8 +15,6 @@ import (
 var profile persistence.Profile
 
 
-// TODO: use the current directory by default, add flag to set data-dir
-
 /**
  * Main method
  */
@@ -24,22 +23,26 @@ func main() {
 		die("", true, 1)
 	}
 
-	operation := os.Args[1]
-	profile_dir := os.Args[2]
+	profile_dir := flag.String("profile", ".", "TODO USAGE")
+	flag.Parse()
+	args := flag.Args()
 
-	if operation == "create_profile" {
-		create_profile(profile_dir)
-		return
-	}
-
-	if len(os.Args) < 4 {
+	if len(args) < 2 {
 		die("", true, 1)
 	}
 
-	target := os.Args[3]
+	operation := args[0]
+	target := args[1]
+
+	if operation == "create_profile" {
+		create_profile(target)
+		return
+	}
+
+
 
 	var err error
-	profile, err = persistence.LoadProfile(profile_dir)
+	profile, err = persistence.LoadProfile(*profile_dir)
 	if err != nil {
 		die("Could not load profile: " + err.Error(), true, 2)
 	}
