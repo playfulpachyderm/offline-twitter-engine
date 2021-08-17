@@ -1,18 +1,26 @@
 package scraper
 
 
-// Return a list of tweets, including the original and the rest of its thread,
-// along with a list of associated users
-func GetFeedFull(user_id UserID, max_tweets int) (tweets []Tweet, retweets []Retweet, users []User, err error) {
+/**
+ * Get a list of tweets that appear on the given user's page, along with a list of associated
+ * users for any retweets.
+ *
+ * args:
+ * - user_id: the ID of the user whomst feed to fetch
+ * - min_tweets: get at least this many tweets, if there are any
+ *
+ * returns: a slice of Tweets, Retweets, and Users
+ */
+func GetUserFeedFor(user_id UserID, min_tweets int) (tweets []Tweet, retweets []Retweet, users []User, err error) {
 	api := API{}
 	tweet_response, err := api.GetFeedFor(user_id, "")
 	if err != nil {
 		return
 	}
 
-	if len(tweet_response.GlobalObjects.Tweets) < max_tweets &&
+	if len(tweet_response.GlobalObjects.Tweets) < min_tweets &&
 			tweet_response.GetCursor() != "" {
-		err = api.GetMoreTweets(user_id, &tweet_response, max_tweets)
+		err = api.GetMoreTweetsFromFeed(user_id, &tweet_response, min_tweets)
 		if err != nil {
 			return
 		}

@@ -19,7 +19,7 @@ func main() {
 		log.Fatal("Error getting user profile: " + err.Error())
 	}
 
-	tweets, retweets, users, err := scraper.GetFeedFull(user.ID, 1)
+	tweets, retweets, users, err := scraper.GetUserFeedFor(user.ID, 1)
 	if err != nil {
 		log.Fatal("Error getting user feed: " + err.Error())
 	}

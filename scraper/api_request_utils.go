@@ -52,10 +52,19 @@ func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) 
 	return response, err
 }
 
-// Resend the request to get more tweets if necessary
-func (api API) GetMoreTweets(user_id UserID, response *TweetResponse, max_tweets int) error {
+/**
+ * Resend the request to get more tweets if necessary
+ *
+ * args:
+ * - user_id: the user's UserID
+ * - response: an "out" parameter; the TweetResponse that tweets, RTs and users will be appended to
+ * - min_tweets: the desired minimum amount of tweets to get
+ */
+func (api API) GetMoreTweetsFromFeed(user_id UserID, response *TweetResponse, min_tweets int) error {
+	// TODO user-feed-infinite-fetch: what if you reach the end of the user's timeline?  Might loop
+	// forever getting no new tweets
 	last_response := response
-	for last_response.GetCursor() != "" && len(response.GlobalObjects.Tweets) < max_tweets {
+	for last_response.GetCursor() != "" && len(response.GlobalObjects.Tweets) < min_tweets {
 		fresh_response, err := api.GetFeedFor(user_id, last_response.GetCursor())
 		if err != nil {
 			return err

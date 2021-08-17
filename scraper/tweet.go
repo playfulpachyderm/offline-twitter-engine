@@ -125,7 +125,14 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 }
 
 
-// Return a single tweet, nothing else
+/**
+ * Get a single tweet with no replies from the API.
+ *
+ * args:
+ * - id: the ID of the tweet to get
+ *
+ * returns: the single Tweet
+ */
 func GetTweet(id TweetID) (Tweet, error) {
 	api := API{}
 	tweet_response, err := api.GetTweet(id, "")
@@ -143,8 +150,15 @@ func GetTweet(id TweetID) (Tweet, error) {
 }
 
 
-// Return a list of tweets, including the original and the rest of its thread,
-// along with a list of associated users
+/**
+ * Return a list of tweets, including the original and the rest of its thread,
+ * along with a list of associated users.
+ *
+ * args:
+ * - id: the ID of the tweet to get
+ *
+ * returns: the tweet, list of its replies and context, and users associated with those replies
+ */
 func GetTweetFull(id TweetID) (tweets []Tweet, retweets []Retweet, users []User, err error) {
 	api := API{}
 	tweet_response, err := api.GetTweet(id, "")
@@ -162,6 +176,14 @@ func GetTweetFull(id TweetID) (tweets []Tweet, retweets []Retweet, users []User,
 	return ParseTweetResponse(tweet_response)
 }
 
+/**
+ * Parse an API response object into a list of tweets, retweets and users
+ *
+ * args:
+ * - resp: the response from the API
+ *
+ * returns: a list of tweets, retweets and users in that response object
+ */
 func ParseTweetResponse(resp TweetResponse) (tweets []Tweet, retweets []Retweet, users []User, err error) {
 	var new_tweet Tweet
 	var new_retweet Retweet
