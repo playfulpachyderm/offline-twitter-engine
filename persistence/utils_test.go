@@ -26,6 +26,10 @@ func create_or_load_profile(profile_path string) persistence.Profile {
 			panic(err)
 		}
 		err = profile.SaveTweet(create_stable_tweet())
+		if err != nil {
+			panic(err)
+		}
+		err = profile.SaveRetweet(create_stable_retweet())
 	} else {
 		profile, err = persistence.LoadProfile(profile_path)
 	}
@@ -114,6 +118,18 @@ func create_stable_tweet() scraper.Tweet {
 	}
 }
 
+/**
+ * Create a stable retweet with a fixed ID and parameters
+ */
+func create_stable_retweet() scraper.Retweet {
+	retweet_id := scraper.TweetID(-1)
+	return scraper.Retweet{
+		RetweetID: retweet_id,
+		TweetID: -1,
+		RetweetedByID: -1,
+		RetweetedAt: time.Unix(20000000, 0),
+	}
+}
 
 /**
  * Create a new user with a random ID and handle
@@ -171,5 +187,20 @@ func create_dummy_tweet() scraper.Tweet {
 		Images: []scraper.Image{img1, img2},
 		Mentions: []scraper.UserHandle{"mention1", "mention2"},
 		Hashtags: []string{"hash1", "hash2"},
+	}
+}
+
+/**
+ * Create a new retweet with a random ID for a given TweetID
+ */
+func create_dummy_retweet(tweet_id scraper.TweetID) scraper.Retweet {
+	rand.Seed(time.Now().UnixNano())
+	retweet_id := scraper.TweetID(rand.Int())
+
+	return scraper.Retweet{
+		RetweetID: retweet_id,
+		TweetID: tweet_id,
+		RetweetedByID: -1,
+		RetweetedAt: time.Unix(20000000, 0),
 	}
 }

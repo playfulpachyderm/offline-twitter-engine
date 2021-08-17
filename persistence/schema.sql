@@ -44,7 +44,7 @@ create table tweets (rowid integer primary key,
 );
 
 create table retweets(rowid integer primary key,
-    retweet_id integer not null,
+    retweet_id integer not null unique,
     tweet_id integer not null,
     retweeted_by integer not null,
     retweeted_at integer not null,
