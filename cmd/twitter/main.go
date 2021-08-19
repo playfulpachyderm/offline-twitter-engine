@@ -54,6 +54,8 @@ func main() {
 		fetch_user(scraper.UserHandle(target))
 	case "fetch_tweet_only":
 		fetch_tweet_only(target)
+	case "get_user_tweets":
+		fetch_user_feed(target)
 	case "download_tweet_content":
 		download_tweet_content(target)
 	case "download_user_content":
@@ -127,6 +129,48 @@ func fetch_tweet_only(tweet_url string) {
 	fmt.Println("Saved the tweet.  Exiting successfully")
 }
 
+/**
+ * Scrape a user feed and get a big blob of tweets and retweets.  Get 50 tweets.
+ *
+ * args:
+ * - handle: the user handle to get
+ */
+func fetch_user_feed(handle string) {
+	user, err := profile.GetUserByHandle(scraper.UserHandle(handle))
+	if err != nil {
+		die(err.Error(), false, -1)
+	}
+
+	tweets, retweets, users, err := scraper.GetUserFeedFor(user.ID, 50);
+	if err != nil {
+		die(err.Error(), false, -2)
+	}
+
+	for _, u := range users {
+		fmt.Println(u)
+		err = profile.SaveUser(u)
+		if err != nil {
+			die("Error saving tweet: " + err.Error(), false, 4)
+		}
+	}
+
+	for _, t := range tweets {
+		fmt.Println(t)
+		err = profile.SaveTweet(t)
+		if err != nil {
+			die("Error saving tweet: " + err.Error(), false, 4)
+		}
+	}
+
+	for _, r := range retweets {
+		fmt.Println(r)
+		err = profile.SaveRetweet(r)
+		if err != nil {
+			die("Error saving retweet: " + err.Error(), false, 4)
+		}
+	}
+	fmt.Printf("Saved %d tweets, %d retweets and %d users.  Exiting successfully\n", len(tweets), len(retweets), len(users))
+}
 
 func download_tweet_content(tweet_id string) {
 	id, err := strconv.Atoi(tweet_id)

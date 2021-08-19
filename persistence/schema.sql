@@ -32,8 +32,8 @@ create table tweets (rowid integer primary key,
     num_retweets integer,
     num_replies integer,
     num_quote_tweets integer,
-    in_reply_to integer,
-    quoted_tweet integer,
+    in_reply_to integer,  -- TODO hungarian: should be `in_reply_to_id`
+    quoted_tweet integer, -- TODO hungarian: should be `quoted_tweet_id`
     mentions text,  -- comma-separated
     hashtags text,  -- comma-separated
 

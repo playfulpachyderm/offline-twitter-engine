@@ -81,5 +81,23 @@ test -f profile_images/DiamondChariots_banner_1615811094.jpg
 cd ..
 tw --profile data fetch_user michaelmalice
 test $(sqlite3 data/twitter.db "select count(*) from users where handle = 'michaelmalice'") = "1"
+cd data
+
+
+# Get a user's feed
+malice_id=$(sqlite3 twitter.db "select id from users where handle='michaelmalice'")
+test $(sqlite3 twitter.db "select count(*) from retweets") = "0"
+tweet_count_1=$(sqlite3 twitter.db "select count(*) from tweets")
+tw get_user_tweets michaelmalice
+
+# Check that there are some retweets
+rts_count=$(sqlite3 twitter.db "select count(*) from retweets")
+test $rts_count -gt "0"
+
+# Check that new retweets plus new tweets > 50
+tweet_count_2=$(sqlite3 twitter.db "select count(*) from tweets")
+test $(sqlite3 twitter.db "select count(*) from retweets where retweeted_by != $malice_id") = "0"
+test $(($rts_count + $tweet_count_2 - $tweet_count_1)) -gt "50"
+
 
 echo -e "\033[32mAll tests passed.  Finished successfully.\033[0m"

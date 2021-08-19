@@ -21,6 +21,7 @@ const help_message = `Usage: twitter [--profile <profile_dir>] <operation> <TARG
 
   - fetch_user (<TARGET> is the user handle)
   - fetch_tweet_only (<TARGET> is the full URL of the tweet)
+  - get_user_tweets (<TARGET> is the user handle whomst feed to get)
   - download_tweet_content (<TARGET> is the ID of the tweet whomst contents to download / back up)
   - download_user_content (<TARGET> is the user handle of the user whomst banner image and profile to download / back up)
 
