@@ -100,4 +100,9 @@ test $(sqlite3 twitter.db "select count(*) from retweets where retweeted_by != $
 test $(($rts_count + $tweet_count_2 - $tweet_count_1)) -gt "50"
 
 
+# Fetch a privated user
+tw fetch_user HbdNrx
+test $(sqlite3 twitter.db "select is_private from users where handle = 'HbdNrx'") = "1"
+
+
 echo -e "\033[32mAll tests passed.  Finished successfully.\033[0m"

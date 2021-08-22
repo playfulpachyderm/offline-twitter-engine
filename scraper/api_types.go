@@ -143,6 +143,10 @@ type UserResponse struct {
 			Legacy APIUser `json:"legacy"`
 		} `json:"user"`
 	} `json:"data"`
+	Errors []struct {
+		Message string  `json:"message"`
+		Code    int     `json:"code",string`
+	} `json:"errors"`
 }
 func (u UserResponse) ConvertToAPIUser() APIUser {
 	ret := u.Data.User.Legacy

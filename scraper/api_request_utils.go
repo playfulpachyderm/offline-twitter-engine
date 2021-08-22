@@ -165,24 +165,38 @@ func (api API) GetUser(handle UserHandle) (APIUser, error) {
 		return APIUser{}, err
 	}
 
-    resp, err := client.Do(req)
-    if err != nil {
-        return APIUser{}, err
-    }
-    defer resp.Body.Close()
-
-    if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusForbidden) {
-        content, _ := ioutil.ReadAll(resp.Body)
-        return APIUser{}, fmt.Errorf("response status %s: %s", resp.Status, content)
-    }
-
-    body, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-        return APIUser{}, err
-    }
-
     var response UserResponse
-    err = json.Unmarshal(body, &response)
+	for retries := 0; retries < 3; retries += 1 {
+	    resp, err := client.Do(req)
+	    if err != nil {
+	        return APIUser{}, err
+	    }
+	    defer resp.Body.Close()
+
+	    // Sometimes it randomly gives 403 Forbidden.  API's fault, not ours
+	    // We check for this below
+	    if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusForbidden) {
+	        content, _ := ioutil.ReadAll(resp.Body)
+	        return APIUser{}, fmt.Errorf("response status %s: %s", resp.Status, content)
+	    }
+
+	    body, err := ioutil.ReadAll(resp.Body)
+	    if err != nil {
+	        return APIUser{}, err
+	    }
+
+	    err = json.Unmarshal(body, &response)
+	    if err != nil {
+	        return APIUser{}, err
+	    }
+
+	    if len(response.Errors) == 0 {
+	        break
+	    }
+
+	    // Reset the response (remove the Errors)
+	    response = UserResponse{}
+    }
     return response.ConvertToAPIUser(), err
 }
 

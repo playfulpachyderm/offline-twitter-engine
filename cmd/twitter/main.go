@@ -143,11 +143,10 @@ func fetch_user_feed(handle string) {
 
 	tweets, retweets, users, err := scraper.GetUserFeedFor(user.ID, 50);
 	if err != nil {
-		die(err.Error(), false, -2)
+		die("Error scraping feed: " + err.Error(), false, -2)
 	}
 
 	for _, u := range users {
-		fmt.Println(u)
 		err = profile.SaveUser(u)
 		if err != nil {
 			die("Error saving tweet: " + err.Error(), false, 4)
@@ -155,7 +154,6 @@ func fetch_user_feed(handle string) {
 	}
 
 	for _, t := range tweets {
-		fmt.Println(t)
 		err = profile.SaveTweet(t)
 		if err != nil {
 			die("Error saving tweet: " + err.Error(), false, 4)
@@ -163,12 +161,12 @@ func fetch_user_feed(handle string) {
 	}
 
 	for _, r := range retweets {
-		fmt.Println(r)
 		err = profile.SaveRetweet(r)
 		if err != nil {
 			die("Error saving retweet: " + err.Error(), false, 4)
 		}
 	}
+
 	fmt.Printf("Saved %d tweets, %d retweets and %d users.  Exiting successfully\n", len(tweets), len(retweets), len(users))
 }
 

@@ -20,10 +20,11 @@ const help_message = `Usage: twitter [--profile <profile_dir>] <operation> <TARG
           <TARGET> must not exist.  <profile_dir> will be ignored if provided.
 
   - fetch_user (<TARGET> is the user handle)
+  - download_user_content (<TARGET> is the user handle of the user whomst banner image and profile to download / back up)
+
   - fetch_tweet_only (<TARGET> is the full URL of the tweet)
   - get_user_tweets (<TARGET> is the user handle whomst feed to get)
   - download_tweet_content (<TARGET> is the ID of the tweet whomst contents to download / back up)
-  - download_user_content (<TARGET> is the user handle of the user whomst banner image and profile to download / back up)
 
 <profile_dir>: the path to the directory containing the data directories, database files, and settings files.  By default, refers to the current directory.  Ignored if <operation> is "create_profile".
 `
