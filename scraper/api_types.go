@@ -182,6 +182,25 @@ func (t *TweetResponse) GetCursor() string {
 	return ""
 }
 
+/**
+ * Test for one case of end-of-feed.  Cursor increments on each request for some reason, but
+ * there's no new content.  This seems to happen when there's a pinned tweet.
+ *
+ * In this case, we look for an "entries" object that has only cursors in it, and no tweets.
+ */
+func (t *TweetResponse) IsEndOfFeed() bool {
+	entries := t.Timeline.Instructions[0].AddEntries.Entries
+	if len(entries) > 2 {
+		return false
+	}
+	for _, e := range entries {
+		if !strings.Contains(e.EntryID, "cursor") {
+			return false
+		}
+	}
+	return true
+}
+
 
 func idstr_to_int(idstr string) int64 {
 	id, err := strconv.Atoi(idstr)

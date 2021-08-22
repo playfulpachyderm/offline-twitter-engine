@@ -94,3 +94,29 @@ func TestGetCursor(t *testing.T) {
 		t.Errorf("Expected %q, got %q", expected_cursor, actual_cursor)
 	}
 }
+
+
+func TestIsEndOfFeed(t *testing.T) {
+	test_cases := []struct {
+		filename string
+		is_end_of_feed bool
+	} {
+		{"test_responses/michael_malice_feed.json", false},
+		{"test_responses/kwiber_end_of_feed.json", true},
+	}
+	for _, v := range test_cases {
+		data, err := ioutil.ReadFile(v.filename)
+		if err != nil {
+			panic(err)
+		}
+		var tweet_resp scraper.TweetResponse
+		err = json.Unmarshal(data, &tweet_resp)
+		if err != nil {
+			t.Fatalf(err.Error())
+		}
+		result := tweet_resp.IsEndOfFeed()
+		if v.is_end_of_feed != result {
+			t.Errorf("Expected IsEndOfFeed to be %v, but got %v", v.is_end_of_feed, result)
+		}
+	}
+}
