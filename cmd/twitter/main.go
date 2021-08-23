@@ -54,6 +54,8 @@ func main() {
 		fetch_user(scraper.UserHandle(target))
 	case "fetch_tweet_only":
 		fetch_tweet_only(target)
+	case "fetch_tweet":
+		fetch_full_tweet(target)
 	case "get_user_tweets":
 		fetch_user_feed(target)
 	case "download_tweet_content":
@@ -127,6 +129,45 @@ func fetch_tweet_only(tweet_url string) {
 		die("Error saving tweet: " + err.Error(), false, 4)
 	}
 	fmt.Println("Saved the tweet.  Exiting successfully")
+}
+
+/**
+ * Scrape a tweet and all associated info, and save it in the database.
+ *
+ * args:
+ * - tweet_url: e.g., "https://twitter.com/michaelmalice/status/1395882872729477131"
+ */
+func fetch_full_tweet(tweet_url string) {
+	tweet_id, err := extract_id_from(tweet_url)
+	if err != nil {
+		die(err.Error(), false, -1)
+	}
+
+	if profile.IsTweetInDatabase(tweet_id) {
+		fmt.Println("Tweet is already in database.  Updating...")
+	}
+
+	tweets, _, users, err := scraper.GetTweetFull(tweet_id)
+	if err != nil {
+		die(err.Error(), false, -1)
+	}
+
+	for _, u := range users {
+		fmt.Println(u)
+		err = profile.SaveUser(u)
+		if err != nil {
+			die("Error saving tweet: " + err.Error(), false, 4)
+		}
+	}
+
+	for _, t := range tweets {
+		fmt.Println(t)
+		err = profile.SaveTweet(t)
+		if err != nil {
+			die("Error saving tweet: " + err.Error(), false, 4)
+		}
+	}
+	fmt.Printf("Saved %d tweets and %d users.  Exiting successfully\n", len(tweets), len(users))
 }
 
 /**

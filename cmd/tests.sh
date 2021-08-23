@@ -22,6 +22,7 @@ test $(sqlite3 twitter.db "select count(*) from users") = "1"
 tw fetch_user Denlesks
 test $(sqlite3 twitter.db "select count(*) from users") = "1"
 
+
 # Fetch a tweet with images
 tw fetch_tweet_only https://twitter.com/Denlesks/status/1261483383483293700
 test $(sqlite3 twitter.db "select count(*) from tweets") = "1"
@@ -77,10 +78,18 @@ test -f profile_images/DiamondChariots_profile_rE4OTedS.jpg
 test -f profile_images/DiamondChariots_banner_1615811094.jpg
 
 
+# Download a full thread
+tw fetch_tweet https://twitter.com/RememberAfghan1/status/1429585423702052867
+test $(sqlite3 twitter.db "select handle from tweets join users on tweets.user_id = users.id where tweets.id=1429585423702052867") = "RememberAfghan1"
+test $(sqlite3 twitter.db "select handle from tweets join users on tweets.user_id = users.id where tweets.id=1429584239570391042") = "michaelmalice"
+test $(sqlite3 twitter.db "select handle from tweets join users on tweets.user_id = users.id where tweets.id=1429583672827465730") = "kanesays23"
+test $(sqlite3 twitter.db "select handle from tweets join users on tweets.user_id = users.id where tweets.id=1429587734054703113") = "TerraDionysus"
+
+
 # Test that the `--profile` flag works
 cd ..
-tw --profile data fetch_user michaelmalice
-test $(sqlite3 data/twitter.db "select count(*) from users where handle = 'michaelmalice'") = "1"
+tw --profile data fetch_user elonmusk
+test $(sqlite3 data/twitter.db "select count(*) from users where handle = 'elonmusk'") = "1"
 cd data
 
 

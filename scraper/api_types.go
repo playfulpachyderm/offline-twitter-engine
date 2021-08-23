@@ -145,7 +145,7 @@ type UserResponse struct {
 	} `json:"data"`
 	Errors []struct {
 		Message string  `json:"message"`
-		Code    int     `json:"code,string"`
+		Code    int     `json:"code"`
 	} `json:"errors"`
 }
 func (u UserResponse) ConvertToAPIUser() APIUser {
