@@ -39,8 +39,6 @@ func main() {
 		return
 	}
 
-
-
 	var err error
 	profile, err = persistence.LoadProfile(*profile_dir)
 	if err != nil {
@@ -210,6 +208,7 @@ func fetch_user_feed(handle string) {
 
 	fmt.Printf("Saved %d tweets, %d retweets and %d users.  Exiting successfully\n", len(tweets), len(retweets), len(users))
 }
+
 
 func download_tweet_content(tweet_id string) {
 	id, err := strconv.Atoi(tweet_id)
