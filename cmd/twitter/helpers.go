@@ -14,19 +14,36 @@ import (
  * Help message to print if command syntax is incorrect
  */
 const help_message = `Usage: twitter [--profile <profile_dir>] <operation> <TARGET>
+This application downloads tweets from twitter and saves them in a SQLite database.
+
+<profile_dir>:
+    Optional.  Indicates the path to the directory containing the data directories, database files, and settings files.
+    By default, will use the current working directory.
+    Ignored if <operation> is "create_profile".
 
 <operation>:
-  - create_profile (<TARGET> is the directory to create).
-          <TARGET> must not exist.  <profile_dir> will be ignored if provided.
+    create_profile
+          <TARGET> is the directory to create.  It must not exist already.
+          <profile_dir> will be ignored if provided.
 
-  - fetch_user (<TARGET> is the user handle)
-  - download_user_content (<TARGET> is the user handle of the user whomst banner image and profile to download / back up)
+    fetch_user
+    download_user_content
+          <TARGET> is the user handle.
+          "download_user_content" will save a local copy of the user's banner and profile images.
 
-  - fetch_tweet_only (<TARGET> is the full URL of the tweet)
-  - get_user_tweets (<TARGET> is the user handle whomst feed to get)
-  - download_tweet_content (<TARGET> is the ID of the tweet whomst contents to download / back up)
+    fetch_tweet
+    fetch_tweet_only
+          <TARGET> is the full URL of the tweet.
+          If using "fetch_tweet_only", then only that specific tweet will be saved.  "fetch_tweet" will save the whole thread including replies.
 
-<profile_dir>: the path to the directory containing the data directories, database files, and settings files.  By default, refers to the current directory.  Ignored if <operation> is "create_profile".
+    download_tweet_content
+          <TARGET> is the ID of the tweet.  Downloads videos and images embedded in the tweet.
+
+    get_user_tweets
+    get_user_tweets_all
+          <TARGET> is the user handle.
+          Gets the most recent ~50 tweets.
+          If "get_user_tweets_all" is used, gets up to ~3200 tweets (API limit).
 `
 
 

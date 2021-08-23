@@ -20,7 +20,7 @@ var profile persistence.Profile
  */
 func main() {
 	if len(os.Args) < 3 {
-		die("", true, 1)
+		die("", true, 0)
 	}
 
 	profile_dir := flag.String("profile", ".", "TODO USAGE")
@@ -50,6 +50,8 @@ func main() {
 		create_profile(target)
 	case "fetch_user":
 		fetch_user(scraper.UserHandle(target))
+	case "download_user_content":
+		download_user_content(scraper.UserHandle(target))
 	case "fetch_tweet_only":
 		fetch_tweet_only(target)
 	case "fetch_tweet":
@@ -60,8 +62,6 @@ func main() {
 		fetch_user_feed(target, 999999999)
 	case "download_tweet_content":
 		download_tweet_content(target)
-	case "download_user_content":
-		download_user_content(scraper.UserHandle(target))
 	default:
 		die("Invalid operation: " + operation, true, 3)
 	}
