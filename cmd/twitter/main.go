@@ -55,7 +55,9 @@ func main() {
 	case "fetch_tweet":
 		fetch_full_tweet(target)
 	case "get_user_tweets":
-		fetch_user_feed(target)
+		fetch_user_feed(target, 50)
+	case "get_user_tweets_all":
+		fetch_user_feed(target, 999999999)
 	case "download_tweet_content":
 		download_tweet_content(target)
 	case "download_user_content":
@@ -174,13 +176,14 @@ func fetch_full_tweet(tweet_url string) {
  * args:
  * - handle: the user handle to get
  */
-func fetch_user_feed(handle string) {
+func fetch_user_feed(handle string, how_many int) {
 	user, err := profile.GetUserByHandle(scraper.UserHandle(handle))
+
 	if err != nil {
 		die(err.Error(), false, -1)
 	}
 
-	tweets, retweets, users, err := scraper.GetUserFeedFor(user.ID, 50);
+	tweets, retweets, users, err := scraper.GetUserFeedFor(user.ID, how_many);
 	if err != nil {
 		die("Error scraping feed: " + err.Error(), false, -2)
 	}

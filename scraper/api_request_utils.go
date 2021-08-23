@@ -11,6 +11,13 @@ import (
 const API_CONVERSATION_BASE_PATH = "https://twitter.com/i/api/2/timeline/conversation/"
 const API_USER_TIMELINE_BASE_PATH = "https://api.twitter.com/2/timeline/profile/"
 
+type APIError string
+func (e APIError) Error() string {
+	return string(e)
+}
+
+const END_OF_FEED = APIError("End of feed")
+
 type API struct{}
 
 func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) {
@@ -70,6 +77,15 @@ func (api API) GetMoreTweetsFromFeed(user_id UserID, response *TweetResponse, mi
 			return err
 		}
 
+		if fresh_response.GetCursor() == last_response.GetCursor() && len(fresh_response.GlobalObjects.Tweets) == 0 {
+			// Empty response, cursor same as previous: end of feed has been reached
+			return END_OF_FEED
+		}
+		if fresh_response.IsEndOfFeed() {
+			// Response has a pinned tweet, but no other content: end of feed has been reached
+			return END_OF_FEED
+		}
+
 		last_response = &fresh_response
 
 		// Copy over the tweets and the users
@@ -79,6 +95,7 @@ func (api API) GetMoreTweetsFromFeed(user_id UserID, response *TweetResponse, mi
 		for id, user := range last_response.GlobalObjects.Users {
 			response.GlobalObjects.Users[id] = user
 		}
+		fmt.Printf("Have %d tweets, and %d users so far\n", len(response.GlobalObjects.Tweets), len(response.GlobalObjects.Users))
 	}
 	return nil
 }
