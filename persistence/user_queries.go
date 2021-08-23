@@ -110,7 +110,7 @@ func (p Profile) GetUserByHandle(handle scraper.UserHandle) (scraper.User, error
     stmt, err := db.Prepare(`
         select id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path, pinned_tweet_id, is_content_downloaded
           from users
-         where handle = ?
+         where lower(handle) = lower(?)
     `)
     if err != nil {
         return scraper.User{}, err

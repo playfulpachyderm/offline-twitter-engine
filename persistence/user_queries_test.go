@@ -42,6 +42,23 @@ func TestSaveAndLoadUser(t *testing.T) {
 }
 
 
+func TestHandleIsCaseInsensitive(t *testing.T) {
+	profile_path := "test_profiles/TestUserQueries"
+	profile := create_or_load_profile(profile_path)
+
+	user := create_stable_user()
+
+	new_user, err := profile.GetUserByHandle("hANdle StaBlE")
+	if err != nil {
+		t.Fatalf("Couldn't find the user: %s", err.Error())
+	}
+
+	if diff := deep.Equal(user, new_user); diff != nil {
+		t.Error(diff)
+	}
+}
+
+
 /**
  * Should correctly report whether the user exists in the database
  */
