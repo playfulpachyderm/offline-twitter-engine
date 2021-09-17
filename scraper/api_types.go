@@ -32,6 +32,35 @@ type APIExtendedMedia struct {
 	} `json:"video_info"`
 }
 
+type APICard struct {
+	BindingValues struct {
+		Domain struct {
+			Value string `json:"string_value"`
+		} `json:"domain"`
+		Creator struct {
+			UserValue struct {
+				Value int64 `json:"id_str,string"`
+			} `json:"user_value"`
+		} `json:"creator"`
+		Site struct {
+			UserValue struct {
+				Value int64 `json:"id_str,string"`
+			} `json:"user_value"`
+		} `json:"site"`
+		Title struct {
+			Value string `json:"string_value"`
+		} `json:"title"`
+		Description struct {
+			Value string `json:"string_value"`
+		} `json:"description"`
+		Thumbnail struct {
+			ImageValue struct {
+				Url string `json:"url"`
+			} `json:"image_value"`
+		} `json:"thumbnail_image_large"`
+	} `json:"binding_values"`
+}
+
 type APITweet struct {
 	ID                int64  `json:"id_str,string"`
 	ConversationID    int64  `json:"conversation_id_str,string"`
@@ -66,6 +95,7 @@ type APITweet struct {
 	QuotedStatusID       int64
 	Time                 time.Time `json:"time"`
 	UserID               int64     `json:"user_id_str,string"`
+	Card                 APICard   `json:"card"`
 }
 
 func (t *APITweet) NormalizeContent() {
