@@ -83,7 +83,7 @@ tw fetch_tweet https://twitter.com/RememberAfghan1/status/1429585423702052867
 test $(sqlite3 twitter.db "select handle from tweets join users on tweets.user_id = users.id where tweets.id=1429585423702052867") = "RememberAfghan1"
 test $(sqlite3 twitter.db "select handle from tweets join users on tweets.user_id = users.id where tweets.id=1429584239570391042") = "michaelmalice"
 test $(sqlite3 twitter.db "select handle from tweets join users on tweets.user_id = users.id where tweets.id=1429583672827465730") = "kanesays23"
-test $(sqlite3 twitter.db "select handle from tweets join users on tweets.user_id = users.id where tweets.id=1429587734054703113") = "TerraDionysus"
+test $(sqlite3 twitter.db "select handle from tweets join users on tweets.user_id = users.id where tweets.id=1429587734054703113") = "NovaValentis"
 
 
 # Test that the `--profile` flag works
