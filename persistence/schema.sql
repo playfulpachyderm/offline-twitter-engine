@@ -63,6 +63,7 @@ create table urls (rowid integer primary key,
     thumbnail_remote_url text,
     thumbnail_local_path text,
     has_card boolean,
+    has_thumbnail boolean,
     is_content_downloaded boolean default 0,
 
     unique (tweet_id, text)

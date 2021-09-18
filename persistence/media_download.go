@@ -76,7 +76,7 @@ func (p Profile) download_tweet_video(v *scraper.Video, downloader MediaDownload
  * Downloads an URL thumbnail image, and if successful, marks it as downloaded in the DB
  */
 func (p Profile) download_link_thumbnail(url *scraper.Url, downloader MediaDownloader) error {
-    if url.HasCard {
+    if url.HasCard && url.HasThumbnail {
         outfile := path.Join(p.ProfileDir, "link_preview_images", url.ThumbnailLocalPath)
         err := downloader.Curl(url.ThumbnailRemoteUrl, outfile)
         if err != nil {

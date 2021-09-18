@@ -19,38 +19,39 @@ type Url struct {
 	SiteID UserID
 
 	HasCard bool
+	HasThumbnail bool
 	IsContentDownloaded bool
 }
 
 func ParseAPIUrlCard(apiCard APICard) Url {
 	values := apiCard.BindingValues
+	ret := Url{}
+	ret.HasCard = true
+
+	ret.Domain = values.Domain.Value
+	ret.Title = values.Title.Value
+	ret.Description = values.Description.Value
+	ret.IsContentDownloaded = false
+	ret.CreatorID = UserID(values.Creator.UserValue.Value)
+	ret.SiteID = UserID(values.Site.UserValue.Value)
+
+	var thumbnail_url string
+
 	if apiCard.Name == "summary_large_image" || apiCard.Name == "summary" {
-		return Url{
-			Domain: values.Domain.Value,
-			Title: values.Title.Value,
-			Description: values.Description.Value,
-			ThumbnailRemoteUrl: values.Thumbnail.ImageValue.Url,
-			ThumbnailLocalPath: get_thumbnail_local_path(values.Thumbnail.ImageValue.Url),
-			CreatorID: UserID(values.Creator.UserValue.Value),
-			SiteID: UserID(values.Site.UserValue.Value),
-			HasCard: true,
-			IsContentDownloaded: false,
-		}
+		thumbnail_url = values.Thumbnail.ImageValue.Url
 	} else if apiCard.Name == "player" {
-		return Url{
-			Domain: values.Domain.Value,
-			Title: values.Title.Value,
-			Description: values.Description.Value,
-			ThumbnailRemoteUrl: values.PlayerImage.ImageValue.Url,
-			ThumbnailLocalPath: get_thumbnail_local_path(values.PlayerImage.ImageValue.Url),
-			CreatorID: UserID(values.Creator.UserValue.Value),
-			SiteID: UserID(values.Site.UserValue.Value),
-			HasCard: true,
-			IsContentDownloaded: false,
-		}
+		thumbnail_url = values.PlayerImage.ImageValue.Url
 	} else {
 		panic("Unknown card type: " + apiCard.Name)
 	}
+
+	if thumbnail_url != "" {
+		ret.HasThumbnail = true
+		ret.ThumbnailRemoteUrl = thumbnail_url
+		ret.ThumbnailLocalPath = get_thumbnail_local_path(thumbnail_url)
+	}
+
+	return ret
 }
 
 func get_thumbnail_local_path(remote_url string) string {

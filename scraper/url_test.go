@@ -48,6 +48,9 @@ func TestParseAPIUrlCard(t *testing.T) {
     if url.SiteID != expected_site_id {
         t.Errorf("Expected %d, got %d", expected_site_id, url.SiteID)
     }
+    if !url.HasThumbnail {
+        t.Errorf("Should have a thumbnail, but it doesn't")
+    }
     if url.IsContentDownloaded {
         t.Errorf("Expected it not to be downloaded, but it was")
     }
@@ -89,7 +92,43 @@ func TestParseAPIUrlCardWithPlayer(t *testing.T) {
     if url.SiteID != expected_site_id {
         t.Errorf("Expected %d, got %d", expected_site_id, url.SiteID)
     }
+    if !url.HasThumbnail {
+        t.Errorf("Should have a thumbnail, but it doesn't")
+    }
     if url.IsContentDownloaded {
         t.Errorf("Expected it not to be downloaded, but it was")
+    }
+}
+
+func TestParseAPIUrlCardWithoutThumbnail(t *testing.T) {
+    data, err := ioutil.ReadFile("test_responses/url_card_without_thumbnail.json")
+    if err != nil {
+        panic(err)
+    }
+    var apiCard scraper.APICard
+    err = json.Unmarshal(data, &apiCard)
+    if err != nil {
+        t.Fatal(err.Error())
+    }
+    url := scraper.ParseAPIUrlCard(apiCard)
+
+    expected_domain := "en.m.wikipedia.org"
+    if url.Domain != expected_domain {
+        t.Errorf("Expected %q, got %q", expected_domain, url.Domain)
+    }
+    expected_title := "Entryism - Wikipedia"
+    if url.Title != expected_title {
+        t.Errorf("Expected %q, got %q", expected_title, url.Title)
+    }
+    expected_description := ""
+    if url.Description != expected_description {
+        t.Errorf("Expected %q, got %q", expected_description, url.Description)
+    }
+
+    if !url.HasCard {
+        t.Errorf("Expected it to have a card, but it didn't")
+    }
+    if url.HasThumbnail {
+        t.Errorf("Should have no thumbnail, but it does")
     }
 }
