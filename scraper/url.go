@@ -16,6 +16,7 @@ type Url struct {
 	CreatorID UserID
 	SiteID UserID
 
+	HasCard bool
 	IsContentDownloaded bool
 }
 
