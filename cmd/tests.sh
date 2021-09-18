@@ -127,6 +127,16 @@ tw fetch_tweet https://twitter.com/CovfefeAnon/status/1428904664645394433
 urls_count_after_2x=$(sqlite3 twitter.db "select count(*) from urls")
 test $urls_count_after_2x = $urls_count_after
 
+# Download the link's preview image
+test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1428904664645394433") = "0"
+test $(sqlite3 twitter.db "select is_content_downloaded from urls where tweet_id = 1428904664645394433") = "0"
+test $(find link_preview_images/* | wc -l) = "0"
+tw download_tweet_content 1428904664645394433
+test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1428904664645394433") = "1"
+test $(sqlite3 twitter.db "select is_content_downloaded from urls where tweet_id = 1428904664645394433") = "1"
+test $(find link_preview_images/* | wc -l) = "1"
+test -f link_preview_images/WX1Rv2AJ_800x320_1.jpg
+
 
 # TODO: Maybe this file should be broken up into multiple test scripts
 

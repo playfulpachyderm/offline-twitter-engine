@@ -83,8 +83,8 @@ func TestNewProfile(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	if len(contents) != 6 {
-		t.Fatalf("Expected 6 contents, got %d instead", len(contents))
+	if len(contents) != 7 {
+		t.Fatalf("Expected 7 contents, got %d instead", len(contents))
 	}
 
 	expected_files := []struct {
@@ -92,6 +92,7 @@ func TestNewProfile(t *testing.T) {
 		isDir bool
 	} {
 		{"images", true},
+		{"link_preview_images", true},
 		{"profile_images", true},
 		{"settings.yaml", false},
 		{"twitter.db", false},

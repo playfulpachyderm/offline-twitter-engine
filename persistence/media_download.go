@@ -73,6 +73,21 @@ func (p Profile) download_tweet_video(v *scraper.Video, downloader MediaDownload
 }
 
 /**
+ * Downloads an URL thumbnail image, and if successful, marks it as downloaded in the DB
+ */
+func (p Profile) download_link_thumbnail(url *scraper.Url, downloader MediaDownloader) error {
+    if url.HasCard {
+        outfile := path.Join(p.ProfileDir, "link_preview_images", url.ThumbnailLocalPath)
+        err := downloader.Curl(url.ThumbnailRemoteUrl, outfile)
+        if err != nil {
+            return err
+        }
+    }
+    url.IsContentDownloaded = true
+    return p.SaveUrl(*url)
+}
+
+/**
  * Download a tweet's video and picture content.
  *
  * Wraps the `DownloadTweetContentWithInjector` method with the default (i.e., real) downloader.
@@ -95,6 +110,13 @@ func (p Profile) DownloadTweetContentWithInjector(t *scraper.Tweet, downloader M
 
     for i := range t.Videos {
         err := p.download_tweet_video(&t.Videos[i], downloader)
+        if err != nil {
+            return err
+        }
+    }
+
+    for i := range t.Urls {
+        err := p.download_link_thumbnail(&t.Urls[i], downloader)
         if err != nil {
             return err
         }

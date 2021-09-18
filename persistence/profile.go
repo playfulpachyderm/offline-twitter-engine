@@ -54,6 +54,7 @@ func NewProfile(target_dir string) (Profile, error) {
 	settings_file := path.Join(target_dir, "settings.yaml")
 	sqlite_file := path.Join(target_dir, "twitter.db")
 	profile_images_dir := path.Join(target_dir, "profile_images")
+	link_thumbnails_dir := path.Join(target_dir, "link_preview_images")
 	images_dir := path.Join(target_dir, "images")
 	videos_dir := path.Join(target_dir, "videos")
 
@@ -97,6 +98,13 @@ func NewProfile(target_dir string) (Profile, error) {
 	// Create `profile_images`
 	fmt.Printf("Creating............. %s/\n", profile_images_dir)
 	err = os.Mkdir(profile_images_dir, os.FileMode(0755))
+	if err != nil {
+		return Profile{}, err
+	}
+
+	// Create `link_thumbnail_images`
+	fmt.Printf("Creating............. %s/\n", link_thumbnails_dir)
+	err = os.Mkdir(link_thumbnails_dir, os.FileMode(0755))
 	if err != nil {
 		return Profile{}, err
 	}
