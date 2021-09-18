@@ -89,19 +89,16 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	ret.NumQuoteTweets = apiTweet.QuoteCount
 	ret.InReplyTo = TweetID(apiTweet.InReplyToStatusID)
 
-	for i, url := range apiTweet.Entities.URLs {
-		if i != 0 {
-			panic(fmt.Sprintf("Tweet with multiple embedded URLs: %d", apiTweet.ID))
-		}
+	for _, url := range apiTweet.Entities.URLs {
 		var url_object Url
-		if apiTweet.Card.BindingValues.Domain.Value != "" {
-			// Using the "Domain" field to detect if there is a card
+		if apiTweet.Card.ShortenedUrl == url.ShortenedUrl {
 			url_object = ParseAPIUrlCard(apiTweet.Card)
 		}
 		url_object.Text = url.ExpandedURL
 		url_object.TweetID = ret.ID
 		ret.Urls = append(ret.Urls, url_object)
 	}
+
 	for _, media := range apiTweet.Entities.Media {
 		if media.Type != "photo" {  // TODO: remove this eventually
 			panic_str := fmt.Sprintf("Unknown media type: %q", media.Type)

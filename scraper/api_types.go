@@ -34,6 +34,7 @@ type APIExtendedMedia struct {
 
 type APICard struct {
 	Name          string `json:"name"`
+	ShortenedUrl  string `json:"url"`
 	BindingValues struct {
 		Domain struct {
 			Value string `json:"string_value"`
@@ -79,8 +80,8 @@ type APITweet struct {
 		} `json:"hashtags"`
 		Media []APIMedia `json:"media"`
 		URLs []struct {
-			ExpandedURL string `json:"expanded_url"`
-			URL         string `json:"url"`
+			ExpandedURL  string `json:"expanded_url"`
+			ShortenedUrl string `json:"url"`
 		} `json:"urls"`
 		Mentions []struct {
 			UserName string `json:"screen_name"`
@@ -107,7 +108,7 @@ type APITweet struct {
 func (t *APITweet) NormalizeContent() {
 	// Remove embedded links at the end of the text
 	if len(t.Entities.URLs) == 1 {  // TODO: should this be `>= 1`, like below?
-		url := t.Entities.URLs[0].URL
+		url := t.Entities.URLs[0].ShortenedUrl
 		if strings.Index(t.FullText, url) == len(t.FullText) - len(url) {
 			t.FullText = t.FullText[0:len(t.FullText) - len(url)]  // Also strip the newline
 		}

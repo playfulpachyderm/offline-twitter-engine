@@ -226,6 +226,40 @@ func TestParseTweetWithUrlButNoCard(t *testing.T) {
 	}
 }
 
+func TestParseTweetWithMultipleUrls(t *testing.T) {
+	data, err := ioutil.ReadFile("test_responses/tweet_with_multiple_urls.json")
+	if err != nil {
+		panic(err)
+	}
+	var apitweet scraper.APITweet
+	err = json.Unmarshal(data, &apitweet)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	tweet, err := scraper.ParseSingleTweet(apitweet)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	if len(tweet.Urls) != 3 {
+		t.Errorf("Expected %d urls, got %d instead", 3, len(tweet.Urls))
+	}
+	if tweet.Urls[0].HasCard {
+		t.Errorf("Expected url not to have a card, but it does: %d", 0)
+	}
+	if tweet.Urls[1].HasCard {
+		t.Errorf("Expected url not to have a card, but it does: %d", 1)
+	}
+	if !tweet.Urls[2].HasCard {
+		t.Errorf("Expected url to have a card, but it doesn't: %d", 2)
+	}
+	expected_title := "Biden’s victory came from the suburbs"
+	if tweet.Urls[2].Title != expected_title {
+		t.Errorf("Expected title to be %q, but got %q", expected_title, tweet.Urls[2].Title)
+	}
+}
+
+
 func TestParseTweetResponse(t *testing.T) {
 	data, err := ioutil.ReadFile("test_responses/michael_malice_feed.json")
 	if err != nil {
