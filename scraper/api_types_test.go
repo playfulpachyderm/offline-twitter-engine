@@ -45,10 +45,10 @@ func TestNormalizeContent(t *testing.T) {
 			t.Errorf("Expected quoted status %d, but got %d", v.quoted_status_id, tweet.QuotedStatusID)
 		}
 		if scraper.TweetID(tweet.InReplyToStatusID) != v.in_reply_to {
-			t.Errorf("Expected quoted status %d, but got %d", v.in_reply_to, tweet.InReplyToStatusID)
+			t.Errorf("Expected in_reply_to id %d, but got %d", v.in_reply_to, tweet.InReplyToStatusID)
 		}
 		if scraper.TweetID(tweet.RetweetedStatusID) != v.retweeted_status_id {
-			t.Errorf("Expected quoted status %d, but got %d", v.retweeted_status_id, tweet.RetweetedStatusID)
+			t.Errorf("Expected retweeted status id %d, but got %d", v.retweeted_status_id, tweet.RetweetedStatusID)
 		}
 	}
 }

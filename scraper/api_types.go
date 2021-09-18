@@ -33,6 +33,7 @@ type APIExtendedMedia struct {
 }
 
 type APICard struct {
+	Name          string `json:"name"`
 	BindingValues struct {
 		Domain struct {
 			Value string `json:"string_value"`
@@ -58,6 +59,11 @@ type APICard struct {
 				Url string `json:"url"`
 			} `json:"image_value"`
 		} `json:"thumbnail_image_large"`
+		PlayerImage struct {
+			ImageValue struct {
+				Url string `json:"url"`
+			} `json:"image_value"`
+		} `json:"player_image_large"`
 	} `json:"binding_values"`
 }
 
