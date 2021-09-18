@@ -54,10 +54,21 @@ create table retweets(rowid integer primary key,
 
 create table urls (rowid integer primary key,
     tweet_id integer not null,
+    domain text,
     text text not null,
+    title text,
+    description text,
+    creator_id integer,
+    site_id integer,
+    thumbnail_remote_url text,
+    thumbnail_local_path text,
+    has_card boolean,
+    is_content_downloaded boolean default 0,
 
     unique (tweet_id, text)
     foreign key(tweet_id) references tweets(id)
+    -- foreign key(creator_id) references users(id)
+    -- foreign key(site_id) references users(id)
 );
 
 create table images (rowid integer primary key,

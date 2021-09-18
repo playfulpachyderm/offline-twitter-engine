@@ -23,7 +23,7 @@ type Tweet struct {
 	NumQuoteTweets int
 	InReplyTo      TweetID
 
-	Urls        []string
+	Urls        []Url
 	Images      []Image
 	Videos      []Video
 	Mentions    []UserHandle
@@ -63,7 +63,7 @@ Replies: %d      RT: %d      QT: %d      Likes: %d
 	if len(t.Urls) > 0 {
 		ret += "urls: [\n"
 		for _, url := range(t.Urls) {
-			ret += "  " + url + "\n"
+			ret += "  " + url.Text + "\n"
 		}
 		ret += "]"
 	}
@@ -89,8 +89,18 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	ret.NumQuoteTweets = apiTweet.QuoteCount
 	ret.InReplyTo = TweetID(apiTweet.InReplyToStatusID)
 
-	for _, url := range apiTweet.Entities.URLs {
-		ret.Urls = append(ret.Urls, url.ExpandedURL)
+	for i, url := range apiTweet.Entities.URLs {
+		if i != 0 {
+			panic(fmt.Sprintf("Tweet with multiple embedded URLs: %d", apiTweet.ID))
+		}
+		var url_object Url
+		if apiTweet.Card.BindingValues.Domain.Value != "" {
+			// Using the "Domain" field to detect if there is a card
+			url_object = ParseAPIUrlCard(apiTweet.Card)
+		}
+		url_object.Text = url.ExpandedURL
+		url_object.TweetID = ret.ID
+		ret.Urls = append(ret.Urls, url_object)
 	}
 	for _, media := range apiTweet.Entities.Media {
 		if media.Type != "photo" {  // TODO: remove this eventually

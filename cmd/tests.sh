@@ -114,4 +114,20 @@ tw fetch_user HbdNrx
 test $(sqlite3 twitter.db "select is_private from users where handle = 'HbdNrx'") = "1"
 
 
+# Test tweets with URLs
+urls_count=$(sqlite3 twitter.db "select count(*) from urls")
+tw fetch_tweet https://twitter.com/CovfefeAnon/status/1428904664645394433
+urls_count_after=$(sqlite3 twitter.db "select count(*) from urls")
+test $urls_count_after = $(($urls_count + 1))
+test "$(sqlite3 twitter.db "select title from urls where tweet_id = 1428904664645394433")" = "Justice Department investigating Elon Musk's SpaceX following complaint of hiring discrimination"
+test $(sqlite3 twitter.db "select thumbnail_remote_url from urls where tweet_id = 1428904664645394433") = "https://pbs.twimg.com/card_img/1436430370946392064/WX1Rv2AJ?format=jpg&name=800x320_1"
+
+# Try to double-fetch it; shouldn't duplicate the URL
+tw fetch_tweet https://twitter.com/CovfefeAnon/status/1428904664645394433
+urls_count_after_2x=$(sqlite3 twitter.db "select count(*) from urls")
+test $urls_count_after_2x = $urls_count_after
+
+
+# TODO: Maybe this file should be broken up into multiple test scripts
+
 echo -e "\033[32mAll tests passed.  Finished successfully.\033[0m"

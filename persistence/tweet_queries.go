@@ -1,7 +1,6 @@
 package persistence
 
 import (
-    "fmt"
     "time"
     "strings"
     "database/sql"
@@ -34,7 +33,7 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
         return err
     }
     for _, url := range t.Urls {
-        _, err := db.Exec("insert into urls (tweet_id, text) values (?, ?) on conflict do nothing", t.ID, url)
+        err := p.SaveUrl(url)
         if err != nil {
             return err
         }
@@ -80,29 +79,6 @@ func (p Profile) IsTweetInDatabase(id scraper.TweetID) bool {
     return true
 }
 
-func (p Profile) attach_urls(t *scraper.Tweet) error {
-    println("Attaching urls")
-    stmt, err := p.DB.Prepare("select text from urls where tweet_id = ?")
-    if err != nil {
-        return err
-    }
-    defer stmt.Close()
-    rows, err := stmt.Query(t.ID)
-    if err != nil {
-        return err
-    }
-    var url string
-    for rows.Next() {
-        err = rows.Scan(&url)
-        if err != nil {
-            return err
-        }
-        t.Urls = append(t.Urls, url)
-        fmt.Printf("%v\n", t.Urls)
-    }
-    return nil
-}
-
 func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
     db := p.DB
 
@@ -146,7 +122,9 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
     }
     t.Videos = vids
 
-    err = p.attach_urls(&t)
+    urls, err := p.GetUrlsForTweet(t)
+    t.Urls = urls
+
     return t, err
 }
 

@@ -52,6 +52,10 @@ func TestParseSingleTweet(t *testing.T) {
 		t.Errorf("Expected %v, got %v", []string{"michaelmalice"}, tweet.Mentions)
 	}
 
+	if len(tweet.Urls) != 0 {
+		t.Errorf("Expected %d urls, but got %d", 0, len(tweet.Urls))
+	}
+
 	if tweet.PostedAt.Unix() != 1621639105 {
 		t.Errorf("Expected %d, got %d", 1621639105, tweet.PostedAt.Unix())
 	}
@@ -159,6 +163,66 @@ func TestParseTweetWithVideo(t *testing.T) {
 
 	if len(tweet.Images) != 0 {
 		t.Errorf("Should not have any images, but has %d", len(tweet.Images))
+	}
+}
+
+func TestParseTweetWithUrl(t *testing.T) {
+	data, err := ioutil.ReadFile("test_responses/tweet_with_url_card.json")
+	if err != nil {
+		panic(err)
+	}
+	var apitweet scraper.APITweet
+	err = json.Unmarshal(data, &apitweet)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	tweet, err := scraper.ParseSingleTweet(apitweet)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	if len(tweet.Urls) != 1 {
+		t.Errorf("Expected %d urls, but got %d", 1, len(tweet.Urls))
+	}
+
+	expected_url_text := "https://reason.com/2021/08/30/la-teachers-union-cecily-myart-cruz-learning-loss/"
+	if tweet.Urls[0].Text != expected_url_text {
+		t.Errorf("Expected Url text to be %q, but got %q", expected_url_text, tweet.Urls[0].Text)
+	}
+	if !tweet.Urls[0].HasCard {
+		t.Errorf("Expected it to have a card, but it doesn't")
+	}
+	expected_url_domain := "reason.com"
+	if tweet.Urls[0].Domain != expected_url_domain {
+		t.Errorf("Expected Url text to be %q, but got %q", expected_url_domain, tweet.Urls[0].Domain)
+	}
+}
+
+func TestParseTweetWithUrlButNoCard(t *testing.T) {
+	data, err := ioutil.ReadFile("test_responses/tweet_with_url_but_no_card.json")
+	if err != nil {
+		panic(err)
+	}
+	var apitweet scraper.APITweet
+	err = json.Unmarshal(data, &apitweet)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	tweet, err := scraper.ParseSingleTweet(apitweet)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	if len(tweet.Urls) != 1 {
+		t.Errorf("Expected %d urls, but got %d", 1, len(tweet.Urls))
+	}
+
+	expected_url_text := "https://www.politico.com/newsletters/west-wing-playbook/2021/09/16/the-jennifer-rubin-wh-symbiosis-494364"
+	if tweet.Urls[0].Text != expected_url_text {
+		t.Errorf("Expected Url text to be %q, but got %q", expected_url_text, tweet.Urls[0].Text)
+	}
+	if tweet.Urls[0].HasCard {
+		t.Errorf("Expected url not to have a card, but it thinks it has one")
 	}
 }
 

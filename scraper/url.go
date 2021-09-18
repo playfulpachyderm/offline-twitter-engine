@@ -7,6 +7,8 @@ import (
 )
 
 type Url struct {
+	TweetID TweetID
+
 	Domain string
 	Text string
 	Title string

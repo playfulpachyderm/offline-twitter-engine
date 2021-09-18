@@ -43,6 +43,22 @@ func (p Profile) SaveVideo(vid scraper.Video) error {
 }
 
 /**
+ * Save an Url
+ */
+func (p Profile) SaveUrl(url scraper.Url) error {
+    _, err := p.DB.Exec(`
+        insert into urls (tweet_id, domain, text, title, description, creator_id, site_id, thumbnail_remote_url, thumbnail_local_path, has_card, is_content_downloaded)
+                  values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             on conflict do update
+                     set is_content_downloaded=?
+        `,
+        url.TweetID, url.Domain, url.Text, url.Title, url.Description,  url.CreatorID, url.SiteID, url.ThumbnailRemoteUrl, url.ThumbnailLocalPath, url.HasCard, url.IsContentDownloaded,
+        url.IsContentDownloaded,
+    )
+    return err
+}
+
+/**
  * Get the list of images for a tweet
  */
 func (p Profile) GetImagesForTweet(t scraper.Tweet) (imgs []scraper.Image, err error) {
@@ -90,6 +106,31 @@ func (p Profile) GetVideosForTweet(t scraper.Tweet) (vids []scraper.Video, err e
         }
         vid.TweetID = t.ID
         vids = append(vids, vid)
+    }
+    return
+}
+
+/**
+ * Get the list of Urls for a Tweet
+ */
+func (p Profile) GetUrlsForTweet(t scraper.Tweet) (urls []scraper.Url, err error) {
+    stmt, err := p.DB.Prepare("select domain, text, title, description, creator_id, site_id, thumbnail_remote_url, thumbnail_local_path, has_card, is_content_downloaded from urls where tweet_id=? order by rowid")
+    if err != nil {
+        return
+    }
+    defer stmt.Close()
+    rows, err := stmt.Query(t.ID)
+    if err != nil {
+        return
+    }
+    var url scraper.Url
+    for rows.Next() {
+        err = rows.Scan(&url.Domain, &url.Text, &url.Title, &url.Description, &url.CreatorID, &url.SiteID, &url.ThumbnailRemoteUrl, &url.ThumbnailLocalPath, &url.HasCard, &url.IsContentDownloaded)
+        if err != nil {
+            return
+        }
+        url.TweetID = t.ID
+        urls = append(urls, url)
     }
     return
 }

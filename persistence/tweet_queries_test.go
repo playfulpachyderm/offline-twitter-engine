@@ -29,12 +29,6 @@ func TestSaveAndLoadTweet(t *testing.T) {
         t.Fatalf("Failed to load the tweet: %s", err.Error())
     }
 
-    if diff := deep.Equal(tweet.Images, new_tweet.Images); diff != nil {
-        t.Error(diff)
-    }
-    if diff := deep.Equal(tweet.Videos, new_tweet.Videos); diff != nil {
-        t.Error(diff)
-    }
     if diff := deep.Equal(tweet, new_tweet); diff != nil {
         t.Error(diff)
     }

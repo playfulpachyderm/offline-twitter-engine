@@ -93,6 +93,26 @@ func create_video_from_id(id int) scraper.Video {
 }
 
 /**
+ * Create a semi-stable Url based on the given ID
+ */
+func create_url_from_id(id int) scraper.Url {
+	s := fmt.Sprint(id)
+	return scraper.Url {
+		TweetID: -1,
+		Domain: s + "domain",
+		Text: s + "text",
+		Title: s + "title",
+		Description: s + "description",
+		ThumbnailRemoteUrl: s + "remote url",
+		ThumbnailLocalPath: s + "local path",
+		CreatorID: scraper.UserID(id),
+		SiteID: scraper.UserID(id),
+		HasCard: true,
+		IsContentDownloaded: false,
+	}
+}
+
+/**
  * Create a stable tweet with a fixed ID and content
  */
 func create_stable_tweet() scraper.Tweet {
@@ -109,7 +129,9 @@ func create_stable_tweet() scraper.Tweet {
 		Videos: []scraper.Video{
 			create_video_from_id(-1),
 		},
-		Urls: []string{},
+		Urls: []scraper.Url{
+			create_url_from_id(-1),
+		},
 		Images: []scraper.Image{
 			create_image_from_id(-1),
 		},
@@ -173,6 +195,11 @@ func create_dummy_tweet() scraper.Tweet {
 	vid := create_video_from_id(rand.Int())
 	vid.TweetID = tweet_id
 
+	url1 := create_url_from_id(rand.Int())
+	url1.TweetID = tweet_id
+	url2 := create_url_from_id(rand.Int())
+	url2.TweetID = tweet_id
+
 	return scraper.Tweet{
 		ID: tweet_id,
 		UserID: -1,
@@ -183,7 +210,7 @@ func create_dummy_tweet() scraper.Tweet {
 		NumReplies: 3,
 		NumQuoteTweets: 4,
 		Videos: []scraper.Video{vid},
-		Urls: []string{"url1", "url2"},
+		Urls: []scraper.Url{url1, url2},
 		Images: []scraper.Image{img1, img2},
 		Mentions: []scraper.UserHandle{"mention1", "mention2"},
 		Hashtags: []string{"hash1", "hash2"},

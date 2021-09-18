@@ -165,3 +165,81 @@ func TestModifyVideo(t *testing.T) {
         t.Error(diff)
     }
 }
+
+
+/**
+ * Create an Url, save it, reload it, and make sure it comes back the same
+ */
+func TestSaveAndLoadUrl(t *testing.T) {
+    profile_path := "test_profiles/TestMediaQueries"
+    profile := create_or_load_profile(profile_path)
+
+    tweet := create_stable_tweet()
+
+    // Create a fresh Url to test on
+    rand.Seed(time.Now().UnixNano())
+    url := create_url_from_id(rand.Int())
+    url.TweetID = tweet.ID
+
+    // Save the Url
+    err := profile.SaveUrl(url)
+    if err != nil {
+        t.Fatalf("Failed to save the url: %s", err.Error())
+    }
+
+    // Reload the Url
+    urls, err := profile.GetUrlsForTweet(tweet)
+    if err != nil {
+        t.Fatalf("Could not load urls: %s", err.Error())
+    }
+
+    var new_url scraper.Url
+    for index := range urls {
+        if urls[index].Text == url.Text {
+            new_url = urls[index]
+        }
+    }
+    if new_url.Text != url.Text {
+        t.Fatalf("Could not find url for some reason: %s, %s; %+v", new_url.Text, url.Text, urls)
+    }
+    if diff := deep.Equal(url, new_url); diff != nil {
+        t.Error(diff)
+    }
+}
+
+/**
+ * Change an Url, save the changes, reload it, and check if it comes back the same
+ */
+func TestModifyUrl(t *testing.T) {
+    profile_path := "test_profiles/TestMediaQueries"
+    profile := create_or_load_profile(profile_path)
+
+    tweet := create_stable_tweet()
+    url := tweet.Urls[0]
+
+    if url.Text != "-1text" {
+        t.Fatalf("Got the wrong url back: wanted %s, got %s!", "-1text", url.Text)
+    }
+
+    url.IsContentDownloaded = true
+
+    // Save the changes
+    err := profile.SaveUrl(url)
+    if err != nil {
+        t.Error(err)
+    }
+
+    // Reload it
+    urls, err := profile.GetUrlsForTweet(tweet)
+    if err != nil {
+        t.Fatalf("Could not load urls: %s", err.Error())
+    }
+    new_url := urls[0]
+    if new_url.Text != "-1text" {
+        t.Fatalf("Got the wrong url back: wanted %s, got %s!", "-1text", new_url.Text)
+    }
+
+    if diff := deep.Equal(url, new_url); diff != nil {
+        t.Error(diff)
+    }
+}
