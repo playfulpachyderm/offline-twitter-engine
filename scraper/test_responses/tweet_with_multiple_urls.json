@@ -1,0 +1,490 @@
+{
+    "created_at": "Thu Sep 16 23:13:10 +0000 2021",
+    "id_str": "1438642143170646017",
+    "full_text": "@ScottMGreer https://t.co/X1YFCSYlKh\n\nhttps://t.co/dNTDGYkJ9y\n\nhttps://t.co/Ti54Xr68dK\n\nBiden won those voters, complete with 'in this house we believe in science' lawn posters",
+    "display_text_range":
+    [
+        13,
+        176
+    ],
+    "entities":
+    {
+        "user_mentions":
+        [
+            {
+                "screen_name": "ScottMGreer",
+                "name": "Scott Greer 6’2” IQ 187",
+                "id_str": "599817378",
+                "indices":
+                [
+                    0,
+                    12
+                ]
+            }
+        ],
+        "urls":
+        [
+            {
+                "url": "https://t.co/X1YFCSYlKh",
+                "expanded_url": "https://www.politico.com/story/2016/07/joe-biden-democrats-middle-class-226306",
+                "display_url": "politico.com/story/2016/07/…",
+                "indices":
+                [
+                    13,
+                    36
+                ]
+            },
+            {
+                "url": "https://t.co/dNTDGYkJ9y",
+                "expanded_url": "https://time.com/5878437/trump-white-middle-class-voters/",
+                "display_url": "time.com/5878437/trump-…",
+                "indices":
+                [
+                    38,
+                    61
+                ]
+            },
+            {
+                "url": "https://t.co/Ti54Xr68dK",
+                "expanded_url": "https://www.brookings.edu/research/bidens-victory-came-from-the-suburbs/",
+                "display_url": "brookings.edu/research/biden…",
+                "indices":
+                [
+                    63,
+                    86
+                ]
+            }
+        ]
+    },
+    "source": "<a href=\"https://mobile.twitter.com\" rel=\"nofollow\">Twitter Web App</a>",
+    "in_reply_to_status_id_str": "1438640730281496576",
+    "in_reply_to_user_id_str": "599817378",
+    "in_reply_to_screen_name": "ScottMGreer",
+    "user_id_str": "1357717304931479552",
+    "retweet_count": 0,
+    "favorite_count": 46,
+    "reply_count": 3,
+    "quote_count": 0,
+    "conversation_id_str": "1438640730281496576",
+    "possibly_sensitive_editable": true,
+    "card":
+    {
+        "name": "summary_large_image",
+        "url": "https://t.co/Ti54Xr68dK",
+        "card_type_url": "http://card-type-url-is-deprecated.invalid",
+        "binding_values":
+        {
+            "vanity_url":
+            {
+                "type": "STRING",
+                "string_value": "brookings.edu",
+                "scribe_key": "vanity_url"
+            },
+            "amp":
+            {
+                "type": "BOOLEAN",
+                "boolean_value": true
+            },
+            "domain":
+            {
+                "type": "STRING",
+                "string_value": "www.brookings.edu"
+            },
+            "site":
+            {
+                "type": "USER",
+                "user_value":
+                {
+                    "id_str": "151106990",
+                    "path":
+                    []
+                },
+                "scribe_key": "publisher_id"
+            },
+            "title":
+            {
+                "type": "STRING",
+                "string_value": "Biden’s victory came from the suburbs"
+            },
+            "summary_photo_image_alt_text":
+            {
+                "type": "STRING",
+                "string_value": "Suburbs"
+            },
+            "photo_image_full_size_alt_text":
+            {
+                "type": "STRING",
+                "string_value": "Suburbs"
+            },
+            "description":
+            {
+                "type": "STRING",
+                "string_value": "New data reveal that Trump’s loss to Joe Biden was due mostly to voters in large metropolitan suburbs, especially in important battleground states, William Frey analyzes."
+            },
+            "thumbnail_image_small":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1436856075232456708/LD95nEQH?format=jpg&name=144x144",
+                    "width": 144,
+                    "height": 81,
+                    "alt": "Suburbs"
+                }
+            },
+            "thumbnail_image":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1436856075232456708/LD95nEQH?format=jpg&name=280x150",
+                    "width": 266,
+                    "height": 150,
+                    "alt": "Suburbs"
+                }
+            },
+            "thumbnail_image_large":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1436856075232456708/LD95nEQH?format=jpg&name=800x320_1",
+                    "width": 568,
+                    "height": 320,
+                    "alt": "Suburbs"
+                }
+            },
+            "thumbnail_image_x_large":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1436856075232456708/LD95nEQH?format=png&name=2048x2048_2_exp",
+                    "width": 1030,
+                    "height": 580,
+                    "alt": "Suburbs"
+                }
+            },
+            "thumbnail_image_original":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1436856075232456708/LD95nEQH?format=jpg&name=orig",
+                    "width": 1030,
+                    "height": 580,
+                    "alt": "Suburbs"
+                }
+            },
+            "summary_photo_image_small":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1436856075232456708/LD95nEQH?format=jpg&name=386x202",
+                    "width": 386,
+                    "height": 202,
+                    "alt": "Suburbs"
+                }
+            },
+            "summary_photo_image":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1436856075232456708/LD95nEQH?format=jpg&name=600x314",
+                    "width": 600,
+                    "height": 314,
+                    "alt": "Suburbs"
+                }
+            },
+            "summary_photo_image_large":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1436856075232456708/LD95nEQH?format=jpg&name=800x419",
+                    "width": 800,
+                    "height": 419,
+                    "alt": "Suburbs"
+                }
+            },
+            "summary_photo_image_x_large":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1436856075232456708/LD95nEQH?format=png&name=2048x2048_2_exp",
+                    "width": 1030,
+                    "height": 580,
+                    "alt": "Suburbs"
+                }
+            },
+            "summary_photo_image_original":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1436856075232456708/LD95nEQH?format=jpg&name=orig",
+                    "width": 1030,
+                    "height": 580,
+                    "alt": "Suburbs"
+                }
+            },
+            "photo_image_full_size_small":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1436856075232456708/LD95nEQH?format=jpg&name=386x202",
+                    "width": 386,
+                    "height": 202,
+                    "alt": "Suburbs"
+                }
+            },
+            "photo_image_full_size":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1436856075232456708/LD95nEQH?format=jpg&name=600x314",
+                    "width": 600,
+                    "height": 314,
+                    "alt": "Suburbs"
+                }
+            },
+            "photo_image_full_size_large":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1436856075232456708/LD95nEQH?format=jpg&name=800x419",
+                    "width": 800,
+                    "height": 419,
+                    "alt": "Suburbs"
+                }
+            },
+            "photo_image_full_size_x_large":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1436856075232456708/LD95nEQH?format=png&name=2048x2048_2_exp",
+                    "width": 1030,
+                    "height": 580,
+                    "alt": "Suburbs"
+                }
+            },
+            "photo_image_full_size_original":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1436856075232456708/LD95nEQH?format=jpg&name=orig",
+                    "width": 1030,
+                    "height": 580,
+                    "alt": "Suburbs"
+                }
+            },
+            "card_url":
+            {
+                "type": "STRING",
+                "string_value": "https://t.co/Ti54Xr68dK",
+                "scribe_key": "card_url"
+            }
+        },
+        "users":
+        {
+            "151106990":
+            {
+                "id_str": "151106990",
+                "name": "The Brookings Institution",
+                "screen_name": "BrookingsInst",
+                "location": "Washington, DC",
+                "description": "Independent research and analysis on the most important policy issues in the world. Sign up for the daily Brookings Brief: https://t.co/yFGhndNQdR",
+                "url": "http://t.co/QDIPCvVyxm",
+                "entities":
+                {
+                    "url":
+                    {
+                        "urls":
+                        [
+                            {
+                                "url": "http://t.co/QDIPCvVyxm",
+                                "expanded_url": "http://www.brookings.edu",
+                                "display_url": "brookings.edu",
+                                "indices":
+                                [
+                                    0,
+                                    22
+                                ]
+                            }
+                        ]
+                    },
+                    "description":
+                    {
+                        "urls":
+                        [
+                            {
+                                "url": "https://t.co/yFGhndNQdR",
+                                "expanded_url": "https://brook.gs/2xFzExX",
+                                "display_url": "brook.gs/2xFzExX",
+                                "indices":
+                                [
+                                    123,
+                                    146
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "followers_count": 428158,
+                "fast_followers_count": 0,
+                "normal_followers_count": 428158,
+                "friends_count": 4450,
+                "listed_count": 7704,
+                "created_at": "Wed Jun 02 16:28:27 +0000 2010",
+                "favourites_count": 2851,
+                "verified": true,
+                "statuses_count": 101692,
+                "media_count": 29518,
+                "profile_image_url_https": "https://pbs.twimg.com/profile_images/1410597093157134339/EgB6rhUY_normal.png",
+                "profile_banner_url": "https://pbs.twimg.com/profile_banners/151106990/1598964962",
+                "profile_image_extensions_media_color":
+                {
+                    "palette":
+                    [
+                        {
+                            "rgb":
+                            {
+                                "red": 8,
+                                "green": 78,
+                                "blue": 146
+                            },
+                            "percentage": 84.88
+                        },
+                        {
+                            "rgb":
+                            {
+                                "red": 255,
+                                "green": 255,
+                                "blue": 255
+                            },
+                            "percentage": 14.42
+                        },
+                        {
+                            "rgb":
+                            {
+                                "red": 95,
+                                "green": 140,
+                                "blue": 183
+                            },
+                            "percentage": 0.79
+                        }
+                    ]
+                },
+                "profile_image_extensions_alt_text": null,
+                "profile_image_extensions_media_availability": null,
+                "profile_image_extensions":
+                {
+                    "mediaStats":
+                    {
+                        "r":
+                        {
+                            "missing": null
+                        },
+                        "ttl": -1
+                    }
+                },
+                "profile_banner_extensions_alt_text": null,
+                "profile_banner_extensions_media_availability": null,
+                "profile_banner_extensions_media_color":
+                {
+                    "palette":
+                    [
+                        {
+                            "rgb":
+                            {
+                                "red": 43,
+                                "green": 66,
+                                "blue": 90
+                            },
+                            "percentage": 98.47
+                        },
+                        {
+                            "rgb":
+                            {
+                                "red": 128,
+                                "green": 143,
+                                "blue": 157
+                            },
+                            "percentage": 1.53
+                        }
+                    ]
+                },
+                "profile_banner_extensions":
+                {
+                    "mediaStats":
+                    {
+                        "r":
+                        {
+                            "missing": null
+                        },
+                        "ttl": -1
+                    }
+                },
+                "profile_link_color": "053769",
+                "has_extended_profile": true,
+                "pinned_tweet_ids":
+                [
+                    1415846646156611589
+                ],
+                "pinned_tweet_ids_str":
+                [
+                    "1415846646156611589"
+                ],
+                "has_custom_timelines": true,
+                "advertiser_account_type": "promotable_user",
+                "advertiser_account_service_levels":
+                [
+                    "dso",
+                    "mms",
+                    "media_studio"
+                ],
+                "profile_interstitial_type": "",
+                "business_profile_state": "none",
+                "translator_type": "none",
+                "withheld_in_countries":
+                [],
+                "ext":
+                {
+                    "highlightedLabel":
+                    {
+                        "r":
+                        {
+                            "ok":
+                            {}
+                        },
+                        "ttl": -1
+                    }
+                }
+            }
+        },
+        "card_platform":
+        {
+            "platform":
+            {
+                "device":
+                {
+                    "name": "Swift",
+                    "version": "12"
+                },
+                "audience":
+                {
+                    "name": "production"
+                }
+            }
+        }
+    },
+    "lang": "en"
+}
