@@ -73,7 +73,7 @@ func die(text string, display_help bool, exit_code int) {
 func extract_id_from(url string) (scraper.TweetID, error) {
 	var id_str string
 
-	if regexp.MustCompile("^\\d+$").MatchString(url) {
+	if regexp.MustCompile(`^\d+$`).MatchString(url) {
 		id_str = url
 	} else {
 		parts := strings.Split(url, "/")
