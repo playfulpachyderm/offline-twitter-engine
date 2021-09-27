@@ -9,7 +9,7 @@ import (
 )
 
 func TestParseAPIUrlCard(t *testing.T) {
-    data, err := ioutil.ReadFile("test_responses/url_card.json")
+    data, err := ioutil.ReadFile("test_responses/tweet_content/url_card.json")
     if err != nil {
         panic(err)
     }
@@ -57,7 +57,7 @@ func TestParseAPIUrlCard(t *testing.T) {
 }
 
 func TestParseAPIUrlCardWithPlayer(t *testing.T) {
-    data, err := ioutil.ReadFile("test_responses/url_card_with_player.json")
+    data, err := ioutil.ReadFile("test_responses/tweet_content/url_card_with_player.json")
     if err != nil {
         panic(err)
     }
@@ -101,7 +101,7 @@ func TestParseAPIUrlCardWithPlayer(t *testing.T) {
 }
 
 func TestParseAPIUrlCardWithoutThumbnail(t *testing.T) {
-    data, err := ioutil.ReadFile("test_responses/url_card_without_thumbnail.json")
+    data, err := ioutil.ReadFile("test_responses/tweet_content/url_card_without_thumbnail.json")
     if err != nil {
         panic(err)
     }

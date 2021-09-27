@@ -143,7 +143,7 @@ func TestParseSingleTweet2(t *testing.T) {
 
 
 func TestParseTweetWithVideo(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/tweet_with_video.json")
+	data, err := ioutil.ReadFile("test_responses/single_tweets/tweet_with_video.json")
 	if err != nil {
 		panic(err)
 	}
@@ -167,7 +167,7 @@ func TestParseTweetWithVideo(t *testing.T) {
 }
 
 func TestParseTweetWithUrl(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/tweet_with_url_card.json")
+	data, err := ioutil.ReadFile("test_responses/single_tweets/tweet_with_url_card.json")
 	if err != nil {
 		panic(err)
 	}
@@ -199,7 +199,7 @@ func TestParseTweetWithUrl(t *testing.T) {
 }
 
 func TestParseTweetWithUrlButNoCard(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/tweet_with_url_but_no_card.json")
+	data, err := ioutil.ReadFile("test_responses/single_tweets/tweet_with_url_but_no_card.json")
 	if err != nil {
 		panic(err)
 	}
@@ -227,7 +227,7 @@ func TestParseTweetWithUrlButNoCard(t *testing.T) {
 }
 
 func TestParseTweetWithMultipleUrls(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/tweet_with_multiple_urls.json")
+	data, err := ioutil.ReadFile("test_responses/single_tweets/tweet_with_multiple_urls.json")
 	if err != nil {
 		panic(err)
 	}

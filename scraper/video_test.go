@@ -9,7 +9,7 @@ import (
 )
 
 func TestParseAPIVideo(t *testing.T) {
-    data, err := ioutil.ReadFile("test_responses/video.json")
+    data, err := ioutil.ReadFile("test_responses/tweet_content/video.json")
     if err != nil {
         panic(err)
     }
