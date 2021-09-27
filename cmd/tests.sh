@@ -16,11 +16,16 @@ cd data
 
 
 # Fetch a user
+test $(find profile_images | wc -l) = "1"                      # should be empty to begin
 tw fetch_user Denlesks
 test "$(sqlite3 twitter.db "select handle from users")" = "Denlesks"
 test $(sqlite3 twitter.db "select count(*) from users") = "1"
-tw fetch_user Denlesks
-test $(sqlite3 twitter.db "select count(*) from users") = "1"
+test $(sqlite3 twitter.db "select is_content_downloaded from users where handle = 'Denlesks'") = "1"
+test $(find profile_images | wc -l) = "3"                      # should have gotten 2 images
+test -f profile_images/Denlesks_profile_22YJvhC7.jpg
+test -f profile_images/Denlesks_banner_1585776052.jpg
+tw fetch_user Denlesks                                         # try to double-download it
+test $(sqlite3 twitter.db "select count(*) from users") = "1"  # shouldn't have added a new row
 
 
 # Fetch a tweet with images
@@ -70,14 +75,6 @@ test $(sqlite3 twitter.db "select count(*) from tweets") = "2"
 test $(sqlite3 twitter.db "select count(*) from videos") = "1"
 
 
-# Download a user's profile image and banner image
-test $(sqlite3 twitter.db "select is_content_downloaded from users where handle = 'DiamondChariots'") = "0"
-tw download_user_content DiamondChariots
-test $(sqlite3 twitter.db "select is_content_downloaded from users where handle = 'DiamondChariots'") = "1"
-test -f profile_images/DiamondChariots_profile_rE4OTedS.jpg
-test -f profile_images/DiamondChariots_banner_1615811094.jpg
-
-
 # Download a full thread
 tw fetch_tweet https://twitter.com/RememberAfghan1/status/1429585423702052867
 test $(sqlite3 twitter.db "select handle from tweets join users on tweets.user_id = users.id where tweets.id=1429585423702052867") = "RememberAfghan1"
@@ -120,7 +117,7 @@ tw fetch_tweet https://twitter.com/CovfefeAnon/status/1428904664645394433
 urls_count_after=$(sqlite3 twitter.db "select count(*) from urls")
 test $urls_count_after = $(($urls_count + 1))
 test "$(sqlite3 twitter.db "select title from urls where tweet_id = 1428904664645394433")" = "Justice Department investigating Elon Musk's SpaceX following complaint of hiring discrimination"
-test $(sqlite3 twitter.db "select thumbnail_remote_url from urls where tweet_id = 1428904664645394433") = "https://pbs.twimg.com/card_img/1436430370946392064/WX1Rv2AJ?format=jpg&name=800x320_1"
+test $(sqlite3 twitter.db "select thumbnail_remote_url from urls where tweet_id = 1428904664645394433") = "https://pbs.twimg.com/card_img/1439840148280123394/LdQZA_2E?format=jpg&name=800x320_1"
 
 # Try to double-fetch it; shouldn't duplicate the URL
 tw fetch_tweet https://twitter.com/CovfefeAnon/status/1428904664645394433
@@ -135,7 +132,7 @@ tw download_tweet_content 1428904664645394433
 test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1428904664645394433") = "1"
 test $(sqlite3 twitter.db "select is_content_downloaded from urls where tweet_id = 1428904664645394433") = "1"
 test $(find link_preview_images | wc -l) = "2"
-test -f link_preview_images/WX1Rv2AJ_800x320_1.jpg
+test -f link_preview_images/LdQZA_2E_800x320_1.jpg
 
 
 # Test a tweet with a URL but no thumbnail

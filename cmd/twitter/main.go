@@ -100,7 +100,10 @@ func fetch_user(handle scraper.UserHandle) {
 	if err != nil {
 		die("Error saving user: " + err.Error(), false, 4)
 	}
-	fmt.Println("Saved the user.  Exiting successfully")
+
+	fmt.Println("Saved the user.  Downloading content..")
+
+	download_user_content(handle);
 }
 
 /**
