@@ -7,6 +7,7 @@ import (
 	"offline_twitter/terminal_utils"
 	"strings"
 	"strconv"
+	"regexp"
 )
 
 
@@ -33,11 +34,12 @@ This application downloads tweets from twitter and saves them in a SQLite databa
 
     fetch_tweet
     fetch_tweet_only
-          <TARGET> is the full URL of the tweet.
+          <TARGET> is either the full URL of the tweet, or its ID.
           If using "fetch_tweet_only", then only that specific tweet will be saved.  "fetch_tweet" will save the whole thread including replies.
 
     download_tweet_content
-          <TARGET> is the ID of the tweet.  Downloads videos and images embedded in the tweet.
+          <TARGET> is either the full URL of the tweet, or its ID.
+          Downloads videos and images embedded in the tweet.
 
     get_user_tweets
     get_user_tweets_all
@@ -69,14 +71,21 @@ func die(text string, display_help bool, exit_code int) {
  * returns: the id at the end of the tweet: e.g., 1395882872729477131
  */
 func extract_id_from(url string) (scraper.TweetID, error) {
-	parts := strings.Split(url, "/")
-	if len(parts) != 6 {
-		return 0, fmt.Errorf("Tweet format isn't right (%d)", len(parts))
+	var id_str string
+
+	if regexp.MustCompile("^\\d+$").MatchString(url) {
+		id_str = url
+	} else {
+		parts := strings.Split(url, "/")
+		if len(parts) != 6 {
+			return 0, fmt.Errorf("Tweet format isn't right (%d)", len(parts))
+		}
+		if parts[0] != "https:" || parts[1] != "" || parts[2] != "twitter.com" || parts[4] != "status" {
+			return 0, fmt.Errorf("Tweet format isn't right")
+		}
+		id_str = parts[5]
 	}
-	if parts[0] != "https:" || parts[1] != "" || parts[2] != "twitter.com" || parts[4] != "status" {
-		return 0, fmt.Errorf("Tweet format isn't right")
-	}
-	id, err := strconv.Atoi(parts[5])
+	id, err := strconv.Atoi(id_str)
 	if err != nil {
 		return 0, err
 	}

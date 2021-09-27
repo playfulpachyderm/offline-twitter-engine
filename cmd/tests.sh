@@ -39,7 +39,7 @@ test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 12614833
 test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 1261483383483293700 and is_downloaded = 1") = "0"
 test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1261483383483293700") = "0"
 test $(find images | wc -l) = "1"
-tw download_tweet_content 1261483383483293700
+tw download_tweet_content https://twitter.com/Denlesks/status/1261483383483293700
 test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 1261483383483293700 and is_downloaded = 0") = "0"
 test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 1261483383483293700 and is_downloaded = 1") = "4"
 test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1261483383483293700") = "1"
@@ -88,6 +88,11 @@ cd ..
 tw --profile data fetch_user elonmusk
 test $(sqlite3 data/twitter.db "select count(*) from users where handle = 'elonmusk'") = "1"
 cd data
+
+# Test that fetching tweets with ID only (not full URL) works
+test $(sqlite3 twitter.db "select count(*) from tweets where id = 1433713164546293767") = "0"  # Check it's not already there
+tw fetch_tweet 1433713164546293767
+test $(sqlite3 twitter.db "select count(*) from tweets where id = 1433713164546293767") = "1"  # Should be there now
 
 
 # Get a user's feed

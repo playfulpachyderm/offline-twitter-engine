@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"strconv"
 	"fmt"
 	"flag"
 	"offline_twitter/scraper"
@@ -55,7 +54,7 @@ func main() {
 	case "fetch_tweet_only":
 		fetch_tweet_only(target)
 	case "fetch_tweet":
-		fetch_full_tweet(target)
+		fetch_tweet_conversation(target)
 	case "get_user_tweets":
 		fetch_user_feed(target, 50)
 	case "get_user_tweets_all":
@@ -112,8 +111,8 @@ func fetch_user(handle scraper.UserHandle) {
  * args:
  * - tweet_url: e.g., "https://twitter.com/michaelmalice/status/1395882872729477131"
  */
-func fetch_tweet_only(tweet_url string) {
-	tweet_id, err := extract_id_from(tweet_url)
+func fetch_tweet_only(tweet_identifier string) {
+	tweet_id, err := extract_id_from(tweet_identifier)
 	if err != nil {
 		die(err.Error(), false, -1)
 	}
@@ -140,8 +139,8 @@ func fetch_tweet_only(tweet_url string) {
  * args:
  * - tweet_url: e.g., "https://twitter.com/michaelmalice/status/1395882872729477131"
  */
-func fetch_full_tweet(tweet_url string) {
-	tweet_id, err := extract_id_from(tweet_url)
+func fetch_tweet_conversation(tweet_identifier string) {
+	tweet_id, err := extract_id_from(tweet_identifier)
 	if err != nil {
 		die(err.Error(), false, -1)
 	}
@@ -216,12 +215,13 @@ func fetch_user_feed(handle string, how_many int) {
 }
 
 
-func download_tweet_content(tweet_id string) {
-	id, err := strconv.Atoi(tweet_id)
+func download_tweet_content(tweet_identifier string) {
+	tweet_id, err := extract_id_from(tweet_identifier)
 	if err != nil {
-		panic(err)
+		die(err.Error(), false, -1)
 	}
-	tweet, err := profile.GetTweetById(scraper.TweetID(id))
+
+	tweet, err := profile.GetTweetById(tweet_id)
 	if err != nil {
 		panic("Couldn't get tweet from database: " + err.Error())
 	}
