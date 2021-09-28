@@ -192,6 +192,7 @@ func GetTweetFull(id TweetID) (tweets []Tweet, retweets []Retweet, users []User,
  * returns: a list of tweets, retweets and users in that response object
  */
 func ParseTweetResponse(resp TweetResponse) (tweets []Tweet, retweets []Retweet, users []User, err error) {
+	// TODO: TweetCollection maybe should be its own type
 	var new_tweet Tweet
 	var new_retweet Retweet
 	for _, single_tweet := range resp.GlobalObjects.Tweets {
