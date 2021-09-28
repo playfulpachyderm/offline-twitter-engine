@@ -213,6 +213,7 @@ func create_dummy_tweet() scraper.Tweet {
 		Urls: []scraper.Url{url1, url2},
 		Images: []scraper.Image{img1, img2},
 		Mentions: []scraper.UserHandle{"mention1", "mention2"},
+		ReplyMentions: []scraper.UserHandle{"replymention1", "replymention2"},
 		Hashtags: []string{"hash1", "hash2"},
 	}
 }

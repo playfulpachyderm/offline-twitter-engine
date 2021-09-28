@@ -16,8 +16,8 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
         return err
     }
     _, err = db.Exec(`
-        insert into tweets (id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to, quoted_tweet, mentions, hashtags, is_content_downloaded)
-        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        insert into tweets (id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to, quoted_tweet, mentions, reply_mentions, hashtags, is_content_downloaded)
+        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             on conflict do update
            set num_likes=?,
                num_retweets=?,
@@ -25,7 +25,7 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
                num_quote_tweets=?,
                is_content_downloaded=?
         `,
-        t.ID, t.UserID, t.Text, t.PostedAt.Unix(), t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.InReplyTo, t.QuotedTweet, scraper.JoinArrayOfHandles(t.Mentions), strings.Join(t.Hashtags, ","), t.IsContentDownloaded,
+        t.ID, t.UserID, t.Text, t.PostedAt.Unix(), t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.InReplyTo, t.QuotedTweet, scraper.JoinArrayOfHandles(t.Mentions), scraper.JoinArrayOfHandles(t.ReplyMentions), strings.Join(t.Hashtags, ","), t.IsContentDownloaded,
         t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.IsContentDownloaded,
     )
 
@@ -83,7 +83,7 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
     db := p.DB
 
     stmt, err := db.Prepare(`
-        select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to, quoted_tweet, mentions, hashtags, is_content_downloaded
+        select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to, quoted_tweet, mentions, reply_mentions, hashtags, is_content_downloaded
           from tweets
          where id = ?
     `)
@@ -96,10 +96,11 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
     var t scraper.Tweet
     var postedAt int
     var mentions string
+    var reply_mentions string
     var hashtags string
 
     row := stmt.QueryRow(id)
-    err = row.Scan(&t.ID, &t.UserID, &t.Text, &postedAt, &t.NumLikes, &t.NumRetweets, &t.NumReplies, &t.NumQuoteTweets, &t.InReplyTo, &t.QuotedTweet, &mentions, &hashtags, &t.IsContentDownloaded)
+    err = row.Scan(&t.ID, &t.UserID, &t.Text, &postedAt, &t.NumLikes, &t.NumRetweets, &t.NumReplies, &t.NumQuoteTweets, &t.InReplyTo, &t.QuotedTweet, &mentions, &reply_mentions, &hashtags, &t.IsContentDownloaded)
     if err != nil {
         return t, err
     }
@@ -107,6 +108,9 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
     t.PostedAt = time.Unix(int64(postedAt), 0)  // args are `seconds` and `nanoseconds`
     for _, m := range strings.Split(mentions, ",") {
         t.Mentions = append(t.Mentions, scraper.UserHandle(m))
+    }
+    for _, m := range strings.Split(reply_mentions, ",") {
+        t.ReplyMentions = append(t.ReplyMentions, scraper.UserHandle(m))
     }
     t.Hashtags = strings.Split(hashtags, ",")
 
