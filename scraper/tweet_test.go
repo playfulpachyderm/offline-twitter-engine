@@ -8,21 +8,26 @@ import (
 	"offline_twitter/scraper"
 )
 
-
-func TestParseSingleTweet(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/single_tweets/tweet_with_unicode_chars.json")
+func load_tweet_from_file(filename string) scraper.Tweet{
+	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		panic(err)
 	}
 	var apitweet scraper.APITweet
 	err = json.Unmarshal(data, &apitweet)
 	if err != nil {
-		t.Errorf(err.Error())
+		panic(err)
 	}
 	tweet, err := scraper.ParseSingleTweet(apitweet)
 	if err != nil {
-		t.Fatalf(err.Error())
+		panic(err)
 	}
+	return tweet
+}
+
+
+func TestParseSingleTweet(t *testing.T) {
+	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_unicode_chars.json")
 
 	expected_text := "The fact that @michaelmalice new book ‘The Anarchist Handbook’ is just absolutely destroying on the charts is the largest white pill I’ve swallowed in years."
 	actual_text := tweet.Text
@@ -49,19 +54,7 @@ func TestParseSingleTweet(t *testing.T) {
 }
 
 func TestParseTweetWithImage(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/single_tweets/tweet_with_image.json")
-	if err != nil {
-		panic(err)
-	}
-	var apitweet scraper.APITweet
-	err = json.Unmarshal(data, &apitweet)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	tweet, err := scraper.ParseSingleTweet(apitweet)
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
+	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_image.json")
 
 	expected_text := "this saddens me every time"
 	if tweet.Text != expected_text {
@@ -73,19 +66,7 @@ func TestParseTweetWithImage(t *testing.T) {
 }
 
 func TestParseTweetWithQuotedTweetAsLink(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/single_tweets/tweet_with_quoted_tweet_as_link2.json")
-	if err != nil {
-		panic(err)
-	}
-	var apitweet scraper.APITweet
-	err = json.Unmarshal(data, &apitweet)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	tweet, err := scraper.ParseSingleTweet(apitweet)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
+	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_quoted_tweet_as_link2.json")
 
 	expected_text := "sometimes they're too dimwitted to even get the wrong title right"
 	if tweet.Text != expected_text {
@@ -107,19 +88,8 @@ func TestParseTweetWithQuotedTweetAsLink(t *testing.T) {
 }
 
 func TestParseTweetWithVideo(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/single_tweets/tweet_with_video.json")
-	if err != nil {
-		panic(err)
-	}
-	var apitweet scraper.APITweet
-	err = json.Unmarshal(data, &apitweet)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	tweet, err := scraper.ParseSingleTweet(apitweet)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
+	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_video.json")
+
 	expected_video := "https://video.twimg.com/ext_tw_video/1418951950020845568/pu/vid/720x1280/sm4iL9_f8Lclh0aa.mp4?tag=12"
 	if len(tweet.Videos) != 1 || tweet.Videos[0].RemoteURL != expected_video {
 		t.Errorf("Expected video URL %q, but got %+v", expected_video, tweet.Videos)
@@ -131,19 +101,7 @@ func TestParseTweetWithVideo(t *testing.T) {
 }
 
 func TestParseTweetWithUrl(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/single_tweets/tweet_with_url_card.json")
-	if err != nil {
-		panic(err)
-	}
-	var apitweet scraper.APITweet
-	err = json.Unmarshal(data, &apitweet)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	tweet, err := scraper.ParseSingleTweet(apitweet)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
+	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_url_card.json")
 
 	if len(tweet.Urls) != 1 {
 		t.Errorf("Expected %d urls, but got %d", 1, len(tweet.Urls))
@@ -163,19 +121,7 @@ func TestParseTweetWithUrl(t *testing.T) {
 }
 
 func TestParseTweetWithUrlButNoCard(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/single_tweets/tweet_with_url_but_no_card.json")
-	if err != nil {
-		panic(err)
-	}
-	var apitweet scraper.APITweet
-	err = json.Unmarshal(data, &apitweet)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	tweet, err := scraper.ParseSingleTweet(apitweet)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
+	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_url_but_no_card.json")
 
 	if len(tweet.Urls) != 1 {
 		t.Errorf("Expected %d urls, but got %d", 1, len(tweet.Urls))
@@ -191,19 +137,7 @@ func TestParseTweetWithUrlButNoCard(t *testing.T) {
 }
 
 func TestParseTweetWithMultipleUrls(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/single_tweets/tweet_with_multiple_urls.json")
-	if err != nil {
-		panic(err)
-	}
-	var apitweet scraper.APITweet
-	err = json.Unmarshal(data, &apitweet)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	tweet, err := scraper.ParseSingleTweet(apitweet)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
+	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_multiple_urls.json")
 
 	if len(tweet.Urls) != 3 {
 		t.Errorf("Expected %d urls, got %d instead", 3, len(tweet.Urls))
@@ -224,19 +158,7 @@ func TestParseTweetWithMultipleUrls(t *testing.T) {
 }
 
 func TestTweetWithLotsOfReplyMentions(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/single_tweets/tweet_with_at_mentions_in_front.json")
-	if err != nil {
-		panic(err)
-	}
-	var apitweet scraper.APITweet
-	err = json.Unmarshal(data, &apitweet)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	tweet, err := scraper.ParseSingleTweet(apitweet)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
+	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_at_mentions_in_front.json")
 
 	if len(tweet.ReplyMentions) != 4 {
 		t.Errorf("Expected %d reply-mentions, got %d", 4, len(tweet.ReplyMentions))
