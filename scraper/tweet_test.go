@@ -223,6 +223,31 @@ func TestParseTweetWithMultipleUrls(t *testing.T) {
 	}
 }
 
+func TestTweetWithLotsOfReplyMentions(t *testing.T) {
+	data, err := ioutil.ReadFile("test_responses/single_tweets/tweet_with_at_mentions_in_front.json")
+	if err != nil {
+		panic(err)
+	}
+	var apitweet scraper.APITweet
+	err = json.Unmarshal(data, &apitweet)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	tweet, err := scraper.ParseSingleTweet(apitweet)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	if len(tweet.ReplyMentions) != 4 {
+		t.Errorf("Expected %d reply-mentions, got %d", 4, len(tweet.ReplyMentions))
+	}
+	for i, v := range []scraper.UserHandle{"rob_mose", "primalpoly", "jmasseypoet", "SpaceX"} {
+		if tweet.ReplyMentions[i] != v {
+			t.Errorf("Expected %q, got %q at position %d", v, tweet.ReplyMentions[i], i)
+		}
+	}
+}
+
 
 func TestParseTweetResponse(t *testing.T) {
 	data, err := ioutil.ReadFile("test_responses/michael_malice_feed.json")

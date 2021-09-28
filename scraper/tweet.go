@@ -3,6 +3,7 @@ package scraper
 import (
 	"time"
 	"fmt"
+	"strings"
 
 	"offline_twitter/terminal_utils"
 )
@@ -23,12 +24,13 @@ type Tweet struct {
 	NumQuoteTweets int
 	InReplyTo      TweetID
 
-	Urls        []Url
-	Images      []Image
-	Videos      []Video
-	Mentions    []UserHandle
-	Hashtags    []string
-	QuotedTweet TweetID
+	Urls          []Url
+	Images        []Image
+	Videos        []Video
+	Mentions      []UserHandle
+	ReplyMentions []UserHandle
+	Hashtags      []string
+	QuotedTweet   TweetID
 
 	IsContentDownloaded bool
 }
@@ -113,6 +115,15 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	}
 	for _, mention := range apiTweet.Entities.Mentions {
 		ret.Mentions = append(ret.Mentions, UserHandle(mention.UserName))
+	}
+
+	for _, mention := range strings.Split(apiTweet.Entities.ReplyMentions, " ") {
+		if mention != "" {
+			if mention[0] != '@' {
+				panic(fmt.Sprintf("Unknown ReplyMention value: %s", apiTweet.Entities.ReplyMentions))
+			}
+			ret.ReplyMentions = append(ret.ReplyMentions, UserHandle(mention[1:]))
+		}
 	}
 
 	ret.QuotedTweet = TweetID(apiTweet.QuotedStatusID)

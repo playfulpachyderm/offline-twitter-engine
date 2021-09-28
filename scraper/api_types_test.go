@@ -16,15 +16,19 @@ func TestNormalizeContent(t *testing.T) {
 		quoted_status_id scraper.TweetID
 		in_reply_to scraper.TweetID
 		retweeted_status_id scraper.TweetID
+		reply_mentions string
 	} {
-		{"test_responses/single_tweets/tweet_that_is_a_reply_with_gif.json", "", 0, 1395882872729477131, 0},
-		{"test_responses/single_tweets/tweet_with_image.json", "this saddens me every time", 0, 0, 0},
-		{"test_responses/single_tweets/tweet_that_is_a_reply.json", "Noted", 0, 1396194494710788100, 0},
-		{"test_responses/single_tweets/tweet_with_4_images.json", "These are public health officials who are making decisions about your lifestyle because they know more about health, fitness and well-being than you do", 0, 0, 0},
-		{"test_responses/single_tweets/tweet_with_quoted_tweet.json", "", 1422680899670274048, 0, 0},
-		{"test_responses/single_tweets/tweet_with_at_mentions_in_front.json", "It always does, doesn't it?", 0, 1428907275532476416, 0},
-		{"test_responses/single_tweets/tweet_with_unicode_chars.json", "The fact that @michaelmalice new book ‘The Anarchist Handbook’ is just absolutely destroying on the charts is the largest white pill I’ve swallowed in years.", 0, 0, 0},
+		{"test_responses/single_tweets/tweet_that_is_a_reply_with_gif.json", "", 0, 1395882872729477131, 0, "@michaelmalice"},
+		{"test_responses/single_tweets/tweet_with_image.json", "this saddens me every time", 0, 0, 0, ""},
+		{"test_responses/single_tweets/tweet_that_is_a_reply.json", "Noted", 0, 1396194494710788100, 0, "@RvaTeddy @michaelmalice"},
+		{"test_responses/single_tweets/tweet_with_4_images.json", "These are public health officials who are making decisions about your lifestyle because they know more about health, fitness and well-being than you do", 0, 0, 0, ""},
+		{"test_responses/single_tweets/tweet_with_at_mentions_in_front.json", "It always does, doesn't it?", 0, 1428907275532476416, 0, "@rob_mose @primalpoly @jmasseypoet @SpaceX"},
+		{"test_responses/single_tweets/tweet_with_unicode_chars.json", "The fact that @michaelmalice new book ‘The Anarchist Handbook’ is just absolutely destroying on the charts is the largest white pill I’ve swallowed in years.", 0, 0, 0, ""},
+		{"test_responses/single_tweets/tweet_with_quoted_tweet_as_link.json", "", 1422680899670274048, 0, 0, ""},
+		{"test_responses/single_tweets/tweet_with_quoted_tweet_as_link2.json", "sometimes they're too dimwitted to even get the wrong title right", 1396194494710788100, 1395882872729477131, 0, "@michaelmalice"},
+		{"test_responses/single_tweets/tweet_with_quoted_tweet_as_link3.json", "I was using an analogy about creating out-groups but the Germans sure love their literalism", 1442092399358930946, 1335678942020300802, 0, "@michaelmalice"},
 	}
+
 	for _, v := range test_cases {
 		data, err := ioutil.ReadFile(v.filename)
 		if err != nil {
@@ -50,6 +54,9 @@ func TestNormalizeContent(t *testing.T) {
 		}
 		if scraper.TweetID(tweet.RetweetedStatusID) != v.retweeted_status_id {
 			t.Errorf("Expected retweeted status id %d, but got %d", v.retweeted_status_id, tweet.RetweetedStatusID)
+		}
+		if tweet.Entities.ReplyMentions != v.reply_mentions {
+			t.Errorf("Expected @reply mentions to be %q, but it was %q", v.reply_mentions, tweet.Entities.ReplyMentions)
 		}
 	}
 }

@@ -74,6 +74,7 @@ type APITweet struct {
 	CreatedAt         string `json:"created_at"`
 	FavoriteCount     int    `json:"favorite_count"`
 	FullText          string `json:"full_text"`
+	DisplayTextRange  []int  `json:"display_text_range"`
 	Entities          struct {
 		Hashtags []struct {
 			Text string `json:"text"`
@@ -87,46 +88,30 @@ type APITweet struct {
 			UserName string `json:"screen_name"`
 			UserID   int64  `json:"id_str,string"`
 		} `json:"user_mentions"`
+		ReplyMentions string  // The leading part of the text which is cut off by "DisplayTextRange"
 	} `json:"entities"`
 	ExtendedEntities struct {
 		Media []APIExtendedMedia `json:"media"`
 	} `json:"extended_entities"`
-	InReplyToStatusID    int64     `json:"in_reply_to_status_id_str,string"`
-	InReplyToScreenName  string    `json:"in_reply_to_screen_name"`
-	ReplyCount           int       `json:"reply_count"`
-	RetweetCount         int       `json:"retweet_count"`
-	QuoteCount           int       `json:"quote_count"`
-	RetweetedStatusIDStr string    `json:"retweeted_status_id_str"`  // Can be empty string
-	RetweetedStatusID    int64
-	QuotedStatusIDStr    string    `json:"quoted_status_id_str"`     // Can be empty string
-	QuotedStatusID       int64
-	Time                 time.Time `json:"time"`
-	UserID               int64     `json:"user_id_str,string"`
-	Card                 APICard   `json:"card"`
+	InReplyToStatusID     int64     `json:"in_reply_to_status_id_str,string"`
+	InReplyToScreenName   string    `json:"in_reply_to_screen_name"`
+	ReplyCount            int       `json:"reply_count"`
+	RetweetCount          int       `json:"retweet_count"`
+	QuoteCount            int       `json:"quote_count"`
+	RetweetedStatusIDStr  string    `json:"retweeted_status_id_str"`  // Can be empty string
+	RetweetedStatusID     int64
+	QuotedStatusIDStr     string    `json:"quoted_status_id_str"`     // Can be empty string
+	QuotedStatusID        int64
+	QuotedStatusPermalink struct {
+		URL         string `json:"url"`
+		ExpandedURL string `json:"expanded"`
+	} `json:"quoted_status_permalink"`
+	Time                  time.Time `json:"time"`
+	UserID                int64     `json:"user_id_str,string"`
+	Card                  APICard   `json:"card"`
 }
 
 func (t *APITweet) NormalizeContent() {
-	// Remove embedded links at the end of the text
-	if len(t.Entities.URLs) == 1 {  // TODO: should this be `>= 1`, like below?
-		url := t.Entities.URLs[0].ShortenedUrl
-		if strings.Index(t.FullText, url) == len(t.FullText) - len(url) {
-			t.FullText = t.FullText[0:len(t.FullText) - len(url)]  // Also strip the newline
-		}
-	}
-	if len(t.Entities.Media) >= 1 {
-		url := t.Entities.Media[0].URL
-		if strings.Index(t.FullText, url) == len(t.FullText) - len(url) {
-			t.FullText = t.FullText[0:len(t.FullText) - len(url)]  // Also strip the trailing space
-		}
-	}
-	// Remove leading `@username` for replies
-	if t.InReplyToScreenName != "" {
-		if strings.Index(t.FullText, "@" + t.InReplyToScreenName) == 0 {
-			t.FullText = t.FullText[len(t.InReplyToScreenName) + 1:]  // `@`, username, space
-		}
-	}
-	t.FullText = strings.TrimSpace(t.FullText)
-
 	id, err := strconv.Atoi(t.QuotedStatusIDStr)
 	if err == nil {
 		t.QuotedStatusID = int64(id)
@@ -135,6 +120,27 @@ func (t *APITweet) NormalizeContent() {
 	if err == nil {
 		t.RetweetedStatusID = int64(id)
 	}
+
+	if (len(t.DisplayTextRange) == 2) {
+		t.Entities.ReplyMentions = strings.TrimSpace(string([]rune(t.FullText)[0:t.DisplayTextRange[0]]))
+		t.FullText = string([]rune(t.FullText)[t.DisplayTextRange[0]:t.DisplayTextRange[1]])
+	}
+
+	// Handle threads
+	if (t.InReplyToScreenName != "" && t.Entities.ReplyMentions == "") {
+		// Identify a "thread" as a tweet that replies to something but there's no leading `@reply` text
+		t.Entities.ReplyMentions = "@" + t.InReplyToScreenName
+	}
+
+	// Handle pasted tweet links that turn into quote tweets but still have a link in them
+	if t.QuotedStatusID != 0 {
+		for _, url := range t.Entities.URLs {
+			if url.ShortenedUrl == t.QuotedStatusPermalink.URL {
+				t.FullText = strings.ReplaceAll(t.FullText, url.ShortenedUrl, "")
+			}
+		}
+	}
+	t.FullText = strings.TrimSpace(t.FullText)
 }
 
 func (t APITweet) String() string {
