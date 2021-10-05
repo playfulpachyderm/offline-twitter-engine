@@ -16,6 +16,7 @@ type Video struct {
     RemoteURL string
     LocalFilename string
     IsDownloaded bool
+    IsGif  bool
 }
 
 func ParseAPIVideo(apiVideo APIExtendedMedia, tweet_id TweetID) Video {
@@ -30,5 +31,6 @@ func ParseAPIVideo(apiVideo APIExtendedMedia, tweet_id TweetID) Video {
         RemoteURL: variants[0].URL,
         LocalFilename: local_filename,
         IsDownloaded: false,
+        IsGif: apiVideo.Type == "animated_gif",
     }
 }

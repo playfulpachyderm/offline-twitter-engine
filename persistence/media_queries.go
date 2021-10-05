@@ -31,12 +31,12 @@ func (p Profile) SaveImage(img scraper.Image) error {
  */
 func (p Profile) SaveVideo(vid scraper.Video) error {
     _, err := p.DB.Exec(`
-        insert into videos (id, tweet_id, remote_url, local_filename, is_downloaded)
-                    values (?, ?, ?, ?, ?)
+        insert into videos (id, tweet_id, remote_url, local_filename, is_downloaded, is_gif)
+                    values (?, ?, ?, ?, ?, ?)
                on conflict do update
                        set is_downloaded=?
         `,
-        vid.ID, vid.TweetID, vid.RemoteURL, vid.LocalFilename, vid.IsDownloaded,
+        vid.ID, vid.TweetID, vid.RemoteURL, vid.LocalFilename, vid.IsDownloaded, vid.IsGif,
         vid.IsDownloaded,
     )
     return err
@@ -89,7 +89,7 @@ func (p Profile) GetImagesForTweet(t scraper.Tweet) (imgs []scraper.Image, err e
  * Get the list of videos for a tweet
  */
 func (p Profile) GetVideosForTweet(t scraper.Tweet) (vids []scraper.Video, err error) {
-    stmt, err := p.DB.Prepare("select id, remote_url, local_filename, is_downloaded from videos where tweet_id=?")
+    stmt, err := p.DB.Prepare("select id, remote_url, local_filename, is_downloaded, is_gif from videos where tweet_id=?")
     if err != nil {
         return
     }
@@ -100,7 +100,7 @@ func (p Profile) GetVideosForTweet(t scraper.Tweet) (vids []scraper.Video, err e
     }
     var vid scraper.Video
     for rows.Next() {
-        err = rows.Scan(&vid.ID, &vid.RemoteURL, &vid.LocalFilename, &vid.IsDownloaded)
+        err = rows.Scan(&vid.ID, &vid.RemoteURL, &vid.LocalFilename, &vid.IsDownloaded, &vid.IsGif)
         if err != nil {
             return
         }

@@ -102,6 +102,7 @@ func TestSaveAndLoadVideo(t *testing.T) {
     rand.Seed(time.Now().UnixNano())
     vid := create_video_from_id(rand.Int())
     vid.TweetID = tweet.ID
+    vid.IsGif = true;
 
     // Save the Video
     err := profile.SaveVideo(vid)

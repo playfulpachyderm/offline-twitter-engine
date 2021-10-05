@@ -88,6 +88,7 @@ create table videos (rowid integer primary key,
     tweet_id integer not null,
     remote_url text not null unique,
     local_filename text not null unique,
+    is_gif boolean default 0,
     is_downloaded boolean default 0,
 
     foreign key(tweet_id) references tweets(id)

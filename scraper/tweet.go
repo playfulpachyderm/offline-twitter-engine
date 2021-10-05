@@ -129,7 +129,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	ret.QuotedTweet = TweetID(apiTweet.QuotedStatusID)
 
 	for _, entity := range apiTweet.ExtendedEntities.Media {
-		if entity.Type != "video" {
+		if entity.Type != "video" && entity.Type != "animated_gif" {
 			continue
 		}
 		if len(apiTweet.ExtendedEntities.Media) != 1 {

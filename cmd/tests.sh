@@ -75,6 +75,22 @@ test $(sqlite3 twitter.db "select count(*) from tweets") = "2"
 test $(sqlite3 twitter.db "select count(*) from videos") = "1"
 
 
+# Fetch a tweet with a GIF
+tw fetch_user Cernovich
+initial_videos_count=$(find videos | wc -l)
+initial_videos_db_count=$(sqlite3 twitter.db "select count(*) from videos")
+tw fetch_tweet_only https://twitter.com/Cernovich/status/1444429517020274693
+
+test $(sqlite3 twitter.db "select count(*) from videos") = "$((initial_videos_db_count + 1))"
+test $(sqlite3 twitter.db "select is_gif from videos where tweet_id = 1444429517020274693") = "1"
+
+# Download the GIF
+test $(find videos | wc -l) = "$((initial_videos_count))"   # Shouldn't have changed yet
+tw download_tweet_content https://twitter.com/Cernovich/status/1444429517020274693
+test $(find videos | wc -l) = "$((initial_videos_count + 1))"
+
+
+
 # Download a full thread
 tw fetch_tweet https://twitter.com/RememberAfghan1/status/1429585423702052867
 test $(sqlite3 twitter.db "select handle from tweets join users on tweets.user_id = users.id where tweets.id=1429585423702052867") = "RememberAfghan1"

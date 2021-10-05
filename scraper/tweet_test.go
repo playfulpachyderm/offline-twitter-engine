@@ -94,9 +94,27 @@ func TestParseTweetWithVideo(t *testing.T) {
 	if len(tweet.Videos) != 1 || tweet.Videos[0].RemoteURL != expected_video {
 		t.Errorf("Expected video URL %q, but got %+v", expected_video, tweet.Videos)
 	}
+	if tweet.Videos[0].IsGif != false {
+		t.Errorf("Expected it to be a regular video, but it was a gif")
+	}
 
 	if len(tweet.Images) != 0 {
 		t.Errorf("Should not have any images, but has %d", len(tweet.Images))
+	}
+}
+
+func TestParseTweetWithGif(t *testing.T) {
+	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_that_is_a_reply_with_gif.json")
+
+	expected_video := "https://video.twimg.com/tweet_video/E189-VhVoAYcrDv.mp4"
+	if len(tweet.Videos) != 1 {
+		t.Errorf("Expected 1 video (a gif), but got %d instead", len(tweet.Videos))
+	}
+	if tweet.Videos[0].RemoteURL != expected_video {
+		t.Errorf("Expected video URL %q, but got %+v", expected_video, tweet.Videos)
+	}
+	if tweet.Videos[0].IsGif != true {
+		t.Errorf("Expected video to be a gif, but it wasn't")
 	}
 }
 
