@@ -140,7 +140,7 @@ tw fetch_tweet https://twitter.com/CovfefeAnon/status/1428904664645394433
 urls_count_after=$(sqlite3 twitter.db "select count(*) from urls")
 test $urls_count_after = $(($urls_count + 1))
 test "$(sqlite3 twitter.db "select title from urls where tweet_id = 1428904664645394433")" = "Justice Department investigating Elon Musk's SpaceX following complaint of hiring discrimination"
-test $(sqlite3 twitter.db "select thumbnail_remote_url from urls where tweet_id = 1428904664645394433") = "https://pbs.twimg.com/card_img/1439840148280123394/LdQZA_2E?format=jpg&name=800x320_1"
+test $(sqlite3 twitter.db "select thumbnail_remote_url from urls where tweet_id = 1428904664645394433") = "https://pbs.twimg.com/card_img/1441690462742773760/qNU9oyp3?format=jpg&name=800x320_1"
 
 # Try to double-fetch it; shouldn't duplicate the URL
 tw fetch_tweet https://twitter.com/CovfefeAnon/status/1428904664645394433
@@ -150,22 +150,22 @@ test $urls_count_after_2x = $urls_count_after
 # Download the link's preview image
 test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1428904664645394433") = "0"
 test $(sqlite3 twitter.db "select is_content_downloaded from urls where tweet_id = 1428904664645394433") = "0"
-test $(find link_preview_images | wc -l) = "1"
+initial_link_preview_images_count=$(find link_preview_images | wc -l)
 tw download_tweet_content 1428904664645394433
 test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1428904664645394433") = "1"
 test $(sqlite3 twitter.db "select is_content_downloaded from urls where tweet_id = 1428904664645394433") = "1"
-test $(find link_preview_images | wc -l) = "2"
-test -f link_preview_images/LdQZA_2E_800x320_1.jpg
+test $(find link_preview_images | wc -l) = "$((initial_link_preview_images_count + 1))"
+test -f link_preview_images/qNU9oyp3_800x320_1.jpg
 
 
 # Test a tweet with a URL but no thumbnail
 tw fetch_tweet https://twitter.com/Xirong7/status/1413665734866186243
 test $(sqlite3 twitter.db "select is_content_downloaded from urls where tweet_id = 1413665734866186243") = "0"
 test $(sqlite3 twitter.db "select has_thumbnail from urls where tweet_id = 1413665734866186243") = "0"
-test $(find link_preview_images | wc -l) = "2"
+initial_link_preview_images_count=$(find link_preview_images | wc -l)  # Check that it doesn't change, since there's no thumbnail
 tw download_tweet_content 1413665734866186243
 test $(sqlite3 twitter.db "select is_content_downloaded from urls where tweet_id = 1413665734866186243") = "1"
-test $(find link_preview_images | wc -l) = "2"
+test $(find link_preview_images | wc -l) = $initial_link_preview_images_count  # Should be the same
 
 
 
