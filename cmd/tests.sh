@@ -142,7 +142,9 @@ tw fetch_tweet https://twitter.com/CovfefeAnon/status/1428904664645394433
 urls_count_after=$(sqlite3 twitter.db "select count(*) from urls")
 test $urls_count_after = $(($urls_count + 1))
 test "$(sqlite3 twitter.db "select title from urls where tweet_id = 1428904664645394433")" = "Justice Department investigating Elon Musk's SpaceX following complaint of hiring discrimination"
-test $(sqlite3 twitter.db "select thumbnail_remote_url from urls where tweet_id = 1428904664645394433") = "https://pbs.twimg.com/card_img/1441690462742773760/qNU9oyp3?format=jpg&name=800x320_1"
+test $(sqlite3 twitter.db "select count(*) from urls where tweet_id = 1428904664645394433") = "1"
+thumbnail_name=$(sqlite3 twitter.db "select thumbnail_remote_url from urls where tweet_id = 1428904664645394433" | grep -Po "(?<=/)\w+(?=\?)")
+test -n "$thumbnail_name"  # Not testing for what the thumbnail url is because it keeps changing
 
 # Try to double-fetch it; shouldn't duplicate the URL
 tw fetch_tweet https://twitter.com/CovfefeAnon/status/1428904664645394433
@@ -157,7 +159,7 @@ tw download_tweet_content 1428904664645394433
 test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1428904664645394433") = "1"
 test $(sqlite3 twitter.db "select is_content_downloaded from urls where tweet_id = 1428904664645394433") = "1"
 test $(find link_preview_images | wc -l) = "$((initial_link_preview_images_count + 1))"
-test -f link_preview_images/qNU9oyp3_800x320_1.jpg
+test -f link_preview_images/${thumbnail_name}_800x320_1.jpg
 
 
 # Test a tweet with a URL but no thumbnail
