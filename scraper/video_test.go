@@ -32,6 +32,14 @@ func TestParseAPIVideo(t *testing.T) {
     if video.RemoteURL != expected_remote_url {
         t.Errorf("Expected %q, got %q", expected_remote_url, video.RemoteURL)
     }
+    expected_height := 1280
+    if video.Height != expected_height {
+        t.Errorf("Expected height %d, got %d", expected_height, video.Height)
+    }
+    expected_width := 720
+    if video.Width != expected_width {
+        t.Errorf("Expected width %d, got %d", expected_width, video.Width)
+    }
 
     expected_local_filename := "28.mp4"
     if video.LocalFilename != expected_local_filename {

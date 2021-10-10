@@ -13,6 +13,8 @@ type VideoID int64
 type Video struct {
     ID VideoID
     TweetID TweetID
+    Width int
+    Height int
     RemoteURL string
     LocalFilename string
     IsDownloaded bool
@@ -28,6 +30,8 @@ func ParseAPIVideo(apiVideo APIExtendedMedia, tweet_id TweetID) Video {
     return Video{
         ID: VideoID(apiVideo.ID),
         TweetID: tweet_id,
+        Width: apiVideo.OriginalInfo.Width,
+        Height: apiVideo.OriginalInfo.Height,
         RemoteURL: variants[0].URL,
         LocalFilename: local_filename,
         IsDownloaded: false,

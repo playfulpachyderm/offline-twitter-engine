@@ -13,6 +13,8 @@ type Url struct {
 	Text string
 	Title string
 	Description string
+	ThumbnailWidth int
+	ThumbnailHeight int
 	ThumbnailRemoteUrl string
 	ThumbnailLocalPath string
 	CreatorID UserID
@@ -49,6 +51,8 @@ func ParseAPIUrlCard(apiCard APICard) Url {
 		ret.HasThumbnail = true
 		ret.ThumbnailRemoteUrl = thumbnail_url
 		ret.ThumbnailLocalPath = get_thumbnail_local_path(thumbnail_url)
+		ret.ThumbnailWidth = values.Thumbnail.ImageValue.Width
+		ret.ThumbnailHeight = values.Thumbnail.ImageValue.Height
 	}
 
 	return ret

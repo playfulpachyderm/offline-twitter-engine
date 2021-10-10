@@ -13,6 +13,10 @@ type APIMedia struct {
 	MediaURLHttps string `json:"media_url_https"`
 	Type          string `json:"type"`
 	URL           string `json:"url"`
+	OriginalInfo struct {
+		Width         int    `json:"width"`
+		Height        int    `json:"height"`
+	} `json:"original_info"`
 }
 
 type SortableVariants []struct {
@@ -30,6 +34,10 @@ type APIExtendedMedia struct {
 	VideoInfo     struct {
 		Variants  SortableVariants `json:"variants"`
 	} `json:"video_info"`
+	OriginalInfo struct {
+		Width         int    `json:"width"`
+		Height        int    `json:"height"`
+	} `json:"original_info"`
 }
 
 type APICard struct {
@@ -58,6 +66,8 @@ type APICard struct {
 		Thumbnail struct {
 			ImageValue struct {
 				Url string `json:"url"`
+				Width int `json:"width"`
+				Height int `json:"height"`
 			} `json:"image_value"`
 		} `json:"thumbnail_image_large"`
 		PlayerImage struct {

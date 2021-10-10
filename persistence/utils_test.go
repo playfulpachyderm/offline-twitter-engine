@@ -72,6 +72,8 @@ func create_image_from_id(id int) scraper.Image {
 	return scraper.Image{
 		ID: scraper.ImageID(id),
 		TweetID: -1,
+		Width: id * 10,
+		Height: id * 5,
 		RemoteURL: filename,
 		LocalFilename: filename,
 		IsDownloaded: false,
@@ -86,6 +88,8 @@ func create_video_from_id(id int) scraper.Video {
 	return scraper.Video{
 		ID: scraper.VideoID(id),
 		TweetID: -1,
+		Width: id * 10,
+		Height: id * 5,
 		RemoteURL: filename,
 		LocalFilename: filename,
 		IsDownloaded: false,
@@ -104,6 +108,8 @@ func create_url_from_id(id int) scraper.Url {
 		Text: s + "text",
 		Title: s + "title",
 		Description: s + "description",
+		ThumbnailWidth: id * 23,
+		ThumbnailHeight: id * 7,
 		ThumbnailRemoteUrl: s + "remote url",
 		ThumbnailLocalPath: s + "local path",
 		CreatorID: scraper.UserID(id),

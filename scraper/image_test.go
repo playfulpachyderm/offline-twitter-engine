@@ -28,6 +28,14 @@ func TestParseAPIMedia(t *testing.T) {
     if image.RemoteURL != expected_remote_url {
         t.Errorf("Expected %q, got %q", expected_remote_url, image.RemoteURL)
     }
+    expected_width := 593
+    if image.Width != expected_width {
+        t.Errorf("Expected width %d, got %d", expected_width, image.Width)
+    }
+    expected_height := 239
+    if image.Height != expected_height {
+        t.Errorf("Expected height %d, got %d", expected_height, image.Height)
+    }
     expected_local_filename := "E18sEUrWYAk8dBl.jpg"
     if image.LocalFilename != expected_local_filename {
         t.Errorf("Expected %q, got %q", expected_local_filename, image.LocalFilename)

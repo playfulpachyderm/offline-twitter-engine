@@ -32,6 +32,14 @@ func TestParseAPIUrlCard(t *testing.T) {
     if url.Description != expected_description {
         t.Errorf("Expected %q, got %q", expected_description, url.Description)
     }
+    expected_width := 600
+    if url.ThumbnailWidth != expected_width {
+        t.Errorf("Expected thumbnail width %d, got %d", expected_width, url.ThumbnailWidth)
+    }
+    expected_height := 315
+    if url.ThumbnailHeight != expected_height {
+        t.Errorf("Expected thumbnail height %d, got %d", expected_height, url.ThumbnailHeight)
+    }
     expected_remote_url := "https://pbs.twimg.com/card_img/1434998862305968129/odDi9EqO?format=jpg&name=600x600"
     if url.ThumbnailRemoteUrl != expected_remote_url {
         t.Errorf("Expected %q, got %q", expected_remote_url, url.ThumbnailRemoteUrl)
