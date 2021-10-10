@@ -155,18 +155,25 @@ func fetch_tweet_conversation(tweet_identifier string) {
 	}
 
 	for _, u := range users {
-		fmt.Println(u)
+		// fmt.Println(u)
 		err = profile.SaveUser(u)
 		if err != nil {
-			die("Error saving tweet: " + err.Error(), false, 4)
+			die("Error saving user: " + err.Error(), false, 4)
+		}
+		err = profile.DownloadUserContentFor(&u)
+		if err != nil {
+			die("Error getting user content: " + err.Error(), false, 10)
 		}
 	}
 
 	for _, t := range tweets {
-		fmt.Println(t)
 		err = profile.SaveTweet(t)
 		if err != nil {
 			die("Error saving tweet: " + err.Error(), false, 4)
+		}
+		err = profile.DownloadTweetContentFor(&t)
+		if err != nil {
+			die("Error getting tweet content: " + err.Error(), false, 11)
 		}
 	}
 	fmt.Printf("Saved %d tweets and %d users.  Exiting successfully\n", len(tweets), len(users))
@@ -193,7 +200,11 @@ func fetch_user_feed(handle string, how_many int) {
 	for _, u := range users {
 		err = profile.SaveUser(u)
 		if err != nil {
-			die("Error saving tweet: " + err.Error(), false, 4)
+			die("Error saving user: " + err.Error(), false, 4)
+		}
+		err = profile.DownloadUserContentFor(&u)
+		if err != nil {
+			die("Error getting user content: " + err.Error(), false, 10)
 		}
 	}
 
@@ -201,6 +212,10 @@ func fetch_user_feed(handle string, how_many int) {
 		err = profile.SaveTweet(t)
 		if err != nil {
 			die("Error saving tweet: " + err.Error(), false, 4)
+		}
+		err = profile.DownloadTweetContentFor(&t)
+		if err != nil {
+			die("Error getting tweet content: " + err.Error(), false, 11)
 		}
 	}
 

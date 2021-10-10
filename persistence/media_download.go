@@ -6,6 +6,7 @@ import (
     "path"
     "net/http"
     "io/ioutil"
+    "strings"
 
     "offline_twitter/scraper"
 )
@@ -150,6 +151,10 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
         outfile = path.Join(p.ProfileDir, "profile_images", u.BannerImageLocalPath)
         err = downloader.Curl(u.BannerImageUrl, outfile)
         if err != nil {
+            if strings.Contains(err.Error(), "404 Not Found") {
+                // Try adding "600x200".  Not sure why this does this but sometimes it does.
+                err = downloader.Curl(u.BannerImageUrl + "/600x200", outfile)
+            }
             return err
         }
     }
