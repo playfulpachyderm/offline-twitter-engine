@@ -129,7 +129,6 @@ func (t *APITweet) NormalizeContent() {
 	// Handle threads
 	if (t.InReplyToScreenName != "" && t.Entities.ReplyMentions == "") {
 		// Identify a "thread" as a tweet that replies to something but there's no leading `@reply` text
-		t.Entities.ReplyMentions = "@" + t.InReplyToScreenName
 	}
 
 	// Handle pasted tweet links that turn into quote tweets but still have a link in them

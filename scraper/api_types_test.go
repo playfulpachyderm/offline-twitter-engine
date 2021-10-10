@@ -25,8 +25,8 @@ func TestNormalizeContent(t *testing.T) {
 		{"test_responses/single_tweets/tweet_with_at_mentions_in_front.json", "It always does, doesn't it?", 0, 1428907275532476416, 0, "@rob_mose @primalpoly @jmasseypoet @SpaceX"},
 		{"test_responses/single_tweets/tweet_with_unicode_chars.json", "The fact that @michaelmalice new book ‘The Anarchist Handbook’ is just absolutely destroying on the charts is the largest white pill I’ve swallowed in years.", 0, 0, 0, ""},
 		{"test_responses/single_tweets/tweet_with_quoted_tweet_as_link.json", "", 1422680899670274048, 0, 0, ""},
-		{"test_responses/single_tweets/tweet_with_quoted_tweet_as_link2.json", "sometimes they're too dimwitted to even get the wrong title right", 1396194494710788100, 1395882872729477131, 0, "@michaelmalice"},
-		{"test_responses/single_tweets/tweet_with_quoted_tweet_as_link3.json", "I was using an analogy about creating out-groups but the Germans sure love their literalism", 1442092399358930946, 1335678942020300802, 0, "@michaelmalice"},
+		{"test_responses/single_tweets/tweet_with_quoted_tweet_as_link2.json", "sometimes they're too dimwitted to even get the wrong title right", 1396194494710788100, 1395882872729477131, 0, ""},
+		{"test_responses/single_tweets/tweet_with_quoted_tweet_as_link3.json", "I was using an analogy about creating out-groups but the Germans sure love their literalism", 1442092399358930946, 1335678942020300802, 0, ""},
 	}
 
 	for _, v := range test_cases {

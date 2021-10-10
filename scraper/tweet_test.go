@@ -77,8 +77,8 @@ func TestParseTweetWithQuotedTweetAsLink(t *testing.T) {
 	if tweet.InReplyTo != expected_replied_id {
 		t.Errorf("Expected %q, got %q", expected_replied_id, tweet.InReplyTo)
 	}
-	if len(tweet.ReplyMentions) != 1 || tweet.ReplyMentions[0] != "michaelmalice" {
-		t.Errorf("Wanted %v, got %v", []string{"michaelmalice"}, tweet.ReplyMentions)
+	if len(tweet.ReplyMentions) != 0 {
+		t.Errorf("Wanted %v, got %v", []string{}, tweet.ReplyMentions)
 	}
 
 	expected_quoted_id := scraper.TweetID(1396194494710788100)
