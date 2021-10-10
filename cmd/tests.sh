@@ -109,8 +109,10 @@ cd data
 
 # Test that fetching tweets with ID only (not full URL) works
 test $(sqlite3 twitter.db "select count(*) from tweets where id = 1433713164546293767") = "0"  # Check it's not already there
+test $(sqlite3 twitter.db "select is_content_downloaded from users where handle='elonmusk'") = "1"  # Should be downloaded from the previous test!
 tw fetch_tweet 1433713164546293767
 test $(sqlite3 twitter.db "select count(*) from tweets where id = 1433713164546293767") = "1"  # Should be there now
+test $(sqlite3 twitter.db "select is_content_downloaded from users where handle='elonmusk'") = "1"  # Should not un-set content-downloaded!
 
 
 # Get a user's feed

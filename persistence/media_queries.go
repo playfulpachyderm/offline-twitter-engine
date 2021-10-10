@@ -15,7 +15,7 @@ func (p Profile) SaveImage(img scraper.Image) error {
         insert into images (id, tweet_id, remote_url, local_filename, is_downloaded)
                     values (?, ?, ?, ?, ?)
                on conflict do update
-                       set is_downloaded=?
+                       set is_downloaded=(is_downloaded or ?)
         `,
         img.ID, img.TweetID, img.RemoteURL, img.LocalFilename, img.IsDownloaded,
         img.IsDownloaded,
@@ -34,7 +34,7 @@ func (p Profile) SaveVideo(vid scraper.Video) error {
         insert into videos (id, tweet_id, remote_url, local_filename, is_downloaded, is_gif)
                     values (?, ?, ?, ?, ?, ?)
                on conflict do update
-                       set is_downloaded=?
+                       set is_downloaded=(is_downloaded or ?)
         `,
         vid.ID, vid.TweetID, vid.RemoteURL, vid.LocalFilename, vid.IsDownloaded, vid.IsGif,
         vid.IsDownloaded,
@@ -50,7 +50,7 @@ func (p Profile) SaveUrl(url scraper.Url) error {
         insert into urls (tweet_id, domain, text, title, description, creator_id, site_id, thumbnail_remote_url, thumbnail_local_path, has_card, has_thumbnail, is_content_downloaded)
                   values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
              on conflict do update
-                     set is_content_downloaded=?
+                     set is_content_downloaded=(is_content_downloaded or ?)
         `,
         url.TweetID, url.Domain, url.Text, url.Title, url.Description,  url.CreatorID, url.SiteID, url.ThumbnailRemoteUrl, url.ThumbnailLocalPath, url.HasCard, url.HasThumbnail, url.IsContentDownloaded,
         url.IsContentDownloaded,

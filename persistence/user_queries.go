@@ -32,7 +32,7 @@ func (p Profile) SaveUser(u scraper.User) error {
                   banner_image_url=?,
                   banner_image_local_path=?,
                   pinned_tweet_id=?,
-                  is_content_downloaded=?
+                  is_content_downloaded=(is_content_downloaded or ?)
         `,
         u.ID, u.DisplayName, u.Handle, u.Bio, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.JoinDate.Unix(), u.IsPrivate, u.IsVerified, u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID, u.IsContentDownloaded,
         u.Bio, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.IsPrivate, u.IsVerified, u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID, u.IsContentDownloaded,

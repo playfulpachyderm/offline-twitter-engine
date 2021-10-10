@@ -23,7 +23,7 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
                num_retweets=?,
                num_replies=?,
                num_quote_tweets=?,
-               is_content_downloaded=?
+               is_content_downloaded=(is_content_downloaded or ?)
         `,
         t.ID, t.UserID, t.Text, t.PostedAt.Unix(), t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.InReplyTo, t.QuotedTweet, scraper.JoinArrayOfHandles(t.Mentions), scraper.JoinArrayOfHandles(t.ReplyMentions), strings.Join(t.Hashtags, ","), t.IsContentDownloaded,
         t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.IsContentDownloaded,
