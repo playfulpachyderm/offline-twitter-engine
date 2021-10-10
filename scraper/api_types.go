@@ -126,11 +126,6 @@ func (t *APITweet) NormalizeContent() {
 		t.FullText = string([]rune(t.FullText)[t.DisplayTextRange[0]:t.DisplayTextRange[1]])
 	}
 
-	// Handle threads
-	if (t.InReplyToScreenName != "" && t.Entities.ReplyMentions == "") {
-		// Identify a "thread" as a tweet that replies to something but there's no leading `@reply` text
-	}
-
 	// Handle pasted tweet links that turn into quote tweets but still have a link in them
 	if t.QuotedStatusID != 0 {
 		for _, url := range t.Entities.URLs {
