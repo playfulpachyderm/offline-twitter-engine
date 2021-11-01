@@ -1,10 +1,12 @@
 package scraper
 
 import (
+	"fmt"
 	"time"
 	"strings"
 	"encoding/json"
 	"strconv"
+	"sort"
 )
 
 
@@ -104,6 +106,7 @@ type APITweet struct {
 		Media []APIExtendedMedia `json:"media"`
 	} `json:"extended_entities"`
 	InReplyToStatusID     int64     `json:"in_reply_to_status_id_str,string"`
+	InReplyToUserID       int64     `json:"in_reply_to_user_id_str,string"`
 	InReplyToScreenName   string    `json:"in_reply_to_screen_name"`
 	ReplyCount            int       `json:"reply_count"`
 	RetweetCount          int       `json:"retweet_count"`
@@ -119,6 +122,7 @@ type APITweet struct {
 	Time                  time.Time `json:"time"`
 	UserID                int64     `json:"user_id_str,string"`
 	Card                  APICard   `json:"card"`
+	TombstoneText         string
 }
 
 func (t *APITweet) NormalizeContent() {
@@ -200,6 +204,39 @@ func (u UserResponse) ConvertToAPIUser() APIUser {
 	ret.ID = u.Data.User.ID
 	return ret
 }
+
+type Entry struct {
+	EntryID string `json:"entryId"`
+	SortIndex int64 `json:"sortIndex,string"`
+	Content struct {
+		Item struct {
+			Content struct {
+				Tombstone struct {
+					TombstoneInfo struct {
+						RichText struct {
+							Text string `json:"text"`
+						} `json:"richText"`
+					} `json:"tombstoneInfo"`
+				} `json:"tombstone"`
+				Tweet struct {
+					ID int64 `json:"id,string"`
+				} `json:"tweet"`
+			} `json:"content"`
+		} `json:"item"`
+		Operation struct {
+			Cursor struct {
+				Value string `json:"value"`
+			} `json:"cursor"`
+		} `json:"operation"`
+	} `json:"content"`
+}
+func (e Entry) GetTombstoneText() string {
+	return e.Content.Item.Content.Tombstone.TombstoneInfo.RichText.Text
+}
+type SortableEntries []Entry
+func (e SortableEntries) Len() int { return len(e) }
+func (e SortableEntries) Swap(i, j int) { e[i], e[j] = e[j], e[i] }
+func (e SortableEntries) Less(i, j int) bool { return e[i].SortIndex > e[j].SortIndex }
 
 type TweetResponse struct {
 	GlobalObjects struct {
