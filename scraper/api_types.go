@@ -246,19 +246,63 @@ type TweetResponse struct {
 	Timeline struct {
 		Instructions []struct {
 			AddEntries struct {
-				Entries []struct {
-					EntryID string `json:"entryId"`
-					Content struct {
-						Operation struct {
-							Cursor struct {
-								Value string `json:"value"`
-							} `json:"cursor"`
-						} `json:"operation"`
-					} `json:"content"`
-				} `json:"entries"`
+				Entries SortableEntries `json:"entries"`
 			} `json:"addEntries"`
+			ReplaceEntry struct {
+				Entry Entry
+			} `json:"replaceEntry"`
 		} `json:"instructions"`
 	} `json:"timeline"`
+}
+
+var tombstone_types = map[string]string{
+	"This Tweet was deleted by the Tweet author. Learn more": "deleted",
+	"You’re unable to view this Tweet because this account owner limits who can view their Tweets. Learn more": "hidden",
+}
+/**
+ * Insert tweets into GlobalObjects for each tombstone.  Returns a list of users that need to
+ * be fetched for tombstones.
+ */
+func (t *TweetResponse) HandleTombstones() []string {
+	ret := []string{}
+
+	entries := t.Timeline.Instructions[0].AddEntries.Entries
+	sort.Sort(entries)
+	for i, entry := range entries {
+		if entry.GetTombstoneText() != "" {
+			// Try to reconstruct the tombstone tweet
+			var tombstoned_tweet APITweet
+			tombstoned_tweet.ID = int64(i)  // Set a default to prevent clobbering other tombstones
+			if i + 1 < len(entries) && entries[i+1].Content.Item.Content.Tweet.ID != 0 {
+				next_tweet_id := entries[i+1].Content.Item.Content.Tweet.ID
+				api_tweet, ok := t.GlobalObjects.Tweets[fmt.Sprint(next_tweet_id)]
+				if !ok {
+					panic("Weird situation!")
+				}
+				tombstoned_tweet.ID = api_tweet.InReplyToStatusID
+				tombstoned_tweet.UserID = api_tweet.InReplyToUserID
+				ret = append(ret, api_tweet.InReplyToScreenName)
+			}
+			if i - 1 >= 0 && entries[i-1].Content.Item.Content.Tweet.ID != 0 {
+				prev_tweet_id := entries[i-1].Content.Item.Content.Tweet.ID
+				_, ok := t.GlobalObjects.Tweets[fmt.Sprint(prev_tweet_id)]
+				if !ok {
+					panic("Weird situation 2!")
+				}
+				tombstoned_tweet.InReplyToStatusID = prev_tweet_id
+			}
+
+			short_text, ok := tombstone_types[entry.GetTombstoneText()]
+			if !ok {
+				panic(fmt.Sprintf("Unknown tombstone text: %s", entry.GetTombstoneText()))
+			}
+			tombstoned_tweet.TombstoneText = short_text
+
+			// Add the tombstoned tweet to GlobalObjects
+			t.GlobalObjects.Tweets[fmt.Sprint(tombstoned_tweet.ID)] = tombstoned_tweet
+		}
+	}
+	return ret
 }
 
 func (t *TweetResponse) GetCursor() string {
