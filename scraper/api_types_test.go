@@ -210,3 +210,37 @@ func TestHandleTombstonesDeleted(t *testing.T) {
 		t.Errorf("Wrong tombstone text: %s", tombstone.TombstoneText)
 	}
 }
+
+func TestHandleTombstonesUnavailable(t *testing.T) {
+	data, err := ioutil.ReadFile("test_responses/tombstones/tombstone_unavailable.json")
+	if err != nil {
+		panic(err)
+	}
+	var tweet_resp scraper.TweetResponse
+	err = json.Unmarshal(data, &tweet_resp)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	if len(tweet_resp.GlobalObjects.Tweets) != 2 {
+		t.Fatalf("Should have started with %d tweets, but had %d instead", 2, len(tweet_resp.GlobalObjects.Tweets))
+	}
+	tweet_resp.HandleTombstones()
+	if len(tweet_resp.GlobalObjects.Tweets) != 3 {
+		t.Errorf("Should have ended up with %d tweets, but had %d instead", 3, len(tweet_resp.GlobalObjects.Tweets))
+	}
+
+	tombstone, ok := tweet_resp.GlobalObjects.Tweets["1452686887651532809"]
+	if !ok {
+		t.Errorf("Missing tombstoned tweet for %s", "1452686887651532809")
+	}
+	if tombstone.ID != 1452686887651532809 {
+		t.Errorf("Expected ID %d, got %d instead", 1452686887651532809, tombstone.ID)
+	}
+	if tombstone.UserID != 1241389617502445569 {
+		t.Errorf("Expected UserID %d, got %d instead", 1241389617502445569, tombstone.UserID)
+	}
+	if tombstone.TombstoneText != "unavailable" {
+		t.Errorf("Wrong tombstone text: %s", tombstone.TombstoneText)
+	}
+}
