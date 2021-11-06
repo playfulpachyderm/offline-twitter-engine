@@ -16,17 +16,18 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
         return err
     }
     _, err = db.Exec(`
-        insert into tweets (id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to, quoted_tweet, mentions, reply_mentions, hashtags, is_content_downloaded)
-        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        insert into tweets (id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to, quoted_tweet, mentions, reply_mentions, hashtags, tombstone_type, is_stub, is_content_downloaded)
+        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, (select rowid from tombstone_types where short_name=?), ?, ?)
             on conflict do update
            set num_likes=?,
                num_retweets=?,
                num_replies=?,
                num_quote_tweets=?,
+               is_stub=(is_stub and ?),
                is_content_downloaded=(is_content_downloaded or ?)
         `,
-        t.ID, t.UserID, t.Text, t.PostedAt.Unix(), t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.InReplyTo, t.QuotedTweet, scraper.JoinArrayOfHandles(t.Mentions), scraper.JoinArrayOfHandles(t.ReplyMentions), strings.Join(t.Hashtags, ","), t.IsContentDownloaded,
-        t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.IsContentDownloaded,
+        t.ID, t.UserID, t.Text, t.PostedAt.Unix(), t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.InReplyTo, t.QuotedTweet, scraper.JoinArrayOfHandles(t.Mentions), scraper.JoinArrayOfHandles(t.ReplyMentions), strings.Join(t.Hashtags, ","), t.TombstoneType, t.IsStub, t.IsContentDownloaded,
+        t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.IsStub, t.IsContentDownloaded,
     )
 
     if err != nil {
@@ -83,8 +84,8 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
     db := p.DB
 
     stmt, err := db.Prepare(`
-        select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to, quoted_tweet, mentions, reply_mentions, hashtags, is_content_downloaded
-          from tweets
+        select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to, quoted_tweet, mentions, reply_mentions, hashtags, ifnull(tombstone_types.short_name, ""), is_stub, is_content_downloaded
+          from tweets left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
          where id = ?
     `)
 
@@ -100,19 +101,30 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
     var hashtags string
 
     row := stmt.QueryRow(id)
-    err = row.Scan(&t.ID, &t.UserID, &t.Text, &postedAt, &t.NumLikes, &t.NumRetweets, &t.NumReplies, &t.NumQuoteTweets, &t.InReplyTo, &t.QuotedTweet, &mentions, &reply_mentions, &hashtags, &t.IsContentDownloaded)
+    err = row.Scan(&t.ID, &t.UserID, &t.Text, &postedAt, &t.NumLikes, &t.NumRetweets, &t.NumReplies, &t.NumQuoteTweets, &t.InReplyTo, &t.QuotedTweet, &mentions, &reply_mentions, &hashtags, &t.TombstoneType, &t.IsStub, &t.IsContentDownloaded)
     if err != nil {
         return t, err
     }
 
     t.PostedAt = time.Unix(int64(postedAt), 0)  // args are `seconds` and `nanoseconds`
+    t.Mentions = []scraper.UserHandle{}
     for _, m := range strings.Split(mentions, ",") {
-        t.Mentions = append(t.Mentions, scraper.UserHandle(m))
+        if m != "" {
+            t.Mentions = append(t.Mentions, scraper.UserHandle(m))
+        }
     }
+    t.ReplyMentions = []scraper.UserHandle{}
     for _, m := range strings.Split(reply_mentions, ",") {
-        t.ReplyMentions = append(t.ReplyMentions, scraper.UserHandle(m))
+        if m != "" {
+            t.ReplyMentions = append(t.ReplyMentions, scraper.UserHandle(m))
+        }
     }
-    t.Hashtags = strings.Split(hashtags, ",")
+    t.Hashtags = []string{}
+    for _, h := range strings.Split(hashtags, ",") {
+        if h != "" {
+            t.Hashtags =  append(t.Hashtags, h)
+        }
+    }
 
     imgs, err := p.GetImagesForTweet(t)
     if err != nil {

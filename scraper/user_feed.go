@@ -18,8 +18,7 @@ func GetUserFeedFor(user_id UserID, min_tweets int) (tweets []Tweet, retweets []
 		return
 	}
 
-	if len(tweet_response.GlobalObjects.Tweets) < min_tweets &&
-			tweet_response.GetCursor() != "" {
+	if len(tweet_response.GlobalObjects.Tweets) < min_tweets && tweet_response.GetCursor() != "" {
 		err = api.GetMoreTweetsFromFeed(user_id, &tweet_response, min_tweets)
 		if err != nil && err != END_OF_FEED {
 			return

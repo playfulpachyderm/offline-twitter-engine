@@ -19,9 +19,17 @@ create table users (rowid integer primary key,
     pinned_tweet_id integer check(typeof(pinned_tweet_id) = 'integer' or pinned_tweet_id = ''),
 
     is_content_downloaded boolean default 0
-
-    -- foreign key(pinned_tweet_id) references tweets(id)
 );
+
+create table tombstone_types (rowid integer primary key,
+    short_name text not null unique,
+    tombstone_text text not null unique
+);
+insert into tombstone_types(rowid, short_name, tombstone_text) values
+    (1, 'deleted', 'This Tweet was deleted by the Tweet author'),
+    (2, 'suspended', '???'),
+    (3, 'hidden', 'You’re unable to view this Tweet because this account owner limits who can view their Tweets'),
+    (4, 'unavailable', 'This Tweet is unavailable');
 
 create table tweets (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
@@ -37,11 +45,11 @@ create table tweets (rowid integer primary key,
     mentions text,        -- comma-separated
     reply_mentions text,  -- comma-separated
     hashtags text,        -- comma-separated
+    tombstone_type integer default 0,
+    is_stub boolean default 0,
 
     is_content_downloaded boolean default 0,
     foreign key(user_id) references users(id)
-    -- foreign key(in_reply_to) references tweets(id),
-    -- foreign key(quoted_tweet) references tweets(id)
 );
 
 create table retweets(rowid integer primary key,
@@ -71,8 +79,6 @@ create table urls (rowid integer primary key,
 
     unique (tweet_id, text)
     foreign key(tweet_id) references tweets(id)
-    -- foreign key(creator_id) references users(id)
-    -- foreign key(site_id) references users(id)
 );
 
 create table images (rowid integer primary key,

@@ -209,9 +209,40 @@ func TestParseTweetResponse(t *testing.T) {
 		t.Errorf("Expected %d tweets, got %d", 29-3, len(tweets))
 	}
 	if len(retweets) != 3 {
-		t.Errorf("Expected %d tweets, got %d", 3, len(retweets))
+		t.Errorf("Expected %d retweets, got %d", 3, len(retweets))
 	}
 	if len(users) != 9 {
-		t.Errorf("Expected %d tweets, got %d", 9, len(users))
+		t.Errorf("Expected %d users, got %d", 9, len(users))
+	}
+}
+
+func TestParseTweetResponseWithTombstones(t *testing.T) {
+	data, err := ioutil.ReadFile("test_responses/tombstones/tombstone_deleted.json")
+	if err != nil {
+		panic(err)
+	}
+	var tweet_resp scraper.TweetResponse
+	err = json.Unmarshal(data, &tweet_resp)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	extra_users := tweet_resp.HandleTombstones()
+	if len(extra_users) != 1 {
+		t.Errorf("Expected to need 1 extra user but got %d instead", len(extra_users))
+	}
+
+	tweets, retweets, users, err := scraper.ParseTweetResponse(tweet_resp)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(tweets) != 2 {
+		t.Errorf("Expected %d tweets, got %d", 2, len(tweets))
+	}
+	if len(retweets) != 0 {
+		t.Errorf("Expected %d retweets, got %d", 0, len(retweets))
+	}
+	if len(users) != 1 {
+		t.Errorf("Expected %d users, got %d", 1, len(users))
 	}
 }

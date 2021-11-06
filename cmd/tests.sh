@@ -144,7 +144,7 @@ urls_count_after=$(sqlite3 twitter.db "select count(*) from urls")
 test $urls_count_after = $(($urls_count + 1))
 test "$(sqlite3 twitter.db "select title from urls where tweet_id = 1428904664645394433")" = "Justice Department investigating Elon Musk's SpaceX following complaint of hiring discrimination"
 test $(sqlite3 twitter.db "select count(*) from urls where tweet_id = 1428904664645394433") = "1"
-thumbnail_name=$(sqlite3 twitter.db "select thumbnail_remote_url from urls where tweet_id = 1428904664645394433" | grep -Po "(?<=/)\w+(?=\?)")
+thumbnail_name=$(sqlite3 twitter.db "select thumbnail_remote_url from urls where tweet_id = 1428904664645394433" | grep -Po "(?<=/)[\w-]+(?=\?)")
 test -n "$thumbnail_name"  # Not testing for what the thumbnail url is because it keeps changing
 
 # Try to double-fetch it; shouldn't duplicate the URL
@@ -173,6 +173,12 @@ tw download_tweet_content 1413665734866186243
 test $(sqlite3 twitter.db "select is_content_downloaded from urls where tweet_id = 1413665734866186243") = "1"
 test $(find link_preview_images | wc -l) = $initial_link_preview_images_count  # Should be the same
 
+
+# Test a tweet thread with tombstones
+tw fetch_tweet https://twitter.com/CovfefeAnon/status/1454526270809726977
+test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454515503242829830") = 1
+test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454521424144654344") = 0
+test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454522147750260742") = 1
 
 
 # TODO: Maybe this file should be broken up into multiple test scripts

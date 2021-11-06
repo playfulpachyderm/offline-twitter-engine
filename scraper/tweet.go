@@ -32,6 +32,9 @@ type Tweet struct {
 	Hashtags      []string
 	QuotedTweet   TweetID
 
+	TombstoneType string
+	IsStub bool
+
 	IsContentDownloaded bool
 }
 
@@ -81,10 +84,13 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	ret.UserID = UserID(apiTweet.UserID)
 	ret.Text = apiTweet.FullText
 
-	ret.PostedAt, err = time.Parse(time.RubyDate, apiTweet.CreatedAt)
-	if err != nil {
-		return
+	if apiTweet.TombstoneText == "" {  // Skip time parsing for tombstones
+		ret.PostedAt, err = time.Parse(time.RubyDate, apiTweet.CreatedAt)
+		if err != nil {
+			return
+		}
 	}
+
 	ret.NumLikes = apiTweet.FavoriteCount
 	ret.NumRetweets = apiTweet.RetweetCount
 	ret.NumReplies = apiTweet.ReplyCount
@@ -139,6 +145,10 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		ret.Videos = []Video{new_video}
 		ret.Images = []Image{}
 	}
+
+	ret.TombstoneType = apiTweet.TombstoneText
+	ret.IsStub = !(ret.TombstoneType == "")
+
 	return
 }
 
@@ -190,8 +200,20 @@ func GetTweetFull(id TweetID) (tweets []Tweet, retweets []Retweet, users []User,
 			return
 		}
 	}
-
-	return ParseTweetResponse(tweet_response)
+	tombstone_users := tweet_response.HandleTombstones()
+	fmt.Printf("%v\n", tombstone_users)
+	for _, u := range tombstone_users {
+		fetched_user, err1 := GetUser(UserHandle(u))
+		if err != nil {
+			err = err1
+			return
+		}
+		fmt.Println(fetched_user)
+		users = append(users, fetched_user)
+	}
+	tweets, retweets, _users, err := ParseTweetResponse(tweet_response)
+	users = append(users, _users...)
+	return
 }
 
 /**

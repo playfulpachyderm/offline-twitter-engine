@@ -226,6 +226,24 @@ func create_dummy_tweet() scraper.Tweet {
 }
 
 /**
+ * Create a random tombstone
+ */
+func create_dummy_tombstone() scraper.Tweet {
+	rand.Seed(time.Now().UnixNano())
+	tweet_id := scraper.TweetID(rand.Int())
+
+	return scraper.Tweet{
+		ID: tweet_id,
+		UserID: -1,
+		TombstoneType: "deleted",
+		IsStub: true,
+		Mentions: []scraper.UserHandle{},
+		ReplyMentions: []scraper.UserHandle{},
+		Hashtags: []string{},
+	}
+}
+
+/**
  * Create a new retweet with a random ID for a given TweetID
  */
 func create_dummy_retweet(tweet_id scraper.TweetID) scraper.Retweet {

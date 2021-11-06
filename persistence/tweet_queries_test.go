@@ -35,6 +35,76 @@ func TestSaveAndLoadTweet(t *testing.T) {
 }
 
 /**
+ * Same as above, but with a tombstone
+ */
+func TestSaveAndLoadTombstone(t *testing.T) {
+    profile_path := "test_profiles/TestTweetQueries"
+    profile := create_or_load_profile(profile_path)
+
+    tweet := create_dummy_tombstone()
+
+    // Save the tweet
+    err := profile.SaveTweet(tweet)
+    if err != nil {
+        t.Fatalf("Failed to save the tweet: %s", err.Error())
+    }
+
+    // Reload the tweet
+    new_tweet, err := profile.GetTweetById(tweet.ID)
+    if err != nil {
+        t.Fatalf("Failed to load the tweet: %s", err.Error())
+    }
+
+    if diff := deep.Equal(tweet, new_tweet); diff != nil {
+        t.Error(diff)
+    }
+}
+
+/**
+ * Saving a tweet that already exists shouldn't reduce its backed-up status.
+ * i.e., content which is already saved shouldn't be marked un-saved if it's removed from Twitter.
+ * After all, that's the whole point of archiving.
+ *
+ * - is_stub should only go from "yes" to "no"
+ * - is_content_downloaded should only go from "no" to "yes"
+ */
+func TestNoWorseningTweet(t *testing.T) {
+    profile_path := "test_profiles/TestTweetQueries"
+    profile := create_or_load_profile(profile_path)
+
+    tweet := create_dummy_tweet()
+    tweet.IsContentDownloaded = true
+    tweet.IsStub = false
+
+    // Save the tweet
+    err := profile.SaveTweet(tweet)
+    if err != nil {
+        t.Fatalf("Failed to save the tweet: %s", err.Error())
+    }
+
+    // Worsen the tweet and re-save it
+    tweet.IsContentDownloaded = false
+    tweet.IsStub = true
+    err = profile.SaveTweet(tweet)
+    if err != nil {
+        t.Fatalf("Failed to save the tweet: %s", err.Error())
+    }
+
+    // Reload the tweet
+    new_tweet, err := profile.GetTweetById(tweet.ID)
+    if err != nil {
+        t.Fatalf("Failed to load the tweet: %s", err.Error())
+    }
+
+    if new_tweet.IsStub != false {
+        t.Errorf("Should have preserved non-stub status")
+    }
+    if new_tweet.IsContentDownloaded != true {
+        t.Errorf("Should have preserved is-content-downloaded status")
+    }
+}
+
+/**
  * Should correctly report whether the User exists in the database
  */
 func TestIsTweetInDatabase(t *testing.T) {
