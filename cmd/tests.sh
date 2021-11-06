@@ -181,6 +181,10 @@ test $(sqlite3 twitter.db "select is_stub from tweets where id = 145452142414465
 test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454522147750260742") = 1
 
 
+# Test search
+tw search "from:michaelmalice constitution"
+test $(sqlite3 twitter.db "select count(*) from tweets where user_id = 44067298 and text like '%constitution%'") -gt "30"  # Not sure exactly how many
+
 # TODO: Maybe this file should be broken up into multiple test scripts
 
 echo -e "\033[32mAll tests passed.  Finished successfully.\033[0m"

@@ -61,6 +61,8 @@ func main() {
 		fetch_user_feed(target, 999999999)
 	case "download_tweet_content":
 		download_tweet_content(target)
+	case "search":
+		search(target)
 	default:
 		die("Invalid operation: " + operation, true, 3)
 	}
@@ -238,7 +240,7 @@ func download_tweet_content(tweet_identifier string) {
 
 	tweet, err := profile.GetTweetById(tweet_id)
 	if err != nil {
-		panic("Couldn't get tweet from database: " + err.Error())
+		panic(fmt.Sprintf("Couldn't get tweet (ID %d) from database: %s", tweet_id, err.Error()))
 	}
 	err = profile.DownloadTweetContentFor(&tweet)
 	if err != nil {
@@ -255,4 +257,37 @@ func download_user_content(handle scraper.UserHandle) {
 	if err != nil {
 		panic("Error getting content: " + err.Error())
 	}
+}
+
+
+func search(query string) {
+	tweets, retweets, users, err := scraper.Search(query, 1000);
+	if err != nil {
+		die("Error scraping search results: " + err.Error(), false, -100)
+	}
+
+	for _, u := range users {
+		err = profile.SaveUser(u)
+		if err != nil {
+			die("Error saving user: " + err.Error(), false, 4)
+		}
+		err = profile.DownloadUserContentFor(&u)
+		if err != nil {
+			die("Error getting user content: " + err.Error(), false, 10)
+		}
+	}
+
+	for _, t := range tweets {
+		// fmt.Println(t)
+		err = profile.SaveTweet(t)
+		if err != nil {
+			die("Error saving tweet: " + err.Error(), false, 4)
+		}
+		err = profile.DownloadTweetContentFor(&t)
+		if err != nil {
+			die("Error getting tweet content: " + err.Error(), false, 11)
+		}
+	}
+
+	fmt.Printf("Saved %d tweets, %d retweets and %d users.  Exiting successfully\n", len(tweets), len(retweets), len(users))
 }

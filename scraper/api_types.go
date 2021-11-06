@@ -308,9 +308,18 @@ func (t *TweetResponse) HandleTombstones() []string {
 
 func (t *TweetResponse) GetCursor() string {
 	entries := t.Timeline.Instructions[0].AddEntries.Entries
-	last_entry := entries[len(entries) - 1]
-	if strings.Contains(last_entry.EntryID, "cursor") {
-		return last_entry.Content.Operation.Cursor.Value
+	if len(entries) > 0 {
+		last_entry := entries[len(entries) - 1]
+		if strings.Contains(last_entry.EntryID, "cursor") {
+			return last_entry.Content.Operation.Cursor.Value
+		}
+	}
+
+	// Next, try the other format ("replaceEntry")
+	instructions := t.Timeline.Instructions
+	last_replace_entry := instructions[len(instructions) - 1].ReplaceEntry.Entry
+	if strings.Contains(last_replace_entry.EntryID, "cursor") {
+		return last_replace_entry.Content.Operation.Cursor.Value
 	}
 	return ""
 }

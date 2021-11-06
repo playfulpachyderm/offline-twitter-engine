@@ -26,3 +26,9 @@ curl \
     -H "Authorization: Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA" \
     -H "X-Guest-Token: 1396177150890348547" \
     https://twitter.com/i/api/2/timeline/conversation/1395881699142160387.json
+
+
+curl \
+    -H "Authorization: Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA" \
+    -H "X-Guest-Token: 1449946080792104970" \
+    "https://twitter.com/i/api/2/search/adaptive.json?count=50&spelling_corrections=1&query_source=typed_query&pc=1&q=potatoes"

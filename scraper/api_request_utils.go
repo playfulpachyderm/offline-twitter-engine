@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -216,6 +217,75 @@ func (api API) GetUser(handle UserHandle) (APIUser, error) {
     }
     return response.ConvertToAPIUser(), err
 }
+
+func (api API) Search(query string, cursor string) (TweetResponse, error) {
+	client := &http.Client{Timeout: 10 * time.Second}
+	req, err := http.NewRequest("GET", "https://twitter.com/i/api/2/search/adaptive.json?count=50&spelling_corrections=1&query_source=typed_query&pc=1&q=" + url.QueryEscape(query), nil)
+	if err != nil {
+		return TweetResponse{}, err
+	}
+
+	err = ApiRequestAddTokens(req)
+	if err != nil {
+		return TweetResponse{}, err
+	}
+
+	ApiRequestAddAllParams(req)
+	if cursor != "" {
+		UpdateQueryCursor(req, cursor, false)
+	}
+
+	fmt.Println(req.URL.String())
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return TweetResponse{}, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		content, _ := ioutil.ReadAll(resp.Body)
+		return TweetResponse{}, fmt.Errorf("Error while searching for %q.  HTTP %s: %s", req.URL, resp.Status, content)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return TweetResponse{}, err
+	}
+	// fmt.Println(string(body))
+
+	var response TweetResponse
+	err = json.Unmarshal(body, &response)
+	return response, err
+}
+
+func (api API) GetMoreTweetsFromSearch(query string, response *TweetResponse, max_results int) error {
+	last_response := response
+	for last_response.GetCursor() != "" && len(response.GlobalObjects.Tweets) < max_results {
+		fresh_response, err := api.Search(query, last_response.GetCursor())
+		if err != nil {
+			return err
+		}
+		if fresh_response.GetCursor() == last_response.GetCursor() && len(fresh_response.GlobalObjects.Tweets) == 0 {
+			// Empty response, cursor same as previous: end of feed has been reached
+			return END_OF_FEED
+		}
+
+		last_response = &fresh_response
+
+		// Copy the results over
+		for id, tweet := range last_response.GlobalObjects.Tweets {
+			response.GlobalObjects.Tweets[id] = tweet
+		}
+		for id, user := range last_response.GlobalObjects.Users {
+			response.GlobalObjects.Users[id] = user
+		}
+		fmt.Printf("Have %d tweets\n", len(response.GlobalObjects.Tweets))
+		// fmt.Printf("Cursor: %s\n", last_response.GetCursor())
+	}
+	return nil
+}
+
 
 // Add Bearer token and guest token
 func ApiRequestAddTokens(req *http.Request) error {
