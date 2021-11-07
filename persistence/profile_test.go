@@ -96,7 +96,7 @@ func TestNewProfile(t *testing.T) {
 		{"profile_images", true},
 		{"settings.yaml", false},
 		{"twitter.db", false},
-		{"users.txt", false},
+		{"users.yaml", false},
 		{"videos", true},
 	}
 
@@ -126,7 +126,7 @@ func TestLoadProfile(t *testing.T) {
 	}
 
 	// Create some users
-	err = os.WriteFile(path.Join(profile_path, "users.txt"), []byte("user1\nuser2\n"), 0644)
+	err = os.WriteFile(path.Join(profile_path, "users.yaml"), []byte("- user: user1\n- user: user2\n"), 0644)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -142,5 +142,8 @@ func TestLoadProfile(t *testing.T) {
 
 	if len(profile.UsersList) != 2 {
 		t.Errorf("Expected 2 users, got %v", profile.UsersList)
+	}
+	if profile.UsersList[0].Handle != "user1" {
+		t.Errorf("Expected first user to be %s, got %s", "user1", profile.UsersList[0].Handle)
 	}
 }

@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"errors"
 	"os"
-	"strings"
-
-	"offline_twitter/scraper"
 )
 
 var NotInDatabase = errors.New("Not in database")
@@ -29,16 +26,4 @@ func file_exists(path string) bool {
 	} else {
 		panic(err)
 	}
-}
-
-
-func parse_users_file(data []byte) []scraper.UserHandle {
-	users := strings.Split(string(data), "\n")
-	ret := []scraper.UserHandle{}
-	for _, u := range users {
-		if u != "" {
-			ret = append(ret, scraper.UserHandle(u))
-		}
-	}
-	return ret
 }

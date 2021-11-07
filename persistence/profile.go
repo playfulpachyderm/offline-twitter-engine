@@ -17,9 +17,16 @@ var sql_init string
 
 type Settings struct {}
 
+/**
+ * Create a Type for this to make it easier to expand later
+ */
+type UsersList []struct {
+	Handle scraper.UserHandle  `yaml:"user"`
+}
+
 type Profile struct {
 	ProfileDir string
-	UsersList []scraper.UserHandle
+	UsersList UsersList
 	Settings Settings
 	DB *sql.DB
 }
@@ -50,7 +57,7 @@ func NewProfile(target_dir string) (Profile, error) {
 		return Profile{}, ErrTargetAlreadyExists{target_dir}
 	}
 
-	user_list_file := path.Join(target_dir, "users.txt")
+	user_list_file := path.Join(target_dir, "users.yaml")
 	settings_file := path.Join(target_dir, "settings.yaml")
 	sqlite_file := path.Join(target_dir, "twitter.db")
 	profile_images_dir := path.Join(target_dir, "profile_images")
@@ -123,7 +130,7 @@ func NewProfile(target_dir string) (Profile, error) {
 		return Profile{}, err
 	}
 
-	return Profile{target_dir, []scraper.UserHandle{}, settings, db}, nil
+	return Profile{target_dir, UsersList{}, settings, db}, nil
 }
 
 
@@ -137,7 +144,7 @@ func NewProfile(target_dir string) (Profile, error) {
  * - the loaded Profile
  */
 func LoadProfile(profile_dir string) (Profile, error) {
-	user_list_file := path.Join(profile_dir, "users.txt")
+	user_list_file := path.Join(profile_dir, "users.yaml")
 	settings_file := path.Join(profile_dir, "settings.yaml")
 	sqlite_file := path.Join(profile_dir, "twitter.db")
 
@@ -155,7 +162,11 @@ func LoadProfile(profile_dir string) (Profile, error) {
 	if err != nil {
 		return Profile{}, err
 	}
-	users_list := parse_users_file(users_data)
+	users_list := UsersList{}
+	err = yaml.Unmarshal(users_data, &users_list);
+	if err != nil {
+		return Profile{}, err
+	}
 
 	settings_data, err := os.ReadFile(settings_file)
 	if err != nil {
@@ -166,10 +177,16 @@ func LoadProfile(profile_dir string) (Profile, error) {
 	if err != nil {
 		return Profile{}, err
 	}
+
 	db, err := sql.Open("sqlite3", sqlite_file + "?_foreign_keys=on&_journal_mode=WAL")
 	if err != nil {
 		return Profile{}, err
 	}
 
-	return Profile{profile_dir, users_list, settings, db}, nil
+	return Profile{
+		ProfileDir: profile_dir,
+		UsersList: users_list,
+		Settings: settings,
+		DB: db,
+	}, nil
 }
