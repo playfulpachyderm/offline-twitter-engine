@@ -77,6 +77,44 @@ type APICard struct {
 				Url string `json:"url"`
 			} `json:"image_value"`
 		} `json:"player_image_large"`
+
+		// For polls
+		Choice1 struct {
+			StringValue string `json:"string_value"`
+		} `json:"choice1_label"`
+		Choice2 struct {
+			StringValue string `json:"string_value"`
+		} `json:"choice2_label"`
+		Choice3 struct {
+			StringValue string `json:"string_value"`
+		} `json:"choice3_label"`
+		Choice4 struct {
+			StringValue string `json:"string_value"`
+		} `json:"choice4_label"`
+
+		Choice1_Count struct {
+			StringValue string `json:"string_value"`
+		} `json:"choice1_count"`
+		Choice2_Count struct {
+			StringValue string `json:"string_value"`
+		} `json:"choice2_count"`
+		Choice3_Count struct {
+			StringValue string `json:"string_value"`
+		} `json:"choice3_count"`
+		Choice4_Count struct {
+			StringValue string `json:"string_value"`
+		} `json:"choice4_count"`
+
+		EndDatetimeUTC struct {
+			StringValue string `json:"string_value"`
+		} `json:"end_datetime_utc"`
+		CountsAreFinal struct {
+			BooleanValue bool `json:"boolean_value"`
+		} `json:"counts_are_final"`
+		DurationMinutes struct {
+			StringValue string `json:"string_value"`
+		} `json:"duration_minutes"`
+
 	} `json:"binding_values"`
 }
 
