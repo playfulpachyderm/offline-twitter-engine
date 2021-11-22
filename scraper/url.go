@@ -63,6 +63,9 @@ func get_thumbnail_local_path(remote_url string) string {
     if err != nil {
         panic(err)
     }
+    if u.RawQuery == "" {
+        return path.Base(u.Path)
+    }
     query_params, err := url.ParseQuery(u.RawQuery)
     if err != nil {
         panic(err)

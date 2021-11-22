@@ -108,6 +108,50 @@ func TestParseAPIUrlCardWithPlayer(t *testing.T) {
     }
 }
 
+func TestParseAPIUrlCardWithPlayerAndPlaceholderThumbnail(t *testing.T) {
+    data, err := ioutil.ReadFile("test_responses/tweet_content/url_card_with_player_placeholder_image.json")
+    if err != nil {
+        panic(err)
+    }
+    var apiCard scraper.APICard
+    err = json.Unmarshal(data, &apiCard)
+    if err != nil {
+        t.Fatal(err.Error())
+    }
+    url := scraper.ParseAPIUrlCard(apiCard)
+
+    expected_domain := "www.youtube.com"
+    if url.Domain != expected_domain {
+        t.Errorf("Expected %q, got %q", expected_domain, url.Domain)
+    }
+    expected_title := "Did Michael Malice Turn Me into an Anarchist? | Ep 181"
+    if url.Title != expected_title {
+        t.Errorf("Expected %q, got %q", expected_title, url.Title)
+    }
+    expected_description := "SUBSCRIBE TO THE NEW SHOW W/ ELIJAH & SYDNEY: \"YOU ARE HERE\"YT: https://www.youtube.com/youareheredaily______________________________________________________..."
+    if url.Description != expected_description {
+        t.Errorf("Expected %q, got %q", expected_description, url.Description)
+    }
+    expected_remote_url := "https://pbs.twimg.com/cards/player-placeholder.png"
+    if url.ThumbnailRemoteUrl != expected_remote_url {
+        t.Errorf("Expected %q, got %q", expected_remote_url, url.ThumbnailRemoteUrl)
+    }
+    expected_local_filename := "player-placeholder.png"
+    if url.ThumbnailLocalPath != expected_local_filename {
+        t.Errorf("Expected %q, got %q", expected_local_filename, url.ThumbnailLocalPath)
+    }
+    expected_site_id := scraper.UserID(10228272)
+    if url.SiteID != expected_site_id {
+        t.Errorf("Expected %d, got %d", expected_site_id, url.SiteID)
+    }
+    if !url.HasThumbnail {
+        t.Errorf("Should have a thumbnail, but it doesn't")
+    }
+    if url.IsContentDownloaded {
+        t.Errorf("Expected it not to be downloaded, but it was")
+    }
+}
+
 func TestParseAPIUrlCardWithoutThumbnail(t *testing.T) {
     data, err := ioutil.ReadFile("test_responses/tweet_content/url_card_without_thumbnail.json")
     if err != nil {
