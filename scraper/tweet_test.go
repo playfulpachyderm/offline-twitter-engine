@@ -48,8 +48,8 @@ func TestParseSingleTweet(t *testing.T) {
 		t.Errorf("Expected %d, got %d", 1621639105, tweet.PostedAt.Unix())
 	}
 
-	if tweet.QuotedTweet != 0 {
-		t.Errorf("Incorrectly believes it quote-tweets tweet with ID %d", tweet.QuotedTweet)
+	if tweet.QuotedTweetID != 0 {
+		t.Errorf("Incorrectly believes it quote-tweets tweet with ID %d", tweet.QuotedTweetID)
 	}
 }
 
@@ -74,16 +74,16 @@ func TestParseTweetWithQuotedTweetAsLink(t *testing.T) {
 	}
 
 	expected_replied_id := scraper.TweetID(1395882872729477131)
-	if tweet.InReplyTo != expected_replied_id {
-		t.Errorf("Expected %q, got %q", expected_replied_id, tweet.InReplyTo)
+	if tweet.InReplyToID != expected_replied_id {
+		t.Errorf("Expected %q, got %q", expected_replied_id, tweet.InReplyToID)
 	}
 	if len(tweet.ReplyMentions) != 0 {
 		t.Errorf("Wanted %v, got %v", []string{}, tweet.ReplyMentions)
 	}
 
 	expected_quoted_id := scraper.TweetID(1396194494710788100)
-	if tweet.QuotedTweet != expected_quoted_id {
-		t.Errorf("Should be a quoted tweet with ID %d, but got %d instead", expected_quoted_id, tweet.QuotedTweet)
+	if tweet.QuotedTweetID != expected_quoted_id {
+		t.Errorf("Should be a quoted tweet with ID %d, but got %d instead", expected_quoted_id, tweet.QuotedTweetID)
 	}
 }
 

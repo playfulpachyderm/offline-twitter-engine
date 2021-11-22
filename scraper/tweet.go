@@ -13,16 +13,17 @@ const DEFAULT_MAX_REPLIES_EAGER_LOAD = 50
 type TweetID int64
 
 type Tweet struct {
-	ID             TweetID
-	UserID         UserID
-	User           *User
-	Text           string
-	PostedAt       time.Time
-	NumLikes       int
-	NumRetweets    int
-	NumReplies     int
-	NumQuoteTweets int
-	InReplyTo      TweetID
+	ID               TweetID
+	UserID           UserID
+	User             *User
+	Text             string
+	PostedAt         time.Time
+	NumLikes         int
+	NumRetweets      int
+	NumReplies       int
+	NumQuoteTweets   int
+	InReplyToID      TweetID
+	QuotedTweetID    TweetID
 
 	Urls          []Url
 	Images        []Image
@@ -30,7 +31,6 @@ type Tweet struct {
 	Mentions      []UserHandle
 	ReplyMentions []UserHandle
 	Hashtags      []string
-	QuotedTweet   TweetID
 
 	TombstoneType string
 	IsStub bool
@@ -95,7 +95,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	ret.NumRetweets = apiTweet.RetweetCount
 	ret.NumReplies = apiTweet.ReplyCount
 	ret.NumQuoteTweets = apiTweet.QuoteCount
-	ret.InReplyTo = TweetID(apiTweet.InReplyToStatusID)
+	ret.InReplyToID = TweetID(apiTweet.InReplyToStatusID)
 
 	for _, url := range apiTweet.Entities.URLs {
 		var url_object Url
@@ -132,7 +132,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		}
 	}
 
-	ret.QuotedTweet = TweetID(apiTweet.QuotedStatusID)
+	ret.QuotedTweetID = TweetID(apiTweet.QuotedStatusID)
 
 	for _, entity := range apiTweet.ExtendedEntities.Media {
 		if entity.Type != "video" && entity.Type != "animated_gif" {
