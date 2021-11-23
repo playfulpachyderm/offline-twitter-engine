@@ -113,3 +113,7 @@ create table hashtags (rowid integer primary key,
     unique (tweet_id, text)
     foreign key(tweet_id) references tweets(id)
 );
+
+create table database_version(rowid integer primary key,
+    version_number integer not null unique
+);

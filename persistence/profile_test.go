@@ -105,6 +105,15 @@ func TestNewProfile(t *testing.T) {
 			t.Fatalf("Expected `%s` to be a %s, but got %s [%s]", v.filename, isdir_map(v.isDir), contents[i].Name(), isdir_map(contents[i].IsDir()))
 		}
 	}
+
+	// Check database version is initialized
+	version, err := profile.GetDatabaseVersion()
+	if err != nil {
+		panic(err)
+	}
+	if version != 0 {
+		t.Errorf("Expected database version %d, but got %d", 0, version)
+	}
 }
 
 

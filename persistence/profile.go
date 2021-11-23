@@ -82,6 +82,7 @@ func NewProfile(target_dir string) (Profile, error) {
 	if err != nil {
 		return Profile{}, err
 	}
+	InitializeDatabaseVersion(db)
 
 	// Create `users.txt`
 	fmt.Printf("Creating............. %s\n", user_list_file)
@@ -183,10 +184,13 @@ func LoadProfile(profile_dir string) (Profile, error) {
 		return Profile{}, err
 	}
 
-	return Profile{
+	ret := Profile{
 		ProfileDir: profile_dir,
 		UsersList: users_list,
 		Settings: settings,
 		DB: db,
-	}, nil
+	}
+	err = ret.check_and_update_version()
+
+	return ret, err
 }
