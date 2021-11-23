@@ -25,7 +25,10 @@ func TestVersionUpgrade(t *testing.T) {
 	}
 
 	persistence.MIGRATIONS = append(persistence.MIGRATIONS, test_migration)
-	profile.UpgradeFromXToY(persistence.ENGINE_DATABASE_VERSION, persistence.ENGINE_DATABASE_VERSION + 1)
+	err := profile.UpgradeFromXToY(persistence.ENGINE_DATABASE_VERSION, persistence.ENGINE_DATABASE_VERSION + 1)
+	if err != nil {
+		panic(err)
+	}
 
 	if !profile.IsTweetInDatabase(test_tweet_id) {
 		t.Errorf("Migration should have created the tweet, but it didn't")

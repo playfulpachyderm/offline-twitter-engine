@@ -64,7 +64,7 @@ func (p Profile) check_and_update_version() error {
 
 	if ENGINE_DATABASE_VERSION > version {
 		fmt.Printf("Upgrading database from version %d to version %d", version, ENGINE_DATABASE_VERSION)
-		p.UpgradeFromXToY(version, ENGINE_DATABASE_VERSION)
+		return p.UpgradeFromXToY(version, ENGINE_DATABASE_VERSION)
 	}
 
 	return nil
