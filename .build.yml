@@ -99,7 +99,7 @@ tasks:
       SECONDS=0
 
       cd twitter_offline_engine/build
-      version=$(git rev-parse --abbrev HEAD | grep -Poh "^(?<=release-)\d+\.\d+\.\d+")
+      version=$(git branch --show-current | grep -Poh "(?<=^release-)\d+\.\d+\.\d+"); true
 
       if [[ -z "$version" ]]
       then
