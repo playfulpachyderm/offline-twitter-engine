@@ -15,6 +15,15 @@ packages:
   - sqlite3
 
 tasks:
+  - source_code_checkout_kludge: |
+      SECONDS=0
+
+      cd twitter_offline_engine
+      basename $GITLAB_REF | xargs git checkout
+
+      duration=$SECONDS
+      echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
+
   - install_go: |
       SECONDS=0
 
@@ -26,23 +35,38 @@ tasks:
       echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
 
   - test_terminal_utils: |
+      SECONDS=0
+
       cd twitter_offline_engine/terminal_utils
 
       go get .
       go test -bench=. -cover
 
+      duration=$SECONDS
+      echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
+
   - test_scraper: |
+      SECONDS=0
+
       cd twitter_offline_engine/scraper
 
       go get .
       go test -bench=. -cover
 
+      duration=$SECONDS
+      echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
+
   - test_persistence: |
+      SECONDS=0
+
       cd twitter_offline_engine/persistence
 
       go get .
       mkdir test_profiles/
       go test -bench=. -cover
+
+      duration=$SECONDS
+      echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
 
   - install_golangci-lint: |
       SECONDS=0
@@ -72,7 +96,10 @@ tasks:
       echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
 
   - dpkg_build: |
-      version=$(git rev-parse --abbrev HEAD | grep -Poh "(?<=release-)\d+\.\d+\.\d+")
+      SECONDS=0
+
+      cd twitter_offline_engine/build
+      version=$(git rev-parse --abbrev HEAD | grep -Poh "^(?<=release-)\d+\.\d+\.\d+")
 
       if [[ -z "$version" ]]
       then
@@ -80,9 +107,6 @@ tasks:
           exit
       fi
 
-      SECONDS=0
-
-      cd twitter_offline_engine/build
       ./build_dpkg.sh $version
 
       duration=$SECONDS
