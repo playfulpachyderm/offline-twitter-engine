@@ -95,7 +95,7 @@ tasks:
       duration=$SECONDS
       echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
 
-  - dpkg_build: |
+  - dpkg_build_and_upload: |
       SECONDS=0
 
       cd twitter_offline_engine/build
@@ -109,16 +109,9 @@ tasks:
 
       ./build_dpkg.sh $version
 
-      duration=$SECONDS
-      echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
-
-  - upload_dpkg: |
-      SECONDS=0
-
       echo "|1|wHeqDXntszAtw63JZ2a8lRFNkzo=|i4RPdW3eWWGZFcRx6ttH66pryWw= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFOHLdwogAIaEhVmUCgKMyHQpWsdBH7k29vMs9mrPoAhD9xdtmil0/wLniyBkflqOAPF/XXvsqYb6+lgGYRN40U=" >> ~/.ssh/known_hosts
       echo "|1|CMeJL187AvCdC7uMVPZPP8JtmgY=|24sUol3rn1+7sGBbXkhOSNO/5Q4= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFOHLdwogAIaEhVmUCgKMyHQpWsdBH7k29vMs9mrPoAhD9xdtmil0/wLniyBkflqOAPF/XXvsqYb6+lgGYRN40U=" >> ~/.ssh/known_hosts
 
-      cd twitter_offline_engine/build
       scp -i ~/.ssh/4e6bb736-559c-4b3e-ba04-331f5808cacc offline-twitter-engine_${version}_all.deb aptrepo@apt.playfulpachyderm.com:/apt-repo/test-repo
       ssh -i ~/.ssh/4e6bb736-559c-4b3e-ba04-331f5808cacc aptrepo@apt.playfulpachyderm.com "cd ~/test-repo && ./update.sh"
 
