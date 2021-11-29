@@ -113,11 +113,11 @@ tasks:
       echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
 
   - upload_dpkg: |
-      # Just fail
-      test -z "fjkjksdf"
+      SECONDS=0
 
+      cd twitter_offline_engine/build
+      scp -i ~/.ssh/4e6bb736-559c-4b3e-ba04-331f5808cacc offline-twitter-engine_${version}_all.deb aptrepo@apt.playfulpachyderm.com:/apt-repo/test-repo
+      ssh -i ~/.ssh/4e6bb736-559c-4b3e-ba04-331f5808cacc aptrepo@apt.playfulpachyderm.com "cd ~/test-repo && ./update.sh"
 
-      # SECONDS=0
-
-      # cd twitter_offline_engine/build
-      # scp offline
+      duration=$SECONDS
+      echo "Task completed in $(($duration / 60))m$(($duration % 60))s."

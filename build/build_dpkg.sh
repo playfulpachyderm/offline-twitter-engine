@@ -21,7 +21,7 @@ mkdir dpkg_tmp
 
 # Construct the dpkg directory structure
 mkdir -p dpkg_tmp/usr/local/bin
-cp ../cmd/tw dpkg_tmp/usr/local/bin
+cp ../cmd/tw dpkg_tmp/usr/local/bin/twitter
 
 # Create the `DEBIAN/control` file
 mkdir dpkg_tmp/DEBIAN
@@ -36,7 +36,7 @@ Priority: optional
 Homepage: http://offline-twitter.com
 Description: This utility is the scraper engine that drives \`offline-twitter\`.
  Download and browse content from twitter.
- Save a local copy of everything you browse.
+ Save a local copy of everything you browse to a SQLite database.
 " > dpkg_tmp/DEBIAN/control
 
 
