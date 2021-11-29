@@ -2,6 +2,7 @@ image: ubuntu/focal
 
 secrets:
   - 31c0c342-c396-4190-9637-1c3cedd705a5 # SSH key
+  - 4e6bb736-559c-4b3e-ba04-331f5808cacc # aptrepo SSH key (to upload the build result to apt.playfulpachyderm.com)
   - 8803f94a-8b8b-4966-aac7-4b8e24c328ce # Gitlab access token
   - c84e3f2c-7c97-4cef-859e-8b13de32a7be # ~/.ssh/known_hosts (gitlab.com)
 
@@ -69,3 +70,30 @@ tasks:
 
       duration=$SECONDS
       echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
+
+  - dpkg_build: |
+      version=$(git rev-parse --abbrev HEAD | grep -Poh "(?<=release-)\d+\.\d+\.\d+")
+
+      if [[ -z "$version" ]]
+      then
+          # Not on a release branch; just exit this task
+          exit
+      fi
+
+      SECONDS=0
+
+      cd twitter_offline_engine/build
+      ./build_dpkg.sh $version
+
+      duration=$SECONDS
+      echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
+
+  - upload_dpkg: |
+      # Just fail
+      test -z "fjkjksdf"
+
+
+      # SECONDS=0
+
+      # cd twitter_offline_engine/build
+      # scp offline
