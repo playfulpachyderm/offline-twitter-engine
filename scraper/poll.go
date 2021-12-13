@@ -4,10 +4,14 @@ import (
     "time"
     "strings"
     "strconv"
+    "net/url"
 )
 
+type PollID int64
+
 type Poll struct {
-    TweetID TweetID
+    ID         PollID
+    TweetID    TweetID
     NumChoices int
 
     Choice1 string
@@ -26,6 +30,12 @@ type Poll struct {
 }
 
 func ParseAPIPoll(apiCard APICard) Poll {
+    card_url, err := url.Parse(apiCard.ShortenedUrl)
+    if err != nil {
+        panic(err)
+    }
+    id := int_or_panic(card_url.Hostname())
+
     voting_ends_at, err := time.Parse(time.RFC3339, apiCard.BindingValues.EndDatetimeUTC.StringValue)
     if err != nil {
         panic(err)
@@ -36,6 +46,7 @@ func ParseAPIPoll(apiCard APICard) Poll {
     }
 
     ret := Poll{}
+    ret.ID = PollID(id)
     ret.NumChoices = parse_num_choices(apiCard.Name)
     ret.VotingDuration = int_or_panic(apiCard.BindingValues.DurationMinutes.StringValue) * 60
     ret.VotingEndsAt = voting_ends_at

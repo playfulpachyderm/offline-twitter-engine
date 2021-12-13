@@ -20,6 +20,9 @@ func TestParsePoll2Choices(t *testing.T) {
     }
 
     poll := scraper.ParseAPIPoll(apiCard)
+    if poll.ID != 1457419248461131776 {
+        t.Errorf("Expected ID %d, got %d", 1457419248461131776, poll.ID)
+    }
     if poll.NumChoices != 2 {
         t.Errorf("Expected %d choices, got %d", 2, poll.NumChoices)
     }
@@ -61,6 +64,9 @@ func TestParsePoll4Choices(t *testing.T) {
     }
 
     poll := scraper.ParseAPIPoll(apiCard)
+    if poll.ID != 1455611588854140929 {
+        t.Errorf("Expected ID %d, got %d", 1455611588854140929, poll.ID)
+    }
     if poll.NumChoices != 4 {
         t.Errorf("Expected %d choices, got %d", 4, poll.NumChoices)
     }

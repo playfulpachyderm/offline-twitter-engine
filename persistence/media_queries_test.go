@@ -272,13 +272,50 @@ func TestSaveAndLoadPoll(t *testing.T) {
 
     var new_poll scraper.Poll
     for index := range polls {
-        if polls[index].Choice1 == poll.Choice1 {
+        if polls[index].ID == poll.ID {
             new_poll = polls[index]
         }
     }
-    if new_poll.Choice1 != poll.Choice1 {
-        t.Fatalf("Could not find poll for some reason: %s, %s; %+v", new_poll.Choice1, poll.Choice1, polls)
+    if new_poll.ID != poll.ID {
+        t.Fatalf("Could not find poll for some reason: %d, %d; %+v", new_poll.ID, poll.ID, polls)
     }
+    if diff := deep.Equal(poll, new_poll); diff != nil {
+        t.Error(diff)
+    }
+}
+
+/**
+ * Change an Poll, save the changes, reload it, and check if it comes back the same
+ */
+func TestModifyPoll(t *testing.T) {
+    profile_path := "test_profiles/TestMediaQueries"
+    profile := create_or_load_profile(profile_path)
+
+    tweet := create_stable_tweet()
+    poll := tweet.Polls[0]
+
+    if poll.Choice1 != "-1" {
+        t.Fatalf("Got the wrong Poll back: wanted %q, got %q", "-1", poll.Choice1)
+    }
+
+    poll.Choice1_Votes = 1200  // Increment it by 200 votes
+
+    // Save the changes
+    err := profile.SavePoll(poll)
+    if err != nil {
+        t.Error(err)
+    }
+
+    // Reload it
+    polls, err := profile.GetPollsForTweet(tweet)
+    if err != nil {
+        t.Fatalf("Could not load polls: %s", err.Error())
+    }
+    new_poll := polls[0]
+    if new_poll.Choice1 != "-1" {
+        t.Fatalf("Got the wrong poll back: wanted %s, got %s!", "-1", new_poll.Choice1)
+    }
+
     if diff := deep.Equal(poll, new_poll); diff != nil {
         t.Error(diff)
     }

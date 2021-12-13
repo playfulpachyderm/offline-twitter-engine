@@ -65,8 +65,8 @@ func (p Profile) SaveUrl(url scraper.Url) error {
  */
 func (p Profile) SavePoll(poll scraper.Poll) error {
     _, err := p.DB.Exec(`
-        insert into polls (tweet_id, num_choices, choice1, choice1_votes, choice2, choice2_votes, choice3, choice3_votes, choice4, choice4_votes, voting_duration, voting_ends_at, last_scraped_at)
-                   values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        insert into polls (id, tweet_id, num_choices, choice1, choice1_votes, choice2, choice2_votes, choice3, choice3_votes, choice4, choice4_votes, voting_duration, voting_ends_at, last_scraped_at)
+                   values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               on conflict do update
                       set choice1_votes=?,
                           choice2_votes=?,
@@ -74,7 +74,7 @@ func (p Profile) SavePoll(poll scraper.Poll) error {
                           choice4_votes=?,
                           last_scraped_at=?
         `,
-        poll.TweetID, poll.NumChoices, poll.Choice1, poll.Choice1_Votes, poll.Choice2, poll.Choice2_Votes, poll.Choice3, poll.Choice3_Votes, poll.Choice4, poll.Choice4_Votes, poll.VotingDuration, poll.VotingEndsAt.Unix(), poll.LastUpdatedAt.Unix(),
+        poll.ID, poll.TweetID, poll.NumChoices, poll.Choice1, poll.Choice1_Votes, poll.Choice2, poll.Choice2_Votes, poll.Choice3, poll.Choice3_Votes, poll.Choice4, poll.Choice4_Votes, poll.VotingDuration, poll.VotingEndsAt.Unix(), poll.LastUpdatedAt.Unix(),
         poll.Choice1_Votes, poll.Choice2_Votes, poll.Choice3_Votes, poll.Choice4_Votes, poll.LastUpdatedAt.Unix(),
     )
     return err
@@ -162,7 +162,7 @@ func (p Profile) GetUrlsForTweet(t scraper.Tweet) (urls []scraper.Url, err error
  * Get the list of Polls for a Tweet
  */
 func (p Profile) GetPollsForTweet(t scraper.Tweet) (polls []scraper.Poll, err error) {
-    stmt, err := p.DB.Prepare("select num_choices, choice1, choice1_votes, choice2, choice2_votes, choice3, choice3_votes, choice4, choice4_votes, voting_duration, voting_ends_at, last_scraped_at from polls where tweet_id=?")
+    stmt, err := p.DB.Prepare("select id, num_choices, choice1, choice1_votes, choice2, choice2_votes, choice3, choice3_votes, choice4, choice4_votes, voting_duration, voting_ends_at, last_scraped_at from polls where tweet_id=?")
     if err != nil {
         return
     }
@@ -175,7 +175,7 @@ func (p Profile) GetPollsForTweet(t scraper.Tweet) (polls []scraper.Poll, err er
     var voting_ends_at int
     var last_scraped_at int
     for rows.Next() {
-        err = rows.Scan(&poll.NumChoices, &poll.Choice1, &poll.Choice1_Votes, &poll.Choice2, &poll.Choice2_Votes, &poll.Choice3, &poll.Choice3_Votes, &poll.Choice4, &poll.Choice4_Votes, &poll.VotingDuration, &voting_ends_at, &last_scraped_at)
+        err = rows.Scan(&poll.ID, &poll.NumChoices, &poll.Choice1, &poll.Choice1_Votes, &poll.Choice2, &poll.Choice2_Votes, &poll.Choice3, &poll.Choice3_Votes, &poll.Choice4, &poll.Choice4_Votes, &poll.VotingDuration, &voting_ends_at, &last_scraped_at)
         if err != nil {
             return
         }

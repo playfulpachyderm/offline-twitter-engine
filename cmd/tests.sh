@@ -184,6 +184,12 @@ test $(find link_preview_images | wc -l) = $initial_link_preview_images_count  #
 tw search "from:michaelmalice constitution"
 test $(sqlite3 twitter.db "select count(*) from tweets where user_id = 44067298 and text like '%constitution%'") -gt "30"  # Not sure exactly how many
 
+tw fetch_tweet 1465534109573390348
+test $(sqlite3 twitter.db "select count(*) from polls where tweet_id = 1465534109573390348") = "1"
+test "$(sqlite3 twitter.db "select choice1, choice2, choice3, choice4 from polls where tweet_id = 1465534109573390348")" = "Tribal armband|Marijuana leaf|Butterfly|Maple leaf"
+test "$(sqlite3 twitter.db "select choice1_votes, choice2_votes, choice3_votes, choice4_votes from polls where tweet_id = 1465534109573390348")" = "1593|624|778|1138"
+
+
 # TODO: Maybe this file should be broken up into multiple test scripts
 
 echo -e "\033[32mAll tests passed.  Finished successfully.\033[0m"

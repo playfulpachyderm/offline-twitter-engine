@@ -171,7 +171,7 @@ func fetch_tweet_conversation(tweet_identifier string) {
 	for _, t := range tweets {
 		err = profile.SaveTweet(t)
 		if err != nil {
-			die("Error saving tweet: " + err.Error(), false, 4)
+			die(fmt.Sprintf("Error saving tweet (id %d): %s", t.ID, err.Error()), false, 4)
 		}
 		err = profile.DownloadTweetContentFor(&t)
 		if err != nil {

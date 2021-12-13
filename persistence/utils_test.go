@@ -126,6 +126,7 @@ func create_url_from_id(id int) scraper.Url {
 func create_poll_from_id(id int) scraper.Poll {
 	s := fmt.Sprint(id)
 	return scraper.Poll{
+		ID: scraper.PollID(id),
 		TweetID: -1,
 		NumChoices: 2,
 		Choice1: s,
