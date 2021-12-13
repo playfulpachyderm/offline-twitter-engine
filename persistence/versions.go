@@ -3,6 +3,8 @@ package persistence
 import (
 	"fmt"
 	"database/sql"
+
+	"offline_twitter/terminal_utils"
 )
 
 
@@ -83,7 +85,10 @@ func (p Profile) check_and_update_version() error {
 	}
 
 	if ENGINE_DATABASE_VERSION > version {
-		fmt.Printf("Upgrading database from version %d to version %d", version, ENGINE_DATABASE_VERSION)
+		fmt.Printf(terminal_utils.COLOR_YELLOW)
+		fmt.Printf("================================================\n")
+		fmt.Printf("Database version is out of date.  Upgrading database from version v%d to version v%d!\n", version, ENGINE_DATABASE_VERSION)
+		fmt.Printf(terminal_utils.COLOR_RESET)
 		return p.UpgradeFromXToY(version, ENGINE_DATABASE_VERSION)
 	}
 
@@ -95,7 +100,10 @@ func (p Profile) check_and_update_version() error {
  */
 func (p Profile) UpgradeFromXToY(x int, y int) error {
 	for i := x; i < y; i++ {
+		fmt.Printf(terminal_utils.COLOR_CYAN)
 		fmt.Println(MIGRATIONS[i])
+		fmt.Printf(terminal_utils.COLOR_RESET)
+
 		_, err := p.DB.Exec(MIGRATIONS[i])
 		if err != nil {
 			return err
@@ -104,7 +112,13 @@ func (p Profile) UpgradeFromXToY(x int, y int) error {
 		if err != nil {
 			return err
 		}
+		fmt.Printf(terminal_utils.COLOR_YELLOW)
 		fmt.Printf("Now at database schema version %d.\n", i + 1)
+		fmt.Printf(terminal_utils.COLOR_RESET)
 	}
+	fmt.Printf(terminal_utils.COLOR_GREEN)
+	fmt.Printf("================================================\n")
+	fmt.Printf("Database version has been upgraded to version %d.\n", y)
+	fmt.Printf(terminal_utils.COLOR_RESET)
 	return nil
 }
