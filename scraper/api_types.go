@@ -114,7 +114,9 @@ type APICard struct {
 		DurationMinutes struct {
 			StringValue string `json:"string_value"`
 		} `json:"duration_minutes"`
-
+		LastUpdatedAt struct {
+			StringValue string `json:"string_value"`
+		} `json:"last_updated_datetime_utc"`
 	} `json:"binding_values"`
 }
 
