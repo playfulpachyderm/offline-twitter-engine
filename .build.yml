@@ -109,7 +109,7 @@ tasks:
 
       sudo apt install -y curl gnupg
       curl https://apt.playfulpachyderm.com/KEY.gpg | sudo apt-key add -
-      sudo echo "deb https://apt.playfulpachyderm.com/ ./" > /etc/apt/sources.list.d/offline_twitter.list
+      echo "deb https://apt.playfulpachyderm.com/ ./" | sudo tee /etc/apt/sources.list.d/offline_twitter.list
       sudo apt update
 
       sudo apt install -y offline-twitter-engine  # Latest released version
@@ -123,9 +123,8 @@ tasks:
       twitter get_user_tweets michaelmalice
 
       # Now test the upgrade using the newer version
-      cd ..  # Now in `cmd` directory
-      which ./tw  # Should be here from previous step
-      tw fetch_user michaelmalice  # Any operation other than `create_profile` should trigger the upgrade
+      which ../tw  # Should be here from previous step
+      ../tw --profile outdated_profile fetch_user michaelmalice  # Any operation other than `create_profile` should trigger the upgrade
 
       duration=$SECONDS
       echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
