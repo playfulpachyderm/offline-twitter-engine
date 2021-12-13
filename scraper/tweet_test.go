@@ -51,6 +51,10 @@ func TestParseSingleTweet(t *testing.T) {
 	if tweet.QuotedTweetID != 0 {
 		t.Errorf("Incorrectly believes it quote-tweets tweet with ID %d", tweet.QuotedTweetID)
 	}
+
+	if len(tweet.Polls) != 0 {
+		t.Errorf("Should not have any polls")
+	}
 }
 
 func TestParseTweetWithImage(t *testing.T) {
@@ -84,6 +88,10 @@ func TestParseTweetWithQuotedTweetAsLink(t *testing.T) {
 	expected_quoted_id := scraper.TweetID(1396194494710788100)
 	if tweet.QuotedTweetID != expected_quoted_id {
 		t.Errorf("Should be a quoted tweet with ID %d, but got %d instead", expected_quoted_id, tweet.QuotedTweetID)
+	}
+
+	if len(tweet.Polls) != 0 {
+		t.Errorf("Should not have any polls")
 	}
 }
 
@@ -136,6 +144,10 @@ func TestParseTweetWithUrl(t *testing.T) {
 	if tweet.Urls[0].Domain != expected_url_domain {
 		t.Errorf("Expected Url text to be %q, but got %q", expected_url_domain, tweet.Urls[0].Domain)
 	}
+
+	if len(tweet.Polls) != 0 {
+		t.Errorf("Should not have any polls")
+	}
 }
 
 func TestParseTweetWithUrlButNoCard(t *testing.T) {
@@ -173,6 +185,10 @@ func TestParseTweetWithMultipleUrls(t *testing.T) {
 	if tweet.Urls[2].Title != expected_title {
 		t.Errorf("Expected title to be %q, but got %q", expected_title, tweet.Urls[2].Title)
 	}
+
+	if len(tweet.Polls) != 0 {
+		t.Errorf("Should not have any polls")
+	}
 }
 
 func TestTweetWithLotsOfReplyMentions(t *testing.T) {
@@ -185,6 +201,68 @@ func TestTweetWithLotsOfReplyMentions(t *testing.T) {
 		if tweet.ReplyMentions[i] != v {
 			t.Errorf("Expected %q, got %q at position %d", v, tweet.ReplyMentions[i], i)
 		}
+	}
+}
+
+func TestTweetWithPoll(t *testing.T) {
+	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_poll_4_choices.json")
+
+	if len(tweet.Polls) != 1 {
+		t.Fatalf("Expected there to be 1 poll, but there was %d", len(tweet.Polls))
+	}
+	p := tweet.Polls[0]
+
+	if p.TweetID != tweet.ID {
+		t.Errorf("Poll's TweetID (%d) should match the tweet's ID (%d)", p.TweetID, tweet.ID)
+	}
+	if p.NumChoices != 4 {
+		t.Errorf("Expected %d choices, got %d instead", 4, p.NumChoices)
+	}
+	expected_choice1 := "Tribal armband"
+	if p.Choice1 != expected_choice1 {
+		t.Errorf("Expected choice1 %q, got %q", expected_choice1, p.Choice1)
+	}
+	expected_choice2 := "Marijuana leaf"
+	if p.Choice2 != expected_choice2 {
+		t.Errorf("Expected choice2 %q, got %q", expected_choice2, p.Choice2)
+	}
+	expected_choice3 := "Butterfly"
+	if p.Choice3 != expected_choice3 {
+		t.Errorf("Expected choice3 %q, got %q", expected_choice3, p.Choice3)
+	}
+	expected_choice4 := "Maple leaf"
+	if p.Choice4 != expected_choice4 {
+		t.Errorf("Expected choice4 %q, got %q", expected_choice4, p.Choice4)
+	}
+
+	expected_votes1 := 1593
+	expected_votes2 := 624
+	expected_votes3 := 778
+	expected_votes4 := 1138
+	if p.Choice1_Votes != expected_votes1 {
+		t.Errorf("Expected Choice1_Votes %d, got %d", expected_votes1, p.Choice1_Votes)
+	}
+	if p.Choice2_Votes != expected_votes2 {
+		t.Errorf("Expected Choice2_Votes %d, got %d", expected_votes2, p.Choice2_Votes)
+	}
+	if p.Choice3_Votes != expected_votes3 {
+		t.Errorf("Expected Choice3_Votes %d, got %d", expected_votes3, p.Choice3_Votes)
+	}
+	if p.Choice4_Votes != expected_votes4 {
+		t.Errorf("Expected Choice4_Votes %d, got %d", expected_votes4, p.Choice4_Votes)
+	}
+
+	expected_duration := 1440 * 60
+	if p.VotingDuration != expected_duration {
+		t.Errorf("Expected voting duration %d seconds, got %d", expected_duration, p.VotingDuration)
+	}
+	expected_ends_at := int64(1638331934)
+	if p.VotingEndsAt.Unix() != expected_ends_at {
+		t.Errorf("Expected voting ends at %d (unix), got %d", expected_ends_at, p.VotingEndsAt.Unix())
+	}
+	expected_last_updated_at := int64(1638331935)
+	if p.LastUpdatedAt.Unix() != expected_last_updated_at {
+		t.Errorf("Expected updated %d, got %d", expected_last_updated_at, p.LastUpdatedAt.Unix())
 	}
 }
 

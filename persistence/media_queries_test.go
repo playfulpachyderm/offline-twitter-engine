@@ -244,3 +244,42 @@ func TestModifyUrl(t *testing.T) {
         t.Error(diff)
     }
 }
+
+
+/**
+ * Create a Poll, save it, reload it, and make sure it comes back the same
+ */
+func TestSaveAndLoadPoll(t *testing.T) {
+    profile_path := "test_profiles/TestMediaQueries"
+    profile := create_or_load_profile(profile_path)
+
+    tweet := create_stable_tweet()
+
+    poll := create_poll_from_id(rand.Int())
+    poll.TweetID = tweet.ID
+
+    // Save the Poll
+    err := profile.SavePoll(poll)
+    if err != nil {
+        t.Fatalf("Failed to save the poll: %s", err.Error())
+    }
+
+    // Reload the Poll
+    polls, err := profile.GetPollsForTweet(tweet)
+    if err != nil {
+        t.Fatalf("Could not load poll: %s", err.Error())
+    }
+
+    var new_poll scraper.Poll
+    for index := range polls {
+        if polls[index].Choice1 == poll.Choice1 {
+            new_poll = polls[index]
+        }
+    }
+    if new_poll.Choice1 != poll.Choice1 {
+        t.Fatalf("Could not find poll for some reason: %s, %s; %+v", new_poll.Choice1, poll.Choice1, polls)
+    }
+    if diff := deep.Equal(poll, new_poll); diff != nil {
+        t.Error(diff)
+    }
+}

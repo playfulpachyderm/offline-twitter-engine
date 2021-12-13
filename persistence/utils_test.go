@@ -119,6 +119,26 @@ func create_url_from_id(id int) scraper.Url {
 	}
 }
 
+
+/**
+ * Create a semi-stable Poll based on the given ID
+ */
+func create_poll_from_id(id int) scraper.Poll {
+	s := fmt.Sprint(id)
+	return scraper.Poll{
+		TweetID: -1,
+		NumChoices: 2,
+		Choice1: s,
+		Choice1_Votes: 1000,
+		Choice2: "Not " + s,
+		Choice2_Votes: 1500,
+		VotingDuration: 10,
+		VotingEndsAt: time.Unix(10000000, 0),
+		LastUpdatedAt: time.Unix(10000, 0),
+	}
+}
+
+
 /**
  * Create a stable tweet with a fixed ID and content
  */
@@ -144,6 +164,9 @@ func create_stable_tweet() scraper.Tweet {
 		},
 		Mentions: []scraper.UserHandle{},
 		Hashtags: []string{},
+		Polls: []scraper.Poll{
+			create_poll_from_id(-1),
+		},
 	}
 }
 
@@ -207,6 +230,9 @@ func create_dummy_tweet() scraper.Tweet {
 	url2 := create_url_from_id(rand.Int())
 	url2.TweetID = tweet_id
 
+	poll := create_poll_from_id(rand.Int())
+	poll.TweetID = tweet_id
+
 	return scraper.Tweet{
 		ID: tweet_id,
 		UserID: -1,
@@ -222,6 +248,7 @@ func create_dummy_tweet() scraper.Tweet {
 		Mentions: []scraper.UserHandle{"mention1", "mention2"},
 		ReplyMentions: []scraper.UserHandle{"replymention1", "replymention2"},
 		Hashtags: []string{"hash1", "hash2"},
+		Polls: []scraper.Poll{poll},
 	}
 }
 

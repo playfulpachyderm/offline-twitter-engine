@@ -57,6 +57,12 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
             return err
         }
     }
+    for _, poll := range t.Polls {
+        err := p.SavePoll(poll)
+        if err != nil {
+            return err
+        }
+    }
 
     err = tx.Commit()
     if err != nil {
@@ -137,6 +143,12 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
         return t, err
     }
     t.Videos = vids
+
+    polls, err := p.GetPollsForTweet(t)
+    if err != nil {
+        return t, err
+    }
+    t.Polls = polls
 
     urls, err := p.GetUrlsForTweet(t)
     t.Urls = urls

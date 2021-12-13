@@ -25,12 +25,13 @@ type Tweet struct {
 	InReplyToID      TweetID
 	QuotedTweetID    TweetID
 
-	Urls          []Url
 	Images        []Image
 	Videos        []Video
 	Mentions      []UserHandle
 	ReplyMentions []UserHandle
 	Hashtags      []string
+	Urls          []Url
+	Polls         []Poll
 
 	TombstoneType string
 	IsStub bool
@@ -84,6 +85,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	ret.UserID = UserID(apiTweet.UserID)
 	ret.Text = apiTweet.FullText
 
+	// Process "posted-at" date and time
 	if apiTweet.TombstoneText == "" {  // Skip time parsing for tombstones
 		ret.PostedAt, err = time.Parse(time.RubyDate, apiTweet.CreatedAt)
 		if err != nil {
@@ -97,6 +99,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	ret.NumQuoteTweets = apiTweet.QuoteCount
 	ret.InReplyToID = TweetID(apiTweet.InReplyToStatusID)
 
+	// Process URLs and link previews
 	for _, url := range apiTweet.Entities.URLs {
 		var url_object Url
 		if apiTweet.Card.ShortenedUrl == url.ShortenedUrl {
@@ -107,6 +110,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		ret.Urls = append(ret.Urls, url_object)
 	}
 
+	// Process images
 	for _, media := range apiTweet.Entities.Media {
 		if media.Type != "photo" {  // TODO: remove this eventually
 			panic_str := fmt.Sprintf("Unknown media type: %q", media.Type)
@@ -116,13 +120,16 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		new_image.TweetID = ret.ID
 		ret.Images = append(ret.Images, new_image)
 	}
+
+	// Process hashtags
 	for _, hashtag := range apiTweet.Entities.Hashtags {
 		ret.Hashtags = append(ret.Hashtags, hashtag.Text)
 	}
+
+	// Process `@` mentions and reply-mentions
 	for _, mention := range apiTweet.Entities.Mentions {
 		ret.Mentions = append(ret.Mentions, UserHandle(mention.UserName))
 	}
-
 	for _, mention := range strings.Split(apiTweet.Entities.ReplyMentions, " ") {
 		if mention != "" {
 			if mention[0] != '@' {
@@ -134,6 +141,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 
 	ret.QuotedTweetID = TweetID(apiTweet.QuotedStatusID)
 
+	// Process videos
 	for _, entity := range apiTweet.ExtendedEntities.Media {
 		if entity.Type != "video" && entity.Type != "animated_gif" {
 			continue
@@ -146,6 +154,14 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		ret.Images = []Image{}
 	}
 
+	// Process polls
+	if strings.Index(apiTweet.Card.Name, "poll") == 0 {
+		poll := ParseAPIPoll(apiTweet.Card)
+		poll.TweetID = ret.ID
+		ret.Polls = []Poll{poll}
+	}
+
+	// Process tombstones
 	ret.TombstoneType = apiTweet.TombstoneText
 	ret.IsStub = !(ret.TombstoneType == "")
 

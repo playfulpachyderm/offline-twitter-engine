@@ -1,6 +1,8 @@
 package persistence
 
 import (
+    "time"
+
     "offline_twitter/scraper"
 )
 
@@ -57,6 +59,27 @@ func (p Profile) SaveUrl(url scraper.Url) error {
     )
     return err
 }
+
+/**
+ * Save a Poll
+ */
+func (p Profile) SavePoll(poll scraper.Poll) error {
+    _, err := p.DB.Exec(`
+        insert into polls (tweet_id, num_choices, choice1, choice1_votes, choice2, choice2_votes, choice3, choice3_votes, choice4, choice4_votes, voting_duration, voting_ends_at, last_scraped_at)
+                   values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              on conflict do update
+                      set choice1_votes=?,
+                          choice2_votes=?,
+                          choice3_votes=?,
+                          choice4_votes=?,
+                          last_scraped_at=?
+        `,
+        poll.TweetID, poll.NumChoices, poll.Choice1, poll.Choice1_Votes, poll.Choice2, poll.Choice2_Votes, poll.Choice3, poll.Choice3_Votes, poll.Choice4, poll.Choice4_Votes, poll.VotingDuration, poll.VotingEndsAt.Unix(), poll.LastUpdatedAt.Unix(),
+        poll.Choice1_Votes, poll.Choice2_Votes, poll.Choice3_Votes, poll.Choice4_Votes, poll.LastUpdatedAt.Unix(),
+    )
+    return err
+}
+
 
 /**
  * Get the list of images for a tweet
@@ -131,6 +154,35 @@ func (p Profile) GetUrlsForTweet(t scraper.Tweet) (urls []scraper.Url, err error
         }
         url.TweetID = t.ID
         urls = append(urls, url)
+    }
+    return
+}
+
+/**
+ * Get the list of Polls for a Tweet
+ */
+func (p Profile) GetPollsForTweet(t scraper.Tweet) (polls []scraper.Poll, err error) {
+    stmt, err := p.DB.Prepare("select num_choices, choice1, choice1_votes, choice2, choice2_votes, choice3, choice3_votes, choice4, choice4_votes, voting_duration, voting_ends_at, last_scraped_at from polls where tweet_id=?")
+    if err != nil {
+        return
+    }
+    defer stmt.Close()
+    rows, err := stmt.Query(t.ID)
+    if err != nil {
+        return
+    }
+    var poll scraper.Poll
+    var voting_ends_at int
+    var last_scraped_at int
+    for rows.Next() {
+        err = rows.Scan(&poll.NumChoices, &poll.Choice1, &poll.Choice1_Votes, &poll.Choice2, &poll.Choice2_Votes, &poll.Choice3, &poll.Choice3_Votes, &poll.Choice4, &poll.Choice4_Votes, &poll.VotingDuration, &voting_ends_at, &last_scraped_at)
+        if err != nil {
+            return
+        }
+        poll.TweetID = t.ID
+        poll.VotingEndsAt = time.Unix(int64(voting_ends_at), 0)
+        poll.LastUpdatedAt = time.Unix(int64(last_scraped_at), 0)
+        polls = append(polls, poll)
     }
     return
 }

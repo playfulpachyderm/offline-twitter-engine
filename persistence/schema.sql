@@ -81,6 +81,27 @@ create table urls (rowid integer primary key,
     foreign key(tweet_id) references tweets(id)
 );
 
+create table polls (rowid integer primary key,
+    tweet_id integer not null,
+    num_choices integer not null,
+
+    choice1 text,
+    choice1_votes integer,
+    choice2 text,
+    choice2_votes integer,
+    choice3 text,
+    choice3_votes integer,
+    choice4 text,
+    choice4_votes integer,
+
+    voting_duration integer not null,  -- in seconds
+    voting_ends_at integer not null,
+
+    last_scraped_at integer not null,
+
+    foreign key(tweet_id) references tweets(id)
+);
+
 create table images (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
     tweet_id integer not null,
