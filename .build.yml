@@ -95,6 +95,33 @@ tasks:
       duration=$SECONDS
       echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
 
+  - version_bump_test: |
+      SECONDS=0
+
+      sudo apt install -y curl gnupg
+      sudo curl https://apt.playfulpachyderm.com/KEY.gpg | apt-key add -
+      sudo echo "deb https://apt.playfulpachyderm.com/ ./" > /etc/apt/sources.list.d/offline_twitter.list
+      sudo apt update
+
+      sudo apt install -y offline-twitter-engine  # Latest released version
+      which twitter  # Ensure that it got installed
+
+      cd twitter_offline_engine/cmd
+      twitter create_profile outdated_profile
+      cd outdated_profile
+
+      # Create some sample data
+      twitter fetch_user michaelmalice
+      twitter get_user_tweets michaelmalice
+
+      # Now test the upgrade using the newer version
+      cd ..  # Now in `cmd` directory
+      which ./tw  # Should be here from previous step
+      tw fetch_user michaelmalice  # Any operation other than `create_profile` should trigger the upgrade
+
+      duration=$SECONDS
+      echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
+
   - dpkg_build_and_upload: |
       SECONDS=0
 

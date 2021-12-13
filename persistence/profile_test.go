@@ -111,8 +111,8 @@ func TestNewProfile(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	if version != 0 {
-		t.Errorf("Expected database version %d, but got %d", 0, version)
+	if version != persistence.ENGINE_DATABASE_VERSION {
+		t.Errorf("Expected database version %d, but got %d", persistence.ENGINE_DATABASE_VERSION, version)
 	}
 }
 

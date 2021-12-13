@@ -35,8 +35,8 @@ Section: web
 Priority: optional
 Homepage: http://offline-twitter.com
 Description: This utility is the scraper engine that drives \`offline-twitter\`.
- Download and browse content from twitter.
- Save a local copy of everything you browse to a SQLite database.
+ Download and browse content from twitter.  Everything you browse gets saved as
+ a local copy into a SQLite database on your computer.
 " > dpkg_tmp/DEBIAN/control
 
 
