@@ -124,7 +124,7 @@ tasks:
 
       # Now test the upgrade using the newer version
       which ../tw  # Should be here from previous step
-      ../tw --profile outdated_profile fetch_user michaelmalice  # Any operation other than `create_profile` should trigger the upgrade
+      ../tw fetch_user michaelmalice  # Any operation other than `create_profile` should trigger the upgrade
 
       duration=$SECONDS
       echo "Task completed in $(($duration / 60))m$(($duration % 60))s."

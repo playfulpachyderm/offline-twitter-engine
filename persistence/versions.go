@@ -87,7 +87,7 @@ func (p Profile) check_and_update_version() error {
 	if ENGINE_DATABASE_VERSION > version {
 		fmt.Printf(terminal_utils.COLOR_YELLOW)
 		fmt.Printf("================================================\n")
-		fmt.Printf("Database version is out of date.  Upgrading database from version v%d to version v%d!\n", version, ENGINE_DATABASE_VERSION)
+		fmt.Printf("Database version is out of date.  Upgrading database from version %d to version %d!\n", version, ENGINE_DATABASE_VERSION)
 		fmt.Printf(terminal_utils.COLOR_RESET)
 		return p.UpgradeFromXToY(version, ENGINE_DATABASE_VERSION)
 	}
