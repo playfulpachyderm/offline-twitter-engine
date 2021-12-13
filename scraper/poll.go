@@ -22,11 +22,15 @@ type Poll struct {
     VotingDuration int  // In seconds
     VotingEndsAt time.Time
 
-    LastScrapedAt time.Time
+    LastUpdatedAt time.Time
 }
 
 func ParseAPIPoll(apiCard APICard) Poll {
     voting_ends_at, err := time.Parse(time.RFC3339, apiCard.BindingValues.EndDatetimeUTC.StringValue)
+    if err != nil {
+        panic(err)
+    }
+    last_updated_at, err := time.Parse(time.RFC3339, apiCard.BindingValues.LastUpdatedAt.StringValue)
     if err != nil {
         panic(err)
     }
@@ -35,6 +39,7 @@ func ParseAPIPoll(apiCard APICard) Poll {
     ret.NumChoices = parse_num_choices(apiCard.Name)
     ret.VotingDuration = int_or_panic(apiCard.BindingValues.DurationMinutes.StringValue) * 60
     ret.VotingEndsAt = voting_ends_at
+    ret.LastUpdatedAt = last_updated_at
 
     ret.Choice1 = apiCard.BindingValues.Choice1.StringValue
     ret.Choice1_Votes = int_or_panic(apiCard.BindingValues.Choice1_Count.StringValue)

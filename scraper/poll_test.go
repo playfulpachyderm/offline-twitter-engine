@@ -30,6 +30,13 @@ func TestParsePoll2Choices(t *testing.T) {
     if poll.VotingEndsAt.Unix() != expected_ending {
         t.Errorf("Expected closing time %d, got %d", expected_ending, poll.VotingEndsAt.Unix())
     }
+    expected_last_updated := int64(1636318755)
+    if poll.LastUpdatedAt.Unix() != expected_last_updated {
+        t.Errorf("Expected last-updated time %d, got %d", expected_last_updated, poll.LastUpdatedAt.Unix())
+    }
+    if expected_last_updated > expected_ending {
+        t.Errorf("Last updated should be before poll closes!")
+    }
 
     if poll.Choice1 != "Yes" || poll.Choice2 != "No" {
         t.Errorf("Expected %q and %q, got %q and %q", "Yes", "No", poll.Choice1, poll.Choice2)
@@ -63,6 +70,13 @@ func TestParsePoll4Choices(t *testing.T) {
     expected_ending := int64(1635966221)
     if poll.VotingEndsAt.Unix() != expected_ending {
         t.Errorf("Expected closing time %d, got %d", expected_ending, poll.VotingEndsAt.Unix())
+    }
+    expected_last_updated := int64(1635966226)
+    if poll.LastUpdatedAt.Unix() != expected_last_updated {
+        t.Errorf("Expected last-updated time %d, got %d", expected_last_updated, poll.LastUpdatedAt.Unix())
+    }
+    if expected_last_updated < expected_ending {
+        t.Errorf("Last updated should be after poll closes!")
     }
 
     if poll.Choice1 != "Alec Baldwin" || poll.Choice1_Votes != 1669 {
