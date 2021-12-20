@@ -163,9 +163,11 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		ret.Polls = []Poll{poll}
 	}
 
-	// Process tombstones
+	// Process tombstones and other metadata
 	ret.TombstoneType = apiTweet.TombstoneText
 	ret.IsStub = !(ret.TombstoneType == "")
+	ret.LastScrapedAt = time.Unix(0, 0)  // Caller will change this for the tweet that was actually scraped
+	ret.IsConversationScraped = false  // Safe due to the "No Worsening" principle
 
 	return
 }
@@ -200,6 +202,9 @@ func GetTweet(id TweetID) (Tweet, error) {
  * Return a list of tweets, including the original and the rest of its thread,
  * along with a list of associated users.
  *
+ * Mark the main tweet as "is_conversation_downloaded = true", and update its "last_scraped_at"
+ * value.
+ *
  * args:
  * - id: the ID of the tweet to get
  *
@@ -230,6 +235,18 @@ func GetTweetFull(id TweetID) (tweets []Tweet, retweets []Retweet, users []User,
 		users = append(users, fetched_user)
 	}
 	tweets, retweets, _users, err := ParseTweetResponse(tweet_response)
+
+	// Find the main tweet and update its "is_conversation_downloaded" and "last_scraped_at"
+	scrape_time := time.Now()
+	for i, t := range(tweets) {
+		fmt.Printf("Checking tweet %d (%v)\n", t.ID, t.LastScrapedAt)
+		if t.ID == id {
+			// Index the slice because `tweets[i]` is a reference, whereas `t` is a copy
+			tweets[i].LastScrapedAt = scrape_time
+			tweets[i].IsConversationScraped = true
+			fmt.Printf("Updating tweet %d: %v\n", tweets[i].ID, tweets[i].LastScrapedAt.Unix())
+		}
+	}
 	users = append(users, _users...)
 	return
 }
