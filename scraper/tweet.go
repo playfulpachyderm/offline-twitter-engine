@@ -239,12 +239,10 @@ func GetTweetFull(id TweetID) (tweets []Tweet, retweets []Retweet, users []User,
 	// Find the main tweet and update its "is_conversation_downloaded" and "last_scraped_at"
 	scrape_time := time.Now()
 	for i, t := range(tweets) {
-		fmt.Printf("Checking tweet %d (%v)\n", t.ID, t.LastScrapedAt)
 		if t.ID == id {
 			// Index the slice because `tweets[i]` is a reference, whereas `t` is a copy
 			tweets[i].LastScrapedAt = scrape_time
 			tweets[i].IsConversationScraped = true
-			fmt.Printf("Updating tweet %d: %v\n", tweets[i].ID, tweets[i].LastScrapedAt.Unix())
 		}
 	}
 	users = append(users, _users...)
