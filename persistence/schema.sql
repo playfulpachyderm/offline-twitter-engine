@@ -49,6 +49,8 @@ create table tweets (rowid integer primary key,
     is_stub boolean default 0,
 
     is_content_downloaded boolean default 0,
+    is_conversation_scraped boolean default 0,
+    last_scraped_at integer not null default 0,
     foreign key(user_id) references users(id)
 );
 

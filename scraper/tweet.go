@@ -37,6 +37,8 @@ type Tweet struct {
 	IsStub bool
 
 	IsContentDownloaded bool
+	IsConversationScraped bool
+	LastScrapedAt time.Time
 }
 
 

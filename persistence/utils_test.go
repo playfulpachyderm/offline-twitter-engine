@@ -168,6 +168,8 @@ func create_stable_tweet() scraper.Tweet {
 		Polls: []scraper.Poll{
 			create_poll_from_id(-1),
 		},
+		IsConversationScraped: true,
+		LastScrapedAt: time.Unix(100000000, 0),
 	}
 }
 

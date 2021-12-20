@@ -16,18 +16,20 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
         return err
     }
     _, err = db.Exec(`
-        insert into tweets (id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id, mentions, reply_mentions, hashtags, tombstone_type, is_stub, is_content_downloaded)
-        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, (select rowid from tombstone_types where short_name=?), ?, ?)
+        insert into tweets (id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id, mentions, reply_mentions, hashtags, tombstone_type, is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at)
+        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, (select rowid from tombstone_types where short_name=?), ?, ?, ?, ?)
             on conflict do update
            set num_likes=?,
                num_retweets=?,
                num_replies=?,
                num_quote_tweets=?,
                is_stub=(is_stub and ?),
-               is_content_downloaded=(is_content_downloaded or ?)
+               is_content_downloaded=(is_content_downloaded or ?),
+               is_conversation_scraped=(is_conversation_scraped or ?),
+               last_scraped_at=max(last_scraped_at, ?)
         `,
-        t.ID, t.UserID, t.Text, t.PostedAt.Unix(), t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.InReplyToID, t.QuotedTweetID, scraper.JoinArrayOfHandles(t.Mentions), scraper.JoinArrayOfHandles(t.ReplyMentions), strings.Join(t.Hashtags, ","), t.TombstoneType, t.IsStub, t.IsContentDownloaded,
-        t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.IsStub, t.IsContentDownloaded,
+        t.ID, t.UserID, t.Text, t.PostedAt.Unix(), t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.InReplyToID, t.QuotedTweetID, scraper.JoinArrayOfHandles(t.Mentions), scraper.JoinArrayOfHandles(t.ReplyMentions), strings.Join(t.Hashtags, ","), t.TombstoneType, t.IsStub, t.IsContentDownloaded, t.IsConversationScraped, t.LastScrapedAt.Unix(),
+        t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.IsStub, t.IsContentDownloaded, t.IsConversationScraped, t.LastScrapedAt.Unix(),
     )
 
     if err != nil {
@@ -90,7 +92,7 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
     db := p.DB
 
     stmt, err := db.Prepare(`
-        select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id, mentions, reply_mentions, hashtags, ifnull(tombstone_types.short_name, ""), is_stub, is_content_downloaded
+        select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id, mentions, reply_mentions, hashtags, ifnull(tombstone_types.short_name, ""), is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at
           from tweets left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
          where id = ?
     `)
@@ -102,17 +104,20 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
 
     var t scraper.Tweet
     var postedAt int
+    var last_scraped_at int
     var mentions string
     var reply_mentions string
     var hashtags string
 
     row := stmt.QueryRow(id)
-    err = row.Scan(&t.ID, &t.UserID, &t.Text, &postedAt, &t.NumLikes, &t.NumRetweets, &t.NumReplies, &t.NumQuoteTweets, &t.InReplyToID, &t.QuotedTweetID, &mentions, &reply_mentions, &hashtags, &t.TombstoneType, &t.IsStub, &t.IsContentDownloaded)
+    err = row.Scan(&t.ID, &t.UserID, &t.Text, &postedAt, &t.NumLikes, &t.NumRetweets, &t.NumReplies, &t.NumQuoteTweets, &t.InReplyToID, &t.QuotedTweetID, &mentions, &reply_mentions, &hashtags, &t.TombstoneType, &t.IsStub, &t.IsContentDownloaded, &t.IsConversationScraped, &last_scraped_at)
     if err != nil {
         return t, err
     }
 
     t.PostedAt = time.Unix(int64(postedAt), 0)  // args are `seconds` and `nanoseconds`
+    t.LastScrapedAt = time.Unix(int64(last_scraped_at), 0)
+
     t.Mentions = []scraper.UserHandle{}
     for _, m := range strings.Split(mentions, ",") {
         if m != "" {

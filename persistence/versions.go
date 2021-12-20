@@ -8,7 +8,7 @@ import (
 )
 
 
-const ENGINE_DATABASE_VERSION = 1
+const ENGINE_DATABASE_VERSION = 2
 
 
 type VersionMismatchError struct {
@@ -48,7 +48,9 @@ var MIGRATIONS = []string{
     last_scraped_at integer not null,
 
     foreign key(tweet_id) references tweets(id)
-);`,
+	);`,
+`alter table tweets add column is_conversation_scraped boolean default 0;
+	alter table tweets add column last_scraped_at integer not null default 0`,
 }
 
 /**
