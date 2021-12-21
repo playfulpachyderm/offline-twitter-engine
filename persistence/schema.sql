@@ -27,9 +27,11 @@ create table tombstone_types (rowid integer primary key,
 );
 insert into tombstone_types(rowid, short_name, tombstone_text) values
     (1, 'deleted', 'This Tweet was deleted by the Tweet author'),
-    (2, 'suspended', '???'),
+    (2, 'suspended', 'This Tweet is from a suspended account'),
     (3, 'hidden', 'You’re unable to view this Tweet because this account owner limits who can view their Tweets'),
-    (4, 'unavailable', 'This Tweet is unavailable');
+    (4, 'unavailable', 'This Tweet is unavailable'),
+    (5, 'violated', 'This Tweet violated the Twitter Rules'),
+    (6, 'no longer exists', 'This Tweet is from an account that no longer exists');
 
 create table tweets (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),

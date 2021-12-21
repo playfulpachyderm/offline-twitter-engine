@@ -297,8 +297,11 @@ type TweetResponse struct {
 
 var tombstone_types = map[string]string{
 	"This Tweet was deleted by the Tweet author. Learn more": "deleted",
+	"This Tweet is from a suspended account. Learn more": "suspended",
 	"You’re unable to view this Tweet because this account owner limits who can view their Tweets. Learn more": "hidden",
 	"This Tweet is unavailable. Learn more": "unavailable",
+	"This Tweet violated the Twitter Rules. Learn more": "violated",
+	"This Tweet is from an account that no longer exists. Learn more": "no longer exists",
 }
 /**
  * Insert tweets into GlobalObjects for each tombstone.  Returns a list of users that need to

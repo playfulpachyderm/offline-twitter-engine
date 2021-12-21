@@ -8,7 +8,7 @@ import (
 )
 
 
-const ENGINE_DATABASE_VERSION = 2
+const ENGINE_DATABASE_VERSION = 3
 
 
 type VersionMismatchError struct {
@@ -25,7 +25,8 @@ Please upgrade this application to a newer version to use this profile.  Or down
 
 
 /**
- * The Nth entry is the migration that moves you from version N to version N+1
+ * The Nth entry is the migration that moves you from version N to version N+1.
+ * `len(MIGRATIONS)` should always equal `ENGINE_DATABASE_VERSION`.
  */
 var MIGRATIONS = []string{
 `create table polls (rowid integer primary key,
@@ -51,6 +52,8 @@ var MIGRATIONS = []string{
 	);`,
 `alter table tweets add column is_conversation_scraped boolean default 0;
 	alter table tweets add column last_scraped_at integer not null default 0`,
+`update tombstone_types set tombstone_text = 'This Tweet is from a suspended account' where rowid = 2;
+	insert into tombstone_types (rowid, short_name, tombstone_text) values (5, 'violated', 'This Tweet violated the Twitter Rules'), (6, 'no longer exists', 'This Tweet is from an account that no longer exists')`
 }
 
 /**
