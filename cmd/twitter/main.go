@@ -269,18 +269,19 @@ func search(query string) {
 	}
 
 	for _, u := range users {
+		fmt.Println(u.Handle)
+		_, err = profile.DownloadUserContentIfNeeded(&u)
+		if err != nil {
+			die("Error getting user content: " + err.Error(), false, 10)
+		}
+
 		err = profile.SaveUser(u)
 		if err != nil {
 			die("Error saving user: " + err.Error(), false, 4)
 		}
-		err = profile.DownloadUserContentFor(&u)
-		if err != nil {
-			die("Error getting user content: " + err.Error(), false, 10)
-		}
 	}
 
 	for _, t := range tweets {
-		// fmt.Println(t)
 		err = profile.SaveTweet(t)
 		if err != nil {
 			die("Error saving tweet: " + err.Error(), false, 4)
