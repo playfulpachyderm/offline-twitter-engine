@@ -146,3 +146,42 @@ func (p Profile) GetUserByID(id scraper.UserID) (scraper.User, error) {
     }
     return ret, err
 }
+
+/**
+ * Returns `true` if content download is needed, `false` otherwise
+ *
+ * If:
+ * - the user isn't in the DB at all (first time scraping), OR
+ * - `is_content_downloaded` is false in the DB, OR
+ * - the banner / profile image URL has changed from what the DB has
+ * then it needs to be downloaded.
+ *
+ * The `user` object will always have `is_content_downloaded` = false on every scrape.  This is
+ * why the No Worsening Principle is needed.
+ */
+func (p Profile) CheckUserContentDownloadNeeded(user scraper.User) bool {
+    row := p.DB.QueryRow(`select is_content_downloaded, profile_image_url, banner_image_url from users where id = ?`, user.ID)
+
+    var is_content_downloaded bool
+    var profile_image_url string
+    var banner_image_url string
+    err := row.Scan(&is_content_downloaded, &profile_image_url, &banner_image_url)
+    if err != nil {
+        if err == sql.ErrNoRows {
+            return true
+        } else {
+            panic(err)
+        }
+    }
+
+    if !is_content_downloaded {
+        return true
+    }
+    if banner_image_url != user.BannerImageUrl {
+        return true
+    }
+    if profile_image_url != user.ProfileImageUrl {
+        return true
+    }
+    return false
+}

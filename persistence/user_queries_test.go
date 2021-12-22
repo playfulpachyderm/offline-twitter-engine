@@ -81,3 +81,52 @@ func TestUserExists(t *testing.T) {
 		t.Errorf("It should exist, but it doesn't: %d", user.ID)
 	}
 }
+
+/**
+ * Test scenarios relating to user content downloading
+ */
+func TestCheckUserContentDownloadNeeded(t *testing.T) {
+	profile_path := "test_profiles/TestUserQueries"
+	profile := create_or_load_profile(profile_path)
+
+	user := create_dummy_user()
+
+	// If user is not in database, should be "yes" automatically
+	if profile.CheckUserContentDownloadNeeded(user) != true {
+		t.Errorf("Non-saved user should always require content download")
+	}
+
+	// Save the user, but `is_content_downloaded` is still "false"
+	user.BannerImageUrl = "banner url1"
+	user.ProfileImageUrl = "profile url1"
+	user.IsContentDownloaded = false
+	err := profile.SaveUser(user)
+	if err != nil {
+		panic(err)
+	}
+
+	// If is_content_downloaded is false, then it needs download
+	if profile.CheckUserContentDownloadNeeded(user) != true {
+		t.Errorf("Non-downloaded user should require download")
+	}
+
+	// Mark `is_content_downloaded` as "true" again
+	user.IsContentDownloaded = true
+	err = profile.SaveUser(user)
+	if err != nil {
+		panic(err)
+	}
+
+	// If everything is up to date, no download should be required
+	if profile.CheckUserContentDownloadNeeded(user) != false {
+		t.Errorf("Up-to-date user shouldn't need a download")
+	}
+
+	// Change an URL, but don't save it-- needs to be different from what's in the DB
+	user.BannerImageUrl = "banner url2"
+
+	// Download needed for new banner image
+	if profile.CheckUserContentDownloadNeeded(user) != true {
+		t.Errorf("If banner image changed, user should require another download")
+	}
+}
