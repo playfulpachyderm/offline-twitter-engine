@@ -53,7 +53,7 @@ var MIGRATIONS = []string{
 `alter table tweets add column is_conversation_scraped boolean default 0;
 	alter table tweets add column last_scraped_at integer not null default 0`,
 `update tombstone_types set tombstone_text = 'This Tweet is from a suspended account' where rowid = 2;
-	insert into tombstone_types (rowid, short_name, tombstone_text) values (5, 'violated', 'This Tweet violated the Twitter Rules'), (6, 'no longer exists', 'This Tweet is from an account that no longer exists')`
+	insert into tombstone_types (rowid, short_name, tombstone_text) values (5, 'violated', 'This Tweet violated the Twitter Rules'), (6, 'no longer exists', 'This Tweet is from an account that no longer exists')`,
 }
 
 /**
