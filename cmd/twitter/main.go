@@ -157,14 +157,15 @@ func fetch_tweet_conversation(tweet_identifier string) {
 	}
 
 	for _, u := range users {
-		// fmt.Println(u)
+		fmt.Println(u.Handle)
+		_, err = profile.DownloadUserContentIfNeeded(&u)
+		if err != nil {
+			die("Error getting user content: " + err.Error(), false, 10)
+		}
+
 		err = profile.SaveUser(u)
 		if err != nil {
 			die("Error saving user: " + err.Error(), false, 4)
-		}
-		err = profile.DownloadUserContentFor(&u)
-		if err != nil {
-			die("Error getting user content: " + err.Error(), false, 10)
 		}
 	}
 
@@ -200,13 +201,14 @@ func fetch_user_feed(handle string, how_many int) {
 	}
 
 	for _, u := range users {
+		fmt.Println(u.Handle)
+		_, err = profile.DownloadUserContentIfNeeded(&u)
+		if err != nil {
+			die("Error getting user content: " + err.Error(), false, 10)
+		}
 		err = profile.SaveUser(u)
 		if err != nil {
 			die("Error saving user: " + err.Error(), false, 4)
-		}
-		err = profile.DownloadUserContentFor(&u)
-		if err != nil {
-			die("Error getting user content: " + err.Error(), false, 10)
 		}
 	}
 

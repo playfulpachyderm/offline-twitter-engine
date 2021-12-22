@@ -162,3 +162,17 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
     u.IsContentDownloaded = true
     return p.SaveUser(*u)
 }
+
+
+/**
+ * Download a User's content, if needed.
+ *
+ * Returns whether anything was downloaded or not.
+ */
+func (p Profile) DownloadUserContentIfNeeded(u *scraper.User) (bool, error) {
+    if !p.CheckUserContentDownloadNeeded(*u) {
+        return false, nil
+    }
+    return true, p.DownloadUserContentFor(u)
+
+}
