@@ -174,5 +174,17 @@ func (p Profile) DownloadUserContentIfNeeded(u *scraper.User) (bool, error) {
         return false, nil
     }
     return true, p.DownloadUserContentFor(u)
+}
 
+
+/**
+ * Download a Tweet's content, if needed.
+ *
+ * Returns whether anything was downloaded or not.
+ */
+func (p Profile) DownloadTweetContentIfNeeded(t *scraper.Tweet) (bool, error) {
+    if !p.CheckTweetContentDownloadNeeded(*t) {
+        return false, nil
+    }
+    return true, p.DownloadTweetContentFor(t)
 }
