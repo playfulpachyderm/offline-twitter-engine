@@ -232,3 +232,42 @@ func TestLoadUserForTweet(t *testing.T) {
         t.Errorf("Did not load a user.  It is still nil.")
     }
 }
+
+/**
+ * Test all the combinations for whether a tweet needs its content downloaded
+ */
+func TestCheckTweetContentDownloadNeeded(t *testing.T) {
+    profile_path := "test_profiles/TestTweetQueries"
+    profile := create_or_load_profile(profile_path)
+
+    tweet := create_dummy_tweet()
+    tweet.IsContentDownloaded = false
+
+    // Non-saved tweets should need to be downloaded
+    if profile.CheckTweetContentDownloadNeeded(tweet) != true {
+        t.Errorf("Non-saved tweets should need a download")
+    }
+
+    // Save the tweet
+    err := profile.SaveTweet(tweet)
+    if err != nil {
+        t.Errorf("Failed to save the tweet: %s", err.Error())
+    }
+
+    // Should still need a download since `is_content_downloaded` is false
+    if profile.CheckTweetContentDownloadNeeded(tweet) != true {
+        t.Errorf("Non-downloaded tweets should need a download")
+    }
+
+    // Try again but this time with `is_content_downloaded` = true
+    tweet.IsContentDownloaded = true
+    err = profile.SaveTweet(tweet)
+    if err != nil {
+        t.Errorf("Failed to save the tweet: %s", err.Error())
+    }
+
+    // Should no longer need a download
+    if profile.CheckTweetContentDownloadNeeded(tweet) != false {
+        t.Errorf("Downloaded tweets shouldn't need content downloaded")
+    }
+}

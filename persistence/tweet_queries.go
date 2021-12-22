@@ -178,3 +178,21 @@ func (p Profile) LoadUserFor(t *scraper.Tweet) error {
     t.User = &user
     return nil
 }
+
+/**
+ * Return `false` if the tweet is in the DB and has had its content downloaded, `false` otherwise
+ */
+func (p Profile) CheckTweetContentDownloadNeeded(tweet scraper.Tweet) bool {
+    row := p.DB.QueryRow(`select is_content_downloaded from tweets where id = ?`, tweet.ID)
+
+    var is_content_downloaded bool
+    err := row.Scan(&is_content_downloaded)
+    if err != nil {
+        if err == sql.ErrNoRows {
+            return true
+        } else {
+            panic(err)
+        }
+    }
+    return !is_content_downloaded
+}
