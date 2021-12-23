@@ -10,3 +10,11 @@ v0.0.1
 ------
 
 - Added polls
+
+v0.0.2
+------
+
+- Add `is_conversation_scraped` field to Tweets
+- Add some new tombstone types: "tweet violated twitter rules", "account no longer exists"
+- No longer re-download media content (tweet content, user profile / banner images) if not needed
+- Download video thumbnail images as part of video downloading
