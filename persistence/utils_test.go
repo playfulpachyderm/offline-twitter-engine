@@ -92,6 +92,8 @@ func create_video_from_id(id int) scraper.Video {
 		Height: id * 5,
 		RemoteURL: filename,
 		LocalFilename: filename,
+		ThumbnailRemoteUrl: filename,
+		ThumbnailLocalPath: filename,
 		IsDownloaded: false,
 		IsGif: false,
 	}

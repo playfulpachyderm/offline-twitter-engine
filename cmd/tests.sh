@@ -62,12 +62,14 @@ test $(sqlite3 twitter.db "select count(*) from videos") = "1"
 test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1418971605674467340 and is_downloaded = 0") = "1"
 test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1418971605674467340 and is_downloaded = 1") = "0"
 test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1418971605674467340") = "0"
-test $(find videos| wc -l) = "1"
+test $(find videos | wc -l) = "1"
+test $(find video_thumbnails | wc -l) = "1"
 tw download_tweet_content 1418971605674467340
 test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1418971605674467340 and is_downloaded = 0") = "0"
 test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1418971605674467340 and is_downloaded = 1") = "1"
 test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1418971605674467340") = "1"
 test $(find videos | wc -l) = "2"
+test $(find video_thumbnails | wc -l) = "2"
 
 # Try to double-download it
 tw fetch_tweet_only https://twitter.com/DiamondChariots/status/1418971605674467340

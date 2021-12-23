@@ -64,6 +64,7 @@ func NewProfile(target_dir string) (Profile, error) {
 	link_thumbnails_dir := path.Join(target_dir, "link_preview_images")
 	images_dir := path.Join(target_dir, "images")
 	videos_dir := path.Join(target_dir, "videos")
+	video_thumbnails_dir := path.Join(target_dir, "video_thumbnails")
 
 	// Create the directory
 	fmt.Printf("Creating new profile: %s\n", target_dir)
@@ -127,6 +128,13 @@ func NewProfile(target_dir string) (Profile, error) {
 	// Create `videos`
 	fmt.Printf("Creating............. %s/\n", videos_dir)
 	err = os.Mkdir(videos_dir, os.FileMode(0755))
+	if err != nil {
+		return Profile{}, err
+	}
+
+	// Create `video_thumbnails`
+	fmt.Printf("Creating............. %s/\n", video_thumbnails_dir)
+	err = os.Mkdir(video_thumbnails_dir, os.FileMode(0755))
 	if err != nil {
 		return Profile{}, err
 	}

@@ -3,6 +3,7 @@ package scraper
 import (
     "fmt"
     "sort"
+    "path"
 )
 
 type VideoID int64
@@ -17,6 +18,10 @@ type Video struct {
     Height int
     RemoteURL string
     LocalFilename string
+
+    ThumbnailRemoteUrl string
+    ThumbnailLocalPath string
+
     IsDownloaded bool
     IsGif  bool
 }
@@ -34,6 +39,10 @@ func ParseAPIVideo(apiVideo APIExtendedMedia, tweet_id TweetID) Video {
         Height: apiVideo.OriginalInfo.Height,
         RemoteURL: variants[0].URL,
         LocalFilename: local_filename,
+
+        ThumbnailRemoteUrl: apiVideo.MediaURLHttps,
+        ThumbnailLocalPath: path.Base(apiVideo.MediaURLHttps),
+
         IsDownloaded: false,
         IsGif: apiVideo.Type == "animated_gif",
     }

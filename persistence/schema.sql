@@ -126,6 +126,8 @@ create table videos (rowid integer primary key,
     height integer not null,
     remote_url text not null unique,
     local_filename text not null unique,
+    thumbnail_remote_url text not null unique default "missing",
+    thumbnail_local_filename text not null unique default "missing",
     is_gif boolean default 0,
     is_downloaded boolean default 0,
 

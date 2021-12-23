@@ -61,14 +61,23 @@ func (p Profile) download_tweet_image(img *scraper.Image, downloader MediaDownlo
 
 
 /**
- * Downloads an Video, and if successful, marks it as downloaded in the DB
+ * Downloads a Video and its thumbnail, and if successful, marks it as downloaded in the DB
  */
 func (p Profile) download_tweet_video(v *scraper.Video, downloader MediaDownloader) error {
+    // Download the video
     outfile := path.Join(p.ProfileDir, "videos", v.LocalFilename)
     err := downloader.Curl(v.RemoteURL, outfile)
     if err != nil {
         return err
     }
+
+    // Download the thumbnail
+    outfile = path.Join(p.ProfileDir, "video_thumbnails", v.ThumbnailLocalPath)
+    err = downloader.Curl(v.ThumbnailRemoteUrl, outfile)
+    if err != nil {
+        return err
+    }
+
     v.IsDownloaded = true
     return p.SaveVideo(*v)
 }
