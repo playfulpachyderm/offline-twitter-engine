@@ -94,6 +94,8 @@ func create_video_from_id(id int) scraper.Video {
 		LocalFilename: filename,
 		ThumbnailRemoteUrl: filename,
 		ThumbnailLocalPath: filename,
+		Duration: 10000,
+		ViewCount: 200,
 		IsDownloaded: false,
 		IsGif: false,
 	}

@@ -131,7 +131,7 @@ func TestSaveAndLoadVideo(t *testing.T) {
 }
 
 /**
- * Change an Image, save the changes, reload it, and check if it comes back the same
+ * Change an Video, save the changes, reload it, and check if it comes back the same
  */
 func TestModifyVideo(t *testing.T) {
     profile_path := "test_profiles/TestMediaQueries"
@@ -145,6 +145,7 @@ func TestModifyVideo(t *testing.T) {
     }
 
     vid.IsDownloaded = true
+    vid.ViewCount = 23000
 
     // Save the changes
     err := profile.SaveVideo(vid)

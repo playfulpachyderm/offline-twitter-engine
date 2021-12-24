@@ -33,13 +33,14 @@ func (p Profile) SaveImage(img scraper.Image) error {
  */
 func (p Profile) SaveVideo(vid scraper.Video) error {
     _, err := p.DB.Exec(`
-        insert into videos (id, tweet_id, width, height, remote_url, local_filename, thumbnail_remote_url, thumbnail_local_filename, is_downloaded, is_gif)
-                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        insert into videos (id, tweet_id, width, height, remote_url, local_filename, thumbnail_remote_url, thumbnail_local_filename, duration, view_count, is_downloaded, is_gif)
+                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                on conflict do update
-                       set is_downloaded=(is_downloaded or ?)
+                       set is_downloaded=(is_downloaded or ?),
+                           view_count=max(view_count, ?)
         `,
-        vid.ID, vid.TweetID, vid.Width, vid.Height, vid.RemoteURL, vid.LocalFilename, vid.ThumbnailRemoteUrl, vid.ThumbnailLocalPath, vid.IsDownloaded, vid.IsGif,
-        vid.IsDownloaded,
+        vid.ID, vid.TweetID, vid.Width, vid.Height, vid.RemoteURL, vid.LocalFilename, vid.ThumbnailRemoteUrl, vid.ThumbnailLocalPath, vid.Duration, vid.ViewCount, vid.IsDownloaded, vid.IsGif,
+        vid.IsDownloaded, vid.ViewCount,
     )
     return err
 }
@@ -112,7 +113,7 @@ func (p Profile) GetImagesForTweet(t scraper.Tweet) (imgs []scraper.Image, err e
  * Get the list of videos for a tweet
  */
 func (p Profile) GetVideosForTweet(t scraper.Tweet) (vids []scraper.Video, err error) {
-    stmt, err := p.DB.Prepare("select id, width, height, remote_url, local_filename, thumbnail_remote_url, thumbnail_local_filename, is_downloaded, is_gif from videos where tweet_id=?")
+    stmt, err := p.DB.Prepare("select id, width, height, remote_url, local_filename, thumbnail_remote_url, thumbnail_local_filename, duration, view_count, is_downloaded, is_gif from videos where tweet_id=?")
     if err != nil {
         return
     }
@@ -123,7 +124,7 @@ func (p Profile) GetVideosForTweet(t scraper.Tweet) (vids []scraper.Video, err e
     }
     var vid scraper.Video
     for rows.Next() {
-        err = rows.Scan(&vid.ID, &vid.Width, &vid.Height, &vid.RemoteURL, &vid.LocalFilename, &vid.ThumbnailRemoteUrl, &vid.ThumbnailLocalPath, &vid.IsDownloaded, &vid.IsGif)
+        err = rows.Scan(&vid.ID, &vid.Width, &vid.Height, &vid.RemoteURL, &vid.LocalFilename, &vid.ThumbnailRemoteUrl, &vid.ThumbnailLocalPath, &vid.Duration, &vid.ViewCount, &vid.IsDownloaded, &vid.IsGif)
         if err != nil {
             return
         }

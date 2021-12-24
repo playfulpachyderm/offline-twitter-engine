@@ -53,6 +53,16 @@ func TestParseAPIVideo(t *testing.T) {
     if video.ThumbnailLocalPath != expected_thumbnail_filename {
         t.Errorf("Expected %q, got %q", expected_thumbnail_filename, video.ThumbnailLocalPath)
     }
+    expected_view_count := 275952
+    if video.ViewCount != expected_view_count {
+        t.Errorf("Expected view count %d, got %d", expected_view_count, video.ViewCount)
+    }
+    expected_duration := 88300
+    if video.Duration != expected_duration {
+        t.Errorf("Expected duration %d, got %d", expected_duration, video.Duration)
+    }
+
+
     if video.IsDownloaded {
         t.Errorf("Expected it not to be downloaded, but it was")
     }

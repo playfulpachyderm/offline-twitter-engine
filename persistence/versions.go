@@ -8,7 +8,7 @@ import (
 )
 
 
-const ENGINE_DATABASE_VERSION = 4
+const ENGINE_DATABASE_VERSION = 5
 
 
 type VersionMismatchError struct {
@@ -56,6 +56,8 @@ var MIGRATIONS = []string{
 	insert into tombstone_types (rowid, short_name, tombstone_text) values (5, 'violated', 'This Tweet violated the Twitter Rules'), (6, 'no longer exists', 'This Tweet is from an account that no longer exists')`,
 `alter table videos add column thumbnail_remote_url text not null default "missing";
 	alter table videos add column thumbnail_local_filename text not null default "missing"`,
+`alter table videos add column duration integer not null default 0;
+	alter table videos add column view_count integer not null default 0`,
 }
 
 /**

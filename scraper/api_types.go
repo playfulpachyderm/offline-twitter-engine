@@ -35,11 +35,17 @@ type APIExtendedMedia struct {
 	Type          string `json:"type"`
 	VideoInfo     struct {
 		Variants  SortableVariants `json:"variants"`
+		Duration  int              `json:"duration_millis"`
 	} `json:"video_info"`
 	OriginalInfo struct {
 		Width         int    `json:"width"`
 		Height        int    `json:"height"`
 	} `json:"original_info"`
+	Ext struct {
+		MediaStats struct {
+			R interface{} `json:"r"`
+		} `json:"mediaStats"`
+	} `json:"ext"`
 }
 
 type APICard struct {
