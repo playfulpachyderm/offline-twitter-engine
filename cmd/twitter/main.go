@@ -13,18 +13,28 @@ import (
  */
 var profile persistence.Profile
 
+var version_string string
 
 /**
  * Main method
  */
 func main() {
-	if len(os.Args) < 3 {
-		die("", true, 0)
-	}
-
 	profile_dir := flag.String("profile", ".", "TODO USAGE")
+	flag.StringVar(profile_dir, "p", ".", "TODO USAGE")
+
+	show_version_flag := flag.Bool("version", false, "???")
+	flag.BoolVar(show_version_flag, "v", false, "???")
 	flag.Parse()
 	args := flag.Args()
+
+	if *show_version_flag {
+		if version_string == "" {
+			fmt.Println("Development version")
+		} else {
+			fmt.Println("v" + version_string)
+		}
+		os.Exit(0)
+	}
 
 	if len(args) < 2 {
 		die("", true, 1)

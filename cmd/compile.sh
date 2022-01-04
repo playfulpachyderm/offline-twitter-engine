@@ -3,5 +3,9 @@
 set -x
 set -e
 
-go build -ldflags="-s -w" -o tw ./twitter
+if [[ -n "$1" ]]; then
+	go build -ldflags="-s -w -X main.version_string=$1" -o tw ./twitter
+else
+	go build -ldflags="-s -w" -o tw ./twitter
+fi
 chmod +x tw

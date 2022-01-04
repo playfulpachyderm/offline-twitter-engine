@@ -5,11 +5,14 @@ set -x
 
 PS4='+(${BASH_SOURCE}:${LINENO}): '
 
-./compile.sh
+FAKE_VERSION="1.100.3489"
+./compile.sh $FAKE_VERSION
 
 test -e data && rm -r data
 
 PATH=`pwd`:$PATH
+
+test "$(tw --version)" = "v$FAKE_VERSION"
 
 tw create_profile data
 cd data

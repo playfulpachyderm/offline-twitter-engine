@@ -122,8 +122,12 @@ tasks:
       twitter fetch_user michaelmalice
       twitter get_user_tweets michaelmalice
 
+      # Compile the binary with the version number
+      cd .. && ./compile.sh $version
+      cd outdated_profile
+
       # Now test the upgrade using the newer version
-      which ../tw  # Should be here from previous step
+      which ../tw
       ../tw fetch_user michaelmalice  # Any operation other than `create_profile` should trigger the upgrade
 
       duration=$SECONDS
