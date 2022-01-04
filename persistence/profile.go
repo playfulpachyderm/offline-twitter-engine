@@ -8,8 +8,6 @@ import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
 	"gopkg.in/yaml.v2"
-
-	"offline_twitter/scraper"
 )
 
 //go:embed schema.sql
@@ -17,16 +15,9 @@ var sql_init string
 
 type Settings struct {}
 
-/**
- * Create a Type for this to make it easier to expand later
- */
-type UsersList []struct {
-	Handle scraper.UserHandle  `yaml:"user"`
-}
-
 type Profile struct {
 	ProfileDir string
-	UsersList UsersList
+	UsersList []Follow
 	Settings Settings
 	DB *sql.DB
 }
@@ -139,7 +130,7 @@ func NewProfile(target_dir string) (Profile, error) {
 		return Profile{}, err
 	}
 
-	return Profile{target_dir, UsersList{}, settings, db}, nil
+	return Profile{target_dir, []Follow{}, settings, db}, nil
 }
 
 
@@ -171,7 +162,7 @@ func LoadProfile(profile_dir string) (Profile, error) {
 	if err != nil {
 		return Profile{}, err
 	}
-	users_list := UsersList{}
+	users_list := []Follow{}
 	err = yaml.Unmarshal(users_data, &users_list);
 	if err != nil {
 		return Profile{}, err

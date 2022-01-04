@@ -46,6 +46,7 @@ func (d DefaultDownloader) Curl(url string, outpath string) error {
     return nil
 }
 
+
 /**
  * Downloads an Image, and if successful, marks it as downloaded in the DB
  */
@@ -146,11 +147,8 @@ func (p Profile) DownloadUserContentFor(u *scraper.User) error {
  * Enable injecting a custom MediaDownloader (i.e., for testing)
  */
 func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader MediaDownloader) error {
-    var err error
-    var outfile string
-
-    outfile = path.Join(p.ProfileDir, "profile_images", u.ProfileImageLocalPath)
-    err = downloader.Curl(u.ProfileImageUrl, outfile)
+    outfile := path.Join(p.ProfileDir, "profile_images", u.ProfileImageLocalPath)
+    err := downloader.Curl(u.ProfileImageUrl, outfile)
     if err != nil {
         return err
     }
