@@ -64,6 +64,10 @@ func TestParseSingleUser(t *testing.T) {
 	if user.ProfileImageUrl != expectedProfileImage {
 		t.Errorf("Expected %q, got %q", expectedProfileImage, user.ProfileImageUrl)
 	}
+	expected_tiny_profile_image := "https://pbs.twimg.com/profile_images/1064051934812913664/Lbwdb_C9_normal.jpg"
+	if user.GetTinyProfileImageUrl() != expected_tiny_profile_image {
+		t.Errorf("Expected %q, got %q", expected_tiny_profile_image, user.GetTinyProfileImageUrl())
+	}
 	expectedBannerImage := "https://pbs.twimg.com/profile_banners/44067298/1615134676"
 	if user.BannerImageUrl != expectedBannerImage {
 		t.Errorf("Expected %q, got %q", expectedBannerImage, user.BannerImageUrl)

@@ -148,3 +148,15 @@ func (u User) compute_banner_image_local_path() string {
     }
     return string(u.Handle) + "_banner_" + base_name
 }
+
+/**
+ * Get the URL where we would expect to find a User's tiny profile image
+ */
+func (u User) GetTinyProfileImageUrl() string {
+    // Check that the format is as expected
+    r := regexp.MustCompile(`(\.\w{2,4})$`)
+    if !r.MatchString(u.ProfileImageUrl) {
+        panic(fmt.Sprintf("Weird profile image url: %s", u.ProfileImageUrl))
+    }
+    return r.ReplaceAllString(u.ProfileImageUrl, "_normal$1")
+}
