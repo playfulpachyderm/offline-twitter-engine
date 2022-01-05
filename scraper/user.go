@@ -160,3 +160,7 @@ func (u User) GetTinyProfileImageUrl() string {
     }
     return r.ReplaceAllString(u.ProfileImageUrl, "_normal$1")
 }
+
+func (u User) GetTinyProfileImageLocalPath() string {
+    return string(u.Handle) + "_profile_" + path.Base(u.GetTinyProfileImageUrl())
+}

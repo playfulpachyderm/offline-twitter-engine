@@ -108,6 +108,16 @@ test $(sqlite3 twitter.db "select reply_mentions from tweets where id = 14295854
 test $(sqlite3 twitter.db "select reply_mentions from tweets where id = 1429616911315345414") = "RememberAfghan1,michaelmalice"
 
 
+# Test that profile images (tiny vs regular) are chosen properly
+test $(sqlite3 twitter.db "select is_content_downloaded from users where handle = 'Cernovich'") = "1"
+test $(find profile_images/Cernovich* | grep normal | wc -l) = "0"  # Since "Cernovich" was fetched directly, should have full-sized profile image and banner
+test $(find profile_images/Cernovich* | grep banner | wc -l) = "1"
+
+test $(sqlite3 twitter.db "select is_content_downloaded from users where handle = 'RememberAfghan1'") = "0"
+test $(find profile_images/RememberAfghan1* | grep normal | wc -l) = "1"  # "RememberAfghan1" was fetched via a tweet thread and isn't followed, so should have tiny profile image and no banner
+test $(find profile_images/RememberAfghan1* | grep banner | wc -l) = "0"
+
+
 # Test that the `--profile` flag works
 cd ..
 tw --profile data fetch_user elonmusk

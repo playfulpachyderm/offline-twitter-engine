@@ -170,6 +170,21 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
     return p.SaveUser(*u)
 }
 
+/**
+ * Download a User's tiny profile image, if it hasn't been downloaded yet.
+ * If it has been downloaded, do nothing.
+ */
+func (p Profile) DownloadUserProfileImageTiny(u scraper.User) error {
+    d := DefaultDownloader{}
+
+    outfile := path.Join(p.ProfileDir, "profile_images", u.GetTinyProfileImageLocalPath())
+    if file_exists(outfile) {
+        return nil
+    }
+    err := d.Curl(u.GetTinyProfileImageUrl(), outfile)
+    return err
+}
+
 
 /**
  * Download a User's content, if needed.
@@ -180,7 +195,12 @@ func (p Profile) DownloadUserContentIfNeeded(u *scraper.User) (bool, error) {
     if !p.CheckUserContentDownloadNeeded(*u) {
         return false, nil
     }
-    return true, p.DownloadUserContentFor(u)
+    if p.IsFollowing(u.Handle) {
+        // TODO: this might not be necessary?  When would someone be followed but content not downloaded?
+        return true, p.DownloadUserContentFor(u)
+    } else {
+        return true, p.DownloadUserProfileImageTiny(*u)
+    }
 }
 
 
