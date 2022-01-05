@@ -18,3 +18,12 @@ v0.0.2
 - Add some new tombstone types: "tweet violated twitter rules", "account no longer exists"
 - No longer re-download media content (tweet content, user profile / banner images) if not needed
 - Download video thumbnail images as part of video downloading
+
+v0.0.3
+------
+
+- Add video `duration` and `view_count` fields
+- Add `--version` command line option
+- Improve user image scraping for rando users (download less eagerly) to speed up browsing and save disk space:
+	- Download tiny versions of profile images (48x48 pixels)
+	- Don't download banner images at all
