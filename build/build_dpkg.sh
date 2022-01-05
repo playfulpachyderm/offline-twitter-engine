@@ -10,7 +10,7 @@ then
 fi
 
 # Compile the program
-(cd ../cmd && ./compile.sh)
+(cd ../cmd && ./compile.sh $1)
 
 # Prepare the output folder
 if [[ -e dpkg_tmp ]]
