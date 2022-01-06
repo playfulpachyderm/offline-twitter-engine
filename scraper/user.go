@@ -78,6 +78,20 @@ Joined %s
     return ret
 }
 
+/**
+ * Given a tweet URL, return the corresponding user handle.
+ * If tweet url is not valid, return an error.
+ */
+func ParseHandleFromTweetUrl(tweet_url string) (UserHandle, error) {
+    r := regexp.MustCompile(`https://twitter.com/(\w+)/status/\d+`)
+    matches := r.FindStringSubmatch(tweet_url)
+    if len(matches) != 2 {  // matches[0] is the full string
+        return "", fmt.Errorf("Invalid tweet url: %s", tweet_url)
+    }
+    return UserHandle(matches[1]), nil
+}
+
+
 // Turn an APIUser, as returned from the scraper, into a properly structured User object
 func ParseSingleUser(apiUser APIUser) (ret User, err error) {
     ret.ID = UserID(apiUser.ID)

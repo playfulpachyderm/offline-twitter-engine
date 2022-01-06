@@ -85,3 +85,31 @@ func TestParseSingleUser(t *testing.T) {
 		t.Errorf("Expected %q, got %q", expected_id, user.PinnedTweet)
 	}
 }
+
+/**
+ * Should extract a user handle from a tweet URL, or fail if URL is invalid
+ */
+func TestParseHandleFromTweetUrl(t *testing.T) {
+	// Test valid tweet url
+	url := "https://twitter.com/kanesays23/status/1429583672827465730"
+	expected_user := scraper.UserHandle("kanesays23")
+	result, err := scraper.ParseHandleFromTweetUrl(url)
+	if err != nil {
+		t.Errorf("Unexpected error while parsing handle: %s", err)
+	}
+	if result != expected_user {
+		t.Errorf("Expected handle %q, got %q", expected_user, result)
+	}
+
+	// Test invalid url
+	_, err = scraper.ParseHandleFromTweetUrl("awjgwekf")
+	if err == nil {
+		t.Errorf("Should have produced an error for invalid URL")
+	}
+
+	// Test empty string
+	_, err = scraper.ParseHandleFromTweetUrl("awjgwekf")
+	if err == nil {
+		t.Errorf("Should have produced an error for invalid URL")
+	}
+}
