@@ -27,6 +27,7 @@ func TestNormalizeContent(t *testing.T) {
 		{"test_responses/single_tweets/tweet_with_quoted_tweet_as_link.json", "", 1422680899670274048, 0, 0, ""},
 		{"test_responses/single_tweets/tweet_with_quoted_tweet_as_link2.json", "sometimes they're too dimwitted to even get the wrong title right", 1396194494710788100, 1395882872729477131, 0, ""},
 		{"test_responses/single_tweets/tweet_with_quoted_tweet_as_link3.json", "I was using an analogy about creating out-groups but the Germans sure love their literalism", 1442092399358930946, 1335678942020300802, 0, ""},
+		{"test_responses/single_tweets/tweet_with_html_entities.json", "By the 1970s  the elite consensus was that \"the hunt for atomic spies\" had been a grotesque over-reaction to minor leaks that cost the lives of the Rosenbergs & ruined many innocents. Only when the USSR fell was it discovered that they & other spies had given away ALL the secrets", 0, 0, 0, ""},
 	}
 
 	for _, v := range test_cases {

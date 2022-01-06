@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"fmt"
+	"html"
 	"time"
 	"strings"
 	"encoding/json"
@@ -194,6 +195,7 @@ func (t *APITweet) NormalizeContent() {
 			}
 		}
 	}
+	t.FullText = html.UnescapeString(t.FullText)
 	t.FullText = strings.TrimSpace(t.FullText)
 }
 
