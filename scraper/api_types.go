@@ -232,6 +232,7 @@ type APIUser struct {
 	ScreenName           string   `json:"screen_name"`
 	StatusesCount        int      `json:"statuses_count"`
 	Verified             bool     `json:"verified"`
+	IsBanned             bool
 }
 
 
@@ -250,6 +251,16 @@ type UserResponse struct {
 func (u UserResponse) ConvertToAPIUser() APIUser {
 	ret := u.Data.User.Legacy
 	ret.ID = u.Data.User.ID
+
+	// Banned users
+	for _, api_error := range u.Errors {
+		if api_error.Message == "Authorization: User has been suspended. (63)" {
+			ret.IsBanned = true
+		} else {
+			panic(fmt.Sprintf("Unknown api error: %q", api_error.Message))
+		}
+	}
+
 	return ret
 }
 

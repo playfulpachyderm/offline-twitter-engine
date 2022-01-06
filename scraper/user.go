@@ -33,6 +33,7 @@ type User struct {
     JoinDate              time.Time
     IsPrivate             bool
     IsVerified            bool
+    IsBanned              bool
     ProfileImageUrl       string
     ProfileImageLocalPath string
     BannerImageUrl        string
@@ -95,6 +96,11 @@ func ParseHandleFromTweetUrl(tweet_url string) (UserHandle, error) {
 // Turn an APIUser, as returned from the scraper, into a properly structured User object
 func ParseSingleUser(apiUser APIUser) (ret User, err error) {
     ret.ID = UserID(apiUser.ID)
+    if apiUser.IsBanned {
+        // Banned users won't have any further info, so just return here
+        ret.IsBanned = true
+        return
+    }
     ret.DisplayName = apiUser.Name
     ret.Handle = UserHandle(apiUser.ScreenName)
     ret.Bio = apiUser.Description

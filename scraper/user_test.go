@@ -60,6 +60,9 @@ func TestParseSingleUser(t *testing.T) {
 	if user.IsVerified != true {
 		t.Errorf("Expected %v, got %v", true, user.IsPrivate)
 	}
+	if user.IsBanned != false {
+		t.Errorf("User should not be banned")
+	}
 	expectedProfileImage := "https://pbs.twimg.com/profile_images/1064051934812913664/Lbwdb_C9.jpg"
 	if user.ProfileImageUrl != expectedProfileImage {
 		t.Errorf("Expected %q, got %q", expectedProfileImage, user.ProfileImageUrl)
@@ -83,6 +86,34 @@ func TestParseSingleUser(t *testing.T) {
 	expected_id = 1403835414373339136
 	if user.PinnedTweetID != scraper.TweetID(expected_id) {
 		t.Errorf("Expected %q, got %q", expected_id, user.PinnedTweet)
+	}
+}
+
+/**
+ * Should correctly parse a banned user
+ */
+func TestParseBannedUser(t *testing.T) {
+	data, err := ioutil.ReadFile("test_responses/suspended_user.json")
+	if err != nil {
+		panic(err)
+	}
+	var user_resp scraper.UserResponse
+	err = json.Unmarshal(data, &user_resp)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	apiUser := user_resp.ConvertToAPIUser()
+
+	user, err := scraper.ParseSingleUser(apiUser)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	if user.ID != 193918550 {
+		t.Errorf("Expected id %d, got %d", 193918550, user.ID)
+	}
+	if user.IsBanned != true {
+		t.Errorf("Expected user to be banned")
 	}
 }
 
