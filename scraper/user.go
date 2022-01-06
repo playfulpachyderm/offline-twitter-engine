@@ -10,6 +10,8 @@ import (
     "offline_twitter/terminal_utils"
 )
 
+const DEFAULT_PROFILE_IMAGE_URL = "https://abs.twimg.com/sticky/default_profile_images/default_profile.png"
+
 type UserID int64
 type UserHandle string
 
@@ -173,14 +175,27 @@ func (u User) compute_banner_image_local_path() string {
  * Get the URL where we would expect to find a User's tiny profile image
  */
 func (u User) GetTinyProfileImageUrl() string {
-    // Check that the format is as expected
     r := regexp.MustCompile(`(\.\w{2,4})$`)
+
+    // If profile image is empty, then just use the default profile image
+    if u.ProfileImageUrl == "" {
+        return r.ReplaceAllString(DEFAULT_PROFILE_IMAGE_URL, "_normal$1")
+    }
+
+    // Check that the format is as expected
     if !r.MatchString(u.ProfileImageUrl) {
         panic(fmt.Sprintf("Weird profile image url: %s", u.ProfileImageUrl))
     }
     return r.ReplaceAllString(u.ProfileImageUrl, "_normal$1")
 }
 
+/**
+ * If user has a profile image, return the local path for its tiny version.
+ * If user has a blank or default profile image, return a non-personalized default path.
+ */
 func (u User) GetTinyProfileImageLocalPath() string {
+    if u.ProfileImageUrl == "" {
+        return path.Base(u.GetTinyProfileImageUrl())
+    }
     return string(u.Handle) + "_profile_" + path.Base(u.GetTinyProfileImageUrl())
 }
