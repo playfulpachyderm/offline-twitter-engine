@@ -226,7 +226,8 @@ func GetTweetFull(id TweetID) (tweets []Tweet, retweets []Retweet, users []User,
 	tombstone_users := tweet_response.HandleTombstones()
 	fmt.Printf("%v\n", tombstone_users)
 	for _, u := range tombstone_users {
-		fetched_user, err1 := GetUser(UserHandle(u))
+		fetched_user, err1 := GetUser(u)
+		fetched_user.Handle = u
 		if err != nil {
 			err = err1
 			return
@@ -235,6 +236,25 @@ func GetTweetFull(id TweetID) (tweets []Tweet, retweets []Retweet, users []User,
 		users = append(users, fetched_user)
 	}
 	tweets, retweets, _users, err := ParseTweetResponse(tweet_response)
+
+	// Quoted tombstones need their user_id filled out from the tombstoned_users list
+	for i, _ := range tweets {
+		if tweets[i].UserID != 0 {
+			continue
+		}
+		handle := tweet_response.GlobalObjects.Tweets[fmt.Sprint(tweets[i].ID)].UserHandle
+		is_found := false
+		for _, u := range users {  // The tombstoned users, not from the tweet response
+			if u.Handle == UserHandle(handle) {
+				tweets[i].UserID = u.ID
+				is_found = true
+				break
+			}
+		}
+		if !is_found {
+			panic("Couldn't find the user handle in the list of tombstoned users!")
+		}
+	}
 
 	// Find the main tweet and update its "is_conversation_downloaded" and "last_scraped_at"
 	scrape_time := time.Now()

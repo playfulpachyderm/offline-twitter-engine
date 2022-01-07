@@ -168,6 +168,7 @@ type APITweet struct {
 	} `json:"quoted_status_permalink"`
 	Time                  time.Time `json:"time"`
 	UserID                int64     `json:"user_id_str,string"`
+	UserHandle            string
 	Card                  APICard   `json:"card"`
 	TombstoneText         string
 }
@@ -326,9 +327,37 @@ var tombstone_types = map[string]string{
  * Insert tweets into GlobalObjects for each tombstone.  Returns a list of users that need to
  * be fetched for tombstones.
  */
-func (t *TweetResponse) HandleTombstones() []string {
-	ret := []string{}
+func (t *TweetResponse) HandleTombstones() []UserHandle {
+	ret := []UserHandle{}
 
+	// Handle tombstones in quote-tweets
+	for _, api_tweet := range t.GlobalObjects.Tweets {
+		// Ignore if tweet doesn't have a quoted tweet
+		if api_tweet.QuotedStatusIDStr == "" {
+			continue
+		}
+		// Ignore if quoted tweet is in the Global Objects (i.e., not a tombstone)
+		if _, ok := t.GlobalObjects.Tweets[api_tweet.QuotedStatusIDStr]; ok {
+			continue
+		}
+
+		user_handle, err := ParseHandleFromTweetUrl(api_tweet.QuotedStatusPermalink.ExpandedURL)
+		if err != nil {
+			panic(err)
+		}
+
+		var tombstoned_tweet APITweet
+		tombstoned_tweet.ID = int64(int_or_panic(api_tweet.QuotedStatusIDStr))
+		tombstoned_tweet.UserHandle = string(user_handle)
+		tombstoned_tweet.TombstoneText = "unavailable"
+
+		ret = append(ret, user_handle)
+		fmt.Printf("Adding quoted tombstoned tweet: TweetID %d, handle %q\n", tombstoned_tweet.ID, tombstoned_tweet.UserHandle)
+
+		t.GlobalObjects.Tweets[api_tweet.QuotedStatusIDStr] = tombstoned_tweet
+	}
+
+	// Handle tombstones in the conversation flow
 	entries := t.Timeline.Instructions[0].AddEntries.Entries
 	sort.Sort(entries)
 	for i, entry := range entries {
@@ -344,7 +373,7 @@ func (t *TweetResponse) HandleTombstones() []string {
 				}
 				tombstoned_tweet.ID = api_tweet.InReplyToStatusID
 				tombstoned_tweet.UserID = api_tweet.InReplyToUserID
-				ret = append(ret, api_tweet.InReplyToScreenName)
+				ret = append(ret, UserHandle(api_tweet.InReplyToScreenName))
 			}
 			if i - 1 >= 0 && entries[i-1].Content.Item.Content.Tweet.ID != 0 {
 				prev_tweet_id := entries[i-1].Content.Item.Content.Tweet.ID
@@ -365,6 +394,7 @@ func (t *TweetResponse) HandleTombstones() []string {
 			t.GlobalObjects.Tweets[fmt.Sprint(tombstoned_tweet.ID)] = tombstoned_tweet
 		}
 	}
+
 	return ret
 }
 
