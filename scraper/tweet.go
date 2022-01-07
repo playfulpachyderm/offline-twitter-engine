@@ -238,7 +238,7 @@ func GetTweetFull(id TweetID) (tweets []Tweet, retweets []Retweet, users []User,
 	tweets, retweets, _users, err := ParseTweetResponse(tweet_response)
 
 	// Quoted tombstones need their user_id filled out from the tombstoned_users list
-	for i, _ := range tweets {
+	for i := range tweets {
 		if tweets[i].UserID != 0 {
 			continue
 		}
