@@ -117,10 +117,10 @@ func TestParseBannedUser(t *testing.T) {
 	}
 
 	// Test generation of profile images for banned user
-	if user.GetTinyProfileImageUrl() != "https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png" {
+	if user.GetTinyProfileImageUrl() != "https://abs.twimg.com/sticky/default_profile_images/default_profile.png" {
 		t.Errorf("Incorrect tiny profile image URL for banned user: %q", user.GetTinyProfileImageUrl())
 	}
-	if user.GetTinyProfileImageLocalPath() != "default_profile_normal.png" {
+	if user.GetTinyProfileImageLocalPath() != "default_profile.png" {
 		t.Errorf("Incorrect tiny profile image local path for banned user: %q", user.GetTinyProfileImageLocalPath())
 	}
 }

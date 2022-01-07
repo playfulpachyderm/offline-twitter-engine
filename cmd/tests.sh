@@ -97,14 +97,14 @@ test $(find videos | wc -l) = "$((initial_videos_count + 1))"
 
 
 # Download a full thread
-test ! -e profile_images/default_profile_normal.png
+test ! -e profile_images/default_profile.png
 tw fetch_tweet https://twitter.com/RememberAfghan1/status/1429585423702052867
 test $(sqlite3 twitter.db "select handle from tweets join users on tweets.user_id = users.id where tweets.id=1429585423702052867") = "RememberAfghan1"
 test $(sqlite3 twitter.db "select is_conversation_scraped, abs(last_scraped_at - strftime('%s','now')) < 30 from tweets where id = 1429585423702052867") = "1|1"
 test $(sqlite3 twitter.db "select handle from tweets join users on tweets.user_id = users.id where tweets.id=1429584239570391042") = "michaelmalice"
 test $(sqlite3 twitter.db "select is_conversation_scraped from tweets where id = 1429584239570391042") = "0"
 test "$(sqlite3 twitter.db "select handle, is_banned from tweets join users on tweets.user_id = users.id where tweets.id=1429583672827465730")" = "kanesays23|1"  # This guy got banned
-test -e profile_images/default_profile_normal.png
+test -e profile_images/default_profile.png
 test $(sqlite3 twitter.db "select handle from tweets join users on tweets.user_id = users.id where tweets.id=1429616911315345414") = "NovaValentis"
 test $(sqlite3 twitter.db "select reply_mentions from tweets where id = 1429585423702052867") = "michaelmalice"
 test $(sqlite3 twitter.db "select reply_mentions from tweets where id = 1429616911315345414") = "RememberAfghan1,michaelmalice"
@@ -210,7 +210,7 @@ test "$(sqlite3 twitter.db "select choice1_votes, choice2_votes, choice3_votes, 
 
 
 # Test fetching a banned user
-test ! -e profile_images/default_profile.png
+rm profile_images/default_profile.png
 tw fetch_user nancytracker
 test "$(sqlite3 twitter.db "select is_content_downloaded, is_banned from users where handle='nancytracker'")" = "1|1"
 test -e profile_images/default_profile.png
