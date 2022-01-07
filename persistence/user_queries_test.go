@@ -2,6 +2,7 @@ package persistence_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/go-test/deep"
 )
@@ -41,6 +42,80 @@ func TestSaveAndLoadUser(t *testing.T) {
 	}
 }
 
+/**
+ *
+ */
+func TestModifyUser(t *testing.T) {
+	profile_path := "test_profiles/TestUserQueries"
+	profile := create_or_load_profile(profile_path)
+
+	fake_user := create_dummy_user()
+	fake_user.DisplayName = "Display Name 1"
+	fake_user.Location = "location1"
+	fake_user.IsPrivate = false
+	fake_user.IsVerified = false
+	fake_user.IsBanned = false
+	fake_user.FollowersCount = 1000
+	fake_user.JoinDate = time.Unix(1000, 0)
+	fake_user.ProfileImageUrl = "asdf"
+	fake_user.IsContentDownloaded = true
+
+	// Save the user so it can be modified
+	err := profile.SaveUser(fake_user)
+	if err != nil {
+		panic(err)
+	}
+
+
+	fake_user.DisplayName = "Display Name 2"
+	fake_user.Location = "location2"
+	fake_user.IsPrivate = true
+	fake_user.IsVerified = true
+	fake_user.IsBanned = true
+	fake_user.FollowersCount = 2000
+	fake_user.JoinDate = time.Unix(2000, 0)
+	fake_user.ProfileImageUrl = "asdf2"
+	fake_user.IsContentDownloaded = false  // test No Worsening
+
+	// Save the modified user
+	err = profile.SaveUser(fake_user)
+	if err != nil {
+		panic(err)
+	}
+	// Reload the modified user
+	new_fake_user, err := profile.GetUserByID(fake_user.ID)
+	if err != nil {
+		panic(err)
+	}
+
+	if new_fake_user.DisplayName != "Display Name 2" {
+		t.Errorf("Expected display name %q, got %q", "Display Name 2", new_fake_user.DisplayName)
+	}
+	if new_fake_user.Location != "location2" {
+		t.Errorf("Expected location %q, got %q", "location2", new_fake_user.Location)
+	}
+	if new_fake_user.IsPrivate != true {
+		t.Errorf("Should be private")
+	}
+	if new_fake_user.IsVerified != true {
+		t.Errorf("Should be verified")
+	}
+	if new_fake_user.IsBanned != true {
+		t.Errorf("Should be banned")
+	}
+	if new_fake_user.FollowersCount != 2000 {
+		t.Errorf("Expected %d followers, got %d", 2000, new_fake_user.FollowersCount)
+	}
+	if new_fake_user.JoinDate.Unix() != 1000 {
+		t.Errorf("Expected unchanged join date (%d), got %d", 1000, new_fake_user.JoinDate.Unix())
+	}
+	if new_fake_user.ProfileImageUrl != "asdf2" {
+		t.Errorf("Expected profile image url to be %q, got %q", "asdf2", new_fake_user.ProfileImageUrl)
+	}
+	if new_fake_user.IsContentDownloaded != true {
+		t.Errorf("Expected content to be downloaded (no-worsening)")
+	}
+}
 
 func TestHandleIsCaseInsensitive(t *testing.T) {
 	profile_path := "test_profiles/TestUserQueries"
