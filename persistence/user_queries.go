@@ -164,10 +164,6 @@ func (p Profile) GetUserByID(id scraper.UserID) (scraper.User, error) {
  * why the No Worsening Principle is needed.
  */
 func (p Profile) CheckUserContentDownloadNeeded(user scraper.User) bool {
-    if user.IsBanned {
-        // Check `is_banned` on the live user, since he may have been un-banned since last scraped
-        return false
-    }
     row := p.DB.QueryRow(`select is_content_downloaded, profile_image_url, banner_image_url from users where id = ?`, user.ID)
 
     var is_content_downloaded bool

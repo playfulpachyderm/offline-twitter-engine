@@ -98,13 +98,13 @@ func ParseHandleFromTweetUrl(tweet_url string) (UserHandle, error) {
 // Turn an APIUser, as returned from the scraper, into a properly structured User object
 func ParseSingleUser(apiUser APIUser) (ret User, err error) {
     ret.ID = UserID(apiUser.ID)
+    ret.Handle = UserHandle(apiUser.ScreenName)
     if apiUser.IsBanned {
         // Banned users won't have any further info, so just return here
         ret.IsBanned = true
         return
     }
     ret.DisplayName = apiUser.Name
-    ret.Handle = UserHandle(apiUser.ScreenName)
     ret.Bio = apiUser.Description
     ret.FollowingCount = apiUser.FriendsCount
     ret.FollowersCount = apiUser.FollowersCount
@@ -139,6 +139,9 @@ func ParseSingleUser(apiUser APIUser) (ret User, err error) {
 func GetUser(handle UserHandle) (User, error) {
     api := API{}
     apiUser, err := api.GetUser(handle)
+    if apiUser.ScreenName == "" {
+        apiUser.ScreenName = string(handle)
+    }
     if err != nil {
         return User{}, err
     }
