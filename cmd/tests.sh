@@ -207,6 +207,11 @@ test "$(sqlite3 twitter.db "select choice1, choice2, choice3, choice4 from polls
 test "$(sqlite3 twitter.db "select choice1_votes, choice2_votes, choice3_votes, choice4_votes from polls where tweet_id = 1465534109573390348")" = "1593|624|778|1138"
 
 
+# Test fetching a banned user
+test $(sqlite3 twitter.db "select is_content_downloaded from users where handle='kanesays23'") = "0"
+tw fetch_user kanesays23
+test "$(sqlite3 twitter.db "select is_content_downloaded, is_banned from users where handle='kanesays23'")" = "1|1"
+
 # TODO: Maybe this file should be broken up into multiple test scripts
 
 echo -e "\033[32mAll tests passed.  Finished successfully.\033[0m"

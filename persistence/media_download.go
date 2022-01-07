@@ -147,8 +147,18 @@ func (p Profile) DownloadUserContentFor(u *scraper.User) error {
  * Enable injecting a custom MediaDownloader (i.e., for testing)
  */
 func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader MediaDownloader) error {
-    outfile := path.Join(p.ProfileDir, "profile_images", u.ProfileImageLocalPath)
-    err := downloader.Curl(u.ProfileImageUrl, outfile)
+    var outfile string
+    var target_url string
+
+    if u.ProfileImageUrl == "" {
+        outfile = path.Join(p.ProfileDir, "profile_images", path.Base(scraper.DEFAULT_PROFILE_IMAGE_URL))
+        target_url = scraper.DEFAULT_PROFILE_IMAGE_URL
+    } else {
+        outfile = path.Join(p.ProfileDir, "profile_images", u.ProfileImageLocalPath)
+        target_url = u.ProfileImageUrl
+    }
+
+    err := downloader.Curl(target_url, outfile)
     if err != nil {
         return err
     }

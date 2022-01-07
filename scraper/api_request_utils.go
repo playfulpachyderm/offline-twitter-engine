@@ -173,49 +173,52 @@ func UpdateQueryCursor(req *http.Request, new_cursor string, is_tweet bool) {
 
 
 func (api API) GetUser(handle UserHandle) (APIUser, error) {
-    client := &http.Client{Timeout: 10 * time.Second}
-    req, err := http.NewRequest("GET", "https://api.twitter.com/graphql/4S2ihIKfF3xhp-ENxvUAfQ/UserByScreenName?variables=%7B%22screen_name%22%3A%22" + string(handle) + "%22%2C%22withHighlightedLabel%22%3Atrue%7D", nil)
-    if err != nil {
-        return APIUser{}, err
-    }
+	client := &http.Client{Timeout: 10 * time.Second}
+	req, err := http.NewRequest("GET", "https://api.twitter.com/graphql/4S2ihIKfF3xhp-ENxvUAfQ/UserByScreenName?variables=%7B%22screen_name%22%3A%22" + string(handle) + "%22%2C%22withHighlightedLabel%22%3Atrue%7D", nil)
+	if err != nil {
+		return APIUser{}, err
+	}
 	err = ApiRequestAddTokens(req)
 	if err != nil {
 		return APIUser{}, err
 	}
 
-    var response UserResponse
+	var response UserResponse
 	for retries := 0; retries < 3; retries += 1 {
-	    resp, err := client.Do(req)
-	    if err != nil {
-	        return APIUser{}, err
-	    }
-	    defer resp.Body.Close()
+		resp, err := client.Do(req)
+		if err != nil {
+			return APIUser{}, err
+		}
+		defer resp.Body.Close()
 
-	    // Sometimes it randomly gives 403 Forbidden.  API's fault, not ours
-	    // We check for this below
-	    if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusForbidden) {
-	        content, _ := ioutil.ReadAll(resp.Body)
-	        return APIUser{}, fmt.Errorf("response status %s: %s", resp.Status, content)
-	    }
+		// Sometimes it randomly gives 403 Forbidden.  API's fault, not ours
+		// We check for this below
+		if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusForbidden) {
+			content, _ := ioutil.ReadAll(resp.Body)
+			return APIUser{}, fmt.Errorf("response status %s: %s", resp.Status, content)
+		}
 
-	    body, err := ioutil.ReadAll(resp.Body)
-	    if err != nil {
-	        return APIUser{}, err
-	    }
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return APIUser{}, err
+		}
 
-	    err = json.Unmarshal(body, &response)
-	    if err != nil {
-	        return APIUser{}, err
-	    }
+		err = json.Unmarshal(body, &response)
+		if err != nil {
+			return APIUser{}, err
+		}
 
-	    if len(response.Errors) == 0 {
-	        break
-	    }
-
-	    // Reset the response (remove the Errors)
-	    response = UserResponse{}
-    }
-    return response.ConvertToAPIUser(), err
+		// Retry ONLY if the error is code 50 (random authentication failure), NOT on real errors
+		if len(response.Errors) == 1 && response.Errors[0].Code == 50 {
+			// Reset the response (remove the Errors)
+			response = UserResponse{}
+			continue
+		} else {
+			// Do not retry on real errors
+			break
+		}
+	}
+	return response.ConvertToAPIUser(), err
 }
 
 func (api API) Search(query string, cursor string) (TweetResponse, error) {
