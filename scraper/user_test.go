@@ -1,9 +1,12 @@
 package scraper_test
 
 import (
+	"testing"
 	"encoding/json"
 	"io/ioutil"
-	"testing"
+	"net/http"
+
+	"github.com/jarcoal/httpmock"
 
 	"offline_twitter/scraper"
 )
@@ -150,5 +153,37 @@ func TestParseHandleFromTweetUrl(t *testing.T) {
 	_, err = scraper.ParseHandleFromTweetUrl("awjgwekf")
 	if err == nil {
 		t.Errorf("Should have produced an error for invalid URL")
+	}
+}
+
+
+/**
+ * Should extract a user handle from a shortened tweet URL
+ */
+func TestParseHandleFromShortenedTweetUrl(t *testing.T) {
+	short_url := "https://t.co/rZVrNGJyDe"
+	expanded_url := "https://twitter.com/MarkSnyderJr1/status/1460857606147350529"
+
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	httpmock.RegisterResponder("GET", short_url, func(req *http.Request) (*http.Response, error) {
+		header := http.Header{}
+		header.Set("Location", expanded_url)
+		return &http.Response{StatusCode: 301, Header: header}, nil
+	})
+
+	// Check the httmock interceptor is working correctly
+	if scraper.ExpandShortUrl(short_url) != expanded_url {
+		t.Fatalf("httpmock didn't intercept the request")
+	}
+
+	result, err := scraper.ParseHandleFromTweetUrl(short_url)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	expected_user := scraper.UserHandle("MarkSnyderJr1")
+	if result != expected_user {
+		t.Errorf("Expected user %q, got %q", expected_user, result)
 	}
 }

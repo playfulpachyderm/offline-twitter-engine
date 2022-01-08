@@ -86,7 +86,12 @@ Joined %s
  * If tweet url is not valid, return an error.
  */
 func ParseHandleFromTweetUrl(tweet_url string) (UserHandle, error) {
-    r := regexp.MustCompile(`https://twitter.com/(\w+)/status/\d+`)
+    short_url_regex := regexp.MustCompile(`^https://t.co/\w{5,20}$`)
+    if short_url_regex.MatchString(tweet_url) {
+        tweet_url = ExpandShortUrl(tweet_url)
+    }
+
+    r := regexp.MustCompile(`^https://twitter.com/(\w+)/status/\d+$`)
     matches := r.FindStringSubmatch(tweet_url)
     if len(matches) != 2 {  // matches[0] is the full string
         return "", fmt.Errorf("Invalid tweet url: %s", tweet_url)
