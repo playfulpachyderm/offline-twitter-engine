@@ -1,0 +1,22 @@
+TODO user-images-extract-to-table:
+User profile images and banner images => extract to table.  Add `is_downloaded` column.  Add test for double-downloading a user, shouldn't change the write-times on these files
+
+TODO update-all:
+For each user in userslist.txt:
+- update user
+- download new images if necessary
+- fetch tweets since last update
+
+TODO implement-search
+
+TODO fetch-older-tweets:
+get tweets older than 3200 ago
+
+
+TODO https://twitter.com/michaelmalice/status/1461031030278742020 => "account no longer exists" tombstone
+
+TODO cleanup-main: The `cmd/twitter/main.go` file is becoming a disaster, it needs a cleanup badly.  lots of copy-pastes that should be functions, code that should be moved to the scraper / persistence modules, etc
+
+TODO broadcast-cards
+panic: Unknown card type: 3691233323:periscope_broadcast
+panic: Unknown card type: 745291183405076480:broadcast

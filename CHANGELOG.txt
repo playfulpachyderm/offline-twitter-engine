@@ -27,3 +27,11 @@ v0.0.3
 - Improve user image scraping for rando users (download less eagerly) to speed up browsing and save disk space:
 	- Download tiny versions of profile images (48x48 pixels)
 	- Don't download banner images at all
+
+v0.0.4
+------
+
+- Escape HTML entities in tweet text
+- Add support for banned users
+- Improve tombstone recognition (quote-tweets)
+- Fix spacing issue around tiny profile images
