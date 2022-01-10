@@ -143,14 +143,23 @@ func TestParseHandleFromTweetUrl(t *testing.T) {
 		t.Errorf("Expected handle %q, got %q", expected_user, result)
 	}
 
+	// Test url with GET params
+	result, err = scraper.ParseHandleFromTweetUrl("https://twitter.com/NerdNoticing/status/1263192389050654720?s=20")
+	expected_user = scraper.UserHandle("NerdNoticing")
+	if err != nil {
+		t.Errorf("Unexpected error while parsing handle: %s", err)
+	}
+	if result != expected_user {
+		t.Errorf("Expected handle %q, got %q", expected_user, result)
+	}
 	// Test invalid url
-	_, err = scraper.ParseHandleFromTweetUrl("awjgwekf")
+	_, err = scraper.ParseHandleFromTweetUrl("https://twitter.com/NerdNoticing/status/1263192389050654720s=20")
 	if err == nil {
 		t.Errorf("Should have produced an error for invalid URL")
 	}
 
 	// Test empty string
-	_, err = scraper.ParseHandleFromTweetUrl("awjgwekf")
+	_, err = scraper.ParseHandleFromTweetUrl("")
 	if err == nil {
 		t.Errorf("Should have produced an error for invalid URL")
 	}

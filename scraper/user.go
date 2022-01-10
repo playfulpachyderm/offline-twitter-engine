@@ -91,7 +91,7 @@ func ParseHandleFromTweetUrl(tweet_url string) (UserHandle, error) {
         tweet_url = ExpandShortUrl(tweet_url)
     }
 
-    r := regexp.MustCompile(`^https://twitter.com/(\w+)/status/\d+$`)
+    r := regexp.MustCompile(`^https://twitter.com/(\w+)/status/\d+(?:\?.*)?$`)
     matches := r.FindStringSubmatch(tweet_url)
     if len(matches) != 2 {  // matches[0] is the full string
         return "", fmt.Errorf("Invalid tweet url: %s", tweet_url)
