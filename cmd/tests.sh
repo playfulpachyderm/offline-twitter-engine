@@ -194,10 +194,10 @@ test $(find link_preview_images | wc -l) = $initial_link_preview_images_count  #
 
 
 # Test a tweet thread with tombstones
-# tw fetch_tweet https://twitter.com/CovfefeAnon/status/1454526270809726977  # TODO: This guy un-privated for some reason
-# test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454515503242829830") = 1
-# test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454521424144654344") = 0
-# test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454522147750260742") = 1
+tw fetch_tweet https://twitter.com/CovfefeAnon/status/1454526270809726977
+test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454515503242829830") = 1
+test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454521424144654344") = 0
+test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454522147750260742") = 1
 
 # Test search
 tw search "from:michaelmalice constitution"
@@ -214,6 +214,11 @@ rm profile_images/default_profile.png
 tw fetch_user nancytracker
 test "$(sqlite3 twitter.db "select is_content_downloaded, is_banned from users where handle='nancytracker'")" = "1|1"
 test -e profile_images/default_profile.png
+
+
+# Fetch a user with "600x200" banner image
+tw fetch_user AlexKoppelman  # This is probably kind of a flimsy test
+test $(sqlite3 twitter.db "select is_content_downloaded from users where handle='AlexKoppelman'") = "1"
 
 # TODO: Maybe this file should be broken up into multiple test scripts
 

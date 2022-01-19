@@ -161,7 +161,7 @@ func TestModifyTweet(t *testing.T) {
         t.Errorf("Expected %d retweets, got %d", 2500, new_tweet.NumRetweets)
     }
     if new_tweet.NumReplies != 3500 {
-        t.Errorf("Expected %d replies, got %d", 1500, new_tweet.NumReplies)
+        t.Errorf("Expected %d replies, got %d", 3500, new_tweet.NumReplies)
     }
     if new_tweet.NumQuoteTweets != 4500 {
         t.Errorf("Expected %d quote tweets, got %d", 4500, new_tweet.NumQuoteTweets)
