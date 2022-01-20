@@ -35,3 +35,9 @@ v0.0.4
 - Add support for banned users
 - Improve tombstone recognition (quote-tweets)
 - Fix spacing issue around tiny profile images
+
+v0.0.5
+------
+
+- BUGFIX: fix parsing of tweet URLs with query params ('?s=20', etc)
+- BUGFIX: fix bug in scraping users with "600x200" banner images that caused them not to be saved correctly

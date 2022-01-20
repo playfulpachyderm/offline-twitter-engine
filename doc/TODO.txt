@@ -20,3 +20,22 @@ TODO cleanup-main: The `cmd/twitter/main.go` file is becoming a disaster, it nee
 TODO broadcast-cards
 panic: Unknown card type: 3691233323:periscope_broadcast
 panic: Unknown card type: 745291183405076480:broadcast
+
+TODO consecutive-tombstones
+Conversation threads with two or more consecutive tombstones don't get scraped correctly
+
+Video size reduction:
+- add "bitrate" and "available bitrates" fields
+- option to upgrade or downgrade video quality
+-
+
+TODO tombstone updating:
+- "Tweet is unavailable" tombstones are not always accurate.  In user feed, they show as "not available" but the real reason is "deleted" etc; should update the tombstone type when fetching the conversation view
+- If a tweet is deleted after getting a non-stub version, should still show a tombstone (or a modified one at least)
+
+
+TODO: Problem tweets
+- https://twitter.com/HazardHarringto/status/1481808740445741062: replies not loading
+- https://twitter.com/TyCardon/status/1480640777281839106: "Media has been disabled in response to report by copyright owner"
+- https://twitter.com/CovfefeAnon/status/1427693931047837702: parent thread not loading (possible GUI problem)
+- "account no longer exists" tombstone not being collected
