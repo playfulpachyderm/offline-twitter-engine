@@ -1,5 +1,8 @@
 package scraper
 
+import (
+	"fmt"
+)
 
 /**
  * Get a list of tweets that appear on the given user's page, along with a list of associated
@@ -26,4 +29,24 @@ func GetUserFeedFor(user_id UserID, min_tweets int) (tweets []Tweet, retweets []
 	}
 
 	return ParseTweetResponse(tweet_response)
+}
+
+
+func GetUserFeedGraphqlFor(user_id UserID, min_tweets int) (trove TweetTrove, err error) {
+	api := API{}
+	api_response, err := api.GetGraphqlFeedFor(user_id, "")
+	if err != nil {
+		err = fmt.Errorf("Error calling API to fetch user feed: UserID %d\n  %s", user_id, err.Error())
+		return
+	}
+
+	if len(api_response.Data.User.Result.Timeline.Timeline.Instructions[0].Entries) < min_tweets && api_response.GetCursorBottom() != "" {
+		err = api.GetMoreTweetsFromGraphqlFeed(user_id, &api_response, min_tweets)
+		if err != nil && err != END_OF_FEED {
+			return
+		}
+	}
+
+
+	return api_response.ToTweetTrove()
 }

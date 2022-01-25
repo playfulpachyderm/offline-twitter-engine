@@ -200,15 +200,16 @@ func fetch_tweet_conversation(tweet_identifier string) {
  */
 func fetch_user_feed(handle string, how_many int) {
 	user, err := profile.GetUserByHandle(scraper.UserHandle(handle))
-
 	if err != nil {
-		die(err.Error(), false, -1)
+		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
 	}
 
-	tweets, retweets, users, err := scraper.GetUserFeedFor(user.ID, how_many);
+	// tweets, retweets, users, err := scraper.GetUserFeedFor(user.ID, how_many);
+	trove, err := scraper.GetUserFeedGraphqlFor(user.ID, how_many)
 	if err != nil {
-		die("Error scraping feed: " + err.Error(), false, -2)
+		die(fmt.Sprintf("Error scraping feed: %s\n  %s", handle, err.Error()), false, -2)
 	}
+	tweets, retweets, users := trove.Transform();
 
 	for _, u := range users {
 		fmt.Println(u.Handle)
