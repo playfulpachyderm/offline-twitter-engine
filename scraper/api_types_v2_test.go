@@ -5,17 +5,53 @@ import (
 	"io/ioutil"
 	"encoding/json"
 
-	"offline_twitter/scraper"
+	. "offline_twitter/scraper"
+	"github.com/stretchr/testify/assert"
 )
 
-
-// Check a plain old tweet
-func TestAPIV2FeedSimpleTweet(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/feeds_api_v2/feed_simple_tweet.json")
+/**
+ * Parse an  APIV2User
+ */
+func TestAPIV2ParseUser(t *testing.T) {
+	data, err := ioutil.ReadFile("test_responses/api_v2/user_michael_malice.json")
 	if err != nil {
 		panic(err)
 	}
-	var feed scraper.APIV2Response
+
+	assert := assert.New(t)
+
+	var user_result APIV2UserResult
+	err = json.Unmarshal(data, &user_result)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	user := user_result.ToUser()
+
+	assert.Equal(user.ID, UserID(44067298))
+	assert.Equal(user.DisplayName, "Michael Malice")
+	assert.Equal(user.Handle, UserHandle("michaelmalice"))
+	assert.Equal(user.Bio, "Author of Dear Reader, The New Right & The Anarchist Handbook\nHost of \"YOUR WELCOME\" \nSubject of Ego & Hubris by Harvey Pekar\nHe/Him ⚑\n@SheathUnderwear Model")
+	assert.Equal(user.FollowingCount, 964)
+	assert.Equal(user.FollowersCount, 334571)
+	assert.Equal(user.Location, "Austin")
+	assert.Equal(user.Website, "https://amzn.to/3oInafv")
+	assert.Equal(user.JoinDate.Unix(), int64(1243920952))
+	assert.Equal(user.IsPrivate, false)
+	assert.Equal(user.IsVerified, true)
+	assert.Equal(user.IsBanned, false)
+	assert.Equal(user.ProfileImageUrl, "https://pbs.twimg.com/profile_images/1415820415314931715/_VVX4GI8.jpg")
+	assert.Equal(user.BannerImageUrl, "https://pbs.twimg.com/profile_banners/44067298/1615134676")
+	assert.Equal(user.PinnedTweetID, TweetID(1477347403023982596))
+}
+
+// Check a plain old tweet
+func TestAPIV2FeedSimpleTweet(t *testing.T) {
+	data, err := ioutil.ReadFile("test_responses/api_v2/feed_simple_tweet.json")
+	if err != nil {
+		panic(err)
+	}
+	var feed APIV2Response
 	err = json.Unmarshal(data, &feed)
 	if err != nil {
 		t.Errorf(err.Error())
@@ -45,7 +81,7 @@ func TestAPIV2FeedSimpleTweet(t *testing.T) {
 	if tweet.ID != 1485708879174508550 {
 		t.Errorf("Expected ID 1485708879174508550, got %d", tweet.ID)
 	}
-	if tweet.UserID != scraper.UserID(44067298) {
+	if tweet.UserID != UserID(44067298) {
 		t.Errorf("Expected user ID 44067298, got %d", tweet.UserID)
 	}
 	expected_text := "If Boris Johnson is driven out of office, it wouldn't mark the first time the Tories had four PMs in a row\nThey had previously governed the UK for 13 years with 4 PMs, from 1951-1964"
@@ -61,11 +97,11 @@ func TestAPIV2FeedSimpleTweet(t *testing.T) {
 
 // Check a retweet
 func TestAPIV2FeedRetweet(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/feeds_api_v2/feed_simple_retweet.json")
+	data, err := ioutil.ReadFile("test_responses/api_v2/feed_simple_retweet.json")
 	if err != nil {
 		panic(err)
 	}
-	var feed scraper.APIV2Response
+	var feed APIV2Response
 	err = json.Unmarshal(data, &feed)
 	if err != nil {
 		t.Errorf(err.Error())
@@ -107,7 +143,7 @@ func TestAPIV2FeedRetweet(t *testing.T) {
 	if tweet.ID != 1485694028620316673 {
 		t.Errorf("Expected ID %d, got %d", 1485694028620316673, tweet.ID)
 	}
-	if tweet.UserID != scraper.UserID(1326229737551912960) {
+	if tweet.UserID != UserID(1326229737551912960) {
 		t.Errorf("Expected user ID %d, got %d", 1326229737551912960, tweet.UserID)
 	}
 	expected_text := "More mask madness, this time in an elevator. The mask police are really nuts https://t.co/3BpvLjdJwD"
@@ -129,7 +165,7 @@ func TestAPIV2FeedRetweet(t *testing.T) {
 	if retweet.RetweetedAt.Unix() != 1643053397 {
 		t.Errorf("Expected retweeted_at %d, got %d", 1643053397, retweet.RetweetedAt.Unix())
 	}
-	if retweet.RetweetedByID != scraper.UserID(44067298) {
+	if retweet.RetweetedByID != UserID(44067298) {
 		t.Errorf("Expected retweeted_by 44067298, got %d", retweet.RetweetedByID)
 	}
 }
@@ -137,11 +173,11 @@ func TestAPIV2FeedRetweet(t *testing.T) {
 
 // Check a quote-tweet
 func TestAPIV2FeedQuoteTweet(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/feeds_api_v2/feed_quote_tweet.json")
+	data, err := ioutil.ReadFile("test_responses/api_v2/feed_quote_tweet.json")
 	if err != nil {
 		panic(err)
 	}
-	var feed scraper.APIV2Response
+	var feed APIV2Response
 	err = json.Unmarshal(data, &feed)
 	if err != nil {
 		t.Errorf(err.Error())
@@ -200,11 +236,11 @@ func TestAPIV2FeedQuoteTweet(t *testing.T) {
 
 // Check a retweeted quote-tweet
 func TestAPIV2FeedRetweetedQuoteTweet(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/feeds_api_v2/feed_retweeted_quote_tweet.json")
+	data, err := ioutil.ReadFile("test_responses/api_v2/feed_retweeted_quote_tweet.json")
 	if err != nil {
 		panic(err)
 	}
-	var feed scraper.APIV2Response
+	var feed APIV2Response
 	err = json.Unmarshal(data, &feed)
 	if err != nil {
 		t.Errorf(err.Error())
@@ -256,11 +292,11 @@ func TestAPIV2FeedRetweetedQuoteTweet(t *testing.T) {
 
 
 func TestParseAPIV2UserFeed(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/feeds_api_v2/user_feed_apiv2.json")
+	data, err := ioutil.ReadFile("test_responses/api_v2/user_feed_apiv2.json")
 	if err != nil {
 		panic(err)
 	}
-	var feed scraper.APIV2Response
+	var feed APIV2Response
 	err = json.Unmarshal(data, &feed)
 	if err != nil {
 		t.Errorf(err.Error())
@@ -304,6 +340,5 @@ func TestParseAPIV2UserFeed(t *testing.T) {
 		t.Errorf("Expected cursor %q, got %q", "HBaYgL2Fp/T7nCkAAA==", bottom_cursor)
 	}
 
-
-	println(len(tweet_trove.Users))
+	fmt.Printf("%d Users, %d Tweets, %d Retweets\n", len(tweet_trove.Users), len(tweet_trove.Tweets), len(tweet_trove.Retweets))
 }

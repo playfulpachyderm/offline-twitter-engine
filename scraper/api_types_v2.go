@@ -10,6 +10,23 @@ import (
 	"strings"
 )
 
+type APIV2UserResult struct {
+	UserResults struct {
+		Result struct {
+			ID     int64   `json:"rest_id,string"`
+			Legacy APIUser `json:"legacy"`
+		} `json:"result"`
+	} `json:"user_results"`
+}
+func (u APIV2UserResult) ToUser() User {
+	user, err := ParseSingleUser(u.UserResults.Result.Legacy)
+	if err != nil {
+		panic(err)
+	}
+	user.ID = UserID(u.UserResults.Result.ID)
+	return user
+}
+
 type APIV2Tweet struct {
 	APITweet
 	RetweetedStatusResult struct {
