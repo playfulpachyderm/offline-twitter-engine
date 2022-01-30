@@ -151,8 +151,8 @@ test $(($rts_count + $tweet_count_2 - $tweet_count_1)) -gt "50"
 
 
 # Fetch a privated user
-tw fetch_user HbdNrx
-test $(sqlite3 twitter.db "select is_private from users where handle = 'HbdNrx'") = "1"
+tw fetch_user LandsharkRides
+test $(sqlite3 twitter.db "select is_private from users where handle = 'LandsharkRides'") = "1"
 
 
 # Test tweets with URLs
