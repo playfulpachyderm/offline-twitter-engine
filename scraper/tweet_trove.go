@@ -27,5 +27,24 @@ func (trove TweetTrove) Transform() (tweets []Tweet, retweets []Retweet, users [
 	for _, val := range trove.Retweets {
 		retweets = append(retweets, val)
 	}
+
 	return
 }  // TODO: refactor until this function isn't needed anymore
+
+
+/**
+ * Combine two troves into one
+ */
+func (t1 *TweetTrove) MergeWith(t2 TweetTrove) {
+	for id, val := range t2.Tweets {
+		t1.Tweets[id] = val
+	}
+	for id, val := range t2.Users {
+		t1.Users[id] = val
+	}
+	for id, val := range t2.Retweets {
+		t1.Retweets[id] = val
+	}
+
+	t1.TombstoneUsers = append(t1.TombstoneUsers, t2.TombstoneUsers...)
+}
