@@ -45,6 +45,4 @@ func (t1 *TweetTrove) MergeWith(t2 TweetTrove) {
 	for id, val := range t2.Retweets {
 		t1.Retweets[id] = val
 	}
-
-	t1.TombstoneUsers = append(t1.TombstoneUsers, t2.TombstoneUsers...)
 }
