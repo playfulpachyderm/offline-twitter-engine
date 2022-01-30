@@ -4,6 +4,7 @@ import (
 	"testing"
 	"io/ioutil"
 	"encoding/json"
+	"fmt"
 
 	. "offline_twitter/scraper"
 	"github.com/stretchr/testify/assert"
