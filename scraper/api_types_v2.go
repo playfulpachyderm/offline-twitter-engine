@@ -27,36 +27,91 @@ func (u APIV2UserResult) ToUser() User {
 	return user
 }
 
+type APIV2Result struct {
+	Result struct {
+		ID int64 `json:"rest_id,string"`
+		Legacy APIV2Tweet `json:"legacy"`
+		Tombstone *struct {
+			Text struct {
+				Text string `json:"text"`
+			} `json:"text"`
+		} `json:"tombstone"`
+		Core *APIV2UserResult `json:"core"`
+		QuotedStatusResult *APIV2Result `json:"quoted_status_result"`
+	} `json:"result"`
+}
+func (api_result APIV2Result) ToTweetTrove() TweetTrove {
+	ret := NewTweetTrove()
+
+	if api_result.Result.Core != nil {
+		main_user := api_result.Result.Core.ToUser()
+		ret.Users[main_user.ID] = main_user
+	} else {
+		// TODO
+	}
+
+	main_tweet_trove := api_result.Result.Legacy.ToTweetTrove()
+	ret.MergeWith(main_tweet_trove)
+
+	// Handle quoted tweet
+	if api_result.Result.QuotedStatusResult != nil {
+		quoted_api_result := api_result.Result.QuotedStatusResult
+
+		// Quoted tweets might be tombstones!
+		if quoted_api_result.Result.Tombstone != nil {
+			tombstoned_tweet := &quoted_api_result.Result.Legacy.APITweet
+			tombstoned_tweet.TombstoneText = quoted_api_result.Result.Tombstone.Text.Text
+			tombstoned_tweet.ID = int64(int_or_panic(api_result.Result.Legacy.APITweet.QuotedStatusIDStr))
+			handle, err := ParseHandleFromTweetUrl(api_result.Result.Legacy.APITweet.QuotedStatusPermalink.ExpandedURL)
+			if err != nil {
+				panic(err)
+			}
+			tombstoned_tweet.UserHandle = string(handle)
+			ret.TombstoneUsers = append(ret.TombstoneUsers, handle)
+		}
+
+		quoted_trove := api_result.Result.QuotedStatusResult.ToTweetTrove()
+		ret.MergeWith(quoted_trove)
+	}
+
+	return ret
+}
+
 type APIV2Tweet struct {
+	// For some reason, retweets are nested *inside* the Legacy tweet, whereas
+	// quoted-tweets are next to it, as their own tweet
+	RetweetedStatusResult *APIV2Result `json:"retweeted_status_result"`
 	APITweet
-	RetweetedStatusResult struct {
-		Result struct {
-			ID int `json:"rest_id,string"`
-			Legacy APITweet `json:"legacy"`
-			Core struct {
-				UserResults struct {
-					Result struct {
-						ID     int64   `json:"rest_id,string"`
-						Legacy APIUser `json:"legacy"`
-					} `json:"result"`
-				} `json:"user_results"`
-			} `json:"core"`
-			QuotedStatusResult struct {
-				Result struct {
-					ID int64 `json:"rest_id,string"`
-					Legacy APITweet `json:"legacy"`
-					Core struct {
-						UserResults struct {
-							Result struct {
-								ID     int64   `json:"rest_id,string"`
-								Legacy APIUser `json:"legacy"`
-							} `json:"result"`
-						} `json:"user_results"`
-					} `json:"core"`
-				} `json:"result"`
-			} `json:"quoted_status_result"`
-		} `json:"result"`
-	} `json:"retweeted_status_result"`
+}
+func (api_v2_tweet APIV2Tweet) ToTweetTrove() TweetTrove {
+	ret := NewTweetTrove()
+
+	// If there's a retweet, we ignore the main tweet except for posted_at and retweeting UserID
+	if api_v2_tweet.RetweetedStatusResult != nil {
+		orig_tweet_trove := api_v2_tweet.RetweetedStatusResult.ToTweetTrove()
+		ret.MergeWith(orig_tweet_trove)
+
+
+		retweet := Retweet{}
+		var err error
+		retweet.RetweetID = TweetID(api_v2_tweet.ID)
+		retweet.TweetID = TweetID(api_v2_tweet.RetweetedStatusResult.Result.ID)
+		retweet.RetweetedByID = UserID(api_v2_tweet.APITweet.UserID)
+		retweet.RetweetedAt, err = time.Parse(time.RubyDate, api_v2_tweet.APITweet.CreatedAt)
+		if err != nil {
+			fmt.Printf("%v\n", api_v2_tweet)
+			panic(err)
+		}
+		ret.Retweets[retweet.RetweetID] = retweet
+	} else {
+		main_tweet, err := ParseSingleTweet(api_v2_tweet.APITweet)
+		if err != nil {
+			panic(err)
+		}
+		ret.Tweets[main_tweet.ID] = main_tweet
+	}
+
+	return ret
 }
 
 type APIV2Response struct {
@@ -75,7 +130,37 @@ type APIV2Response struct {
 										EntryType string `json:"entryType"`
 										TweetResults struct {
 											Result struct {
-												Legacy APIV2Tweet `json:"legacy"`
+												Legacy struct {
+													APITweet
+													RetweetedStatusResult struct {
+														Result struct {
+															ID int `json:"rest_id,string"`
+															Legacy APITweet `json:"legacy"`
+															Core struct {
+																UserResults struct {
+																	Result struct {
+																		ID     int64   `json:"rest_id,string"`
+																		Legacy APIUser `json:"legacy"`
+																	} `json:"result"`
+																} `json:"user_results"`
+															} `json:"core"`
+															QuotedStatusResult struct {
+																Result struct {
+																	ID int64 `json:"rest_id,string"`
+																	Legacy APITweet `json:"legacy"`
+																	Core struct {
+																		UserResults struct {
+																			Result struct {
+																				ID     int64   `json:"rest_id,string"`
+																				Legacy APIUser `json:"legacy"`
+																			} `json:"result"`
+																		} `json:"user_results"`
+																	} `json:"core"`
+																} `json:"result"`
+															} `json:"quoted_status_result"`
+														} `json:"result"`
+													} `json:"retweeted_status_result"`
+												} `json:"legacy"`
 												Core struct {
 													UserResults struct {
 														Result struct {
@@ -87,7 +172,37 @@ type APIV2Response struct {
 												QuotedStatusResult struct {  // Same as "Result"
 													Result struct {
 														ID int64 `json:"rest_id,string"`
-														Legacy APIV2Tweet `json:"legacy"`
+														Legacy struct {
+															APITweet
+															RetweetedStatusResult struct {
+																Result struct {
+																	ID int `json:"rest_id,string"`
+																	Legacy APITweet `json:"legacy"`
+																	Core struct {
+																		UserResults struct {
+																			Result struct {
+																				ID     int64   `json:"rest_id,string"`
+																				Legacy APIUser `json:"legacy"`
+																			} `json:"result"`
+																		} `json:"user_results"`
+																	} `json:"core"`
+																	QuotedStatusResult struct {
+																		Result struct {
+																			ID int64 `json:"rest_id,string"`
+																			Legacy APITweet `json:"legacy"`
+																			Core struct {
+																				UserResults struct {
+																					Result struct {
+																						ID     int64   `json:"rest_id,string"`
+																						Legacy APIUser `json:"legacy"`
+																					} `json:"result"`
+																				} `json:"user_results"`
+																			} `json:"core"`
+																		} `json:"result"`
+																	} `json:"quoted_status_result"`
+																} `json:"result"`
+															} `json:"retweeted_status_result"`
+														} `json:"legacy"`
 														Core struct {
 															UserResults struct {
 																Result struct {
