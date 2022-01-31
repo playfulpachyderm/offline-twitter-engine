@@ -46,9 +46,9 @@ func (api_result APIV2Result) ToTweetTrove() TweetTrove {
 	if api_result.Result.Core != nil {
 		main_user := api_result.Result.Core.ToUser()
 		ret.Users[main_user.ID] = main_user
-	} else {
+	} /*else {
 		// TODO
-	}
+	}*/
 
 	main_tweet_trove := api_result.Result.Legacy.ToTweetTrove()
 	ret.MergeWith(main_tweet_trove)
