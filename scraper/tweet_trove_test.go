@@ -27,6 +27,8 @@ func TestMergeTweetTroves(t *testing.T) {
 
 	trove1.Retweets[1] = r1
 
+	trove1.TombstoneUsers = []UserHandle{"a", "b"}
+
 	trove2 := NewTweetTrove()
 	trove2.Tweets[3] = t3
 
@@ -36,10 +38,12 @@ func TestMergeTweetTroves(t *testing.T) {
 	trove2.Retweets[2] = r2
 	trove2.Retweets[3] = r3
 
+	trove2.TombstoneUsers = []UserHandle{"c"}
 
 	trove1.MergeWith(trove2)
 
 	assert.Equal(3, len(trove1.Tweets))
 	assert.Equal(2, len(trove1.Users))
 	assert.Equal(3, len(trove1.Retweets))
+	assert.Equal(3, len(trove1.TombstoneUsers))
 }

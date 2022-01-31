@@ -4,6 +4,8 @@ type TweetTrove struct {
 	Tweets    map[TweetID]Tweet
 	Users     map[UserID]User
 	Retweets  map[TweetID]Retweet
+
+	TombstoneUsers []UserHandle
 }
 
 func NewTweetTrove() TweetTrove {
@@ -11,6 +13,7 @@ func NewTweetTrove() TweetTrove {
 	ret.Tweets = make(map[TweetID]Tweet)
 	ret.Users = make(map[UserID]User)
 	ret.Retweets = make(map[TweetID]Retweet)
+	ret.TombstoneUsers = []UserHandle{}
 	return ret
 }
 
@@ -45,4 +48,6 @@ func (t1 *TweetTrove) MergeWith(t2 TweetTrove) {
 	for id, val := range t2.Retweets {
 		t1.Retweets[id] = val
 	}
+
+	t1.TombstoneUsers = append(t1.TombstoneUsers, t2.TombstoneUsers...)
 }
