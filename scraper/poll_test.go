@@ -5,96 +5,63 @@ import (
     "io/ioutil"
     "encoding/json"
 
-    "offline_twitter/scraper"
+    "github.com/stretchr/testify/assert"
+    "github.com/stretchr/testify/require"
+
+    . "offline_twitter/scraper"
 )
 
 func TestParsePoll2Choices(t *testing.T) {
+    assert := assert.New(t)
     data, err := ioutil.ReadFile("test_responses/tweet_content/poll_card_2_options.json")
     if err != nil {
         panic(err)
     }
-    var apiCard scraper.APICard
+    var apiCard APICard
     err = json.Unmarshal(data, &apiCard)
-    if err != nil {
-        t.Fatal(err.Error())
-    }
+    require.NoError(t, err)
 
-    poll := scraper.ParseAPIPoll(apiCard)
-    if poll.ID != 1457419248461131776 {
-        t.Errorf("Expected ID %d, got %d", 1457419248461131776, poll.ID)
-    }
-    if poll.NumChoices != 2 {
-        t.Errorf("Expected %d choices, got %d", 2, poll.NumChoices)
-    }
-    if poll.VotingDuration != 60 * 60 * 24 {
-        t.Errorf("Expected duratino %d, got %d", 60 * 60 * 24, poll.VotingDuration)
-    }
-    expected_ending := int64(1636397201)
-    if poll.VotingEndsAt.Unix() != expected_ending {
-        t.Errorf("Expected closing time %d, got %d", expected_ending, poll.VotingEndsAt.Unix())
-    }
-    expected_last_updated := int64(1636318755)
-    if poll.LastUpdatedAt.Unix() != expected_last_updated {
-        t.Errorf("Expected last-updated time %d, got %d", expected_last_updated, poll.LastUpdatedAt.Unix())
-    }
-    if expected_last_updated > expected_ending {
-        t.Errorf("Last updated should be before poll closes!")
-    }
+    poll := ParseAPIPoll(apiCard)
+    assert.Equal(PollID(1457419248461131776), poll.ID)
+    assert.Equal(2, poll.NumChoices)
+    assert.Equal(60 * 60 * 24, poll.VotingDuration)
+    assert.Equal(int64(1636397201), poll.VotingEndsAt.Unix())
+    assert.Equal(int64(1636318755), poll.LastUpdatedAt.Unix())
 
-    if poll.Choice1 != "Yes" || poll.Choice2 != "No" {
-        t.Errorf("Expected %q and %q, got %q and %q", "Yes", "No", poll.Choice1, poll.Choice2)
-    }
-    if poll.Choice1_Votes != 529 {
-        t.Errorf("Expected %d votes for choice 1, got %d", 529, poll.Choice1_Votes)
-    }
-    if poll.Choice2_Votes != 2182 {
-        t.Errorf("Expected %d votes for choice 2, got %d", 2182, poll.Choice2_Votes)
-    }
+    assert.Less(poll.LastUpdatedAt.Unix(), poll.VotingEndsAt.Unix())
+    assert.Equal("Yes", poll.Choice1)
+    assert.Equal("No", poll.Choice2)
+    assert.Equal(529, poll.Choice1_Votes)
+    assert.Equal(2182, poll.Choice2_Votes)
 }
 
 func TestParsePoll4Choices(t *testing.T) {
+    assert := assert.New(t)
     data, err := ioutil.ReadFile("test_responses/tweet_content/poll_card_4_options_ended.json")
     if err != nil {
         panic(err)
     }
-    var apiCard scraper.APICard
+    var apiCard APICard
     err = json.Unmarshal(data, &apiCard)
-    if err != nil {
-        t.Fatal(err.Error())
-    }
+    require.NoError(t, err)
 
-    poll := scraper.ParseAPIPoll(apiCard)
-    if poll.ID != 1455611588854140929 {
-        t.Errorf("Expected ID %d, got %d", 1455611588854140929, poll.ID)
-    }
-    if poll.NumChoices != 4 {
-        t.Errorf("Expected %d choices, got %d", 4, poll.NumChoices)
-    }
-    if poll.VotingDuration != 60 * 60 * 24 {
-        t.Errorf("Expected duratino %d, got %d", 60 * 60 * 24, poll.VotingDuration)
-    }
-    expected_ending := int64(1635966221)
-    if poll.VotingEndsAt.Unix() != expected_ending {
-        t.Errorf("Expected closing time %d, got %d", expected_ending, poll.VotingEndsAt.Unix())
-    }
-    expected_last_updated := int64(1635966226)
-    if poll.LastUpdatedAt.Unix() != expected_last_updated {
-        t.Errorf("Expected last-updated time %d, got %d", expected_last_updated, poll.LastUpdatedAt.Unix())
-    }
-    if expected_last_updated < expected_ending {
-        t.Errorf("Last updated should be after poll closes!")
-    }
+    poll := ParseAPIPoll(apiCard)
+    assert.Equal(PollID(1455611588854140929), poll.ID)
+    assert.Equal(4, poll.NumChoices)
+    assert.Equal(60 * 60 * 24, poll.VotingDuration)
+    assert.Equal(int64(1635966221), poll.VotingEndsAt.Unix())
+    assert.Equal(int64(1635966226), poll.LastUpdatedAt.Unix())
+    assert.Greater(poll.LastUpdatedAt.Unix(), poll.VotingEndsAt.Unix())
 
-    if poll.Choice1 != "Alec Baldwin" || poll.Choice1_Votes != 1669 {
-        t.Errorf("Expected %q with %d, got %q with %d", "Alec Baldwin", 1669, poll.Choice1, poll.Choice1_Votes)
-    }
-    if poll.Choice2 != "Andew Cuomo" || poll.Choice2_Votes != 272 {
-        t.Errorf("Expected %q with %d, got %q with %d", "Andew Cuomo", 272, poll.Choice2, poll.Choice2_Votes)
-    }
-    if poll.Choice3 != "George Floyd" || poll.Choice3_Votes != 829 {
-        t.Errorf("Expected %q with %d, got %q with %d", "George Floyd", 829, poll.Choice3, poll.Choice3_Votes)
-    }
-    if poll.Choice4 != "Derek Chauvin" || poll.Choice4_Votes != 2397 {
-        t.Errorf("Expected %q with %d, got %q with %d", "Derek Chauvin", 2397, poll.Choice4, poll.Choice4_Votes)
-    }
+    assert.Equal("Alec Baldwin", poll.Choice1)
+    assert.Equal(1669, poll.Choice1_Votes)
+
+    assert.Equal("Andew Cuomo", poll.Choice2)
+    assert.Equal(272, poll.Choice2_Votes)
+
+    assert.Equal("George Floyd", poll.Choice3)
+    assert.Equal(829, poll.Choice3_Votes)
+
+    assert.Equal("Derek Chauvin", poll.Choice4)
+    assert.Equal(2397, poll.Choice4_Votes)
 }

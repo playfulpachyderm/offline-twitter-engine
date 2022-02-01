@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	. "offline_twitter/scraper"
 	"github.com/stretchr/testify/assert"
-)
 
+	. "offline_twitter/scraper"
+)
 
 /**
  * Parse an  APIV2User

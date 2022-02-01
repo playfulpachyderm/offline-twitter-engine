@@ -1,12 +1,14 @@
 package scraper_test
 
-import "testing"
-import "fmt"
-import "offline_twitter/scraper"
+import (
+	"testing"
+	"fmt"
+	. "offline_twitter/scraper"
+)
 
 // Makes an HTTP request
 func TestGetGuestToken(t *testing.T) {
-	token, err := scraper.GetGuestToken()
+	token, err := GetGuestToken()
 	if err != nil {
 		t.Errorf("%v", err)
 	}
@@ -22,6 +24,6 @@ func TestGetGuestToken(t *testing.T) {
 // other than the first use the cache.
 func BenchmarkGetGuestToken(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, _ = scraper.GetGuestToken()
+		_, _ = GetGuestToken()
 	}
 }

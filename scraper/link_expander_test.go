@@ -6,7 +6,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"offline_twitter/scraper"
+    "github.com/stretchr/testify/assert"
+
+	. "offline_twitter/scraper"
 )
 
 
@@ -18,8 +20,5 @@ func TestExpandShortUrl(t *testing.T) {
 	}))
 	defer srvr.Close()
 
-	result := scraper.ExpandShortUrl(srvr.URL)
-	if result != redirecting_to {
-		t.Errorf("Expected %q, got %q", redirecting_to, result)
-	}
+	assert.Equal(t, redirecting_to, ExpandShortUrl(srvr.URL))
 }

@@ -5,38 +5,27 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"offline_twitter/scraper"
+    "github.com/stretchr/testify/assert"
+    "github.com/stretchr/testify/require"
+
+	. "offline_twitter/scraper"
 )
 
 func TestParseSingleRetweet(t *testing.T) {
+	assert := assert.New(t)
 	data, err := ioutil.ReadFile("test_responses/tweet_that_is_a_retweet.json")
 	if err != nil {
 		panic(err)
 	}
-	var api_tweet scraper.APITweet
+	var api_tweet APITweet
 	err = json.Unmarshal(data, &api_tweet)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
+	require.NoError(t, err)
 
-	retweet, err := scraper.ParseSingleRetweet(api_tweet)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	expected_id := 1404270043018448896
-	if retweet.RetweetID != scraper.TweetID(1404270043018448896) {
-		t.Errorf("Expected %d, got %d", expected_id, retweet.RetweetID)
-	}
-	expected_id = 1404269989646028804
-	if retweet.TweetID != scraper.TweetID(expected_id) {
-		t.Errorf("Expected %d, got %d", expected_id, retweet.TweetID)
-	}
-	expected_id = 44067298
-	if retweet.RetweetedByID != scraper.UserID(expected_id) {
-		t.Errorf("Expected %d, got %d", expected_id, retweet.RetweetedByID)
-	}
-	expected_id = 1623639042
-	if retweet.RetweetedAt.Unix() != int64(expected_id) {
-		t.Errorf("Expected %d, got %d", expected_id, retweet.RetweetedAt.Unix())
-	}
+	retweet, err := ParseSingleRetweet(api_tweet)
+	require.NoError(t, err)
+
+	assert.Equal(TweetID(1404270043018448896), retweet.RetweetID)
+	assert.Equal(TweetID(1404269989646028804), retweet.TweetID)
+	assert.Equal(UserID(44067298), retweet.RetweetedByID)
+	assert.Equal(int64(1623639042), retweet.RetweetedAt.Unix())
 }
