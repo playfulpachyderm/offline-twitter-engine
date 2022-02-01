@@ -90,6 +90,7 @@ func TestParseTweetWithUrl(t *testing.T) {
 
 	u := tweet.Urls[0]
 	assert.Equal("https://reason.com/2021/08/30/la-teachers-union-cecily-myart-cruz-learning-loss/", u.Text)
+	assert.Equal("https://t.co/Y1lWjNEiPK", u.ShortText)
 	assert.True(u.HasCard)
 	assert.Equal("reason.com", u.Domain)
 }
@@ -101,6 +102,7 @@ func TestParseTweetWithUrlButNoCard(t *testing.T) {
 
 	u := tweet.Urls[0]
 	assert.Equal("https://www.politico.com/newsletters/west-wing-playbook/2021/09/16/the-jennifer-rubin-wh-symbiosis-494364", u.Text)
+	assert.Equal("https://t.co/ZigZyLctwt", u.ShortText)
 	assert.False(u.HasCard)
 }
 

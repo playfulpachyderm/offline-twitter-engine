@@ -50,12 +50,12 @@ func (p Profile) SaveVideo(vid scraper.Video) error {
  */
 func (p Profile) SaveUrl(url scraper.Url) error {
     _, err := p.DB.Exec(`
-        insert into urls (tweet_id, domain, text, title, description, creator_id, site_id, thumbnail_width, thumbnail_height, thumbnail_remote_url, thumbnail_local_path, has_card, has_thumbnail, is_content_downloaded)
-                  values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        insert into urls (tweet_id, domain, text, short_text, title, description, creator_id, site_id, thumbnail_width, thumbnail_height, thumbnail_remote_url, thumbnail_local_path, has_card, has_thumbnail, is_content_downloaded)
+                  values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
              on conflict do update
                      set is_content_downloaded=(is_content_downloaded or ?)
         `,
-        url.TweetID, url.Domain, url.Text, url.Title, url.Description,  url.CreatorID, url.SiteID, url.ThumbnailWidth, url.ThumbnailHeight, url.ThumbnailRemoteUrl, url.ThumbnailLocalPath, url.HasCard, url.HasThumbnail, url.IsContentDownloaded,
+        url.TweetID, url.Domain, url.Text, url.ShortText, url.Title, url.Description,  url.CreatorID, url.SiteID, url.ThumbnailWidth, url.ThumbnailHeight, url.ThumbnailRemoteUrl, url.ThumbnailLocalPath, url.HasCard, url.HasThumbnail, url.IsContentDownloaded,
         url.IsContentDownloaded,
     )
     return err
@@ -138,7 +138,7 @@ func (p Profile) GetVideosForTweet(t scraper.Tweet) (vids []scraper.Video, err e
  * Get the list of Urls for a Tweet
  */
 func (p Profile) GetUrlsForTweet(t scraper.Tweet) (urls []scraper.Url, err error) {
-    stmt, err := p.DB.Prepare("select domain, text, title, description, creator_id, site_id, thumbnail_width, thumbnail_height, thumbnail_remote_url, thumbnail_local_path, has_card, has_thumbnail, is_content_downloaded from urls where tweet_id=? order by rowid")
+    stmt, err := p.DB.Prepare("select domain, text, short_text, title, description, creator_id, site_id, thumbnail_width, thumbnail_height, thumbnail_remote_url, thumbnail_local_path, has_card, has_thumbnail, is_content_downloaded from urls where tweet_id=? order by rowid")
     if err != nil {
         return
     }
@@ -149,7 +149,7 @@ func (p Profile) GetUrlsForTweet(t scraper.Tweet) (urls []scraper.Url, err error
     }
     var url scraper.Url
     for rows.Next() {
-        err = rows.Scan(&url.Domain, &url.Text, &url.Title, &url.Description, &url.CreatorID, &url.SiteID, &url.ThumbnailWidth, &url.ThumbnailHeight, &url.ThumbnailRemoteUrl, &url.ThumbnailLocalPath, &url.HasCard, &url.HasThumbnail, &url.IsContentDownloaded)
+        err = rows.Scan(&url.Domain, &url.Text, &url.ShortText, &url.Title, &url.Description, &url.CreatorID, &url.SiteID, &url.ThumbnailWidth, &url.ThumbnailHeight, &url.ThumbnailRemoteUrl, &url.ThumbnailLocalPath, &url.HasCard, &url.HasThumbnail, &url.IsContentDownloaded)
         if err != nil {
             return
         }

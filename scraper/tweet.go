@@ -108,6 +108,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 			url_object = ParseAPIUrlCard(apiTweet.Card)
 		}
 		url_object.Text = url.ExpandedURL
+		url_object.ShortText = url.ShortenedUrl
 		url_object.TweetID = ret.ID
 		ret.Urls = append(ret.Urls, url_object)
 	}

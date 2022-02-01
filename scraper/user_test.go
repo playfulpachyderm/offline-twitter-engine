@@ -118,7 +118,7 @@ func TestParseHandleFromShortenedTweetUrl(t *testing.T) {
 		return &http.Response{StatusCode: 301, Header: header}, nil
 	})
 
-	// Check the httmock interceptor is working correctly
+	// Check the httpmock interceptor is working correctly
 	require.Equal(t, expanded_url, ExpandShortUrl(short_url), "httpmock didn't intercept the request")
 
 	result, err := ParseHandleFromTweetUrl(short_url)

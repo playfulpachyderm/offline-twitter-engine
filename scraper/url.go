@@ -11,6 +11,7 @@ type Url struct {
 
 	Domain string
 	Text string
+	ShortText string
 	Title string
 	Description string
 	ThumbnailWidth int

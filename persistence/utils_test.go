@@ -110,6 +110,7 @@ func create_url_from_id(id int) scraper.Url {
 		TweetID: -1,
 		Domain: s + "domain",
 		Text: s + "text",
+		ShortText: s + "shorttext",
 		Title: s + "title",
 		Description: s + "description",
 		ThumbnailWidth: id * 23,

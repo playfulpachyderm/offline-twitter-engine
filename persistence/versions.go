@@ -8,7 +8,7 @@ import (
 )
 
 
-const ENGINE_DATABASE_VERSION = 6
+const ENGINE_DATABASE_VERSION = 7
 
 
 type VersionMismatchError struct {
@@ -59,6 +59,7 @@ var MIGRATIONS = []string{
 `alter table videos add column duration integer not null default 0;
 	alter table videos add column view_count integer not null default 0`,
 `alter table users add column is_banned boolean default 0`,
+`alter table urls add column short_text text not null default ""`,
 }
 
 /**
