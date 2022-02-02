@@ -136,22 +136,31 @@ func (api_result APIV2Result) ToTweetTrove() TweetTrove {
 		ret.MergeWith(quoted_trove)
 	}
 
-	// Handle URL cards
-	if api_result.Result.Card.Legacy.Name == "summary_large_image" || api_result.Result.Card.Legacy.Name == "player" {
-		url := api_result.Result.Card.ParseAsUrl()
+	// Handle URL cards.
+	// This should be done in APIV2Tweet (not APIV2Result), but due to the terrible API response structuring (the Card
+	// should be nested under the APIV2Tweet, but it isn't), it goes here.
+	if api_result.Result.Legacy.RetweetedStatusResult == nil {
+		// We have to filter out retweets.  For some reason, retweets have a copy of the card in both the retweeting
+		// and the retweeted TweetResults; it should only be parsed for the real Tweet, not the Retweet
+		if api_result.Result.Card.Legacy.Name == "summary_large_image" || api_result.Result.Card.Legacy.Name == "player" {
+			url := api_result.Result.Card.ParseAsUrl()
 
-		main_tweet := ret.Tweets[TweetID(api_result.Result.Legacy.ID)]
-		found := false
-		for i := range main_tweet.Urls {
-			if main_tweet.Urls[i].ShortText != url.ShortText {
-				continue
+			main_tweet, ok := ret.Tweets[TweetID(api_result.Result.Legacy.ID)]
+			if !ok {
+				panic(fmt.Sprintf("Tweet trove didn't contain its own tweet: %d", api_result.Result.Legacy.ID))
 			}
-			found = true
-			url.Text = main_tweet.Urls[i].Text  // Copy the expanded URL over, since the card doesn't have it in the new API
-			main_tweet.Urls[i] = url
-		}
-		if !found {
-			panic("Tweet trove doesn't contain its own main tweet")
+			found := false
+			for i := range main_tweet.Urls {
+				if main_tweet.Urls[i].ShortText != url.ShortText {
+					continue
+				}
+				found = true
+				url.Text = main_tweet.Urls[i].Text  // Copy the expanded URL over, since the card doesn't have it in the new API
+				main_tweet.Urls[i] = url
+			}
+			if !found {
+				panic(fmt.Sprintf("Couldn't find the url in tweet ID: %d", api_result.Result.Legacy.ID))
+			}
 		}
 	}
 
