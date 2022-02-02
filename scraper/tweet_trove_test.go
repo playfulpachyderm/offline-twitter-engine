@@ -47,3 +47,22 @@ func TestMergeTweetTroves(t *testing.T) {
 	assert.Equal(3, len(trove1.Retweets))
 	assert.Equal(3, len(trove1.TombstoneUsers))
 }
+
+func TestFillMissingUserIDs(t *testing.T) {
+	assert := assert.New(t)
+	u1 := User{ID: 1, Handle: "a"}
+
+	t1 := Tweet{ID: 1, UserID: 1}
+	t2 := Tweet{ID: 2, UserHandle: "a"}
+
+	trove := NewTweetTrove()
+	trove.Users[u1.ID] = u1
+	trove.Tweets[t1.ID] = t1
+	trove.Tweets[t2.ID] = t2
+
+	assert.NotEqual(trove.Tweets[2].UserID, UserID(1))
+
+	trove.FillMissingUserIDs()
+
+	assert.Equal(trove.Tweets[2].UserID, UserID(1))
+}
