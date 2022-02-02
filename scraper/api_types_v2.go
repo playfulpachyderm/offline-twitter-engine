@@ -149,6 +149,7 @@ func (api_result APIV2Result) ToTweetTrove() TweetTrove {
 			if !ok {
 				panic(fmt.Sprintf("Tweet trove didn't contain its own tweet: %d", api_result.Result.Legacy.ID))
 			}
+			url.TweetID = main_tweet.ID
 			found := false
 			for i := range main_tweet.Urls {
 				if main_tweet.Urls[i].ShortText != url.ShortText {

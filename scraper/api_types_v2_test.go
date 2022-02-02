@@ -291,6 +291,7 @@ func TestAPIV2ParseTweetWithURL(t *testing.T) {
 
 	assert.Equal(1, len(tweet.Urls))
 	url := tweet.Urls[0]
+	assert.Equal(tweet.ID, url.TweetID)
 	assert.Equal("observer.com", url.Domain)
 	assert.Equal("Why Evangelical Progressives Need to Demonstrate Anguish Publicly", url.Title)
 	assert.Equal("https://observer.com/2016/12/why-evangelical-progressives-need-to-demonstrate-anguish-publicly/", url.Text)
@@ -325,12 +326,40 @@ func TestAPIV2ParseTweetWithURLPlayerCard(t *testing.T) {
 
 	assert.Equal(1, len(tweet.Urls))
 	url := tweet.Urls[0]
+	assert.Equal(tweet.ID, url.TweetID)
 	assert.Equal("www.youtube.com", url.Domain)
 	assert.Equal("Michael Malice on Kennedy Nov. 15, 2016", url.Title)
 	assert.Equal("https://www.youtube.com/watch?v=c9TypEM1ik4&t=9s", url.Text)
 	assert.Equal("Steve Bannon;", url.Description)
 	assert.Equal("https://pbs.twimg.com/card_img/1485504774233415680/fsbK59th?format=jpg&name=800x320_1", url.ThumbnailRemoteUrl)
 	assert.Equal(UserID(10228272), url.SiteID)
+}
+
+/**
+ * Parse a tweet with a link with a "player" card
+ */
+func TestAPIV2ParseTweetWithURLRetweet(t *testing.T) {
+	assert := assert.New(t)
+	data, err := ioutil.ReadFile("test_responses/api_v2/retweet_with_url.json")
+	if err != nil {
+		panic(err)
+	}
+
+	var tweet_result APIV2Result
+	err = json.Unmarshal(data, &tweet_result)
+	assert.NoError(err)
+
+	trove := tweet_result.ToTweetTrove()
+
+	assert.Equal(1, len(trove.Tweets))
+	tweet, ok := trove.Tweets[1488605073588559873]
+	assert.True(ok)
+	assert.Equal("REJOICE", tweet.Text)
+
+	assert.Equal(1, len(tweet.Urls))
+	url := tweet.Urls[0]
+	assert.Equal(tweet.ID, url.TweetID)
+	assert.Equal("tippinsights.com", url.Domain)
 }
 
 
