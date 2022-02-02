@@ -414,3 +414,31 @@ func TestParseAPIV2UserFeed(t *testing.T) {
 
 	fmt.Printf("%d Users, %d Tweets, %d Retweets\n", len(tweet_trove.Users), len(tweet_trove.Tweets), len(tweet_trove.Retweets))
 }
+
+
+/**
+ * Should correctly identify an "empty" response
+ */
+func TestAPIV2FeedIsEmpty(t *testing.T) {
+	assert := assert.New(t)
+	data, err := ioutil.ReadFile("test_responses/api_v2/empty_response.json")
+	if err != nil {
+		panic(err)
+	}
+	var feed APIV2Response
+	err = json.Unmarshal(data, &feed)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	assert.True(feed.IsEmpty())
+
+	// Make sure parsing it doesn't cause an error
+	trove, err := feed.ToTweetTrove()
+	if err != nil {
+		panic(err)
+	}
+	assert.Len(trove.Tweets, 0)
+	assert.Len(trove.Users, 0)
+	assert.Len(trove.Retweets, 0)
+}

@@ -250,6 +250,18 @@ func (api_response APIV2Response) GetCursorBottom() string {
 }
 
 /**
+ * Returns `true` if there's no non-cursor entries in this response, false otherwise
+ */
+func (api_response APIV2Response) IsEmpty() bool {
+	for _, e := range api_response.Data.User.Result.Timeline.Timeline.Instructions[0].Entries {
+		if !strings.Contains(e.EntryID, "cursor") {
+			return false
+		}
+	}
+	return true
+}
+
+/**
  * Parse the collected API response and turn it into a TweetTrove
  */
 func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
@@ -343,7 +355,7 @@ func (api API) GetMoreTweetsFromGraphqlFeed(user_id UserID, response *APIV2Respo
 			// Empty response, cursor same as previous: end of feed has been reached
 			return END_OF_FEED
 		}
-		if len(fresh_response.Data.User.Result.Timeline.Timeline.Instructions[0].Entries) == 0 {
+		if fresh_response.IsEmpty() {
 			// Response has a pinned tweet, but no other content: end of feed has been reached
 			return END_OF_FEED  // TODO: check that there actually is a pinned tweet and the request didn't just fail lol
 		}
