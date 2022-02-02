@@ -122,7 +122,11 @@ func (api_result APIV2Result) ToTweetTrove() TweetTrove {
 		// Quoted tweets might be tombstones!
 		if quoted_api_result.Result.Tombstone != nil {
 			tombstoned_tweet := &quoted_api_result.Result.Legacy.APITweet
-			tombstoned_tweet.TombstoneText = quoted_api_result.Result.Tombstone.Text.Text
+			var ok bool
+			tombstoned_tweet.TombstoneText, ok = tombstone_types[quoted_api_result.Result.Tombstone.Text.Text]
+			if !ok {
+				panic(fmt.Sprintf("Unknown tombstone text: %s", quoted_api_result.Result.Tombstone.Text.Text))
+			}
 			tombstoned_tweet.ID = int64(int_or_panic(api_result.Result.Legacy.APITweet.QuotedStatusIDStr))
 			handle, err := ParseHandleFromTweetUrl(api_result.Result.Legacy.APITweet.QuotedStatusPermalink.ExpandedURL)
 			if err != nil {

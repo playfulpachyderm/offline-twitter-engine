@@ -48,5 +48,32 @@ func GetUserFeedGraphqlFor(user_id UserID, min_tweets int) (trove TweetTrove, er
 	}
 
 
-	return api_response.ToTweetTrove()
+	trove, err = api_response.ToTweetTrove()
+	if err != nil {
+		panic(err)
+	}
+
+	// DUPE tombstone-user-processing
+	fmt.Println("------------")
+	for _, handle := range trove.TombstoneUsers {
+		fmt.Println(handle)
+
+		user, err := GetUser(handle)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(user)
+
+		if user.ID == 0 {
+			panic(fmt.Sprintf("UserID == 0 (@%s)", handle))
+		}
+
+		trove.Users[user.ID] = user
+	}
+	// Quoted tombstones need their user_id filled out from the tombstoned_users list
+	trove.FillMissingUserIDs()
+
+	// <<<<<<< DUPE tombstone-user-processing
+
+	return trove, nil
 }

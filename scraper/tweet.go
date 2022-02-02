@@ -15,6 +15,7 @@ type TweetID int64
 type Tweet struct {
 	ID               TweetID
 	UserID           UserID
+	UserHandle       UserHandle  // For processing tombstones
 	User             *User
 	Text             string
 	PostedAt         time.Time
@@ -85,6 +86,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 
 	ret.ID = TweetID(apiTweet.ID)
 	ret.UserID = UserID(apiTweet.UserID)
+	ret.UserHandle = UserHandle(apiTweet.UserHandle)
 	ret.Text = apiTweet.FullText
 
 	// Process "posted-at" date and time

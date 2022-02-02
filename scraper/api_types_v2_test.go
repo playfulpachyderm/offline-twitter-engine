@@ -269,6 +269,42 @@ func TestAPIV2ParseRetweetedQuoteTweet(t *testing.T) {
 
 
 /**
+ * Parse tweet with quoted tombstone
+ */
+func TestAPIV2ParseTweetWithQuotedTombstone(t *testing.T) {
+	assert := assert.New(t)
+	data, err := ioutil.ReadFile("test_responses/api_v2/tweet_with_quoted_tombstone.json")
+	if err != nil {
+		panic(err)
+	}
+
+	var tweet_result APIV2Result
+	err = json.Unmarshal(data, &tweet_result)
+	assert.NoError(err)
+
+	trove := tweet_result.ToTweetTrove()
+
+	assert.Equal(1, len(trove.Users))
+	user, ok := trove.Users[44067298]
+	assert.True(ok)
+	assert.Equal(UserHandle("michaelmalice"), user.Handle)
+
+	assert.Equal(1, len(trove.TombstoneUsers))
+	assert.Contains(trove.TombstoneUsers, UserHandle("coltnkat"))
+
+	assert.Equal(2, len(trove.Tweets))
+	tombstoned_tweet, ok := trove.Tweets[1485774025347371008]
+	assert.True(ok)
+	assert.Equal(TweetID(1485774025347371008), tombstoned_tweet.ID)
+	assert.Equal("no longer exists", tombstoned_tweet.TombstoneType)
+	assert.True (tombstoned_tweet.IsStub)
+	assert.Equal(UserHandle("coltnkat"), tombstoned_tweet.UserHandle)
+
+	assert.Equal(0, len(trove.Retweets))
+}
+
+
+/**
  * Parse a tweet with a link
  */
 func TestAPIV2ParseTweetWithURL(t *testing.T) {
