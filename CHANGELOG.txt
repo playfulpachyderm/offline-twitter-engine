@@ -41,3 +41,9 @@ v0.0.5
 
 - BUGFIX: fix parsing of tweet URLs with query params ('?s=20', etc)
 - BUGFIX: fix bug in scraping users with "600x200" banner images that caused them not to be saved correctly
+
+v0.1.0
+------
+
+- Add support for new GraphQL twitter API (dubbed "APIv2" in code).  User feed scraping now uses this API
+- Embedded links (URLs) now have their short versions saved in the DB.
