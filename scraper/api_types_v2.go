@@ -114,6 +114,23 @@ func (api_v2_tweet APIV2Tweet) ToTweetTrove() TweetTrove {
 	return ret
 }
 
+type APIV2Entry struct {
+	EntryID string `json:"entryId"`
+	SortIndex int64 `json:"sortIndex,string"`
+	Content struct {
+		ItemContent struct {
+			EntryType string `json:"entryType"`
+			TweetResults APIV2Result `json:"tweet_results"`
+		} `json:"itemContent"`
+
+		// Cursors
+		EntryType string `json:"entryType"`
+		Value string `json:"value"`
+		CursorType string `json:"cursorType"`
+
+	} `json:"content"`
+}
+
 type APIV2Response struct {
 	Data struct {
 		User struct {
@@ -122,108 +139,7 @@ type APIV2Response struct {
 					Timeline struct {
 						Instructions []struct {
 							Type string `json:"type"`
-							Entries []struct {
-								EntryID string `json:"entryId"`
-								SortIndex int64 `json:"sortIndex,string"`
-								Content struct {
-									ItemContent struct {
-										EntryType string `json:"entryType"`
-										TweetResults struct {
-											Result struct {
-												Legacy struct {
-													APITweet
-													RetweetedStatusResult struct {
-														Result struct {
-															ID int `json:"rest_id,string"`
-															Legacy APITweet `json:"legacy"`
-															Core struct {
-																UserResults struct {
-																	Result struct {
-																		ID     int64   `json:"rest_id,string"`
-																		Legacy APIUser `json:"legacy"`
-																	} `json:"result"`
-																} `json:"user_results"`
-															} `json:"core"`
-															QuotedStatusResult struct {
-																Result struct {
-																	ID int64 `json:"rest_id,string"`
-																	Legacy APITweet `json:"legacy"`
-																	Core struct {
-																		UserResults struct {
-																			Result struct {
-																				ID     int64   `json:"rest_id,string"`
-																				Legacy APIUser `json:"legacy"`
-																			} `json:"result"`
-																		} `json:"user_results"`
-																	} `json:"core"`
-																} `json:"result"`
-															} `json:"quoted_status_result"`
-														} `json:"result"`
-													} `json:"retweeted_status_result"`
-												} `json:"legacy"`
-												Core struct {
-													UserResults struct {
-														Result struct {
-															ID     int64   `json:"rest_id,string"`
-															Legacy APIUser `json:"legacy"`
-														} `json:"result"`
-													} `json:"user_results"`
-												} `json:"core"`
-												QuotedStatusResult struct {  // Same as "Result"
-													Result struct {
-														ID int64 `json:"rest_id,string"`
-														Legacy struct {
-															APITweet
-															RetweetedStatusResult struct {
-																Result struct {
-																	ID int `json:"rest_id,string"`
-																	Legacy APITweet `json:"legacy"`
-																	Core struct {
-																		UserResults struct {
-																			Result struct {
-																				ID     int64   `json:"rest_id,string"`
-																				Legacy APIUser `json:"legacy"`
-																			} `json:"result"`
-																		} `json:"user_results"`
-																	} `json:"core"`
-																	QuotedStatusResult struct {
-																		Result struct {
-																			ID int64 `json:"rest_id,string"`
-																			Legacy APITweet `json:"legacy"`
-																			Core struct {
-																				UserResults struct {
-																					Result struct {
-																						ID     int64   `json:"rest_id,string"`
-																						Legacy APIUser `json:"legacy"`
-																					} `json:"result"`
-																				} `json:"user_results"`
-																			} `json:"core"`
-																		} `json:"result"`
-																	} `json:"quoted_status_result"`
-																} `json:"result"`
-															} `json:"retweeted_status_result"`
-														} `json:"legacy"`
-														Core struct {
-															UserResults struct {
-																Result struct {
-																	ID     int64   `json:"rest_id,string"`
-																	Legacy APIUser `json:"legacy"`
-																} `json:"result"`
-															} `json:"user_results"`
-														} `json:"core"`
-													} `json:"result"`
-												} `json:"quoted_status_result"`
-											} `json:"result"`
-										} `json:"tweet_results"`
-									} `json:"itemContent"`
-
-									// Cursors
-									EntryType string `json:"entryType"`
-									Value string `json:"value"`
-									CursorType string `json:"cursorType"`
-
-								} `json:"content"`
-							} `json:"entries"`
+							Entries []APIV2Entry`json:"entries"`
 						} `json:"instructions"`
 					} `json:"timeline"`
 				} `json:"timeline"`
@@ -242,7 +158,6 @@ func (api_response APIV2Response) GetCursorBottom() string {
 	return last_entry.Content.Value
 }
 
-
 /**
  * Parse the collected API response and turn it into a TweetTrove
  */
@@ -250,102 +165,15 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 	ret := NewTweetTrove()
 	for _, entry := range api_response.Data.User.Result.Timeline.Timeline.Instructions[0].Entries {  // TODO: the second Instruction is the pinned tweet
 		if !strings.HasPrefix(entry.EntryID, "tweet-") {
-			// println(entry.EntryID)
 			continue
 		}
 
-		result := entry.Content.ItemContent.TweetResults.Result
-		apiv2_tweet := result.Legacy
-		apiv2_user_result := result.Core.UserResults.Result
-		apiv2_retweeted_tweet_result := apiv2_tweet.RetweetedStatusResult.Result
-		apiv2_retweeted_tweet_user := apiv2_retweeted_tweet_result.Core.UserResults.Result
-		apiv2_retweeted_quoted_result := apiv2_retweeted_tweet_result.QuotedStatusResult.Result
-		apiv2_retweeted_quoted_user := apiv2_retweeted_quoted_result.Core.UserResults.Result
-		apiv2_quoted_tweet_result := result.QuotedStatusResult.Result
-		apiv2_quoted_user_result := apiv2_quoted_tweet_result.Core.UserResults.Result
+		result := entry.Content.ItemContent.TweetResults
 
-		// Handle case of retweet (main tweet doesn't get parsed other than retweeted_at)
-		if apiv2_retweeted_tweet_result.ID != 0 {
-			orig_tweet, err := ParseSingleTweet(apiv2_retweeted_tweet_result.Legacy)
-			if err != nil {
-				return TweetTrove{}, err
-			}
-			ret.Tweets[orig_tweet.ID] = orig_tweet
-
-			orig_user, err := ParseSingleUser(apiv2_retweeted_tweet_user.Legacy)
-			if err != nil {
-				return TweetTrove{}, err
-			}
-			orig_user.ID = UserID(apiv2_retweeted_tweet_user.ID)
-			ret.Users[orig_user.ID] = orig_user
-
-			retweeting_user, err := ParseSingleUser(apiv2_user_result.Legacy)
-			if err != nil {
-				return TweetTrove{}, err
-			}
-			retweeting_user.ID = UserID(apiv2_user_result.ID)
-			ret.Users[retweeting_user.ID] = retweeting_user
-
-			retweet := Retweet{}
-			retweet.RetweetID = TweetID(apiv2_tweet.ID)
-			retweet.TweetID = TweetID(orig_tweet.ID)
-			retweet.RetweetedByID = retweeting_user.ID
-			retweet.RetweetedAt, err = time.Parse(time.RubyDate, apiv2_tweet.CreatedAt)
-			if err != nil {
-				fmt.Printf("%v\n", apiv2_tweet)
-				panic(err)
-			}
-			ret.Retweets[retweet.RetweetID] = retweet
-
-			// Handle quoted tweet
-			if apiv2_retweeted_quoted_result.ID != 0 {
-				quoted_tweet, err := ParseSingleTweet(apiv2_retweeted_quoted_result.Legacy)
-				if err != nil {
-					return TweetTrove{}, err
-				}
-				ret.Tweets[quoted_tweet.ID] = quoted_tweet
-
-				quoted_user, err := ParseSingleUser(apiv2_retweeted_quoted_user.Legacy)
-				if err != nil {
-					return TweetTrove{}, err
-				}
-				quoted_user.ID = UserID(apiv2_retweeted_quoted_user.ID)
-				ret.Users[quoted_user.ID] = quoted_user
-			}
-
-			continue
-		}
-
-		// The main tweet
-		tweet, err := ParseSingleTweet(apiv2_tweet.APITweet)
-		if err != nil {
-			return TweetTrove{}, err
-		}
-		ret.Tweets[tweet.ID] = tweet
-
-		user, err := ParseSingleUser(apiv2_user_result.Legacy)
-		if err != nil {
-			return TweetTrove{}, err
-		}
-		user.ID = UserID(apiv2_user_result.ID)
-		ret.Users[user.ID] = user
-
-		// Handle quoted tweet
-		if apiv2_quoted_tweet_result.ID != 0 {
-			quoted_tweet, err := ParseSingleTweet(apiv2_quoted_tweet_result.Legacy.APITweet)
-			if err != nil {
-				return TweetTrove{}, err
-			}
-			ret.Tweets[quoted_tweet.ID] = quoted_tweet
-
-			quoted_user, err := ParseSingleUser(apiv2_quoted_user_result.Legacy)
-			if err != nil {
-				return TweetTrove{}, err
-			}
-			quoted_user.ID = UserID(apiv2_quoted_user_result.ID)
-			ret.Users[quoted_user.ID] = quoted_user
-		}
+		main_trove := result.ToTweetTrove()
+		ret.MergeWith(main_trove)
 	}
+
 	return ret, nil
 }
 
