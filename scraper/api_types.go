@@ -163,7 +163,7 @@ type APITweet struct {
 	QuotedStatusIDStr     string    `json:"quoted_status_id_str"`     // Can be empty string
 	QuotedStatusID        int64
 	QuotedStatusPermalink struct {
-		URL         string `json:"url"`
+		ShortURL    string `json:"url"`
 		ExpandedURL string `json:"expanded"`
 	} `json:"quoted_status_permalink"`
 	Time                  time.Time `json:"time"`
@@ -188,10 +188,20 @@ func (t *APITweet) NormalizeContent() {
 		t.FullText = string([]rune(t.FullText)[t.DisplayTextRange[0]:t.DisplayTextRange[1]])
 	}
 
+	// Handle short links showing up at ends of tweets
+	for _, url := range t.Entities.URLs {
+		index := strings.Index(t.FullText, url.ShortenedUrl)
+		if index == (len(t.FullText) - len(url.ShortenedUrl)) {
+			t.FullText = strings.TrimSpace(t.FullText[0:index])
+
+		}
+	}
+
 	// Handle pasted tweet links that turn into quote tweets but still have a link in them
+	// This is a separate case from above because we want it gone even if it's in the middle of the tweet
 	if t.QuotedStatusID != 0 {
 		for _, url := range t.Entities.URLs {
-			if url.ShortenedUrl == t.QuotedStatusPermalink.URL {
+			if url.ShortenedUrl == t.QuotedStatusPermalink.ShortURL {
 				t.FullText = strings.ReplaceAll(t.FullText, url.ShortenedUrl, "")
 			}
 		}

@@ -10,6 +10,67 @@ import (
 	"strings"
 )
 
+type CardValue struct {
+	Type string `json:"type"`
+	StringValue string `json:"string_value"`
+	ImageValue struct {
+		AltText string `json:"alt"`
+		Height int `json:"height"`
+		Width int `json:"width"`
+		Url string `json:"url"`
+	} `json:"image_value"`
+	UserValue struct {
+		ID int64 `json:"id_str,string"`
+	} `json:"user_value"`
+	BooleanValue bool `json:"boolean_value"`
+}
+
+type APIV2Card struct {
+	Legacy struct {
+		BindingValues []struct {
+			Key string `json:"key"`
+			Value CardValue `json:"value"`
+		} `json:"binding_values"`
+		Name string `json:"name"`
+		Url string `json:"url"`
+	} `json:"legacy"`
+}
+func (card APIV2Card) ParseAsUrl() Url {
+	values := make(map[string]CardValue)
+	for _, obj := range card.Legacy.BindingValues {
+		values[obj.Key] = obj.Value
+	}
+
+	ret := Url{}
+	ret.HasCard = true
+
+	ret.ShortText = card.Legacy.Url
+	ret.Domain = values["domain"].StringValue
+	ret.Title = values["title"].StringValue
+	ret.Description = values["description"].StringValue
+	ret.IsContentDownloaded = false
+	ret.CreatorID = UserID(values["creator"].UserValue.ID)
+	ret.SiteID = UserID(values["site"].UserValue.ID)
+
+	var thumbnail_url string
+	if card.Legacy.Name == "summary_large_image" || card.Legacy.Name == "summary" {
+		thumbnail_url = values["thumbnail_image_large"].ImageValue.Url
+	} else if card.Legacy.Name == "player" {
+		thumbnail_url = values["player_image_large"].ImageValue.Url
+	} else {
+		panic("TODO unknown card type")
+	}
+
+	if thumbnail_url != "" {
+		ret.HasThumbnail = true
+		ret.ThumbnailRemoteUrl = thumbnail_url
+		ret.ThumbnailLocalPath = get_thumbnail_local_path(thumbnail_url)
+		ret.ThumbnailWidth = values["thumbnail_image_large"].ImageValue.Width
+		ret.ThumbnailHeight = values["thumbnail_image_large"].ImageValue.Height
+	}
+	return ret
+}
+
 type APIV2UserResult struct {
 	UserResults struct {
 		Result struct {
@@ -37,6 +98,7 @@ type APIV2Result struct {
 			} `json:"text"`
 		} `json:"tombstone"`
 		Core *APIV2UserResult `json:"core"`
+		Card APIV2Card `json:"card"`
 		QuotedStatusResult *APIV2Result `json:"quoted_status_result"`
 	} `json:"result"`
 }
@@ -72,6 +134,25 @@ func (api_result APIV2Result) ToTweetTrove() TweetTrove {
 
 		quoted_trove := api_result.Result.QuotedStatusResult.ToTweetTrove()
 		ret.MergeWith(quoted_trove)
+	}
+
+	// Handle URL cards
+	if api_result.Result.Card.Legacy.Name == "summary_large_image" || api_result.Result.Card.Legacy.Name == "player" {
+		url := api_result.Result.Card.ParseAsUrl()
+
+		main_tweet := ret.Tweets[TweetID(api_result.Result.Legacy.ID)]
+		found := false
+		for i := range main_tweet.Urls {
+			if main_tweet.Urls[i].ShortText != url.ShortText {
+				continue
+			}
+			found = true
+			url.Text = main_tweet.Urls[i].Text  // Copy the expanded URL over, since the card doesn't have it in the new API
+			main_tweet.Urls[i] = url
+		}
+		if !found {
+			panic("Tweet trove doesn't contain its own main tweet")
+		}
 	}
 
 	return ret

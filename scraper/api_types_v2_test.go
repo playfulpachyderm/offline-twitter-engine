@@ -268,6 +268,72 @@ func TestAPIV2ParseRetweetedQuoteTweet(t *testing.T) {
 }
 
 
+/**
+ * Parse a tweet with a link
+ */
+func TestAPIV2ParseTweetWithURL(t *testing.T) {
+	assert := assert.New(t)
+	data, err := ioutil.ReadFile("test_responses/api_v2/tweet_with_url.json")
+	if err != nil {
+		panic(err)
+	}
+
+	var tweet_result APIV2Result
+	err = json.Unmarshal(data, &tweet_result)
+	assert.NoError(err)
+
+	trove := tweet_result.ToTweetTrove()
+
+	assert.Equal(1, len(trove.Tweets))
+	tweet, ok := trove.Tweets[1485695695025803264]
+	assert.True(ok)
+	assert.Equal("This led to what I discussed as \"anguish signaling,\" where progs competed in proclaiming their distress both to show they were the Good Guys but also to get the pack to regroup, akin to wolves howling.", tweet.Text)
+
+	assert.Equal(1, len(tweet.Urls))
+	url := tweet.Urls[0]
+	assert.Equal("observer.com", url.Domain)
+	assert.Equal("Why Evangelical Progressives Need to Demonstrate Anguish Publicly", url.Title)
+	assert.Equal("https://observer.com/2016/12/why-evangelical-progressives-need-to-demonstrate-anguish-publicly/", url.Text)
+	assert.Equal("The concept of “virtue signaling” gained a great deal of currency in this past year. It’s a way to demonstrate to others that one is a good person without having to do anything", url.Description)
+	assert.Equal("https://pbs.twimg.com/card_img/1485694664640507911/WsproWyP?format=jpg&name=600x600", url.ThumbnailRemoteUrl)
+	assert.Equal(600, url.ThumbnailWidth)
+	assert.Equal(300, url.ThumbnailHeight)
+	assert.Equal(UserID(15738599), url.SiteID)
+	assert.Equal(UserID(15738599), url.CreatorID)
+}
+
+/**
+ * Parse a tweet with a link with a "player" card
+ */
+func TestAPIV2ParseTweetWithURLPlayerCard(t *testing.T) {
+	assert := assert.New(t)
+	data, err := ioutil.ReadFile("test_responses/api_v2/tweet_with_url_player_card.json")
+	if err != nil {
+		panic(err)
+	}
+
+	var tweet_result APIV2Result
+	err = json.Unmarshal(data, &tweet_result)
+	assert.NoError(err)
+
+	trove := tweet_result.ToTweetTrove()
+
+	assert.Equal(1, len(trove.Tweets))
+	tweet, ok := trove.Tweets[1485504913614327808]
+	assert.True(ok)
+	assert.Equal("i'll just leave this here", tweet.Text)
+
+	assert.Equal(1, len(tweet.Urls))
+	url := tweet.Urls[0]
+	assert.Equal("www.youtube.com", url.Domain)
+	assert.Equal("Michael Malice on Kennedy Nov. 15, 2016", url.Title)
+	assert.Equal("https://www.youtube.com/watch?v=c9TypEM1ik4&t=9s", url.Text)
+	assert.Equal("Steve Bannon;", url.Description)
+	assert.Equal("https://pbs.twimg.com/card_img/1485504774233415680/fsbK59th?format=jpg&name=800x320_1", url.ThumbnailRemoteUrl)
+	assert.Equal(UserID(10228272), url.SiteID)
+}
+
+
 func TestParseAPIV2UserFeed(t *testing.T) {
 	data, err := ioutil.ReadFile("test_responses/api_v2/user_feed_apiv2.json")
 	if err != nil {
