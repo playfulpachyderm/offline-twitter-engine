@@ -14,7 +14,7 @@ import (
 /**
  * Help message to print if command syntax is incorrect
  */
-const help_message = `Usage: twitter [--profile <profile_dir>] <operation> <TARGET>
+const help_message = `Usage: twitter [--profile <profile_dir>] [<flags>] <operation> <TARGET>
 This application downloads tweets from twitter and saves them in a SQLite database.
 
 <profile_dir>:
@@ -49,6 +49,16 @@ This application downloads tweets from twitter and saves them in a SQLite databa
 
     search
           <TARGET> is the search query.  Should be wrapped in quotes if it has spaces.
+
+<flags>:
+    -v, --version
+          Print the version number and exit.
+
+    -n, --number
+          Set the number of tweets to fetch, when getting a feed.  Default is 50.
+          Setting this flag means you will get at least that many "tweets plus retweets" from that user (unless of
+          course they don't have that many).  The total amount of tweets returned will be larger, because quoted tweets
+          won't count toward the limit.
 `
 
 

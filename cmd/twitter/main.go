@@ -24,6 +24,10 @@ func main() {
 
 	show_version_flag := flag.Bool("version", false, "???")
 	flag.BoolVar(show_version_flag, "v", false, "???")
+
+	how_many := flag.Int("n", 50, "???")
+	flag.IntVar(how_many, "number", 50, "???")
+
 	flag.Parse()
 	args := flag.Args()
 
@@ -66,7 +70,7 @@ func main() {
 	case "fetch_tweet":
 		fetch_tweet_conversation(target)
 	case "get_user_tweets":
-		fetch_user_feed(target, 50)
+		fetch_user_feed(target, *how_many)
 	case "get_user_tweets_all":
 		fetch_user_feed(target, 999999999)
 	case "download_tweet_content":
