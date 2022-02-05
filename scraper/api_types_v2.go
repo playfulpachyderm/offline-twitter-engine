@@ -70,6 +70,49 @@ func (card APIV2Card) ParseAsUrl() Url {
 	}
 	return ret
 }
+func (card APIV2Card) ParseAsPoll() Poll {
+	values := make(map[string]CardValue)
+	for _, obj := range card.Legacy.BindingValues {
+		values[obj.Key] = obj.Value
+	}
+
+	card_url, err := url.Parse(card.Legacy.Url)
+	if err != nil {
+		panic(err)
+	}
+	id := int_or_panic(card_url.Hostname())
+
+	voting_ends_at, err := time.Parse(time.RFC3339, values["end_datetime_utc"].StringValue)
+	if err != nil {
+		panic(err)
+	}
+	last_updated_at, err := time.Parse(time.RFC3339, values["last_updated_datetime_utc"].StringValue)
+	if err != nil {
+		panic(err)
+	}
+
+	ret := Poll{}
+	ret.ID = PollID(id)
+	ret.NumChoices = parse_num_choices(card.Legacy.Name)
+	ret.VotingDuration = int_or_panic(values["duration_minutes"].StringValue) * 60
+	ret.VotingEndsAt = voting_ends_at
+	ret.LastUpdatedAt = last_updated_at
+
+	ret.Choice1 = values["choice1_label"].StringValue
+	ret.Choice1_Votes = int_or_panic(values["choice1_count"].StringValue)
+	ret.Choice2 = values["choice2_label"].StringValue
+	ret.Choice2_Votes = int_or_panic(values["choice2_count"].StringValue)
+
+	if ret.NumChoices > 2 {
+		ret.Choice3 = values["choice3_label"].StringValue
+		ret.Choice3_Votes = int_or_panic(values["choice3_count"].StringValue)
+	}
+	if ret.NumChoices > 3 {
+		ret.Choice4 = values["choice4_label"].StringValue
+		ret.Choice4_Votes = int_or_panic(values["choice4_count"].StringValue)
+	}
+	return ret
+}
 
 type APIV2UserResult struct {
 	UserResults struct {
@@ -146,13 +189,13 @@ func (api_result APIV2Result) ToTweetTrove() TweetTrove {
 	if api_result.Result.Legacy.RetweetedStatusResult == nil {
 		// We have to filter out retweets.  For some reason, retweets have a copy of the card in both the retweeting
 		// and the retweeted TweetResults; it should only be parsed for the real Tweet, not the Retweet
+		main_tweet, ok := ret.Tweets[TweetID(api_result.Result.Legacy.ID)]
+		if !ok {
+			panic(fmt.Sprintf("Tweet trove didn't contain its own tweet: %d", api_result.Result.Legacy.ID))
+		}
 		if api_result.Result.Card.Legacy.Name == "summary_large_image" || api_result.Result.Card.Legacy.Name == "player" {
 			url := api_result.Result.Card.ParseAsUrl()
 
-			main_tweet, ok := ret.Tweets[TweetID(api_result.Result.Legacy.ID)]
-			if !ok {
-				panic(fmt.Sprintf("Tweet trove didn't contain its own tweet: %d", api_result.Result.Legacy.ID))
-			}
 			url.TweetID = main_tweet.ID
 			found := false
 			for i := range main_tweet.Urls {
@@ -166,7 +209,14 @@ func (api_result APIV2Result) ToTweetTrove() TweetTrove {
 			if !found {
 				panic(fmt.Sprintf("Couldn't find the url in tweet ID: %d", api_result.Result.Legacy.ID))
 			}
+		} else if strings.Index(api_result.Result.Card.Legacy.Name, "poll") == 0 {
+			// Process polls
+			poll := api_result.Result.Card.ParseAsPoll()
+			poll.TweetID = main_tweet.ID
+			main_tweet.Polls = []Poll{poll}
+			ret.Tweets[main_tweet.ID] = main_tweet
 		}
+
 	}
 
 	return ret

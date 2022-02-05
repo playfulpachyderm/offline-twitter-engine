@@ -82,7 +82,6 @@ func TestAPIV2ParseTweet(t *testing.T) {
 	assert.Equal(0, len(tweet.Mentions))
 	assert.Equal(0, len(tweet.ReplyMentions))
 	assert.Equal(0, len(tweet.Hashtags))
-	assert.Equal(0, len(tweet.Polls))
 	assert.Equal("", tweet.TombstoneType)
 	assert.False(tweet.IsStub)
 
@@ -396,6 +395,45 @@ func TestAPIV2ParseTweetWithURLRetweet(t *testing.T) {
 	url := tweet.Urls[0]
 	assert.Equal(tweet.ID, url.TweetID)
 	assert.Equal("tippinsights.com", url.Domain)
+}
+
+/**
+ * Parse a tweet with a poll
+ */
+func TestAPIV2ParseTweetWithPoll(t *testing.T) {
+	assert := assert.New(t)
+	data, err := ioutil.ReadFile("test_responses/api_v2/tweet_with_poll.json")
+	if err != nil {
+		panic(err)
+	}
+
+	var tweet_result APIV2Result
+	err = json.Unmarshal(data, &tweet_result)
+	assert.NoError(err)
+
+	trove := tweet_result.ToTweetTrove()
+
+	assert.Len(trove.Tweets, 1)
+	tweet, ok := trove.Tweets[1485692111106285571]
+	assert.True(ok)
+	assert.Len(tweet.Polls, 1)
+
+	poll := tweet.Polls[0]
+	assert.Equal(TweetID(1485692111106285571), poll.TweetID)
+	assert.Equal(poll.NumChoices, 4)
+
+	assert.Equal("1", poll.Choice1)
+	assert.Equal("2", poll.Choice2)
+	assert.Equal("C", poll.Choice3)
+	assert.Equal("E", poll.Choice4)
+	assert.Equal(891, poll.Choice1_Votes)
+	assert.Equal(702, poll.Choice2_Votes)
+	assert.Equal(459, poll.Choice3_Votes)
+	assert.Equal(1801, poll.Choice4_Votes)
+
+	assert.Equal(int64(1643137976), poll.VotingEndsAt.Unix())
+	assert.Equal(int64(1643055638), poll.LastUpdatedAt.Unix())
+	assert.Equal(1440 * 60, poll.VotingDuration)
 }
 
 
