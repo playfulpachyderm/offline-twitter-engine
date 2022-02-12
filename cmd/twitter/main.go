@@ -28,6 +28,9 @@ func main() {
 	how_many := flag.Int("n", 50, "???")
 	flag.IntVar(how_many, "number", 50, "???")
 
+	help := flag.Bool("help", false, "???")
+	flag.BoolVar(help, "h", false, "???")
+
 	flag.Parse()
 	args := flag.Args()
 
@@ -38,6 +41,10 @@ func main() {
 			fmt.Println("v" + version_string)
 		}
 		os.Exit(0)
+	}
+
+	if *help {
+		die("", true, 0)
 	}
 
 	if len(args) < 2 {

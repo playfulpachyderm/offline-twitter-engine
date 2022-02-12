@@ -51,6 +51,9 @@ This application downloads tweets from twitter and saves them in a SQLite databa
           <TARGET> is the search query.  Should be wrapped in quotes if it has spaces.
 
 <flags>:
+    -h, --help
+          Print this message, then exit.
+
     -v, --version
           Print the version number and exit.
 

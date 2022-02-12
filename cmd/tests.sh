@@ -14,6 +14,9 @@ PATH=`pwd`:$PATH
 
 test "$(tw --version)" = "v$FAKE_VERSION"
 
+tw --help
+test $? -eq 0
+
 tw create_profile data
 cd data
 
