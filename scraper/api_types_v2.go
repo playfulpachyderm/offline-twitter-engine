@@ -276,16 +276,18 @@ type APIV2Entry struct {
 	} `json:"content"`
 }
 
+type APIV2Instruction struct {
+	Type string `json:"type"`
+	Entries []APIV2Entry`json:"entries"`
+}
+
 type APIV2Response struct {
 	Data struct {
 		User struct {
 			Result struct {
 				Timeline struct {
 					Timeline struct {
-						Instructions []struct {
-							Type string `json:"type"`
-							Entries []APIV2Entry`json:"entries"`
-						} `json:"instructions"`
+						Instructions []APIV2Instruction `json:"instructions"`
 					} `json:"timeline"`
 				} `json:"timeline"`
 			} `json:"result"`
@@ -293,8 +295,18 @@ type APIV2Response struct {
 	} `json:"data"`
 }
 
+func (api_response APIV2Response) GetMainInstruction() *APIV2Instruction {
+	instructions := api_response.Data.User.Result.Timeline.Timeline.Instructions
+	for i := range instructions {
+		if instructions[i].Type == "TimelineAddEntries" {
+			return &instructions[i]
+		}
+	}
+	panic("No 'TimelineAddEntries' found")
+}
+
 func (api_response APIV2Response) GetCursorBottom() string {
-	entries := api_response.Data.User.Result.Timeline.Timeline.Instructions[0].Entries
+	entries := api_response.GetMainInstruction().Entries
 	last_entry := entries[len(entries) - 1]
 	if last_entry.Content.CursorType != "Bottom" {
 		panic("No bottom cursor found")
@@ -307,7 +319,7 @@ func (api_response APIV2Response) GetCursorBottom() string {
  * Returns `true` if there's no non-cursor entries in this response, false otherwise
  */
 func (api_response APIV2Response) IsEmpty() bool {
-	for _, e := range api_response.Data.User.Result.Timeline.Timeline.Instructions[0].Entries {
+	for _, e := range api_response.GetMainInstruction().Entries {
 		if !strings.Contains(e.EntryID, "cursor") {
 			return false
 		}
@@ -320,7 +332,7 @@ func (api_response APIV2Response) IsEmpty() bool {
  */
 func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 	ret := NewTweetTrove()
-	for _, entry := range api_response.Data.User.Result.Timeline.Timeline.Instructions[0].Entries {  // TODO: the second Instruction is the pinned tweet
+	for _, entry := range api_response.GetMainInstruction().Entries {  // TODO: the second Instruction is the pinned tweet
 		if !strings.HasPrefix(entry.EntryID, "tweet-") {
 			continue
 		}
@@ -399,13 +411,13 @@ func (api API) GetMoreTweetsFromGraphqlFeed(user_id UserID, response *APIV2Respo
 	// TODO user-feed-infinite-fetch: what if you reach the end of the user's timeline?  Might loop
 	// forever getting no new tweets
 	last_response := response
-	for last_response.GetCursorBottom() != "" && len(response.Data.User.Result.Timeline.Timeline.Instructions[0].Entries) < min_tweets {
+	for last_response.GetCursorBottom() != "" && len(response.GetMainInstruction().Entries) < min_tweets {
 		fresh_response, err := api.GetGraphqlFeedFor(user_id, last_response.GetCursorBottom())
 		if err != nil {
 			return err
 		}
 
-		if fresh_response.GetCursorBottom() == last_response.GetCursorBottom() && len(fresh_response.Data.User.Result.Timeline.Timeline.Instructions[0].Entries) == 0 {
+		if fresh_response.GetCursorBottom() == last_response.GetCursorBottom() && len(fresh_response.GetMainInstruction().Entries) == 0 {
 			// Empty response, cursor same as previous: end of feed has been reached
 			return END_OF_FEED
 		}
@@ -417,11 +429,11 @@ func (api API) GetMoreTweetsFromGraphqlFeed(user_id UserID, response *APIV2Respo
 		last_response = &fresh_response
 
 		// Copy over the entries
-		response.Data.User.Result.Timeline.Timeline.Instructions[0].Entries = append(
-			response.Data.User.Result.Timeline.Timeline.Instructions[0].Entries,
-			last_response.Data.User.Result.Timeline.Timeline.Instructions[0].Entries...)
+		response.GetMainInstruction().Entries = append(
+			response.GetMainInstruction().Entries,
+			last_response.GetMainInstruction().Entries...)
 
-		fmt.Printf("Have %d entries so far\n", len(response.Data.User.Result.Timeline.Timeline.Instructions[0].Entries))
+		fmt.Printf("Have %d entries so far\n", len(response.GetMainInstruction().Entries))
 	}
 	return nil
 }

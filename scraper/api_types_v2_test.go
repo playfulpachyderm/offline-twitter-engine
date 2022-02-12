@@ -516,3 +516,26 @@ func TestAPIV2FeedIsEmpty(t *testing.T) {
 	assert.Len(trove.Users, 0)
 	assert.Len(trove.Retweets, 0)
 }
+
+/**
+ * Should get the right Instruction element
+ */
+func TestAPIV2GetMainInstructionFromFeed(t *testing.T) {
+	assert := assert.New(t)
+	data, err := ioutil.ReadFile("test_responses/api_v2/user_feed_apiv2.json")
+	if err != nil {
+		panic(err)
+	}
+	var feed APIV2Response
+	err = json.Unmarshal(data, &feed)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	assert.Equal(len(feed.GetMainInstruction().Entries), 41)
+
+	// Test that this is a writable version
+	feed.GetMainInstruction().Entries = append(feed.GetMainInstruction().Entries, APIV2Entry{EntryID: "asdf"})
+	assert.Equal(len(feed.GetMainInstruction().Entries), 42)
+	assert.Equal(feed.GetMainInstruction().Entries[41].EntryID, "asdf")
+}
