@@ -66,3 +66,21 @@ func TestFillMissingUserIDs(t *testing.T) {
 
 	assert.Equal(trove.Tweets[2].UserID, UserID(1))
 }
+
+func TestFindUserByHandle(t *testing.T) {
+	assert := assert.New(t)
+
+	u1 := User{ID: 1, Handle: "1", DisplayName: "One"}
+	u2 := User{ID: 2, Handle: "2", DisplayName: "Two"}
+
+	trove := NewTweetTrove()
+	trove.Users[u1.ID] = u1
+	trove.Users[u2.ID] = u2
+
+	user_2, ok := trove.FindUserByHandle("2")
+	assert.True(ok)
+	assert.Equal(user_2.DisplayName, "Two")
+
+	_, ok = trove.FindUserByHandle("3")
+	assert.False(ok)
+}

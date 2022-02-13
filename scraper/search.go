@@ -13,7 +13,7 @@ func TimestampToDateString(timestamp int) string {
  * - photos
  * - videos
  */
-func Search(query string, min_results int) (tweets []Tweet, retweets []Retweet, users []User, err error) {
+func Search(query string, min_results int) (trove TweetTrove, err error) {
 	api := API{}
 	tweet_response, err := api.Search(query, "")
 	if err != nil {

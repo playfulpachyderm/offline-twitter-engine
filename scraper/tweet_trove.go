@@ -37,6 +37,17 @@ func (trove TweetTrove) Transform() (tweets []Tweet, retweets []Retweet, users [
 	return
 }  // TODO: refactor until this function isn't needed anymore
 
+/**
+ * Search for a user by handle.  Second param is whether the user was found or not.
+ */
+func (trove TweetTrove) FindUserByHandle(handle UserHandle) (User, bool) {
+	for _, user := range trove.Users {
+		if user.Handle == handle {
+			return user, true
+		}
+	}
+	return User{}, false
+}
 
 /**
  * Combine two troves into one
@@ -53,6 +64,30 @@ func (t1 *TweetTrove) MergeWith(t2 TweetTrove) {
 	}
 
 	t1.TombstoneUsers = append(t1.TombstoneUsers, t2.TombstoneUsers...)
+}
+
+/**
+ * Tries to fetch every User that's been identified in a tombstone in this trove
+ */
+func (trove *TweetTrove) FetchTombstoneUsers() {
+	for _, handle := range trove.TombstoneUsers {
+		// Skip fetching if this user is already in the trove
+		_, already_fetched := trove.FindUserByHandle(handle)
+		if already_fetched {
+			continue
+		}
+
+		user, err := GetUser(handle)
+		if err != nil {
+			panic(fmt.Sprintf("Error getting tombstoned user: %s\n  %s", handle, err.Error()))
+		}
+
+		if user.ID == 0 {
+			panic(fmt.Sprintf("UserID == 0 (@%s)", handle))
+		}
+
+		trove.Users[user.ID] = user
+	}
 }
 
 /**

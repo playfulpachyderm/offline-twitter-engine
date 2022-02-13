@@ -213,7 +213,7 @@ func GetTweet(id TweetID) (Tweet, error) {
  *
  * returns: the tweet, list of its replies and context, and users associated with those replies
  */
-func GetTweetFull(id TweetID) (tweets []Tweet, retweets []Retweet, users []User, err error) {
+func GetTweetFull(id TweetID) (trove TweetTrove, err error) {
 	api := API{}
 	tweet_response, err := api.GetTweet(id, "")
 	if err != nil {
@@ -226,49 +226,31 @@ func GetTweetFull(id TweetID) (tweets []Tweet, retweets []Retweet, users []User,
 			return
 		}
 	}
-	tombstone_users := tweet_response.HandleTombstones()
-	fmt.Printf("%v\n", tombstone_users)
-	for _, u := range tombstone_users {
-		fetched_user, err1 := GetUser(u)
-		fetched_user.Handle = u
-		if err != nil {
-			err = err1
-			return
-		}
-		fmt.Println(fetched_user)
-		users = append(users, fetched_user)
+
+	// This has to be called BEFORE ParseTweetResponse, because it modifies the TweetResponse (adds tombstone tweets to its tweets list)
+	tombstoned_users := tweet_response.HandleTombstones()
+
+	trove, err = ParseTweetResponse(tweet_response)
+	if err != nil {
+		panic(err)
 	}
-	tweets, retweets, _users, err := ParseTweetResponse(tweet_response)
+	trove.TombstoneUsers = tombstoned_users
+	trove.FetchTombstoneUsers()
 
 	// Quoted tombstones need their user_id filled out from the tombstoned_users list
-	for i := range tweets {
-		if tweets[i].UserID != 0 {
-			continue
-		}
-		handle := tweet_response.GlobalObjects.Tweets[fmt.Sprint(tweets[i].ID)].UserHandle
-		is_found := false
-		for _, u := range users {  // The tombstoned users, not from the tweet response
-			if u.Handle == UserHandle(handle) {
-				tweets[i].UserID = u.ID
-				is_found = true
-				break
-			}
-		}
-		if !is_found {
-			panic("Couldn't find the user handle in the list of tombstoned users!")
-		}
-	}
+	trove.FillMissingUserIDs()
 
 	// Find the main tweet and update its "is_conversation_downloaded" and "last_scraped_at"
-	scrape_time := time.Now()
-	for i, t := range(tweets) {
-		if t.ID == id {
-			// Index the slice because `tweets[i]` is a reference, whereas `t` is a copy
-			tweets[i].LastScrapedAt = scrape_time
-			tweets[i].IsConversationScraped = true
-		}
+	tweet, ok := trove.Tweets[id]
+	if !ok {
+		panic("Trove didn't contain its own tweet!")
 	}
-	users = append(users, _users...)
+	tweet.LastScrapedAt = time.Now()
+	tweet.IsConversationScraped = true
+	trove.Tweets[id] = tweet
+
+	// tweets, retweets, users = trove.Transform()
+
 	return
 }
 
@@ -280,32 +262,31 @@ func GetTweetFull(id TweetID) (tweets []Tweet, retweets []Retweet, users []User,
  *
  * returns: a list of tweets, retweets and users in that response object
  */
-func ParseTweetResponse(resp TweetResponse) (tweets []Tweet, retweets []Retweet, users []User, err error) {
-	// TODO: TweetCollection maybe should be its own type
-	var new_tweet Tweet
-	var new_retweet Retweet
+func ParseTweetResponse(resp TweetResponse) (TweetTrove, error) {
+	trove := NewTweetTrove()
+
 	for _, single_tweet := range resp.GlobalObjects.Tweets {
 		if single_tweet.RetweetedStatusIDStr == "" {
-			new_tweet, err = ParseSingleTweet(single_tweet)
+			new_tweet, err := ParseSingleTweet(single_tweet)
 			if err != nil {
-				return
+				return trove, err
 			}
-			tweets = append(tweets, new_tweet)
+			trove.Tweets[new_tweet.ID] = new_tweet
 		} else {
-			new_retweet, err = ParseSingleRetweet(single_tweet)
+			new_retweet, err := ParseSingleRetweet(single_tweet)
 			if err != nil {
-				return
+				return trove, err
 			}
-			retweets = append(retweets, new_retweet)
+			trove.Retweets[new_retweet.RetweetID] = new_retweet
 		}
 	}
-	var new_user User
+
 	for _, user := range resp.GlobalObjects.Users {
-		new_user, err = ParseSingleUser(user)
+		new_user, err := ParseSingleUser(user)
 		if err != nil {
-			return
+			return trove, err
 		}
-		users = append(users, new_user)
+		trove.Users[new_user.ID] = new_user
 	}
-	return
+	return trove, nil
 }

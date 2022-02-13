@@ -161,8 +161,9 @@ func TestParseTweetResponse(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_resp)
 	require.NoError(t, err)
 
-	tweets, retweets, users, err := ParseTweetResponse(tweet_resp)
+	trove, err := ParseTweetResponse(tweet_resp)
 	require.NoError(t, err)
+	tweets, retweets, users := trove.Transform()
 
 	assert.Len(tweets, 29 - 3)
 	assert.Len(retweets, 3)
@@ -182,8 +183,9 @@ func TestParseTweetResponseWithTombstones(t *testing.T) {
 	extra_users := tweet_resp.HandleTombstones()
 	assert.Len(extra_users, 1)
 
-	tweets, retweets, users, err := ParseTweetResponse(tweet_resp)
+	trove, err := ParseTweetResponse(tweet_resp)
 	require.NoError(t, err)
+	tweets, retweets, users := trove.Transform()
 
 	assert.Len(tweets, 2)
 	assert.Len(retweets, 0)

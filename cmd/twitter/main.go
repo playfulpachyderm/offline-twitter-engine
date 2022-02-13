@@ -172,10 +172,11 @@ func fetch_tweet_conversation(tweet_identifier string) {
 		fmt.Println("Tweet is already in database.  Updating...")
 	}
 
-	tweets, _, users, err := scraper.GetTweetFull(tweet_id)
+	trove, err := scraper.GetTweetFull(tweet_id)
 	if err != nil {
 		die(err.Error(), false, -1)
 	}
+	tweets, _, users := trove.Transform()
 
 	for _, u := range users {
 		fmt.Println(u.Handle)
@@ -285,10 +286,11 @@ func download_user_content(handle scraper.UserHandle) {
 
 
 func search(query string) {
-	tweets, retweets, users, err := scraper.Search(query, 1000);
+	trove, err := scraper.Search(query, 1000)
 	if err != nil {
 		die("Error scraping search results: " + err.Error(), false, -100)
 	}
+	tweets, retweets, users := trove.Transform()
 
 	for _, u := range users {
 		fmt.Println(u.Handle)
