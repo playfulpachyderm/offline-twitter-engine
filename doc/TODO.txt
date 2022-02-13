@@ -27,15 +27,20 @@ Conversation threads with two or more consecutive tombstones don't get scraped c
 Video size reduction:
 - add "bitrate" and "available bitrates" fields
 - option to upgrade or downgrade video quality
--
 
 TODO tombstone updating:
 - "Tweet is unavailable" tombstones are not always accurate.  In user feed, they show as "not available" but the real reason is "deleted" etc; should update the tombstone type when fetching the conversation view
-- If a tweet is deleted after getting a non-stub version, should still show a tombstone (or a modified one at least)
-
+- tweet-to-stub: If a tweet is deleted after getting a non-stub version, should still show a tombstone (or a modified one at least)
+- stub-to-tweet: If a user un-privates after getting a stub-version (or tweet becomes available for other reasons), stub versions should write the real content and "stub" status should be removed
 
 TODO: Problem tweets
 - https://twitter.com/HazardHarringto/status/1481808740445741062: replies not loading
 - https://twitter.com/TyCardon/status/1480640777281839106: "Media has been disabled in response to report by copyright owner"
 - https://twitter.com/CovfefeAnon/status/1427693931047837702: parent thread not loading (possible GUI problem)
 - "account no longer exists" tombstone not being collected
+
+TODO: videos-view-count
+- videos don't parse properly in APIv2
+
+TODO: APIv2-pinned-tweets
+- feed with pinned tweet

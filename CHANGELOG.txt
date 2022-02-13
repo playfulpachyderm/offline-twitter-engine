@@ -47,3 +47,9 @@ v0.1.0
 
 - Add support for new GraphQL twitter API (dubbed "APIv2" in code).  User feed scraping now uses this API
 - Embedded links (URLs) now have their short versions saved in the DB.
+
+v0.1.1
+------
+
+- BUGFIX: fix selection of primary "TimelineAddEntries" field in APIv2 following breaking API change
+- Add `-h, --help` command line flags to display help message and gracefully exit
