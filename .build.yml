@@ -120,7 +120,10 @@ tasks:
 
       # Create some sample data
       twitter fetch_user michaelmalice
-      twitter get_user_tweets michaelmalice
+      twitter fetch_tweet 1489015707186704388
+      twitter fetch_tweet 1489011184242237443
+      twitter fetch_tweet 1489005836961824773
+      twitter fetch_tweet 1488982302122291200
 
       # Compile the binary with the version number
       cd .. && ./compile.sh $version
