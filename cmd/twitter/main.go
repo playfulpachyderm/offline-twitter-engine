@@ -127,9 +127,8 @@ func fetch_user(handle scraper.UserHandle) {
 		die("Error saving user: " + err.Error(), false, 4)
 	}
 
-	fmt.Println("Saved the user.  Downloading content..")
-
 	download_user_content(handle);
+	happy_exit("Saved the user")
 }
 
 /**
@@ -157,7 +156,7 @@ func fetch_tweet_only(tweet_identifier string) {
 	if err != nil {
 		die("Error saving tweet: " + err.Error(), false, 4)
 	}
-	fmt.Println("Saved the tweet.  Exiting successfully")
+	happy_exit("Saved the tweet")
 }
 
 /**
@@ -180,32 +179,9 @@ func fetch_tweet_conversation(tweet_identifier string) {
 	if err != nil {
 		die(err.Error(), false, -1)
 	}
-	tweets, _, users := trove.Transform()
+	profile.SaveTweetTrove(trove)
 
-	for _, u := range users {
-		fmt.Println(u.Handle)
-		err = profile.DownloadUserProfileImageTiny(&u)
-		if err != nil {
-			die("Error getting user content: " + err.Error(), false, 10)
-		}
-
-		err = profile.SaveUser(u)
-		if err != nil {
-			die("Error saving user: " + err.Error(), false, 4)
-		}
-	}
-
-	for _, t := range tweets {
-		err = profile.SaveTweet(t)
-		if err != nil {
-			die(fmt.Sprintf("Error saving tweet (id %d): %s", t.ID, err.Error()), false, 4)
-		}
-		err = profile.DownloadTweetContentFor(&t)
-		if err != nil {
-			die("Error getting tweet content: " + err.Error(), false, 11)
-		}
-	}
-	fmt.Printf("Saved %d tweets and %d users.  Exiting successfully\n", len(tweets), len(users))
+	happy_exit(fmt.Sprintf("Saved %d tweets and %d users.  Exiting successfully\n", len(trove.Tweets), len(trove.Users)))
 }
 
 /**
@@ -220,44 +196,13 @@ func fetch_user_feed(handle string, how_many int) {
 		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
 	}
 
-	// tweets, retweets, users, err := scraper.GetUserFeedFor(user.ID, how_many);
 	trove, err := scraper.GetUserFeedGraphqlFor(user.ID, how_many)
 	if err != nil {
 		die(fmt.Sprintf("Error scraping feed: %s\n  %s", handle, err.Error()), false, -2)
 	}
-	tweets, retweets, users := trove.Transform();
+	profile.SaveTweetTrove(trove)
 
-	for _, u := range users {
-		fmt.Println(u.Handle)
-		err = profile.DownloadUserProfileImageTiny(&u)
-		if err != nil {
-			die("Error getting user content: " + err.Error(), false, 10)
-		}
-		err = profile.SaveUser(u)
-		if err != nil {
-			die("Error saving user: " + err.Error(), false, 4)
-		}
-	}
-
-	for _, t := range tweets {
-		err = profile.SaveTweet(t)
-		if err != nil {
-			die("Error saving tweet: " + err.Error(), false, 4)
-		}
-		err = profile.DownloadTweetContentFor(&t)
-		if err != nil {
-			die("Error getting tweet content: " + err.Error(), false, 11)
-		}
-	}
-
-	for _, r := range retweets {
-		err = profile.SaveRetweet(r)
-		if err != nil {
-			die("Error saving retweet: " + err.Error(), false, 4)
-		}
-	}
-
-	fmt.Printf("Saved %d tweets, %d retweets and %d users.  Exiting successfully\n", len(tweets), len(retweets), len(users))
+	happy_exit(fmt.Sprintf("Saved %d tweets, %d retweets and %d users.  Exiting successfully\n", len(trove.Tweets), len(trove.Retweets), len(trove.Users)))
 }
 
 
@@ -294,31 +239,7 @@ func search(query string) {
 	if err != nil {
 		die("Error scraping search results: " + err.Error(), false, -100)
 	}
-	tweets, retweets, users := trove.Transform()
+	profile.SaveTweetTrove(trove)
 
-	for _, u := range users {
-		fmt.Println(u.Handle)
-		err = profile.DownloadUserProfileImageTiny(&u)
-		if err != nil {
-			die("Error getting user content: " + err.Error(), false, 10)
-		}
-
-		err = profile.SaveUser(u)
-		if err != nil {
-			die("Error saving user: " + err.Error(), false, 4)
-		}
-	}
-
-	for _, t := range tweets {
-		err = profile.SaveTweet(t)
-		if err != nil {
-			die("Error saving tweet: " + err.Error(), false, 4)
-		}
-		err = profile.DownloadTweetContentFor(&t)
-		if err != nil {
-			die("Error getting tweet content: " + err.Error(), false, 11)
-		}
-	}
-
-	fmt.Printf("Saved %d tweets, %d retweets and %d users.  Exiting successfully\n", len(tweets), len(retweets), len(users))
+	happy_exit(fmt.Sprintf("Saved %d tweets and %d users.  Exiting successfully\n", len(trove.Tweets), len(trove.Users)))
 }

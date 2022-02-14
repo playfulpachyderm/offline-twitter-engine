@@ -79,6 +79,14 @@ func die(text string, display_help bool, exit_code int) {
 }
 
 /**
+ * Print a happy exit message and exit
+ */
+func happy_exit(text string) {
+  fmt.Printf(terminal_utils.COLOR_GREEN + text + terminal_utils.COLOR_RESET + "\n")
+  fmt.Printf(terminal_utils.COLOR_GREEN + "Exiting successfully." + terminal_utils.COLOR_RESET + "\n")
+}
+
+/**
  * Helper function - parse a tweet permalink URL to extract the tweet ID
  *
  * args:
