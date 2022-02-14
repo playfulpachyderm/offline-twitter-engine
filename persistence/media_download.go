@@ -112,6 +112,11 @@ func (p Profile) DownloadTweetContentFor(t *scraper.Tweet) error {
  * Enable injecting a custom MediaDownloader (i.e., for testing)
  */
 func (p Profile) DownloadTweetContentWithInjector(t *scraper.Tweet, downloader MediaDownloader) error {
+    // Check if content needs to be downloaded; if not, just return
+    if !p.CheckTweetContentDownloadNeeded(*t) {
+        return nil
+    }
+
     for i := range t.Images {
         err := p.download_tweet_image(&t.Images[i], downloader)
         if err != nil {
@@ -147,6 +152,10 @@ func (p Profile) DownloadUserContentFor(u *scraper.User) error {
  * Enable injecting a custom MediaDownloader (i.e., for testing)
  */
 func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader MediaDownloader) error {
+    if !p.CheckUserContentDownloadNeeded(*u) {
+        return nil
+    }
+
     var outfile string
     var target_url string
 
@@ -167,6 +176,7 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
     if u.BannerImageLocalPath != "" {
         outfile = path.Join(p.ProfileDir, "profile_images", u.BannerImageLocalPath)
         err = downloader.Curl(u.BannerImageUrl, outfile)
+
         if err != nil && strings.Contains(err.Error(), "404 Not Found") {
             // Try adding "600x200".  Not sure why this does this but sometimes it does.
             err = downloader.Curl(u.BannerImageUrl + "/600x200", outfile)
@@ -184,7 +194,11 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
  * Download a User's tiny profile image, if it hasn't been downloaded yet.
  * If it has been downloaded, do nothing.
  */
-func (p Profile) DownloadUserProfileImageTiny(u scraper.User) error {
+func (p Profile) DownloadUserProfileImageTiny(u *scraper.User) error {
+    if p.IsFollowing(u.Handle) {
+        return p.DownloadUserContentFor(u)
+    }
+
     d := DefaultDownloader{}
 
     outfile := path.Join(p.ProfileDir, "profile_images", u.GetTinyProfileImageLocalPath())
@@ -193,35 +207,4 @@ func (p Profile) DownloadUserProfileImageTiny(u scraper.User) error {
     }
     err := d.Curl(u.GetTinyProfileImageUrl(), outfile)
     return err
-}
-
-
-/**
- * Download a User's content, if needed.
- *
- * Returns whether anything was downloaded or not.
- */
-func (p Profile) DownloadUserContentIfNeeded(u *scraper.User) (bool, error) {
-    if !p.CheckUserContentDownloadNeeded(*u) {
-        return false, nil
-    }
-    if p.IsFollowing(u.Handle) {
-        // TODO: this might not be necessary?  When would someone be followed but content not downloaded?
-        return true, p.DownloadUserContentFor(u)
-    } else {
-        return true, p.DownloadUserProfileImageTiny(*u)
-    }
-}
-
-
-/**
- * Download a Tweet's content, if needed.
- *
- * Returns whether anything was downloaded or not.
- */
-func (p Profile) DownloadTweetContentIfNeeded(t *scraper.Tweet) (bool, error) {
-    if !p.CheckTweetContentDownloadNeeded(*t) {
-        return false, nil
-    }
-    return true, p.DownloadTweetContentFor(t)
 }

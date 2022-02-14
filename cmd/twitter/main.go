@@ -184,7 +184,7 @@ func fetch_tweet_conversation(tweet_identifier string) {
 
 	for _, u := range users {
 		fmt.Println(u.Handle)
-		_, err = profile.DownloadUserContentIfNeeded(&u)
+		err = profile.DownloadUserProfileImageTiny(&u)
 		if err != nil {
 			die("Error getting user content: " + err.Error(), false, 10)
 		}
@@ -200,7 +200,7 @@ func fetch_tweet_conversation(tweet_identifier string) {
 		if err != nil {
 			die(fmt.Sprintf("Error saving tweet (id %d): %s", t.ID, err.Error()), false, 4)
 		}
-		_, err = profile.DownloadTweetContentIfNeeded(&t)
+		err = profile.DownloadTweetContentFor(&t)
 		if err != nil {
 			die("Error getting tweet content: " + err.Error(), false, 11)
 		}
@@ -229,7 +229,7 @@ func fetch_user_feed(handle string, how_many int) {
 
 	for _, u := range users {
 		fmt.Println(u.Handle)
-		_, err = profile.DownloadUserContentIfNeeded(&u)
+		err = profile.DownloadUserProfileImageTiny(&u)
 		if err != nil {
 			die("Error getting user content: " + err.Error(), false, 10)
 		}
@@ -244,7 +244,7 @@ func fetch_user_feed(handle string, how_many int) {
 		if err != nil {
 			die("Error saving tweet: " + err.Error(), false, 4)
 		}
-		_, err = profile.DownloadTweetContentIfNeeded(&t)
+		err = profile.DownloadTweetContentFor(&t)
 		if err != nil {
 			die("Error getting tweet content: " + err.Error(), false, 11)
 		}
@@ -298,7 +298,7 @@ func search(query string) {
 
 	for _, u := range users {
 		fmt.Println(u.Handle)
-		_, err = profile.DownloadUserContentIfNeeded(&u)
+		err = profile.DownloadUserProfileImageTiny(&u)
 		if err != nil {
 			die("Error getting user content: " + err.Error(), false, 10)
 		}
@@ -314,7 +314,7 @@ func search(query string) {
 		if err != nil {
 			die("Error saving tweet: " + err.Error(), false, 4)
 		}
-		_, err = profile.DownloadTweetContentIfNeeded(&t)
+		err = profile.DownloadTweetContentFor(&t)
 		if err != nil {
 			die("Error getting tweet content: " + err.Error(), false, 11)
 		}
