@@ -19,17 +19,21 @@ var version_string string
  * Main method
  */
 func main() {
-	profile_dir := flag.String("profile", ".", "TODO USAGE")
-	flag.StringVar(profile_dir, "p", ".", "TODO USAGE")
+	profile_dir := flag.String("profile", ".", "")
+	flag.StringVar(profile_dir, "p", ".", "")
 
-	show_version_flag := flag.Bool("version", false, "???")
-	flag.BoolVar(show_version_flag, "v", false, "???")
+	show_version_flag := flag.Bool("version", false, "")
+	flag.BoolVar(show_version_flag, "v", false, "")
 
-	how_many := flag.Int("n", 50, "???")
-	flag.IntVar(how_many, "number", 50, "???")
+	how_many := flag.Int("n", 50, "")
+	flag.IntVar(how_many, "number", 50, "")
 
-	help := flag.Bool("help", false, "???")
-	flag.BoolVar(help, "h", false, "???")
+	help := flag.Bool("help", false, "")
+	flag.BoolVar(help, "h", false, "")
+
+	flag.Usage = func() {
+		die("", true, 1)
+	}
 
 	flag.Parse()
 	args := flag.Args()
