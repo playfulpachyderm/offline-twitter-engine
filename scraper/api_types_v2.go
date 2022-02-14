@@ -8,6 +8,8 @@ import (
 	"time"
 	"encoding/json"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type CardValue struct {
@@ -392,7 +394,7 @@ func (api API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response, 
 	if err != nil {
 		return APIV2Response{}, err
 	}
-	fmt.Println(string(body))
+	log.Debug(string(body))
 
 	var response APIV2Response
 	err = json.Unmarshal(body, &response)

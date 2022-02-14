@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const API_CONVERSATION_BASE_PATH = "https://twitter.com/i/api/2/timeline/conversation/"
@@ -47,13 +49,18 @@ func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) 
 
 	if resp.StatusCode != http.StatusOK {
 		content, _ := ioutil.ReadAll(resp.Body)
-		return TweetResponse{}, fmt.Errorf("HTTP %s: %s", resp.Status, content)
+		s := ""
+		for header := range resp.Header {
+			s += fmt.Sprintf("    %s: %s\n", header, resp.Header.Get(header))
+		}
+		return TweetResponse{}, fmt.Errorf("HTTP %s\n%s\n%s", resp.Status, s, content)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return TweetResponse{}, err
 	}
+	log.Debug(string(body))
 
 	var response TweetResponse
 	err = json.Unmarshal(body, &response)
@@ -134,6 +141,7 @@ func (api API) GetTweet(id TweetID, cursor string) (TweetResponse, error) {
 	if err != nil {
 		return TweetResponse{}, err
 	}
+	log.Debug(string(body))
 
 	var response TweetResponse
 	err = json.Unmarshal(body, &response)
@@ -202,6 +210,7 @@ func (api API) GetUser(handle UserHandle) (APIUser, error) {
 		if err != nil {
 			return APIUser{}, err
 		}
+		log.Debug(string(body))
 
 		err = json.Unmarshal(body, &response)
 		if err != nil {

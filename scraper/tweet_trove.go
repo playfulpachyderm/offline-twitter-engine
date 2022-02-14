@@ -2,6 +2,8 @@ package scraper
 
 import (
 	"fmt"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type TweetTrove struct {
@@ -77,6 +79,7 @@ func (trove *TweetTrove) FetchTombstoneUsers() {
 			continue
 		}
 
+		log.Debug("Getting tombstone user: " + handle)
 		user, err := GetUser(handle)
 		if err != nil {
 			panic(fmt.Sprintf("Error getting tombstoned user: %s\n  %s", handle, err.Error()))

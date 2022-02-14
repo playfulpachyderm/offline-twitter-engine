@@ -4,6 +4,9 @@ import (
 	"os"
 	"fmt"
 	"flag"
+
+	log "github.com/sirupsen/logrus"
+
 	"offline_twitter/scraper"
 	"offline_twitter/persistence"
 )
@@ -28,6 +31,14 @@ func main() {
 	how_many := flag.Int("n", 50, "")
 	flag.IntVar(how_many, "number", 50, "")
 
+	var default_log_level string
+	if version_string == "" {
+		default_log_level = "debug"
+	} else {
+		default_log_level = "info"
+	}
+	log_level := flag.String("log-level", default_log_level, "")
+
 	help := flag.Bool("help", false, "")
 	flag.BoolVar(help, "h", false, "")
 
@@ -51,6 +62,12 @@ func main() {
 		die("", true, 0)
 	}
 
+	logging_level, err := log.ParseLevel(*log_level)
+	if err != nil {
+		die(err.Error(), false, 1)
+	}
+	log.SetLevel(logging_level)
+
 	if len(args) < 2 {
 		die("", true, 1)
 	}
@@ -63,7 +80,6 @@ func main() {
 		return
 	}
 
-	var err error
 	profile, err = persistence.LoadProfile(*profile_dir)
 	if err != nil {
 		die("Could not load profile: " + err.Error(), true, 2)
@@ -113,14 +129,11 @@ func create_profile(target_dir string) {
  * - handle: e.g., "michaelmalice"
  */
 func fetch_user(handle scraper.UserHandle) {
-	if profile.UserExists(handle) {
-		fmt.Println("User is already in database.  Updating user...")
-	}
 	user, err := scraper.GetUser(handle)
 	if err != nil {
 		die(err.Error(), false, -1)
 	}
-	fmt.Println(user)
+	log.Debug(user)
 
 	err = profile.SaveUser(user)
 	if err != nil {
@@ -143,14 +156,11 @@ func fetch_tweet_only(tweet_identifier string) {
 		die(err.Error(), false, -1)
 	}
 
-	if profile.IsTweetInDatabase(tweet_id) {
-		fmt.Println("Tweet is already in database.  Updating...")
-	}
 	tweet, err := scraper.GetTweet(tweet_id)
 	if err != nil {
 		die("Error fetching tweet: " + err.Error(), false, -1)
 	}
-	fmt.Println(tweet)
+	log.Debug(tweet)
 
 	err = profile.SaveTweet(tweet)
 	if err != nil {
@@ -171,17 +181,13 @@ func fetch_tweet_conversation(tweet_identifier string) {
 		die(err.Error(), false, -1)
 	}
 
-	if profile.IsTweetInDatabase(tweet_id) {
-		fmt.Println("Tweet is already in database.  Updating...")
-	}
-
 	trove, err := scraper.GetTweetFull(tweet_id)
 	if err != nil {
 		die(err.Error(), false, -1)
 	}
 	profile.SaveTweetTrove(trove)
 
-	happy_exit(fmt.Sprintf("Saved %d tweets and %d users.  Exiting successfully\n", len(trove.Tweets), len(trove.Users)))
+	happy_exit(fmt.Sprintf("Saved %d tweets and %d users", len(trove.Tweets), len(trove.Users)))
 }
 
 /**
@@ -202,7 +208,7 @@ func fetch_user_feed(handle string, how_many int) {
 	}
 	profile.SaveTweetTrove(trove)
 
-	happy_exit(fmt.Sprintf("Saved %d tweets, %d retweets and %d users.  Exiting successfully\n", len(trove.Tweets), len(trove.Retweets), len(trove.Users)))
+	happy_exit(fmt.Sprintf("Saved %d tweets, %d retweets and %d users", len(trove.Tweets), len(trove.Retweets), len(trove.Users)))
 }
 
 
@@ -241,5 +247,5 @@ func search(query string) {
 	}
 	profile.SaveTweetTrove(trove)
 
-	happy_exit(fmt.Sprintf("Saved %d tweets and %d users.  Exiting successfully\n", len(trove.Tweets), len(trove.Users)))
+	happy_exit(fmt.Sprintf("Saved %d tweets and %d users", len(trove.Tweets), len(trove.Users)))
 }
