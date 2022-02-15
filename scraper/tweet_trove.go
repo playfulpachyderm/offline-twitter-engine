@@ -45,7 +45,7 @@ func (trove TweetTrove) Transform() (tweets []Tweet, retweets []Retweet, users [
  */
 func (trove TweetTrove) FindUserByHandle(handle UserHandle) (User, bool) {
 	for _, user := range trove.Users {
-		if strings.ToLower(string(user.Handle)) == strings.ToLower(string(handle)) {
+		if strings.EqualFold(string(user.Handle), string(handle)) {
 			return user, true
 		}
 	}
