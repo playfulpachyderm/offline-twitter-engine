@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"fmt"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -44,7 +45,7 @@ func (trove TweetTrove) Transform() (tweets []Tweet, retweets []Retweet, users [
  */
 func (trove TweetTrove) FindUserByHandle(handle UserHandle) (User, bool) {
 	for _, user := range trove.Users {
-		if user.Handle == handle {
+		if strings.ToLower(string(user.Handle)) == strings.ToLower(string(handle)) {
 			return user, true
 		}
 	}
@@ -112,20 +113,13 @@ func (trove *TweetTrove) FillMissingUserIDs() {
 			continue
 		}
 
-		handle := tweet.UserHandle
-		is_user_found := false
-		for _, u := range trove.Users {
-			if u.Handle == handle {
-				tweet.UserID = u.ID
-				is_user_found = true
-				break
-			}
-		}
-		if !is_user_found {
+		user, is_found := trove.FindUserByHandle(tweet.UserHandle)
+		if !is_found {
 			// The user probably deleted deleted their account, and thus `scraper.GetUser` failed.  So
 			// they're not in this trove's Users.
 			panic(fmt.Sprintf("Couldn't fill out this Tweet's UserID: %d, %s", tweet.ID, tweet.UserHandle))
 		}
+		tweet.UserID = user.ID
 		trove.Tweets[i] = tweet
 	}
 }

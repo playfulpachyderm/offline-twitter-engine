@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	. "offline_twitter/scraper"
 )
@@ -50,7 +51,7 @@ func TestMergeTweetTroves(t *testing.T) {
 
 func TestFillMissingUserIDs(t *testing.T) {
 	assert := assert.New(t)
-	u1 := User{ID: 1, Handle: "a"}
+	u1 := User{ID: 1, Handle: "A"}
 
 	t1 := Tweet{ID: 1, UserID: 1}
 	t2 := Tweet{ID: 2, UserHandle: "a"}
@@ -71,14 +72,14 @@ func TestFindUserByHandle(t *testing.T) {
 	assert := assert.New(t)
 
 	u1 := User{ID: 1, Handle: "1", DisplayName: "One"}
-	u2 := User{ID: 2, Handle: "2", DisplayName: "Two"}
+	u2 := User{ID: 2, Handle: "b", DisplayName: "Two"}
 
 	trove := NewTweetTrove()
 	trove.Users[u1.ID] = u1
 	trove.Users[u2.ID] = u2
 
-	user_2, ok := trove.FindUserByHandle("2")
-	assert.True(ok)
+	user_2, ok := trove.FindUserByHandle("B")
+	require.True(t, ok)
 	assert.Equal(user_2.DisplayName, "Two")
 
 	_, ok = trove.FindUserByHandle("3")
