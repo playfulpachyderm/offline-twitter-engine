@@ -13,10 +13,22 @@ curl \
 
 #
 # A user's feed:
-curl \
+curl -i \
     -H "Authorization: Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA" \
     -H "X-Guest-Token: 1396177150890348547" \
     https://api.twitter.com/2/timeline/profile/44067298.json
+
+#
+# User feed APIv2:
+
+curl -i \
+  -H 'authorization: Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA' \
+  -H 'x-csrf-token: 8e73dca13c4f04c3a9136b6b6204d9e9809e8f544bec6deb4cf1f5054f0c5d54b332433b5dcd2b3f7a5c6fa241e567beeebeff22a3f528fa44b0e6fc1ad75bf0a7cb7bc5b0be1a01a9d5e3e40cd19b69' \
+  -H 'cookie: ct0=8e73dca13c4f04c3a9136b6b6204d9e9809e8f544bec6deb4cf1f5054f0c5d54b332433b5dcd2b3f7a5c6fa241e567beeebeff22a3f528fa44b0e6fc1ad75bf0a7cb7bc5b0be1a01a9d5e3e40cd19b69' \
+  -H 'x-guest-token: 1493389889173291009' \
+  -H 'x-twitter-client-language: en' \
+  'https://twitter.com/i/api/graphql/CwLU7qTfeu0doqhSr6tW4A/UserTweetsAndReplies?variables=%7B%22userId%22%3A%22599817378%22%2C%22count%22%3A40%2C%22includePromotedContent%22%3Afalse%2C%22withCommunity%22%3Atrue%2C%22withSuperFollowsUserFields%22%3Atrue%2C%22withBirdwatchPivots%22%3Afalse%2C%22withDownvotePerspective%22%3Afalse%2C%22withReactionsMetadata%22%3Afalse%2C%22withReactionsPerspective%22%3Afalse%2C%22withSuperFollowsTweetFields%22%3Atrue%2C%22withVoice%22%3Atrue%2C%22withV2Timeline%22%3Afalse%2C%22__fs_interactive_text%22%3Afalse%2C%22__fs_dont_mention_me_view_api_enabled%22%3Afalse%7D'
+
 
 
 #

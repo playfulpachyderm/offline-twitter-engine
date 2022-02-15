@@ -332,6 +332,7 @@ var tombstone_types = map[string]string{
 	"This Tweet is unavailable. Learn more": "unavailable",
 	"This Tweet violated the Twitter Rules. Learn more": "violated",
 	"This Tweet is from an account that no longer exists. Learn more": "no longer exists",
+	"Age-restricted adult content. This content might not be appropriate for people under 18 years old. To view this media, you’ll need to log in to Twitter. Learn more": "age-restricted",
 }
 /**
  * Insert tweets into GlobalObjects for each tombstone.  Returns a list of users that need to

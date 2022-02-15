@@ -32,7 +32,8 @@ insert into tombstone_types(rowid, short_name, tombstone_text) values
     (3, 'hidden', 'You’re unable to view this Tweet because this account owner limits who can view their Tweets'),
     (4, 'unavailable', 'This Tweet is unavailable'),
     (5, 'violated', 'This Tweet violated the Twitter Rules'),
-    (6, 'no longer exists', 'This Tweet is from an account that no longer exists');
+    (6, 'no longer exists', 'This Tweet is from an account that no longer exists'),
+    (7, 'age-restricted', 'Age-restricted adult content. This content might not be appropriate for people under 18 years old. To view this media, you’ll need to log in to Twitter');
 
 create table tweets (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),

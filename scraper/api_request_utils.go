@@ -302,6 +302,7 @@ func (api API) GetMoreTweetsFromSearch(query string, response *TweetResponse, ma
 // Add Bearer token and guest token
 func ApiRequestAddTokens(req *http.Request) error {
 	req.Header.Set("Authorization", "Bearer " + BEARER_TOKEN)
+	req.Header.Set("x-twitter-client-language", "en")
 
 	guestToken, err := GetGuestToken()
 	if err != nil {
