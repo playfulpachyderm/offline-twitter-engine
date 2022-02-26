@@ -19,6 +19,7 @@ create table users (rowid integer primary key,
     banner_image_local_path text,
     pinned_tweet_id integer check(typeof(pinned_tweet_id) = 'integer' or pinned_tweet_id = ''),
 
+    is_followed boolean default 0,
     is_content_downloaded boolean default 0
 );
 

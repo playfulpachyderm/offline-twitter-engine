@@ -4,6 +4,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/go-test/deep"
 )
 
@@ -204,4 +207,47 @@ func TestCheckUserContentDownloadNeeded(t *testing.T) {
 	if profile.CheckUserContentDownloadNeeded(user) != true {
 		t.Errorf("If banner image changed, user should require another download")
 	}
+}
+
+/**
+ * Make sure following works
+ *
+ * - users are unfollowed by default
+ * - following a user makes it save as is_followed
+ * - using regular save method doesn't un-follow
+ * - unfollowing a user makes it save as no longer is_followed
+ */
+func TestFollowUnfollowUser(t *testing.T) {
+	assert := assert.New(t)
+
+	profile_path := "test_profiles/TestUserQueries"
+	profile := create_or_load_profile(profile_path)
+
+	user := create_dummy_user()
+	assert.False(user.IsFollowed)
+	profile.SaveUser(user)
+
+	profile.SetUserFollowed(&user, true)
+	assert.True(user.IsFollowed)
+
+	// Ensure the change was persisted
+	user_reloaded, err := profile.GetUserByHandle(user.Handle)
+	require.NoError(t, err)
+	assert.Equal(user.ID, user_reloaded.ID)  // Verify it's the same user
+	assert.True(user_reloaded.IsFollowed)
+
+	profile.SaveUser(user)  // should NOT un-set is_followed
+	user_reloaded, err = profile.GetUserByHandle(user.Handle)
+	require.NoError(t, err)
+	assert.Equal(user.ID, user_reloaded.ID)  // Verify it's the same user
+	assert.True(user_reloaded.IsFollowed)
+
+	profile.SetUserFollowed(&user, false)
+	assert.False(user.IsFollowed)
+
+	// Ensure the change was persisted
+	user_reloaded, err = profile.GetUserByHandle(user.Handle)
+	require.NoError(t, err)
+	assert.Equal(user.ID, user_reloaded.ID)  // Verify it's the same user
+	assert.False(user_reloaded.IsFollowed)
 }

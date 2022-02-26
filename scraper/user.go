@@ -44,6 +44,7 @@ type User struct {
     PinnedTweetID   TweetID
     PinnedTweet     *Tweet
 
+    IsFollowed          bool
     IsContentDownloaded bool
 }
 

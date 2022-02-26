@@ -1,6 +1,7 @@
 package persistence
 
 import (
+    "fmt"
     "database/sql"
     "time"
     "offline_twitter/scraper"
@@ -78,7 +79,7 @@ func parse_user_from_row(row *sql.Row) (scraper.User, error) {
     var u scraper.User
     var joinDate int64
 
-    err := row.Scan(&u.ID, &u.DisplayName, &u.Handle, &u.Bio, &u.FollowingCount, &u.FollowersCount, &u.Location, &u.Website, &joinDate, &u.IsPrivate, &u.IsVerified, &u.IsBanned, &u.ProfileImageUrl, &u.ProfileImageLocalPath, &u.BannerImageUrl, &u.BannerImageLocalPath, &u.PinnedTweetID, &u.IsContentDownloaded)
+    err := row.Scan(&u.ID, &u.DisplayName, &u.Handle, &u.Bio, &u.FollowingCount, &u.FollowersCount, &u.Location, &u.Website, &joinDate, &u.IsPrivate, &u.IsVerified, &u.IsBanned, &u.ProfileImageUrl, &u.ProfileImageLocalPath, &u.BannerImageUrl, &u.BannerImageLocalPath, &u.PinnedTweetID, &u.IsContentDownloaded, &u.IsFollowed)
     if err != nil {
         return u, err
     }
@@ -101,7 +102,7 @@ func (p Profile) GetUserByHandle(handle scraper.UserHandle) (scraper.User, error
     db := p.DB
 
     stmt, err := db.Prepare(`
-        select id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified, is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path, pinned_tweet_id, is_content_downloaded
+        select id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified, is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path, pinned_tweet_id, is_content_downloaded, is_followed
           from users
          where lower(handle) = lower(?)
     `)
@@ -132,7 +133,7 @@ func (p Profile) GetUserByID(id scraper.UserID) (scraper.User, error) {
     db := p.DB
 
     stmt, err := db.Prepare(`
-        select id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified, is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path, pinned_tweet_id, is_content_downloaded
+        select id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified, is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path, pinned_tweet_id, is_content_downloaded, is_followed
           from users
          where id = ?
     `)
@@ -188,4 +189,21 @@ func (p Profile) CheckUserContentDownloadNeeded(user scraper.User) bool {
         return true
     }
     return false
+}
+
+/**
+ * Follow / unfollow a user.  Update the given User object's IsFollowed field.
+ */
+func (p Profile) SetUserFollowed(user *scraper.User, is_followed bool) {
+    result, err := p.DB.Exec("update users set is_followed = ? where id = ?", is_followed, user.ID)
+    if err != nil {
+        panic("Unknown error: " + err.Error())
+    }
+    if count, _ := result.RowsAffected(); count != 1 {
+        panic(fmt.Sprintf("User with handle %q not found", user.Handle))
+    }
+    if err != nil {
+        panic(fmt.Sprintf("Error inserting user with handle %q: %s", user.Handle, err.Error()))
+    }
+    user.IsFollowed = is_followed
 }

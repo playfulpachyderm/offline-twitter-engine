@@ -8,7 +8,7 @@ import (
 )
 
 
-const ENGINE_DATABASE_VERSION = 8
+const ENGINE_DATABASE_VERSION = 9
 
 
 type VersionMismatchError struct {
@@ -61,6 +61,7 @@ var MIGRATIONS = []string{
 `alter table users add column is_banned boolean default 0`,
 `alter table urls add column short_text text not null default ""`,
 `insert into tombstone_types (rowid, short_name, tombstone_text) values (7, 'age-restricted', 'Age-restricted adult content. This content might not be appropriate for people under 18 years old. To view this media, you’ll need to log in to Twitter')`,
+`alter table users add column is_followed boolean default 0`,
 }
 
 /**
