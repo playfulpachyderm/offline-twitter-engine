@@ -18,7 +18,7 @@ func (p Profile) SaveTweetTrove(trove TweetTrove) {
 			panic(fmt.Sprintf("Error downloading user content for user with ID %d and handle %s: %s", u.ID, u.Handle, err.Error()))
 		}
 
-		err = p.SaveUser(u)
+		err = p.SaveUser(&u)
 		if err != nil {
 			panic(fmt.Sprintf("Error saving user with ID %d and handle %s: %s", u.ID, u.Handle, err.Error()))
 		}

@@ -3,11 +3,15 @@ package persistence_test
 import (
 	"testing"
 	"time"
+	"fmt"
+	"math/rand"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/go-test/deep"
+
+	"offline_twitter/scraper"
 )
 
 
@@ -21,7 +25,7 @@ func TestSaveAndLoadUser(t *testing.T) {
 	fake_user := create_dummy_user()
 
 	// Save the user, then reload it and ensure it's the same
-	err := profile.SaveUser(fake_user)
+	err := profile.SaveUser(&fake_user)
 	if err != nil {
 		panic(err)
 	}
@@ -64,7 +68,7 @@ func TestModifyUser(t *testing.T) {
 	fake_user.IsContentDownloaded = true
 
 	// Save the user so it can be modified
-	err := profile.SaveUser(fake_user)
+	err := profile.SaveUser(&fake_user)
 	if err != nil {
 		panic(err)
 	}
@@ -81,7 +85,7 @@ func TestModifyUser(t *testing.T) {
 	fake_user.IsContentDownloaded = false  // test No Worsening
 
 	// Save the modified user
-	err = profile.SaveUser(fake_user)
+	err = profile.SaveUser(&fake_user)
 	if err != nil {
 		panic(err)
 	}
@@ -150,7 +154,7 @@ func TestUserExists(t *testing.T) {
 	if exists {
 		t.Errorf("It shouldn't exist, but it does: %d", user.ID)
 	}
-	err := profile.SaveUser(user)
+	err := profile.SaveUser(&user)
 	if err != nil {
 		panic(err)
 	}
@@ -178,7 +182,7 @@ func TestCheckUserContentDownloadNeeded(t *testing.T) {
 	user.BannerImageUrl = "banner url1"
 	user.ProfileImageUrl = "profile url1"
 	user.IsContentDownloaded = false
-	err := profile.SaveUser(user)
+	err := profile.SaveUser(&user)
 	if err != nil {
 		panic(err)
 	}
@@ -190,7 +194,7 @@ func TestCheckUserContentDownloadNeeded(t *testing.T) {
 
 	// Mark `is_content_downloaded` as "true" again
 	user.IsContentDownloaded = true
-	err = profile.SaveUser(user)
+	err = profile.SaveUser(&user)
 	if err != nil {
 		panic(err)
 	}
@@ -225,7 +229,7 @@ func TestFollowUnfollowUser(t *testing.T) {
 
 	user := create_dummy_user()
 	assert.False(user.IsFollowed)
-	err := profile.SaveUser(user)
+	err := profile.SaveUser(&user)
 	assert.NoError(err)
 
 	profile.SetUserFollowed(&user, true)
@@ -237,7 +241,7 @@ func TestFollowUnfollowUser(t *testing.T) {
 	assert.Equal(user.ID, user_reloaded.ID)  // Verify it's the same user
 	assert.True(user_reloaded.IsFollowed)
 
-	err = profile.SaveUser(user)  // should NOT un-set is_followed
+	err = profile.SaveUser(&user)  // should NOT un-set is_followed
 	assert.NoError(err)
 	user_reloaded, err = profile.GetUserByHandle(user.Handle)
 	require.NoError(t, err)
@@ -252,4 +256,63 @@ func TestFollowUnfollowUser(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(user.ID, user_reloaded.ID)  // Verify it's the same user
 	assert.False(user_reloaded.IsFollowed)
+}
+
+/**
+ * Should create a new Unknown User from the given handle.
+ * The Unknown User should work consistently with other Users.
+ */
+func TestCreateUnknownUserWithHandle(t *testing.T) {
+	assert := assert.New(t)
+
+	profile_path := "test_profiles/TestUserQueries"
+	profile := create_or_load_profile(profile_path)
+
+	next_id := profile.NextFakeUserID()
+
+	handle := scraper.UserHandle(fmt.Sprintf("UnknownUser%d", rand.Int31()))
+	user := scraper.GetUnknownUserWithHandle(handle)
+	assert.Equal(scraper.UserID(0), user.ID)
+	assert.True(user.IsIdFake)
+
+	err := profile.SaveUser(&user)
+	assert.NoError(err)
+	assert.Equal(scraper.UserID(next_id + 1), user.ID)
+
+	// Ensure the change was persisted
+	user_reloaded, err := profile.GetUserByHandle(user.Handle)
+	require.NoError(t, err)
+	assert.Equal(handle, user_reloaded.Handle)  // Verify it's the same user
+	assert.Equal(scraper.UserID(next_id + 1), user_reloaded.ID)
+
+	// Why not tack this test on here: make sure NextFakeUserID works as expected
+	assert.Equal(next_id + 2, profile.NextFakeUserID())
+}
+
+/**
+ * Should update the unknown User's UserID with the correct ID if it already exists
+ */
+func TestCreateUnknownUserWithHandleThatAlreadyExists(t *testing.T) {
+	assert := assert.New(t)
+
+	profile_path := "test_profiles/TestUserQueries"
+	profile := create_or_load_profile(profile_path)
+
+	user := create_stable_user()
+
+
+	unknown_user := scraper.GetUnknownUserWithHandle(user.Handle)
+	assert.Equal(scraper.UserID(0), unknown_user.ID)
+
+	err := profile.SaveUser(&unknown_user)
+	assert.NoError(err)
+	assert.Equal(user.ID, unknown_user.ID)
+
+	// The real user should not have been overwritten at all
+	user_reloaded, err := profile.GetUserByID(user.ID)
+	assert.NoError(err)
+	assert.False(user_reloaded.IsIdFake)  // This one particularly
+	assert.Equal(user.Handle, user_reloaded.Handle)
+	assert.Equal(user.Bio, user_reloaded.Bio)
+	assert.Equal(user.DisplayName, user_reloaded.DisplayName)
 }

@@ -21,7 +21,8 @@ func create_or_load_profile(profile_path string) persistence.Profile {
 		if err != nil {
 			panic(err)
 		}
-		err = profile.SaveUser(create_stable_user())
+		u := create_stable_user()
+		err = profile.SaveUser(&u)
 		if err != nil {
 			panic(err)
 		}

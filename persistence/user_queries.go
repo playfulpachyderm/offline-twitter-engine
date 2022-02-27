@@ -14,12 +14,24 @@ import (
  * args:
  * - u: the User
  */
-func (p Profile) SaveUser(u scraper.User) error {
-    db := p.DB
+func (p Profile) SaveUser(u *scraper.User) error {
+    if u.IsNeedingFakeID {
+        err := p.DB.QueryRow("select id from users where lower(handle) = lower(?)", u.Handle).Scan(&u.ID)
+        if err == sql.ErrNoRows {
+            // We need to continue-- create a new fake user
+            u.ID = p.NextFakeUserID()
+        } else if err == nil {
+            // We're done; everything is fine (ID has already been scanned into the User)
+            return nil
+        } else {
+            // A real error occurred
+            panic(fmt.Sprintf("Error checking for existence of fake user with handle %q: %s", u.Handle, err.Error()))
+        }
+    }
 
-    _, err := db.Exec(`
-        insert into users (id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified, is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path, pinned_tweet_id, is_content_downloaded)
-        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    _, err := p.DB.Exec(`
+        insert into users (id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified, is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path, pinned_tweet_id, is_content_downloaded, is_id_fake)
+        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             on conflict do update
            set bio=?,
                display_name=?,
@@ -37,7 +49,7 @@ func (p Profile) SaveUser(u scraper.User) error {
                pinned_tweet_id=?,
                is_content_downloaded=(is_content_downloaded or ?)
         `,
-        u.ID, u.DisplayName, u.Handle, u.Bio, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.JoinDate.Unix(), u.IsPrivate, u.IsVerified, u.IsBanned, u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID, u.IsContentDownloaded,
+        u.ID, u.DisplayName, u.Handle, u.Bio, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.JoinDate.Unix(), u.IsPrivate, u.IsVerified, u.IsBanned, u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID, u.IsContentDownloaded, u.IsIdFake,
         u.Bio, u.DisplayName, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.IsPrivate, u.IsVerified, u.IsBanned, u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID, u.IsContentDownloaded,
     )
     if err != nil {
@@ -207,4 +219,17 @@ func (p Profile) SetUserFollowed(user *scraper.User, is_followed bool) {
         panic(fmt.Sprintf("User with handle %q not found", user.Handle))
     }
     user.IsFollowed = is_followed
+}
+
+func (p Profile) NextFakeUserID() scraper.UserID {
+    _, err := p.DB.Exec("update fake_user_sequence set latest_fake_id = latest_fake_id + 1")
+    if err != nil {
+        panic(err)
+    }
+    var ret scraper.UserID
+    err = p.DB.QueryRow("select latest_fake_id from fake_user_sequence").Scan(&ret)
+    if err != nil {
+        panic(err)
+    }
+    return ret
 }

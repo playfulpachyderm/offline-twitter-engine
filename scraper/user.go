@@ -46,6 +46,8 @@ type User struct {
 
     IsFollowed          bool
     IsContentDownloaded bool
+    IsNeedingFakeID     bool
+    IsIdFake            bool
 }
 
 func (u User) String() string {
@@ -100,6 +102,27 @@ func ParseHandleFromTweetUrl(tweet_url string) (UserHandle, error) {
     return UserHandle(matches[1]), nil
 }
 
+func GetUnknownUserWithHandle(handle UserHandle) User {
+    return User{
+        ID: UserID(0),  // 2^62 + 1...
+        DisplayName: string(handle),
+        Handle: handle,
+        Bio: "<blank>",
+        FollowersCount: 0,
+        FollowingCount: 0,
+        Location: "<blank>",
+        Website:"<blank>",
+        JoinDate: time.Unix(0, 0),
+        IsVerified: false,
+        IsPrivate: true,
+        ProfileImageUrl: DEFAULT_PROFILE_IMAGE_URL,
+        ProfileImageLocalPath: path.Base(DEFAULT_PROFILE_IMAGE_URL),
+        BannerImageUrl: "",
+        BannerImageLocalPath: "",
+        IsNeedingFakeID: true,
+        IsIdFake: true,
+    }
+}
 
 // Turn an APIUser, as returned from the scraper, into a properly structured User object
 func ParseSingleUser(apiUser APIUser) (ret User, err error) {

@@ -81,7 +81,7 @@ func TestDownloadUserContent(t *testing.T) {
     user := create_dummy_user()
 
     // Persist the User
-    err := profile.SaveUser(user)
+    err := profile.SaveUser(&user)
     if err != nil {
         t.Fatalf("Failed to save the user: %s", err.Error())
     }

@@ -187,7 +187,7 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
     }
 
     u.IsContentDownloaded = true
-    return p.SaveUser(*u)
+    return p.SaveUser(u)
 }
 
 /**

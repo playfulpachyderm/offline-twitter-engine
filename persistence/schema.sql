@@ -20,6 +20,7 @@ create table users (rowid integer primary key,
     pinned_tweet_id integer check(typeof(pinned_tweet_id) = 'integer' or pinned_tweet_id = ''),
 
     is_followed boolean default 0,
+    is_id_fake boolean default 0,
     is_content_downloaded boolean default 0
 );
 
@@ -151,3 +152,6 @@ create table hashtags (rowid integer primary key,
 create table database_version(rowid integer primary key,
     version_number integer not null unique
 );
+
+create table fake_user_sequence(latest_fake_id integer not null);
+insert into fake_user_sequence values(0x4000000000000000);
