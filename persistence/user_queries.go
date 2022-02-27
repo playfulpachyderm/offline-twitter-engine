@@ -197,13 +197,14 @@ func (p Profile) CheckUserContentDownloadNeeded(user scraper.User) bool {
 func (p Profile) SetUserFollowed(user *scraper.User, is_followed bool) {
     result, err := p.DB.Exec("update users set is_followed = ? where id = ?", is_followed, user.ID)
     if err != nil {
+        panic(fmt.Sprintf("Error inserting user with handle %q: %s", user.Handle, err.Error()))
+    }
+    count, err := result.RowsAffected()
+    if err != nil {
         panic("Unknown error: " + err.Error())
     }
-    if count, _ := result.RowsAffected(); count != 1 {
+    if count != 1 {
         panic(fmt.Sprintf("User with handle %q not found", user.Handle))
-    }
-    if err != nil {
-        panic(fmt.Sprintf("Error inserting user with handle %q: %s", user.Handle, err.Error()))
     }
     user.IsFollowed = is_followed
 }

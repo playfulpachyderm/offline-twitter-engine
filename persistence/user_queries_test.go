@@ -225,7 +225,8 @@ func TestFollowUnfollowUser(t *testing.T) {
 
 	user := create_dummy_user()
 	assert.False(user.IsFollowed)
-	profile.SaveUser(user)
+	err := profile.SaveUser(user)
+	assert.NoError(err)
 
 	profile.SetUserFollowed(&user, true)
 	assert.True(user.IsFollowed)
@@ -236,7 +237,8 @@ func TestFollowUnfollowUser(t *testing.T) {
 	assert.Equal(user.ID, user_reloaded.ID)  // Verify it's the same user
 	assert.True(user_reloaded.IsFollowed)
 
-	profile.SaveUser(user)  // should NOT un-set is_followed
+	err = profile.SaveUser(user)  // should NOT un-set is_followed
+	assert.NoError(err)
 	user_reloaded, err = profile.GetUserByHandle(user.Handle)
 	require.NoError(t, err)
 	assert.Equal(user.ID, user_reloaded.ID)  // Verify it's the same user
