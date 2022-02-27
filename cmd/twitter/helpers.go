@@ -47,6 +47,10 @@ This application downloads tweets from twitter and saves them in a SQLite databa
           Gets the most recent ~50 tweets.
           If "get_user_tweets_all" is used, gets up to ~3200 tweets (API limit).
 
+    follow
+    unfollow
+          <TARGET> is the user handle
+
     search
           <TARGET> is the search query.  Should be wrapped in quotes if it has spaces.
 

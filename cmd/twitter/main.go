@@ -104,6 +104,10 @@ func main() {
 		download_tweet_content(target)
 	case "search":
 		search(target)
+	case "follow":
+		follow_user(target, true)
+	case "unfollow":
+		follow_user(target, false)
 	default:
 		die("Invalid operation: " + operation, true, 3)
 	}
@@ -239,7 +243,6 @@ func download_user_content(handle scraper.UserHandle) {
 	}
 }
 
-
 func search(query string) {
 	trove, err := scraper.Search(query, 1000)
 	if err != nil {
@@ -248,4 +251,18 @@ func search(query string) {
 	profile.SaveTweetTrove(trove)
 
 	happy_exit(fmt.Sprintf("Saved %d tweets and %d users", len(trove.Tweets), len(trove.Users)))
+}
+
+func follow_user(handle string, is_followed bool) {
+	user, err := profile.GetUserByHandle(scraper.UserHandle(handle))
+	if err != nil {
+		panic("Couldn't get the user from database: " + err.Error())
+	}
+	profile.SetUserFollowed(&user, is_followed)
+
+	if is_followed {
+		happy_exit("Followed user: " + handle)
+	} else {
+		happy_exit("Unfollowed user: " + handle)
+	}
 }

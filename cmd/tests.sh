@@ -223,6 +223,14 @@ test -e profile_images/default_profile.png
 tw fetch_user AlexKoppelman  # This is probably kind of a flimsy test
 test $(sqlite3 twitter.db "select is_content_downloaded from users where handle='AlexKoppelman'") = "1"
 
+
+# Test following / unfollowing a user
+test "$(sqlite3 twitter.db "select count(*) from users where is_followed = 1")" = "0"
+tw follow michaelmalice
+test "$(sqlite3 twitter.db "select handle from users where is_followed = 1")" = "michaelmalice"
+tw unfollow michaelmalice
+test "$(sqlite3 twitter.db "select count(*) from users where is_followed = 1")" = "0"
+
 # TODO: Maybe this file should be broken up into multiple test scripts
 
 echo -e "\033[32mAll tests passed.  Finished successfully.\033[0m"
