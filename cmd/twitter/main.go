@@ -139,7 +139,7 @@ func fetch_user(handle scraper.UserHandle) {
 	}
 	log.Debug(user)
 
-	err = profile.SaveUser(user)
+	err = profile.SaveUser(&user)
 	if err != nil {
 		die("Error saving user: " + err.Error(), false, 4)
 	}
