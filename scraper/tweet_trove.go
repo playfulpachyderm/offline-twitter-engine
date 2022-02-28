@@ -87,7 +87,14 @@ func (trove *TweetTrove) FetchTombstoneUsers() {
 		}
 
 		if user.ID == 0 {
-			panic(fmt.Sprintf("UserID == 0 (@%s)", handle))
+			// Find some random ID to fit it into the trove
+			for i := 1; ; i++ {
+				_, ok := trove.Users[UserID(i)]
+				if !ok {
+					user.ID = UserID(i)
+					break
+				}
+			}
 		}
 
 		trove.Users[user.ID] = user
@@ -108,7 +115,7 @@ func (trove *TweetTrove) FetchTombstoneUsers() {
 func (trove *TweetTrove) FillMissingUserIDs() {
 	for i := range trove.Tweets {
 		tweet := trove.Tweets[i]
-		if tweet.UserID != 0 {
+		if tweet.UserHandle == "" {
 			// No need to fill this tweet's user_id, it's already filled
 			continue
 		}

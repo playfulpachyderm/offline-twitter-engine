@@ -115,10 +115,6 @@ func GetUnknownUserWithHandle(handle UserHandle) User {
         JoinDate: time.Unix(0, 0),
         IsVerified: false,
         IsPrivate: true,
-        ProfileImageUrl: DEFAULT_PROFILE_IMAGE_URL,
-        ProfileImageLocalPath: path.Base(DEFAULT_PROFILE_IMAGE_URL),
-        BannerImageUrl: "",
-        BannerImageLocalPath: "",
         IsNeedingFakeID: true,
         IsIdFake: true,
     }
@@ -126,6 +122,14 @@ func GetUnknownUserWithHandle(handle UserHandle) User {
 
 // Turn an APIUser, as returned from the scraper, into a properly structured User object
 func ParseSingleUser(apiUser APIUser) (ret User, err error) {
+    if apiUser.DoesntExist {
+        // User may have been deleted, or there was a typo.  There's no data to parse
+        if apiUser.ScreenName == "" {
+            panic("ScreenName is empty!")
+        }
+        ret = GetUnknownUserWithHandle(UserHandle(apiUser.ScreenName))
+        return
+    }
     ret.ID = UserID(apiUser.ID)
     ret.Handle = UserHandle(apiUser.ScreenName)
     if apiUser.IsBanned {

@@ -74,6 +74,37 @@ func TestParseBannedUser(t *testing.T) {
 }
 
 /**
+ * Should correctly parse a deleted user
+ */
+func TestParseDeletedUser(t *testing.T) {
+	assert := assert.New(t)
+	data, err := ioutil.ReadFile("test_responses/deleted_user.json")
+	if err != nil {
+		panic(err)
+	}
+	var user_resp UserResponse
+	err = json.Unmarshal(data, &user_resp)
+	require.NoError(t, err)
+
+	handle := "Some Random Deleted User"
+
+	apiUser := user_resp.ConvertToAPIUser()
+	apiUser.ScreenName = string(handle)  // This is done in scraper.GetUser, since users are retrieved by handle anyway
+
+	user, err := ParseSingleUser(apiUser)
+	require.NoError(t, err)
+	assert.Equal(UserID(0), user.ID)
+	assert.True(user.IsIdFake)
+	assert.True(user.IsNeedingFakeID)
+	assert.Equal(user.Bio, "<blank>")
+	assert.Equal(user.Handle, UserHandle(handle))
+
+	// Test generation of profile images for deleted user
+	assert.Equal("https://abs.twimg.com/sticky/default_profile_images/default_profile.png", user.GetTinyProfileImageUrl())
+	assert.Equal("default_profile.png", user.GetTinyProfileImageLocalPath())
+}
+
+/**
  * Should extract a user handle from a tweet URL, or fail if URL is invalid
  */
 func TestParseHandleFromTweetUrl(t *testing.T) {

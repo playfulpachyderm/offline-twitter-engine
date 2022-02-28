@@ -197,10 +197,11 @@ test $(find link_preview_images | wc -l) = $initial_link_preview_images_count  #
 
 
 # Test a tweet thread with tombstones
-tw fetch_tweet https://twitter.com/CovfefeAnon/status/1454526270809726977
-test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454515503242829830") = 1
-test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454521424144654344") = 0
-test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454522147750260742") = 1
+# tw fetch_tweet https://twitter.com/CovfefeAnon/status/1454526270809726977
+# test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454515503242829830") = 1
+# test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454521424144654344") = 0  # TODO this guy got banned
+# test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454522147750260742") = 1
+
 
 # Test search
 tw search "from:michaelmalice constitution"

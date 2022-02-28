@@ -244,6 +244,7 @@ type APIUser struct {
 	StatusesCount        int      `json:"statuses_count"`
 	Verified             bool     `json:"verified"`
 	IsBanned             bool
+	DoesntExist          bool
 }
 
 
@@ -256,6 +257,7 @@ type UserResponse struct {
 	} `json:"data"`
 	Errors []struct {
 		Message string  `json:"message"`
+		Name string     `json:"name"`
 		Code    int     `json:"code"`
 	} `json:"errors"`
 }
@@ -267,6 +269,8 @@ func (u UserResponse) ConvertToAPIUser() APIUser {
 	for _, api_error := range u.Errors {
 		if api_error.Message == "Authorization: User has been suspended. (63)" {
 			ret.IsBanned = true
+		} else if api_error.Name == "NotFoundError" {
+			ret.DoesntExist = true
 		} else {
 			panic(fmt.Sprintf("Unknown api error: %q", api_error.Message))
 		}
