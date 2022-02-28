@@ -203,6 +203,12 @@ test $(find link_preview_images | wc -l) = $initial_link_preview_images_count  #
 # test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454522147750260742") = 1
 
 
+# Test a tweet thread with a deleted account; should generate a user with a fake ID
+tw fetch_tweet https://twitter.com/michaelmalice/status/1497272681497980928
+test $(sqlite3 twitter.db "select is_id_fake from users where handle = 'GregCunningham0'") = 1
+test $(sqlite3 twitter.db "select count(*) from tweets where user_id = (select id from users where handle = 'GregCunningham0')") = 1
+
+
 # Test search
 tw search "from:michaelmalice constitution"
 test $(sqlite3 twitter.db "select count(*) from tweets where user_id = 44067298 and text like '%constitution%'") -gt "30"  # Not sure exactly how many

@@ -11,7 +11,7 @@ import (
  * Panics if anything goes wrong.
  */
 func (p Profile) SaveTweetTrove(trove TweetTrove) {
-	for _, u := range trove.Users {
+	for i, u := range trove.Users {
 		// Download download their tiny profile image
 		err := p.DownloadUserProfileImageTiny(&u)
 		if err != nil {
@@ -22,7 +22,13 @@ func (p Profile) SaveTweetTrove(trove TweetTrove) {
 		if err != nil {
 			panic(fmt.Sprintf("Error saving user with ID %d and handle %s: %s", u.ID, u.Handle, err.Error()))
 		}
+		fmt.Println(u.Handle, u.ID)
+		// If the User's ID was updated in saving (i.e., Unknown User), update it in the Trove too
+		trove.Users[i] = u
 	}
+
+	// TODO: this is called earlier in the process as well, before parsing.  Is that call redundant?  Too tired to figure out right now
+	trove.FillMissingUserIDs()
 
 	for _, t := range trove.Tweets {
 		err := p.SaveTweet(t)
