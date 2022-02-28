@@ -218,7 +218,7 @@ func (api API) GetUser(handle UserHandle) (APIUser, error) {
 		}
 
 		// Retry ONLY if the error is code 50 (random authentication failure), NOT on real errors
-		if len(response.Errors) == 1 && response.Errors[0].Code == 50 {
+		if len(response.Errors) == 1 && response.Errors[0].Code == 50 && response.Errors[0].Name != "NotFoundError" {
 			// Reset the response (remove the Errors)
 			response = UserResponse{}
 			continue
