@@ -133,32 +133,45 @@ func (u APIV2UserResult) ToUser() User {
 	return user
 }
 
+type _Result struct {
+	ID int64 `json:"rest_id,string"`
+	Legacy APIV2Tweet `json:"legacy"`
+	Tombstone *struct {
+		Text struct {
+			Text string `json:"text"`
+		} `json:"text"`
+	} `json:"tombstone"`
+	Core *APIV2UserResult `json:"core"`
+	Card APIV2Card `json:"card"`
+	QuotedStatusResult *APIV2Result `json:"quoted_status_result"`
+}
+
 type APIV2Result struct {
 	Result struct {
-		ID int64 `json:"rest_id,string"`
-		Legacy APIV2Tweet `json:"legacy"`
-		Tombstone *struct {
-			Text struct {
-				Text string `json:"text"`
-			} `json:"text"`
-		} `json:"tombstone"`
-		Core *APIV2UserResult `json:"core"`
-		Card APIV2Card `json:"card"`
-		QuotedStatusResult *APIV2Result `json:"quoted_status_result"`
+		_Result
+		Tweet _Result `json:"tweet"`
 	} `json:"result"`
 }
 func (api_result APIV2Result) ToTweetTrove() TweetTrove {
 	ret := NewTweetTrove()
 
-	if api_result.Result.Core != nil {
-		main_user := api_result.Result.Core.ToUser()
-		ret.Users[main_user.ID] = main_user
-	} /*else {
-		// TODO
-	}*/
+	if api_result.Result.Legacy.ID == 0 && api_result.Result.Tweet.Legacy.ID != 0 {
+		// If the tweet has "__typename" of "TweetWithVisibilityResults", it uses a new structure with
+		// a "tweet" field with the regular data, alongside a "tweetInterstitial" field which is ignored
+		// for now.
+		log.Debug("Using Inner Tweet")
+		api_result.Result._Result = api_result.Result.Tweet
+	}
 
 	main_tweet_trove := api_result.Result.Legacy.ToTweetTrove()
 	ret.MergeWith(main_tweet_trove)
+
+	// Parse the User info
+	if api_result.Result.Core != nil {
+		// `Core` is nil for tombstones because they don't carry user info.  Nothing to do here
+		main_user := api_result.Result.Core.ToUser()
+		ret.Users[main_user.ID] = main_user
+	}
 
 	// Handle quoted tweet
 	if api_result.Result.QuotedStatusResult != nil {

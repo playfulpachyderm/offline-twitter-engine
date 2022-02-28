@@ -539,3 +539,30 @@ func TestAPIV2GetMainInstructionFromFeed(t *testing.T) {
 	assert.Equal(len(feed.GetMainInstruction().Entries), 42)
 	assert.Equal(feed.GetMainInstruction().Entries[41].EntryID, "asdf")
 }
+
+/**
+ * Should handle an entry in the feed that's just a tombstone
+ */
+func TestAPIV2TombstoneEntry(t *testing.T) {
+
+}
+
+
+func TestTweetWithWarning(t *testing.T) {
+	assert := assert.New(t)
+	data, err := ioutil.ReadFile("test_responses/api_v2/tweet_with_warning.json")
+	if err != nil {
+		panic(err)
+	}
+	var tweet_result APIV2Result
+	err = json.Unmarshal(data, &tweet_result)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	trove := tweet_result.ToTweetTrove()
+
+	assert.Len(trove.Retweets, 1)
+	assert.Len(trove.Tweets, 2)
+	assert.Len(trove.Users, 3)
+}
