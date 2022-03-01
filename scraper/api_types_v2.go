@@ -152,8 +152,14 @@ type APIV2Result struct {
 		Tweet _Result `json:"tweet"`
 	} `json:"result"`
 }
-func (api_result APIV2Result) ToTweetTrove() TweetTrove {
+func (api_result APIV2Result) ToTweetTrove(ignore_null_entries bool) TweetTrove {
 	ret := NewTweetTrove()
+
+	// Start by checking if this is a null entry in a feed
+	if api_result.Result.Tombstone != nil && ignore_null_entries{
+		// TODO: this is becoming really spaghetti.  Why do we need a separate execution path for this?
+		return ret
+	}
 
 	if api_result.Result.Legacy.ID == 0 && api_result.Result.Tweet.Legacy.ID != 0 {
 		// If the tweet has "__typename" of "TweetWithVisibilityResults", it uses a new structure with
@@ -194,7 +200,7 @@ func (api_result APIV2Result) ToTweetTrove() TweetTrove {
 			ret.TombstoneUsers = append(ret.TombstoneUsers, handle)
 		}
 
-		quoted_trove := api_result.Result.QuotedStatusResult.ToTweetTrove()
+		quoted_trove := quoted_api_result.ToTweetTrove(false)
 		ret.MergeWith(quoted_trove)
 	}
 
@@ -248,7 +254,7 @@ func (api_v2_tweet APIV2Tweet) ToTweetTrove() TweetTrove {
 
 	// If there's a retweet, we ignore the main tweet except for posted_at and retweeting UserID
 	if api_v2_tweet.RetweetedStatusResult != nil {
-		orig_tweet_trove := api_v2_tweet.RetweetedStatusResult.ToTweetTrove()
+		orig_tweet_trove := api_v2_tweet.RetweetedStatusResult.ToTweetTrove(false)
 		ret.MergeWith(orig_tweet_trove)
 
 
@@ -354,7 +360,7 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 
 		result := entry.Content.ItemContent.TweetResults
 
-		main_trove := result.ToTweetTrove()
+		main_trove := result.ToTweetTrove(true)
 		ret.MergeWith(main_trove)
 	}
 

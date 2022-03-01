@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	. "offline_twitter/scraper"
 )
@@ -61,7 +62,7 @@ func TestAPIV2ParseTweet(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove()
+	trove := tweet_result.ToTweetTrove(true)
 
 	assert.Equal(1, len(trove.Tweets))
 	tweet, ok := trove.Tweets[1485708879174508550]
@@ -108,7 +109,7 @@ func TestAPIV2ParseTweetWithQuotedTweet(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove()
+	trove := tweet_result.ToTweetTrove(true)
 
 	// Should be 2 tweets: quote-tweet and quoted-tweet
 	assert.Equal(2, len(trove.Tweets))
@@ -161,7 +162,7 @@ func TestAPIV2ParseRetweet(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove()
+	trove := tweet_result.ToTweetTrove(true)
 
 	// Should only be 1 tweet, the retweeted one
 	assert.Equal(1, len(trove.Tweets))
@@ -221,7 +222,7 @@ func TestAPIV2ParseRetweetedQuoteTweet(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove()
+	trove := tweet_result.ToTweetTrove(true)
 
 	// Quoted tweet and quoting tweet
 	assert.Equal(2, len(trove.Tweets))
@@ -281,7 +282,7 @@ func TestAPIV2ParseTweetWithQuotedTombstone(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove()
+	trove := tweet_result.ToTweetTrove(true)
 
 	assert.Equal(1, len(trove.Users))
 	user, ok := trove.Users[44067298]
@@ -317,7 +318,7 @@ func TestAPIV2ParseTweetWithURL(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove()
+	trove := tweet_result.ToTweetTrove(true)
 
 	assert.Equal(1, len(trove.Tweets))
 	tweet, ok := trove.Tweets[1485695695025803264]
@@ -352,7 +353,7 @@ func TestAPIV2ParseTweetWithURLPlayerCard(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove()
+	trove := tweet_result.ToTweetTrove(true)
 
 	assert.Equal(1, len(trove.Tweets))
 	tweet, ok := trove.Tweets[1485504913614327808]
@@ -384,7 +385,7 @@ func TestAPIV2ParseTweetWithURLRetweet(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove()
+	trove := tweet_result.ToTweetTrove(true)
 
 	assert.Equal(1, len(trove.Tweets))
 	tweet, ok := trove.Tweets[1488605073588559873]
@@ -411,7 +412,7 @@ func TestAPIV2ParseTweetWithPoll(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove()
+	trove := tweet_result.ToTweetTrove(true)
 
 	assert.Len(trove.Tweets, 1)
 	tweet, ok := trove.Tweets[1485692111106285571]
@@ -541,26 +542,37 @@ func TestAPIV2GetMainInstructionFromFeed(t *testing.T) {
 }
 
 /**
- * Should handle an entry in the feed that's just a tombstone
+ * Should handle an entry in the feed that's a tombstone by just ignoring it
+ * Expectation: random tombstones in the feed with no context should parse as empty TweetTroves.
+ *
+ * The indication that it's from a feed (i.e., not in a comments thread) is 'ToTweetTrove(true)'.
+ * On a reply thread, it would be 'ToTweetTrove(false)'.
  */
 func TestAPIV2TombstoneEntry(t *testing.T) {
+	assert := assert.New(t)
+	data, err := ioutil.ReadFile("test_responses/api_v2/tombstone_tweet.json")
+	require.NoError(t, err)
 
+	var tweet_result APIV2Result
+	err = json.Unmarshal(data, &tweet_result)
+	require.NoError(t, err)
+
+	trove := tweet_result.ToTweetTrove(true)  // 'true' indicates to ignore empty entries
+	assert.Len(trove.Tweets, 0)
+	assert.Len(trove.Users, 0)
+	assert.Len(trove.Retweets, 0)
 }
 
 
 func TestTweetWithWarning(t *testing.T) {
 	assert := assert.New(t)
 	data, err := ioutil.ReadFile("test_responses/api_v2/tweet_with_warning.json")
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 	var tweet_result APIV2Result
 	err = json.Unmarshal(data, &tweet_result)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
+	require.NoError(t, err)
 
-	trove := tweet_result.ToTweetTrove()
+	trove := tweet_result.ToTweetTrove(true)
 
 	assert.Len(trove.Retweets, 1)
 	assert.Len(trove.Tweets, 2)

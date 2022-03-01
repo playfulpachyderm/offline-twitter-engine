@@ -1,0 +1,1 @@
+{"result":{"__typename":"TweetTombstone","tombstone":{"__typename":"TextTombstone","text":{"rtl":false,"text":"This Tweet was deleted by the Tweet author. Learn more","entities":[{"fromIndex":44,"toIndex":54,"ref":{"type":"TimelineUrl","url":"https://help.twitter.com/rules-and-policies/notices-on-twitter","urlType":"ExternalUrl"}}]}}}}
