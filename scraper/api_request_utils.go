@@ -332,7 +332,6 @@ func ApiRequestAddAllParams(req *http.Request) {
 	query.Add("tweet_mode", "extended")
 	query.Add("include_entities", "true")
 	query.Add("include_user_entities", "true")
-	query.Add("include_ext_media_color", "true")
 	query.Add("include_ext_media_availability", "true")
 	query.Add("send_error_codes", "true")
 	query.Add("simple_quoted_tweet", "true")

@@ -300,7 +300,6 @@ func TestCreateUnknownUserWithHandleThatAlreadyExists(t *testing.T) {
 
 	user := create_stable_user()
 
-
 	unknown_user := scraper.GetUnknownUserWithHandle(user.Handle)
 	assert.Equal(scraper.UserID(0), unknown_user.ID)
 

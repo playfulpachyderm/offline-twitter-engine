@@ -233,3 +233,24 @@ func (p Profile) NextFakeUserID() scraper.UserID {
     }
     return ret
 }
+
+func (p Profile) GetAllFollowedUsers() []scraper.UserHandle {
+    rows, err := p.DB.Query("select handle from users where is_followed = 1")
+    if err != nil {
+        panic(err)
+    }
+
+    ret := []scraper.UserHandle{}
+
+    var tmp scraper.UserHandle
+
+    for rows.Next() {
+        err = rows.Scan(&tmp)
+        if err != nil {
+            panic(err)
+        }
+        ret = append(ret, tmp)
+    }
+
+    return ret
+}

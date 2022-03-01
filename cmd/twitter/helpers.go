@@ -51,6 +51,10 @@ This application downloads tweets from twitter and saves them in a SQLite databa
     unfollow
           <TARGET> is the user handle
 
+    list_followed
+          No <TARGET> is needed; will be ignored if given.
+          Lists all the users (by their @handle) that are followed.
+
     search
           <TARGET> is the search query.  Should be wrapped in quotes if it has spaces.
 

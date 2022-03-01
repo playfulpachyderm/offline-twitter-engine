@@ -235,7 +235,16 @@ test $(sqlite3 twitter.db "select is_content_downloaded from users where handle=
 test "$(sqlite3 twitter.db "select count(*) from users where is_followed = 1")" = "0"
 tw follow michaelmalice
 test "$(sqlite3 twitter.db "select handle from users where is_followed = 1")" = "michaelmalice"
+
+tw follow cernovich
+test "$(tw list_followed | wc -l)" = 2
+test "$(tw list_followed | grep -iq cernovich && echo YES)" = "YES"
+test "$(tw list_followed | grep -iq michaelmalice && echo YES)" = "YES"
+test "$(tw list_followed | grep -iq blahblahgibberish && echo YES)" = ""
+
 tw unfollow michaelmalice
+test "$(sqlite3 twitter.db "select count(*) from users where is_followed = 1")" = "1"
+tw unfollow cernovich
 test "$(sqlite3 twitter.db "select count(*) from users where is_followed = 1")" = "0"
 
 # TODO: Maybe this file should be broken up into multiple test scripts

@@ -102,6 +102,10 @@ func ParseHandleFromTweetUrl(tweet_url string) (UserHandle, error) {
     return UserHandle(matches[1]), nil
 }
 
+/**
+ * Unknown Users with handles are only created by direct GetUser calls (either `twitter fetch_user`
+ * subcommand or as part of tombstone user fetching.)
+ */
 func GetUnknownUserWithHandle(handle UserHandle) User {
     return User{
         ID: UserID(0),  // 2^62 + 1...
@@ -114,7 +118,7 @@ func GetUnknownUserWithHandle(handle UserHandle) User {
         Website:"<blank>",
         JoinDate: time.Unix(0, 0),
         IsVerified: false,
-        IsPrivate: true,
+        IsPrivate: false,
         IsNeedingFakeID: true,
         IsIdFake: true,
     }

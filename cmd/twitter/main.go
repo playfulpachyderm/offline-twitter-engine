@@ -69,7 +69,12 @@ func main() {
 	log.SetLevel(logging_level)
 
 	if len(args) < 2 {
-		die("", true, 1)
+		if len(args) == 1 && args[0] == "list_followed" {
+			// "list_followed" doesn't need a target, so create a fake second arg
+			args = append(args, "")
+		} else {
+			die("", true, 1)
+		}
 	}
 
 	operation := args[0]
@@ -108,6 +113,8 @@ func main() {
 		follow_user(target, true)
 	case "unfollow":
 		follow_user(target, false)
+	case "list_followed":
+		list_followed()
 	default:
 		die("Invalid operation: " + operation, true, 3)
 	}
@@ -264,5 +271,11 @@ func follow_user(handle string, is_followed bool) {
 		happy_exit("Followed user: " + handle)
 	} else {
 		happy_exit("Unfollowed user: " + handle)
+	}
+}
+
+func list_followed() {
+	for _, handle := range profile.GetAllFollowedUsers() {
+		fmt.Println(handle)
 	}
 }
