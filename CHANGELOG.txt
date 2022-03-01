@@ -60,3 +60,10 @@ v0.1.2
 - BUGFIX: fix error when trying to match mixed-case user handles in tombstone tweets
 - BUGFIX: set "Client Language" header to "English" in all cases
 - Add an option to show debug logging; hide it by default
+
+v0.1.3
+------
+
+- Add following users
+- Add `list_followed` subcommand
+- Add support for tweets that quote-tweet something from a user who deleted their account
