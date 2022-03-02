@@ -84,23 +84,7 @@ Joined %s
     return ret
 }
 
-/**
- * Given a tweet URL, return the corresponding user handle.
- * If tweet url is not valid, return an error.
- */
-func ParseHandleFromTweetUrl(tweet_url string) (UserHandle, error) {
-    short_url_regex := regexp.MustCompile(`^https://t.co/\w{5,20}$`)
-    if short_url_regex.MatchString(tweet_url) {
-        tweet_url = ExpandShortUrl(tweet_url)
-    }
 
-    r := regexp.MustCompile(`^https://twitter.com/(\w+)/status/\d+(?:\?.*)?$`)
-    matches := r.FindStringSubmatch(tweet_url)
-    if len(matches) != 2 {  // matches[0] is the full string
-        return "", fmt.Errorf("Invalid tweet url: %s", tweet_url)
-    }
-    return UserHandle(matches[1]), nil
-}
 
 /**
  * Unknown Users with handles are only created by direct GetUser calls (either `twitter fetch_user`

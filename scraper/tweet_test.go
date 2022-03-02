@@ -50,6 +50,9 @@ func TestParseTweetWithImage(t *testing.T) {
 	assert.Len(tweet.Images, 1)
 }
 
+/**
+ * Ensure the fake url (link to the quoted tweet) is not parsed as a URL; it should just be ignored
+ */
 func TestParseTweetWithQuotedTweetAsLink(t *testing.T) {
 	assert := assert.New(t)
 	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_quoted_tweet_as_link2.json")
@@ -59,6 +62,22 @@ func TestParseTweetWithQuotedTweetAsLink(t *testing.T) {
 	assert.Equal(TweetID(1396194494710788100), tweet.QuotedTweetID)
 	assert.Empty(tweet.ReplyMentions)
 	assert.Empty(tweet.Polls)
+	assert.Empty(tweet.Urls)
+}
+
+/**
+ * Quote-tweets with links should work properly
+ */
+func TestParseTweetWithQuotedTweetAndLink(t *testing.T) {
+	assert := assert.New(t)
+	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_quoted_tweet_and_url.json")
+
+	assert.Equal("This is video he’s talking about. Please watch. Is there a single US politician capable of doing this with the weasels and rats running American industry today?", tweet.Text)
+	assert.Equal(TweetID(1497997890999898115), tweet.QuotedTweetID)
+
+	assert.Len(tweet.Urls, 1)
+	url := tweet.Urls[0]
+	assert.Equal(url.Text, "https://youtu.be/VjrlTMvirVo")
 }
 
 func TestParseTweetWithVideo(t *testing.T) {

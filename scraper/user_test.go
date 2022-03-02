@@ -105,33 +105,6 @@ func TestParseDeletedUser(t *testing.T) {
 }
 
 /**
- * Should extract a user handle from a tweet URL, or fail if URL is invalid
- */
-func TestParseHandleFromTweetUrl(t *testing.T) {
-	assert := assert.New(t)
-
-	// Test valid tweet url
-	url := "https://twitter.com/kanesays23/status/1429583672827465730"
-	result, err := ParseHandleFromTweetUrl(url)
-	assert.NoError(err)
-	assert.Equal(UserHandle("kanesays23"), result)
-
-	// Test url with GET params
-	result, err = ParseHandleFromTweetUrl("https://twitter.com/NerdNoticing/status/1263192389050654720?s=20")
-	assert.NoError(err)
-	assert.Equal(UserHandle("NerdNoticing"), result)
-
-	// Test invalid url
-	_, err = ParseHandleFromTweetUrl("https://twitter.com/NerdNoticing/status/1263192389050654720s=20")
-	assert.Error(err)
-
-	// Test empty string
-	_, err = ParseHandleFromTweetUrl("")
-	assert.Error(err)
-}
-
-
-/**
  * Should extract a user handle from a shortened tweet URL
  */
 func TestParseHandleFromShortenedTweetUrl(t *testing.T) {

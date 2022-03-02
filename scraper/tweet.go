@@ -102,6 +102,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	ret.NumReplies = apiTweet.ReplyCount
 	ret.NumQuoteTweets = apiTweet.QuoteCount
 	ret.InReplyToID = TweetID(apiTweet.InReplyToStatusID)
+	ret.QuotedTweetID = TweetID(apiTweet.QuotedStatusID)
 
 	// Process URLs and link previews
 	for _, url := range apiTweet.Entities.URLs {
@@ -112,14 +113,20 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		url_object.Text = url.ExpandedURL
 		url_object.ShortText = url.ShortenedUrl
 		url_object.TweetID = ret.ID
+
+		// Skip it if it's just the quoted tweet
+		_, id, is_ok := TryParseTweetUrl(url.ExpandedURL)
+		if is_ok && id == ret.QuotedTweetID {
+			continue
+		}
+
 		ret.Urls = append(ret.Urls, url_object)
 	}
 
 	// Process images
 	for _, media := range apiTweet.Entities.Media {
 		if media.Type != "photo" {  // TODO: remove this eventually
-			panic_str := fmt.Sprintf("Unknown media type: %q", media.Type)
-			panic(panic_str)
+			panic(fmt.Sprintf("Unknown media type: %q", media.Type))
 		}
 		new_image := ParseAPIMedia(media)
 		new_image.TweetID = ret.ID
@@ -144,7 +151,6 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		}
 	}
 
-	ret.QuotedTweetID = TweetID(apiTweet.QuotedStatusID)
 
 	// Process videos
 	for _, entity := range apiTweet.ExtendedEntities.Media {

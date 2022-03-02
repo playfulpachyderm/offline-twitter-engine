@@ -3,6 +3,7 @@ package scraper
 import (
 	"fmt"
 	"path"
+	"regexp"
 	"net/url"
 )
 
@@ -60,17 +61,50 @@ func ParseAPIUrlCard(apiCard APICard) Url {
 }
 
 func get_thumbnail_local_path(remote_url string) string {
-    u, err := url.Parse(remote_url)
-    if err != nil {
-        panic(err)
-    }
-    if u.RawQuery == "" {
-        return path.Base(u.Path)
-    }
-    query_params, err := url.ParseQuery(u.RawQuery)
-    if err != nil {
-        panic(err)
-    }
+	u, err := url.Parse(remote_url)
+	if err != nil {
+		panic(err)
+	}
+	if u.RawQuery == "" {
+		return path.Base(u.Path)
+	}
+	query_params, err := url.ParseQuery(u.RawQuery)
+	if err != nil {
+		panic(err)
+	}
 
-    return fmt.Sprintf("%s_%s.%s", path.Base(u.Path), query_params["name"][0], query_params["format"][0])
+	return fmt.Sprintf("%s_%s.%s", path.Base(u.Path), query_params["name"][0], query_params["format"][0])
+}
+
+/**
+ * Given an URL, try to parse it as a tweet url.
+ * The bool is an `is_ok` value; true if the parse was successful, false if it didn't match
+ */
+func TryParseTweetUrl(url string) (UserHandle, TweetID, bool) {
+	r := regexp.MustCompile(`^https://twitter.com/(\w+)/status/(\d+)(?:\?.*)?$`)
+	matches := r.FindStringSubmatch(url)
+	if matches == nil {
+		return UserHandle(""), TweetID(0), false
+	}
+	if len(matches) != 3 {  // matches[0] is the full string
+		panic(matches)
+	}
+	return UserHandle(matches[1]), TweetID(int_or_panic(matches[2])), true
+}
+
+/**
+ * Given a tweet URL, return the corresponding user handle.
+ * If tweet url is not valid, return an error.
+ */
+func ParseHandleFromTweetUrl(tweet_url string) (UserHandle, error) {
+	short_url_regex := regexp.MustCompile(`^https://t.co/\w{5,20}$`)
+	if short_url_regex.MatchString(tweet_url) {
+		tweet_url = ExpandShortUrl(tweet_url)
+	}
+
+	ret, _, is_ok := TryParseTweetUrl(tweet_url)
+	if !is_ok {
+		return "", fmt.Errorf("Invalid tweet url: %s", tweet_url)
+	}
+	return ret, nil
 }
