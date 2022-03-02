@@ -1,0 +1,367 @@
+{
+    "created_at": "Sun Feb 27 18:28:26 +0000 2022",
+    "id_str": "1498002100294410241",
+    "full_text": "This is video he’s talking about. Please watch. Is there a single US politician capable of doing this with the weasels and rats running American industry today?\n\nhttps://t.co/xurv3zslRt",
+    "display_text_range":
+    [
+        0,
+        185
+    ],
+    "entities":
+    {
+        "urls":
+        [
+            {
+                "url": "https://t.co/xurv3zslRt",
+                "expanded_url": "https://youtu.be/VjrlTMvirVo",
+                "display_url": "youtu.be/VjrlTMvirVo",
+                "indices":
+                [
+                    162,
+                    185
+                ]
+            }
+        ]
+    },
+    "source": "<a href=\"http://twitter.com/download/iphone\" rel=\"nofollow\">Twitter for iPhone</a>",
+    "user_id_str": "2996959115",
+    "is_quote_status": true,
+    "quoted_status_id_str": "1497997890999898115",
+    "quoted_status_permalink":
+    {
+        "url": "https://t.co/6KrfeQvaAa",
+        "expanded": "https://twitter.com/LatinxPutler/status/1497997890999898115",
+        "display": "twitter.com/LatinxPutler/s…"
+    },
+    "retweet_count": 4,
+    "favorite_count": 42,
+    "reply_count": 2,
+    "quote_count": 0,
+    "conversation_id_str": "1498002100294410241",
+    "possibly_sensitive_editable": true,
+    "card":
+    {
+        "name": "player",
+        "url": "https://t.co/xurv3zslRt",
+        "card_type_url": "http://card-type-url-is-deprecated.invalid",
+        "binding_values":
+        {
+            "vanity_url":
+            {
+                "type": "STRING",
+                "string_value": "youtube.com",
+                "scribe_key": "vanity_url"
+            },
+            "player_url":
+            {
+                "type": "STRING",
+                "string_value": "https://www.youtube.com/embed/VjrlTMvirVo"
+            },
+            "app_is_free":
+            {
+                "type": "STRING",
+                "string_value": "true"
+            },
+            "app_price_currency":
+            {
+                "type": "STRING",
+                "string_value": "USD"
+            },
+            "app_price_amount":
+            {
+                "type": "STRING",
+                "string_value": "0.0"
+            },
+            "domain":
+            {
+                "type": "STRING",
+                "string_value": "www.youtube.com"
+            },
+            "app_num_ratings":
+            {
+                "type": "STRING",
+                "string_value": "24,612,724"
+            },
+            "app_star_rating":
+            {
+                "type": "STRING",
+                "string_value": "4.68268"
+            },
+            "app_name":
+            {
+                "type": "STRING",
+                "string_value": "YouTube: Watch, Listen, Stream"
+            },
+            "player_width":
+            {
+                "type": "STRING",
+                "string_value": "480"
+            },
+            "player_height":
+            {
+                "type": "STRING",
+                "string_value": "360"
+            },
+            "site":
+            {
+                "type": "USER",
+                "user_value":
+                {
+                    "id_str": "10228272",
+                    "path":
+                    []
+                },
+                "scribe_key": "publisher_id"
+            },
+            "title":
+            {
+                "type": "STRING",
+                "string_value": "Vladimir Putin Rage"
+            },
+            "description":
+            {
+                "type": "STRING",
+                "string_value": "Putin owns business men"
+            },
+            "player_image_small":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1497796040619175936/M03IKQ-W?format=jpg&name=144x144",
+                    "width": 144,
+                    "height": 108
+                }
+            },
+            "player_image":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1497796040619175936/M03IKQ-W?format=jpg&name=280x280",
+                    "width": 280,
+                    "height": 210
+                }
+            },
+            "player_image_large":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1497796040619175936/M03IKQ-W?format=jpg&name=1200x627",
+                    "width": 1200,
+                    "height": 627
+                }
+            },
+            "player_image_x_large":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1497796040619175936/M03IKQ-W?format=png&name=2048x2048_2_exp",
+                    "width": 480,
+                    "height": 360
+                }
+            },
+            "player_image_color":
+            {
+                "type": "IMAGE_COLOR",
+                "image_color_value":
+                {
+                    "palette":
+                    [
+                        {
+                            "percentage": 32.24,
+                            "rgb":
+                            {
+                                "red": 0,
+                                "green": 0,
+                                "blue": 0
+                            }
+                        },
+                        {
+                            "percentage": 26.64,
+                            "rgb":
+                            {
+                                "red": 244,
+                                "green": 238,
+                                "blue": 183
+                            }
+                        },
+                        {
+                            "percentage": 14.46,
+                            "rgb":
+                            {
+                                "red": 109,
+                                "green": 132,
+                                "blue": 150
+                            }
+                        },
+                        {
+                            "percentage": 10.73,
+                            "rgb":
+                            {
+                                "red": 176,
+                                "green": 21,
+                                "blue": 27
+                            }
+                        },
+                        {
+                            "percentage": 4.41,
+                            "rgb":
+                            {
+                                "red": 195,
+                                "green": 154,
+                                "blue": 133
+                            }
+                        }
+                    ]
+                }
+            },
+            "player_image_original":
+            {
+                "type": "IMAGE",
+                "image_value":
+                {
+                    "url": "https://pbs.twimg.com/card_img/1497796040619175936/M03IKQ-W?format=jpg&name=orig",
+                    "width": 480,
+                    "height": 360
+                }
+            },
+            "card_url":
+            {
+                "type": "STRING",
+                "string_value": "https://t.co/xurv3zslRt",
+                "scribe_key": "card_url"
+            }
+        },
+        "users":
+        {
+            "10228272":
+            {
+                "id_str": "10228272",
+                "name": "YouTube",
+                "screen_name": "YouTube",
+                "location": "San Bruno, CA",
+                "description": "like and subscribe.",
+                "url": "https://t.co/bUisN3Gqbw",
+                "entities":
+                {
+                    "url":
+                    {
+                        "urls":
+                        [
+                            {
+                                "url": "https://t.co/bUisN3Gqbw",
+                                "expanded_url": "http://youtube.com",
+                                "display_url": "youtube.com",
+                                "indices":
+                                [
+                                    0,
+                                    23
+                                ]
+                            }
+                        ]
+                    },
+                    "description":
+                    {}
+                },
+                "followers_count": 74506164,
+                "fast_followers_count": 0,
+                "normal_followers_count": 74506164,
+                "friends_count": 1207,
+                "listed_count": 79844,
+                "created_at": "Tue Nov 13 21:43:46 +0000 2007",
+                "favourites_count": 6062,
+                "verified": true,
+                "statuses_count": 42888,
+                "media_count": 13946,
+                "is_translation_enabled": true,
+                "profile_image_url_https": "https://pbs.twimg.com/profile_images/1427292844612595720/RC1YSvuT_normal.jpg",
+                "profile_banner_url": "https://pbs.twimg.com/profile_banners/10228272/1644426960",
+                "profile_image_extensions_media_availability": null,
+                "profile_image_extensions_alt_text": null,
+                "profile_image_extensions":
+                {
+                    "mediaStats":
+                    {
+                        "r":
+                        {
+                            "missing": null
+                        },
+                        "ttl": -1
+                    }
+                },
+                "profile_banner_extensions_media_availability": null,
+                "profile_banner_extensions_alt_text": null,
+                "profile_banner_extensions":
+                {
+                    "mediaStats":
+                    {
+                        "r":
+                        {
+                            "missing": null
+                        },
+                        "ttl": -1
+                    }
+                },
+                "profile_link_color": "C9191D",
+                "pinned_tweet_ids":
+                [],
+                "pinned_tweet_ids_str":
+                [],
+                "has_custom_timelines": true,
+                "advertiser_account_type": "promotable_user",
+                "advertiser_account_service_levels":
+                [
+                    "dso",
+                    "dso",
+                    "dso",
+                    "dso",
+                    "dso",
+                    "dso",
+                    "dso",
+                    "dso",
+                    "dso"
+                ],
+                "profile_interstitial_type": "",
+                "business_profile_state": "none",
+                "translator_type": "regular",
+                "withheld_in_countries":
+                [],
+                "ext":
+                {
+                    "highlightedLabel":
+                    {
+                        "r":
+                        {
+                            "ok":
+                            {}
+                        },
+                        "ttl": -1
+                    }
+                }
+            }
+        },
+        "card_platform":
+        {
+            "platform":
+            {
+                "device":
+                {
+                    "name": "Swift",
+                    "version": "12"
+                },
+                "audience":
+                {
+                    "name": "production"
+                }
+            }
+        }
+    },
+    "lang": "en",
+    "self_thread":
+    {
+        "id_str": "1498002100294410241"
+    }
+}
