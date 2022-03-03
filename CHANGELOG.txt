@@ -67,3 +67,10 @@ v0.1.3
 - Add following users
 - Add `list_followed` subcommand
 - Add support for tweets that quote-tweet something from a user who deleted their account
+
+v0.1.4
+------
+
+- BUGFIXES: Fixed some annoying bugs caused by Twitter's poor API
+	- ignore empty entries in a user feed instead of crashing
+	- quote tweets no longer include their quoted tweet as an embedded link

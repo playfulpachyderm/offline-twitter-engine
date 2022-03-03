@@ -1,17 +1,14 @@
 TODO user-images-extract-to-table:
 User profile images and banner images => extract to table.  Add `is_downloaded` column.  Add test for double-downloading a user, shouldn't change the write-times on these files
 
-TODO update-all:
-For each user in userslist.txt:
-- update user
-- download new images if necessary
-- fetch tweets since last update
+TODO update-all
+
+TODO delete users.txt, users.yaml
 
 TODO fetch-older-tweets:
 get tweets older than 3200 ago
 
 
-TODO https://twitter.com/michaelmalice/status/1461031030278742020 => "account no longer exists" tombstone
 
 TODO broadcast-cards
 panic: Unknown card type: 3691233323:periscope_broadcast
@@ -19,6 +16,8 @@ panic: Unknown card type: 745291183405076480:broadcast
 
 TODO consecutive-tombstones
 Conversation threads with two or more consecutive tombstones don't get scraped correctly
+- e.g.: https://twitter.com/hatecoleslaw/status/1429584549701357568
+- Hard mode: https://twitter.com/masforshort/status/1482000048447705090
 
 Video size reduction:
 - add "bitrate" and "available bitrates" fields
@@ -28,11 +27,15 @@ TODO tombstone updating:
 - "Tweet is unavailable" tombstones are not always accurate.  In user feed, they show as "not available" but the real reason is "deleted" etc; should update the tombstone type when fetching the conversation view
 - tweet-to-stub: If a tweet is deleted after getting a non-stub version, should still show a tombstone (or a modified one at least)
 - stub-to-tweet: If a user un-privates after getting a stub-version (or tweet becomes available for other reasons), stub versions should write the real content and "stub" status should be removed
+- "Account owner limits who can view these tweets" tombstone: https://twitter.com/michaelmalice/status/1479540552081326085
+
+TODO https://twitter.com/michaelmalice/status/1461031030278742020 => tombstone should say "account no longer exists" but it says "Tweet is unavailable"
 
 TODO: Problem tweets
 - https://twitter.com/TyCardon/status/1480640777281839106: "Media has been disabled in response to report by copyright owner"
 - https://twitter.com/CovfefeAnon/status/1427693931047837702: parent thread not loading (possible GUI problem)
 - "account no longer exists" tombstone not being collected
+- tweet with warning label not getting scraped right: https://twitter.com/michaelmalice/status/1493324611999748098
 
 TODO: videos-view-count
 - videos don't parse properly in APIv2
@@ -41,3 +44,6 @@ TODO: APIv2-pinned-tweets
 - feed with pinned tweet
 
 TODO video-not-downloading: https://twitter.com/JustinPulitzer/status/1496709662602932224
+
+TODO sqlx
+- https://github.com/jmoiron/sqlx
