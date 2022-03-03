@@ -8,7 +8,7 @@ import (
 )
 
 
-const ENGINE_DATABASE_VERSION = 10
+const ENGINE_DATABASE_VERSION = 11
 
 
 type VersionMismatchError struct {
@@ -65,6 +65,7 @@ var MIGRATIONS = []string{
 `create table fake_user_sequence(latest_fake_id integer not null);
 	insert into fake_user_sequence values(0x4000000000000000);
 	alter table users add column is_id_fake boolean default 0;`,
+`delete from urls where rowid in (select urls.rowid from tweets join urls on tweets.id = urls.tweet_id where urls.text like 'https://twitter.com/%/status/' || tweets.quoted_tweet_id || "%")`,
 }
 
 /**
