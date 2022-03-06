@@ -6,6 +6,9 @@ import (
 	"path"
 	"errors"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"offline_twitter/persistence"
 )
 
@@ -33,24 +36,20 @@ func isdir_map(is_dir bool) string {
  * Should refuse to create a Profile if the target already exists (i.e., is a file or directory).
  */
 func TestNewProfileInvalidPath(t *testing.T) {
+	require := require.New(t)
 	gibberish_path := "test_profiles/fjlwrefuvaaw23efwm"
 	if file_exists(gibberish_path) {
 		err := os.RemoveAll(gibberish_path)
-		if err != nil {
-			panic(err)
-		}
+		require.NoError(err)
 	}
 	err := os.Mkdir(gibberish_path, 0755)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(err)
+
 	_, err = persistence.NewProfile(gibberish_path)
-	if err == nil {
-		t.Errorf("Should have failed to create a profile in an already existing directory!")
-	}
-	if _, is_right_type := err.(persistence.ErrTargetAlreadyExists); !is_right_type {
-		t.Errorf("Expected 'ErrTargetAlreadyExists' error, got %T instead", err)
-	}
+	require.Error(err, "Should have failed to create a profile in an already existing directory!")
+
+	_, is_right_type := err.(persistence.ErrTargetAlreadyExists)
+	assert.True(t, is_right_type, "Expected 'ErrTargetAlreadyExists' error, got %T instead", err)
 }
 
 
@@ -58,34 +57,27 @@ func TestNewProfileInvalidPath(t *testing.T) {
  * Should correctly create a new Profile
  */
 func TestNewProfile(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
 	profile_path := "test_profiles/TestNewProfile"
 	if file_exists(profile_path) {
 		err := os.RemoveAll(profile_path)
-		if err != nil {
-			panic(err)
-		}
+		require.NoError(err)
 	}
 
 	profile, err := persistence.NewProfile(profile_path)
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
+	require.NoError(err)
 
-	if profile.ProfileDir != profile_path {
-		t.Errorf("ProfileDir should be %s, but it is %s", profile_path, profile.ProfileDir)
-	}
+	assert.Equal(profile_path,profile.ProfileDir)
 	if len(profile.UsersList) != 0 {
 		t.Errorf("Expected empty users list, got %v instead", profile.UsersList)
 	}
 
 	// Check files were created
 	contents, err := os.ReadDir(profile_path)
-	if err != nil {
-		panic(err)
-	}
-	if len(contents) != 8 {
-		t.Fatalf("Expected 8 contents, got %d instead", len(contents))
-	}
+	require.NoError(err)
+	assert.Len(contents, 8)
 
 	expected_files := []struct {
 		filename string
@@ -102,19 +94,14 @@ func TestNewProfile(t *testing.T) {
 	}
 
 	for i, v := range expected_files {
-		if contents[i].Name() != v.filename || contents[i].IsDir() != v.isDir {
-			t.Fatalf("Expected `%s` to be a %s, but got %s [%s]", v.filename, isdir_map(v.isDir), contents[i].Name(), isdir_map(contents[i].IsDir()))
-		}
+		assert.Equal(v.filename, contents[i].Name())
+		assert.Equal(v.isDir, contents[i].IsDir())
 	}
 
 	// Check database version is initialized
 	version, err := profile.GetDatabaseVersion()
-	if err != nil {
-		panic(err)
-	}
-	if version != persistence.ENGINE_DATABASE_VERSION {
-		t.Errorf("Expected database version %d, but got %d", persistence.ENGINE_DATABASE_VERSION, version)
-	}
+	require.NoError(err)
+	assert.Equal(persistence.ENGINE_DATABASE_VERSION, version)
 }
 
 
@@ -122,38 +109,25 @@ func TestNewProfile(t *testing.T) {
  * Should correctly load the Profile
  */
 func TestLoadProfile(t *testing.T) {
+	require := require.New(t)
+
 	profile_path := "test_profiles/TestLoadProfile"
 	if file_exists(profile_path) {
 		err := os.RemoveAll(profile_path)
-		if err != nil {
-			panic(err)
-		}
+		require.NoError(err)
 	}
 
 	_, err := persistence.NewProfile(profile_path)
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
+	require.NoError(err)
 
 	// Create some users
 	err = os.WriteFile(path.Join(profile_path, "users.yaml"), []byte("- user: user1\n- user: user2\n"), 0644)
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
+	require.NoError(err)
 
 	profile, err := persistence.LoadProfile(profile_path)
-	if err != nil {
-		t.Fatalf(err.Error())
-	}
+	require.NoError(err)
 
-	if profile.ProfileDir != profile_path {
-		t.Errorf("Expected profile path to be %q, but got %q", profile_path, profile.ProfileDir)
-	}
-
-	if len(profile.UsersList) != 2 {
-		t.Errorf("Expected 2 users, got %v", profile.UsersList)
-	}
-	if profile.UsersList[0].Handle != "user1" {
-		t.Errorf("Expected first user to be %s, got %s", "user1", profile.UsersList[0].Handle)
-	}
+	assert.Equal(t, profile_path, profile.ProfileDir)
+	assert.Len(profile.UsersList, 2)
+	assert.Equal("user1", profile.UsersList[0].Handle)
 }

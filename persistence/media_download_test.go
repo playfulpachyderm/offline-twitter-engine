@@ -3,6 +3,9 @@ package persistence_test
 import (
     "testing"
 
+    "github.com/stretchr/testify/assert"
+    "github.com/stretchr/testify/require"
+
     "offline_twitter/scraper"
 )
 
@@ -15,12 +18,8 @@ func test_all_downloaded(tweet scraper.Tweet, yes_or_no bool, t *testing.T) {
         false: "Expected not to be downloaded, but it was",
     }[yes_or_no]
 
-    if len(tweet.Images) != 2 {
-        t.Errorf("Expected %d images, got %d", 2, len(tweet.Images))
-    }
-    if len(tweet.Videos) != 1 {
-        t.Errorf("Expected %d videos, got %d", 1, len(tweet.Videos))
-    }
+    assert.Len(t, tweet.Images, 2)
+    assert.Len(t, tweet.Videos, 1)
     for _, img := range tweet.Images {
         if img.IsDownloaded != yes_or_no {
             t.Errorf("%s: ImageID %d", error_msg, img.ID)
@@ -47,27 +46,21 @@ func TestDownloadTweetContent(t *testing.T) {
 
     // Persist the tweet
     err := profile.SaveTweet(tweet)
-    if err != nil {
-        t.Fatalf("Failed to save the tweet: %s", err.Error())
-    }
+    require.NoError(t, err)
 
     // Make sure everything is marked "not downloaded"
     test_all_downloaded(tweet, false, t)
 
     // Do the (fake) downloading
     err = profile.DownloadTweetContentWithInjector(&tweet, FakeDownloader{})
-    if err != nil {
-        t.Fatalf("Error running fake download: %s", err.Error())
-    }
+    require.NoError(t, err)
 
     // It should all be marked "yes downloaded" now
     test_all_downloaded(tweet, true, t)
 
     // Reload the Tweet (check db); should also be "yes downloaded"
     new_tweet, err := profile.GetTweetById(tweet.ID)
-    if err != nil {
-        t.Fatalf("Couldn't reload the Tweet: %s", err.Error())
-    }
+    require.NoError(t, err)
     test_all_downloaded(new_tweet, true, t)
 }
 
@@ -75,6 +68,7 @@ func TestDownloadTweetContent(t *testing.T) {
  * Downloading a User's contents should mark the User as downloaded
  */
 func TestDownloadUserContent(t *testing.T) {
+    assert := assert.New(t)
     profile_path := "test_profiles/TestMediaQueries"
     profile := create_or_load_profile(profile_path)
 
@@ -82,31 +76,20 @@ func TestDownloadUserContent(t *testing.T) {
 
     // Persist the User
     err := profile.SaveUser(&user)
-    if err != nil {
-        t.Fatalf("Failed to save the user: %s", err.Error())
-    }
+    require.NoError(t, err)
 
     // Make sure the User is marked "not downloaded"
-    if user.IsContentDownloaded {
-        t.Errorf("User shouldn't be marked downloaded, but it was")
-    }
+    assert.False(user.IsContentDownloaded)
 
     // Do the (fake) downloading
     err = profile.DownloadUserContentWithInjector(&user, FakeDownloader{})
-    if err != nil {
-        t.Fatalf("Error running fake download: %s", err.Error())
-    }
+    require.NoError(t, err)
 
     // The User should now be marked "yes downloaded"
-    if !user.IsContentDownloaded {
-        t.Errorf("User should be marked downloaded, but it wasn't")
-    }
+    assert.True(user.IsContentDownloaded)
 
     // Reload the User (check db); should also be "yes downloaded"
     new_user, err := profile.GetUserByID(user.ID)
-    if err != nil {
-        t.Fatalf("Couldn't reload the User: %s", err.Error())
-    }
-    if !new_user.IsContentDownloaded {
-        t.Errorf("User should be marked downloaded, but it wasn't")
-    }}
+    require.NoError(t, err)
+    assert.True(new_user.IsContentDownloaded)
+}

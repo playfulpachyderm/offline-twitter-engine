@@ -19,6 +19,7 @@ import (
  * Create a user, save it, reload it, and make sure it comes back the same
  */
 func TestSaveAndLoadUser(t *testing.T) {
+	require := require.New(t)
 	profile_path := "test_profiles/TestUserQueries"
 	profile := create_or_load_profile(profile_path)
 
@@ -26,13 +27,10 @@ func TestSaveAndLoadUser(t *testing.T) {
 
 	// Save the user, then reload it and ensure it's the same
 	err := profile.SaveUser(&fake_user)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(err)
+
 	new_fake_user, err := profile.GetUserByID(fake_user.ID)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(err)
 
 	if diff := deep.Equal(new_fake_user, fake_user); diff != nil {
 		t.Error(diff)
@@ -40,9 +38,7 @@ func TestSaveAndLoadUser(t *testing.T) {
 
 	// Same thing, but get by handle
 	new_fake_user2, err := profile.GetUserByHandle(fake_user.Handle)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(err)
 
 	if diff := deep.Equal(new_fake_user2, fake_user); diff != nil {
 		t.Error(diff)
@@ -53,6 +49,9 @@ func TestSaveAndLoadUser(t *testing.T) {
  *
  */
 func TestModifyUser(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
 	profile_path := "test_profiles/TestUserQueries"
 	profile := create_or_load_profile(profile_path)
 
@@ -69,9 +68,7 @@ func TestModifyUser(t *testing.T) {
 
 	// Save the user so it can be modified
 	err := profile.SaveUser(&fake_user)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(err)
 
 
 	fake_user.DisplayName = "Display Name 2"
@@ -86,42 +83,21 @@ func TestModifyUser(t *testing.T) {
 
 	// Save the modified user
 	err = profile.SaveUser(&fake_user)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(err)
+
 	// Reload the modified user
 	new_fake_user, err := profile.GetUserByID(fake_user.ID)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(err)
 
-	if new_fake_user.DisplayName != "Display Name 2" {
-		t.Errorf("Expected display name %q, got %q", "Display Name 2", new_fake_user.DisplayName)
-	}
-	if new_fake_user.Location != "location2" {
-		t.Errorf("Expected location %q, got %q", "location2", new_fake_user.Location)
-	}
-	if new_fake_user.IsPrivate != true {
-		t.Errorf("Should be private")
-	}
-	if new_fake_user.IsVerified != true {
-		t.Errorf("Should be verified")
-	}
-	if new_fake_user.IsBanned != true {
-		t.Errorf("Should be banned")
-	}
-	if new_fake_user.FollowersCount != 2000 {
-		t.Errorf("Expected %d followers, got %d", 2000, new_fake_user.FollowersCount)
-	}
-	if new_fake_user.JoinDate.Unix() != 1000 {
-		t.Errorf("Expected unchanged join date (%d), got %d", 1000, new_fake_user.JoinDate.Unix())
-	}
-	if new_fake_user.ProfileImageUrl != "asdf2" {
-		t.Errorf("Expected profile image url to be %q, got %q", "asdf2", new_fake_user.ProfileImageUrl)
-	}
-	if new_fake_user.IsContentDownloaded != true {
-		t.Errorf("Expected content to be downloaded (no-worsening)")
-	}
+	assert.Equal("Display Name 2", new_fake_user.DisplayName)
+	assert.Equal("location2", new_fake_user.Location)
+	assert.True(new_fake_user.IsPrivate)
+	assert.True(new_fake_user.IsVerified)
+	assert.True(new_fake_user.IsBanned)
+	assert.Equal(2000, new_fake_user.FollowersCount)
+	assert.Equal(int64(1000), new_fake_user.JoinDate.Unix())
+	assert.Equal("asdf2", new_fake_user.ProfileImageUrl)
+	assert.True(new_fake_user.IsContentDownloaded)
 }
 
 func TestHandleIsCaseInsensitive(t *testing.T) {
@@ -131,9 +107,7 @@ func TestHandleIsCaseInsensitive(t *testing.T) {
 	user := create_stable_user()
 
 	new_user, err := profile.GetUserByHandle("hANdle StaBlE")
-	if err != nil {
-		t.Fatalf("Couldn't find the user: %s", err.Error())
-	}
+	require.NoError(t, err, "Couldn't find the user")
 
 	if diff := deep.Equal(user, new_user); diff != nil {
 		t.Error(diff)
@@ -145,72 +119,58 @@ func TestHandleIsCaseInsensitive(t *testing.T) {
  * Should correctly report whether the user exists in the database
  */
 func TestUserExists(t *testing.T) {
+	require := require.New(t)
 	profile_path := "test_profiles/TestUserQueries"
 	profile := create_or_load_profile(profile_path)
 
 	user := create_dummy_user()
 
 	exists := profile.UserExists(user.Handle)
-	if exists {
-		t.Errorf("It shouldn't exist, but it does: %d", user.ID)
-	}
+	require.False(exists)
+
 	err := profile.SaveUser(&user)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(err)
+
 	exists = profile.UserExists(user.Handle)
-	if !exists {
-		t.Errorf("It should exist, but it doesn't: %d", user.ID)
-	}
+	require.True(exists)
 }
 
 /**
  * Test scenarios relating to user content downloading
  */
 func TestCheckUserContentDownloadNeeded(t *testing.T) {
+	assert := assert.New(t)
 	profile_path := "test_profiles/TestUserQueries"
 	profile := create_or_load_profile(profile_path)
 
 	user := create_dummy_user()
 
 	// If user is not in database, should be "yes" automatically
-	if profile.CheckUserContentDownloadNeeded(user) != true {
-		t.Errorf("Non-saved user should always require content download")
-	}
+	assert.True(profile.CheckUserContentDownloadNeeded(user))
 
 	// Save the user, but `is_content_downloaded` is still "false"
 	user.BannerImageUrl = "banner url1"
 	user.ProfileImageUrl = "profile url1"
 	user.IsContentDownloaded = false
 	err := profile.SaveUser(&user)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// If is_content_downloaded is false, then it needs download
-	if profile.CheckUserContentDownloadNeeded(user) != true {
-		t.Errorf("Non-downloaded user should require download")
-	}
+	assert.True(profile.CheckUserContentDownloadNeeded(user))
 
 	// Mark `is_content_downloaded` as "true" again
 	user.IsContentDownloaded = true
 	err = profile.SaveUser(&user)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	// If everything is up to date, no download should be required
-	if profile.CheckUserContentDownloadNeeded(user) != false {
-		t.Errorf("Up-to-date user shouldn't need a download")
-	}
+	assert.False(profile.CheckUserContentDownloadNeeded(user))
 
 	// Change an URL, but don't save it-- needs to be different from what's in the DB
 	user.BannerImageUrl = "banner url2"
 
 	// Download needed for new banner image
-	if profile.CheckUserContentDownloadNeeded(user) != true {
-		t.Errorf("If banner image changed, user should require another download")
-	}
+	assert.True(profile.CheckUserContentDownloadNeeded(user))
 }
 
 /**

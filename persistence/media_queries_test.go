@@ -6,6 +6,7 @@ import (
     "time"
 
     "github.com/go-test/deep"
+    "github.com/stretchr/testify/require"
 
     "offline_twitter/scraper"
 )
@@ -15,6 +16,7 @@ import (
  * Create an Image, save it, reload it, and make sure it comes back the same
  */
 func TestSaveAndLoadImage(t *testing.T) {
+    require := require.New(t)
     profile_path := "test_profiles/TestMediaQueries"
     profile := create_or_load_profile(profile_path)
 
@@ -27,15 +29,11 @@ func TestSaveAndLoadImage(t *testing.T) {
 
     // Save the Image
     err := profile.SaveImage(img)
-    if err != nil {
-        t.Fatalf("Failed to save the image: %s", err.Error())
-    }
+    require.NoError(err)
 
     // Reload the Image
     imgs, err := profile.GetImagesForTweet(tweet)
-    if err != nil {
-        t.Fatalf("Could not load images: %s", err.Error())
-    }
+    require.NoError(err)
 
     var new_img scraper.Image
     for index := range imgs {
@@ -43,9 +41,7 @@ func TestSaveAndLoadImage(t *testing.T) {
             new_img = imgs[index]
         }
     }
-    if new_img.ID != img.ID {
-        t.Fatalf("Could not find image for some reason: %d, %d; %+v", new_img.ID, img.ID, imgs)
-    }
+    require.Equal(img.ID, new_img.ID, "Could not find image for some reason")
     if diff := deep.Equal(img, new_img); diff != nil {
         t.Error(diff)
     }
@@ -55,33 +51,27 @@ func TestSaveAndLoadImage(t *testing.T) {
  * Change an Image, save the changes, reload it, and check if it comes back the same
  */
 func TestModifyImage(t *testing.T) {
+    require := require.New(t)
     profile_path := "test_profiles/TestMediaQueries"
     profile := create_or_load_profile(profile_path)
 
     tweet := create_stable_tweet()
     img := tweet.Images[0]
 
-    if img.ID != -1 {
-        t.Fatalf("Got the wrong image back: wanted ID %d, got %d", -1, img.ID)
-    }
+    require.Equal(scraper.ImageID(-1), img.ID, "Got the wrong image back")
 
     img.IsDownloaded = true
 
     // Save the changes
     err := profile.SaveImage(img)
-    if err != nil {
-        t.Error(err)
-    }
+    require.NoError(err)
 
     // Reload it
     imgs, err := profile.GetImagesForTweet(tweet)
-    if err != nil {
-        t.Fatalf("Could not load images: %s", err.Error())
-    }
+    require.NoError(err)
+
     new_img := imgs[0]
-    if new_img.ID != img.ID {
-        t.Fatalf("Got the wrong image back: wanted ID %d, got %d", -1, new_img.ID)
-    }
+    require.Equal(imgs[0], new_img, "Got the wrong image back")
 
     if diff := deep.Equal(img, new_img); diff != nil {
         t.Error(diff)
@@ -93,6 +83,7 @@ func TestModifyImage(t *testing.T) {
  * Create an Video, save it, reload it, and make sure it comes back the same
  */
 func TestSaveAndLoadVideo(t *testing.T) {
+    require := require.New(t)
     profile_path := "test_profiles/TestMediaQueries"
     profile := create_or_load_profile(profile_path)
 
@@ -106,15 +97,11 @@ func TestSaveAndLoadVideo(t *testing.T) {
 
     // Save the Video
     err := profile.SaveVideo(vid)
-    if err != nil {
-        t.Fatalf("Failed to save the video: %s", err.Error())
-    }
+    require.NoError(err)
 
     // Reload the Video
     vids, err := profile.GetVideosForTweet(tweet)
-    if err != nil {
-        t.Fatalf("Could not load videos: %s", err.Error())
-    }
+    require.NoError(err)
 
     var new_vid scraper.Video
     for index := range vids {
@@ -122,9 +109,8 @@ func TestSaveAndLoadVideo(t *testing.T) {
             new_vid = vids[index]
         }
     }
-    if new_vid.ID != vid.ID {
-        t.Fatalf("Could not find video for some reason: %d, %d; %+v", new_vid.ID, vid.ID, vids)
-    }
+    require.Equal(vid.ID, new_vid.ID, "Could not find video for some reason")
+
     if diff := deep.Equal(vid, new_vid); diff != nil {
         t.Error(diff)
     }
@@ -134,34 +120,27 @@ func TestSaveAndLoadVideo(t *testing.T) {
  * Change an Video, save the changes, reload it, and check if it comes back the same
  */
 func TestModifyVideo(t *testing.T) {
+    require := require.New(t)
     profile_path := "test_profiles/TestMediaQueries"
     profile := create_or_load_profile(profile_path)
 
     tweet := create_stable_tweet()
     vid := tweet.Videos[0]
-
-    if vid.ID != -1 {
-        t.Fatalf("Got the wrong video back: wanted ID %d, got %d", -1, vid.ID)
-    }
+    require.Equal(scraper.VideoID(-1), vid.ID, "Got the wrong video back")
 
     vid.IsDownloaded = true
     vid.ViewCount = 23000
 
     // Save the changes
     err := profile.SaveVideo(vid)
-    if err != nil {
-        t.Error(err)
-    }
+    require.NoError(err)
 
     // Reload it
     vids, err := profile.GetVideosForTweet(tweet)
-    if err != nil {
-        t.Fatalf("Could not load videos: %s", err.Error())
-    }
+    require.NoError(err)
+
     new_vid := vids[0]
-    if new_vid.ID != vid.ID {
-        t.Fatalf("Got the wrong video back: wanted ID %d, got %d", -1, new_vid.ID)
-    }
+    require.Equal(vid.ID, new_vid.ID, "Got the wrong video back")
 
     if diff := deep.Equal(vid, new_vid); diff != nil {
         t.Error(diff)
@@ -173,6 +152,7 @@ func TestModifyVideo(t *testing.T) {
  * Create an Url, save it, reload it, and make sure it comes back the same
  */
 func TestSaveAndLoadUrl(t *testing.T) {
+    require := require.New(t)
     profile_path := "test_profiles/TestMediaQueries"
     profile := create_or_load_profile(profile_path)
 
@@ -185,15 +165,11 @@ func TestSaveAndLoadUrl(t *testing.T) {
 
     // Save the Url
     err := profile.SaveUrl(url)
-    if err != nil {
-        t.Fatalf("Failed to save the url: %s", err.Error())
-    }
+    require.NoError(err)
 
     // Reload the Url
     urls, err := profile.GetUrlsForTweet(tweet)
-    if err != nil {
-        t.Fatalf("Could not load urls: %s", err.Error())
-    }
+    require.NoError(err)
 
     var new_url scraper.Url
     for index := range urls {
@@ -201,9 +177,8 @@ func TestSaveAndLoadUrl(t *testing.T) {
             new_url = urls[index]
         }
     }
-    if new_url.Text != url.Text {
-        t.Fatalf("Could not find url for some reason: %s, %s; %+v", new_url.Text, url.Text, urls)
-    }
+    require.Equal(url.Text, new_url.Text, "Could not find the url for some reason")
+
     if diff := deep.Equal(url, new_url); diff != nil {
         t.Error(diff)
     }
@@ -213,33 +188,27 @@ func TestSaveAndLoadUrl(t *testing.T) {
  * Change an Url, save the changes, reload it, and check if it comes back the same
  */
 func TestModifyUrl(t *testing.T) {
+    require := require.New(t)
     profile_path := "test_profiles/TestMediaQueries"
     profile := create_or_load_profile(profile_path)
 
     tweet := create_stable_tweet()
     url := tweet.Urls[0]
 
-    if url.Text != "-1text" {
-        t.Fatalf("Got the wrong url back: wanted %s, got %s!", "-1text", url.Text)
-    }
+    require.Equal("-1text", url.Text, "Got the wrong url back")
 
     url.IsContentDownloaded = true
 
     // Save the changes
     err := profile.SaveUrl(url)
-    if err != nil {
-        t.Error(err)
-    }
+    require.NoError(err)
 
     // Reload it
     urls, err := profile.GetUrlsForTweet(tweet)
-    if err != nil {
-        t.Fatalf("Could not load urls: %s", err.Error())
-    }
+    require.NoError(err)
+
     new_url := urls[0]
-    if new_url.Text != "-1text" {
-        t.Fatalf("Got the wrong url back: wanted %s, got %s!", "-1text", new_url.Text)
-    }
+    require.Equal("-1text", url.Text, "Got the wrong url back")
 
     if diff := deep.Equal(url, new_url); diff != nil {
         t.Error(diff)
@@ -251,6 +220,7 @@ func TestModifyUrl(t *testing.T) {
  * Create a Poll, save it, reload it, and make sure it comes back the same
  */
 func TestSaveAndLoadPoll(t *testing.T) {
+    require := require.New(t)
     profile_path := "test_profiles/TestMediaQueries"
     profile := create_or_load_profile(profile_path)
 
@@ -261,15 +231,11 @@ func TestSaveAndLoadPoll(t *testing.T) {
 
     // Save the Poll
     err := profile.SavePoll(poll)
-    if err != nil {
-        t.Fatalf("Failed to save the poll: %s", err.Error())
-    }
+    require.NoError(err)
 
     // Reload the Poll
     polls, err := profile.GetPollsForTweet(tweet)
-    if err != nil {
-        t.Fatalf("Could not load poll: %s", err.Error())
-    }
+    require.NoError(err)
 
     var new_poll scraper.Poll
     for index := range polls {
@@ -277,9 +243,8 @@ func TestSaveAndLoadPoll(t *testing.T) {
             new_poll = polls[index]
         }
     }
-    if new_poll.ID != poll.ID {
-        t.Fatalf("Could not find poll for some reason: %d, %d; %+v", new_poll.ID, poll.ID, polls)
-    }
+    require.Equal(poll.ID, new_poll.ID, "Could not find poll for some reason")
+
     if diff := deep.Equal(poll, new_poll); diff != nil {
         t.Error(diff)
     }
@@ -289,33 +254,27 @@ func TestSaveAndLoadPoll(t *testing.T) {
  * Change an Poll, save the changes, reload it, and check if it comes back the same
  */
 func TestModifyPoll(t *testing.T) {
+    require := require.New(t)
     profile_path := "test_profiles/TestMediaQueries"
     profile := create_or_load_profile(profile_path)
 
     tweet := create_stable_tweet()
     poll := tweet.Polls[0]
 
-    if poll.Choice1 != "-1" {
-        t.Fatalf("Got the wrong Poll back: wanted %q, got %q", "-1", poll.Choice1)
-    }
+    require.Equal("-1", poll.Choice1, "Got the wrong Poll back")
 
     poll.Choice1_Votes = 1200  // Increment it by 200 votes
 
     // Save the changes
     err := profile.SavePoll(poll)
-    if err != nil {
-        t.Error(err)
-    }
+    require.NoError(err)
 
     // Reload it
     polls, err := profile.GetPollsForTweet(tweet)
-    if err != nil {
-        t.Fatalf("Could not load polls: %s", err.Error())
-    }
+    require.NoError(err)
+
     new_poll := polls[0]
-    if new_poll.Choice1 != "-1" {
-        t.Fatalf("Got the wrong poll back: wanted %s, got %s!", "-1", new_poll.Choice1)
-    }
+    require.Equal("-1", new_poll.Choice1, "Got the wrong poll back")
 
     if diff := deep.Equal(poll, new_poll); diff != nil {
         t.Error(diff)
