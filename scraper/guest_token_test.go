@@ -24,6 +24,6 @@ func TestGetGuestToken(t *testing.T) {
 // other than the first use the cache.
 func BenchmarkGetGuestToken(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, _ = GetGuestToken()
+		GetGuestToken()  // nolint:errcheck
 	}
 }

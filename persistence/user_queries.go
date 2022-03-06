@@ -30,7 +30,9 @@ func (p Profile) SaveUser(u *scraper.User) error {
     }
 
     _, err := p.DB.Exec(`
-        insert into users (id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified, is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path, pinned_tweet_id, is_content_downloaded, is_id_fake)
+        insert into users (id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private,
+                           is_verified, is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path,
+                           pinned_tweet_id, is_content_downloaded, is_id_fake)
         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             on conflict do update
            set bio=?,
@@ -49,8 +51,12 @@ func (p Profile) SaveUser(u *scraper.User) error {
                pinned_tweet_id=?,
                is_content_downloaded=(is_content_downloaded or ?)
         `,
-        u.ID, u.DisplayName, u.Handle, u.Bio, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.JoinDate.Unix(), u.IsPrivate, u.IsVerified, u.IsBanned, u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID, u.IsContentDownloaded, u.IsIdFake,
-        u.Bio, u.DisplayName, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.IsPrivate, u.IsVerified, u.IsBanned, u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID, u.IsContentDownloaded,
+        u.ID, u.DisplayName, u.Handle, u.Bio, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.JoinDate, u.IsPrivate,
+        u.IsVerified, u.IsBanned, u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID,
+        u.IsContentDownloaded, u.IsIdFake,
+
+        u.Bio, u.DisplayName, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.IsPrivate, u.IsVerified, u.IsBanned,
+        u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID, u.IsContentDownloaded,
     )
     if err != nil {
         return err

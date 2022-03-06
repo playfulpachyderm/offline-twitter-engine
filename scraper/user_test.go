@@ -31,7 +31,8 @@ func TestParseSingleUser(t *testing.T) {
 	assert.Equal(UserID(44067298), user.ID)
 	assert.Equal("Michael Malice", user.DisplayName)
 	assert.Equal(UserHandle("michaelmalice"), user.Handle)
-	assert.Equal("Author of Dear Reader, The New Right & The Anarchist Handbook\nHost of \"YOUR WELCOME\" \nSubject of Ego & Hubris by Harvey Pekar\nUnderwear Model\nHe/Him ⚑", user.Bio)
+	assert.Equal("Author of Dear Reader, The New Right & The Anarchist Handbook\nHost of \"YOUR WELCOME\" \nSubject of Ego & Hubris by " +
+		"Harvey Pekar\nUnderwear Model\nHe/Him ⚑", user.Bio)
 	assert.Equal(941, user.FollowingCount)
 	assert.Equal(208589, user.FollowersCount)
 	assert.Equal("Brooklyn", user.Location)

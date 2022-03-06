@@ -24,13 +24,6 @@ func file_exists(path string) bool {
 	}
 }
 
-func isdir_map(is_dir bool) string {
-	if is_dir {
-		return "directory"
-	}
-	return "file"
-}
-
 
 /**
  * Should refuse to create a Profile if the target already exists (i.e., is a file or directory).

@@ -14,7 +14,8 @@ func TestWrapParagraph(t *testing.T) {
         Expected []string
     } {
         {
-            "These are public health officials who are making decisions about your lifestyle because they know more about health, fitness and well-being than you do",
+            "These are public health officials who are making decisions about your lifestyle because they know more about health, " +
+                "fitness and well-being than you do",
             []string{
                 "These are public health officials who are making decisions",
                 "about your lifestyle because they know more about health,",
@@ -49,7 +50,8 @@ func TestWrapText(t *testing.T) {
         Expected string
     } {
         {
-            "These are public health officials who are making decisions about your lifestyle because they know more about health, fitness and well-being than you do",
+            "These are public health officials who are making decisions about your lifestyle because they know more about health, " +
+                "fitness and well-being than you do",
 `These are public health officials who are making decisions
     about your lifestyle because they know more about health,
     fitness and well-being than you do`,

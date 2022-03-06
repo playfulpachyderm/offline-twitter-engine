@@ -34,7 +34,8 @@ func TestAPIV2ParseUser(t *testing.T) {
 	assert.Equal(user.ID, UserID(44067298))
 	assert.Equal(user.DisplayName, "Michael Malice")
 	assert.Equal(user.Handle, UserHandle("michaelmalice"))
-	assert.Equal(user.Bio, "Author of Dear Reader, The New Right & The Anarchist Handbook\nHost of \"YOUR WELCOME\" \nSubject of Ego & Hubris by Harvey Pekar\nHe/Him ⚑\n@SheathUnderwear Model")
+	assert.Equal(user.Bio, "Author of Dear Reader, The New Right & The Anarchist Handbook\nHost of \"YOUR WELCOME\" \nSubject of Ego & " +
+		"Hubris by Harvey Pekar\nHe/Him ⚑\n@SheathUnderwear Model")
 	assert.Equal(user.FollowingCount, 964)
 	assert.Equal(user.FollowersCount, 334571)
 	assert.Equal(user.Location, "Austin")
@@ -69,7 +70,8 @@ func TestAPIV2ParseTweet(t *testing.T) {
 	assert.True(ok)
 	assert.Equal(tweet.ID, TweetID(1485708879174508550))
 	assert.Equal(tweet.UserID, UserID(44067298))
-	assert.Equal(tweet.Text, "If Boris Johnson is driven out of office, it wouldn't mark the first time the Tories had four PMs in a row\nThey had previously governed the UK for 13 years with 4 PMs, from 1951-1964")
+	assert.Equal(tweet.Text, "If Boris Johnson is driven out of office, it wouldn't mark the first time the Tories had four PMs in a " +
+		"row\nThey had previously governed the UK for 13 years with 4 PMs, from 1951-1964")
 	assert.Equal(tweet.PostedAt.Unix(), int64(1643055574))
 	assert.Equal(tweet.QuotedTweetID, TweetID(0))
 	assert.Equal(tweet.InReplyToID, TweetID(0))
@@ -131,7 +133,8 @@ func TestAPIV2ParseTweetWithQuotedTweet(t *testing.T) {
 	assert.True(ok)
 	assert.Equal(TweetID(1485690410899021826), quote_tweet.ID)
 	assert.Equal(TweetID(1485690069079846915), quote_tweet.QuotedTweetID)
-	assert.Equal("Hatred is powerless in and of itself despite all the agitprop to the contrary\nHatred didnt stop Trump's election, for example", quote_tweet.Text)
+	assert.Equal("Hatred is powerless in and of itself despite all the agitprop to the contrary\nHatred didnt stop Trump's election, " +
+		"for example", quote_tweet.Text)
 
 	// Should be 2 users: quoter and quoted
 	assert.Equal(2, len(trove.Users))
@@ -323,7 +326,8 @@ func TestAPIV2ParseTweetWithURL(t *testing.T) {
 	assert.Equal(1, len(trove.Tweets))
 	tweet, ok := trove.Tweets[1485695695025803264]
 	assert.True(ok)
-	assert.Equal("This led to what I discussed as \"anguish signaling,\" where progs competed in proclaiming their distress both to show they were the Good Guys but also to get the pack to regroup, akin to wolves howling.", tweet.Text)
+	assert.Equal("This led to what I discussed as \"anguish signaling,\" where progs competed in proclaiming their distress both to " +
+		"show they were the Good Guys but also to get the pack to regroup, akin to wolves howling.", tweet.Text)
 
 	assert.Equal(1, len(tweet.Urls))
 	url := tweet.Urls[0]
@@ -331,7 +335,8 @@ func TestAPIV2ParseTweetWithURL(t *testing.T) {
 	assert.Equal("observer.com", url.Domain)
 	assert.Equal("Why Evangelical Progressives Need to Demonstrate Anguish Publicly", url.Title)
 	assert.Equal("https://observer.com/2016/12/why-evangelical-progressives-need-to-demonstrate-anguish-publicly/", url.Text)
-	assert.Equal("The concept of “virtue signaling” gained a great deal of currency in this past year. It’s a way to demonstrate to others that one is a good person without having to do anything", url.Description)
+	assert.Equal("The concept of “virtue signaling” gained a great deal of currency in this past year. It’s a way to demonstrate to " +
+		"others that one is a good person without having to do anything", url.Description)
 	assert.Equal("https://pbs.twimg.com/card_img/1485694664640507911/WsproWyP?format=jpg&name=600x600", url.ThumbnailRemoteUrl)
 	assert.Equal(600, url.ThumbnailWidth)
 	assert.Equal(300, url.ThumbnailHeight)

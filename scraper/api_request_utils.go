@@ -182,7 +182,11 @@ func UpdateQueryCursor(req *http.Request, new_cursor string, is_tweet bool) {
 
 func (api API) GetUser(handle UserHandle) (APIUser, error) {
 	client := &http.Client{Timeout: 10 * time.Second}
-	req, err := http.NewRequest("GET", "https://api.twitter.com/graphql/4S2ihIKfF3xhp-ENxvUAfQ/UserByScreenName?variables=%7B%22screen_name%22%3A%22" + string(handle) + "%22%2C%22withHighlightedLabel%22%3Atrue%7D", nil)
+	req, err := http.NewRequest(
+		"GET",
+		"https://api.twitter.com/graphql/4S2ihIKfF3xhp-ENxvUAfQ/UserByScreenName?variables=%7B%22screen_name%22%3A%22" + string(handle) +
+			"%22%2C%22withHighlightedLabel%22%3Atrue%7D",
+		nil)
 	if err != nil {
 		return APIUser{}, err
 	}
@@ -232,7 +236,11 @@ func (api API) GetUser(handle UserHandle) (APIUser, error) {
 
 func (api API) Search(query string, cursor string) (TweetResponse, error) {
 	client := &http.Client{Timeout: 10 * time.Second}
-	req, err := http.NewRequest("GET", "https://twitter.com/i/api/2/search/adaptive.json?count=50&spelling_corrections=1&query_source=typed_query&pc=1&q=" + url.QueryEscape(query), nil)
+	req, err := http.NewRequest(
+		"GET",
+		"https://twitter.com/i/api/2/search/adaptive.json?count=50&spelling_corrections=1&query_source=typed_query&pc=1&q=" +
+			url.QueryEscape(query),
+		nil)
 	if err != nil {
 		return TweetResponse{}, err
 	}

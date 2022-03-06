@@ -35,7 +35,8 @@ This application downloads tweets from twitter and saves them in a SQLite databa
     fetch_tweet
     fetch_tweet_only
           <TARGET> is either the full URL of the tweet, or its ID.
-          If using "fetch_tweet_only", then only that specific tweet will be saved.  "fetch_tweet" will save the whole thread including replies.
+          If using "fetch_tweet_only", then only that specific tweet will be saved.  "fetch_tweet" will save the whole
+          thread including replies.
 
     download_tweet_content
           <TARGET> is either the full URL of the tweet, or its ID.

@@ -25,13 +25,20 @@ func TestNormalizeContent(t *testing.T) {
 		{"test_responses/single_tweets/tweet_that_is_a_reply_with_gif.json", "", 0, 1395882872729477131, 0, "@michaelmalice"},
 		{"test_responses/single_tweets/tweet_with_image.json", "this saddens me every time", 0, 0, 0, ""},
 		{"test_responses/single_tweets/tweet_that_is_a_reply.json", "Noted", 0, 1396194494710788100, 0, "@RvaTeddy @michaelmalice"},
-		{"test_responses/single_tweets/tweet_with_4_images.json", "These are public health officials who are making decisions about your lifestyle because they know more about health, fitness and well-being than you do", 0, 0, 0, ""},
-		{"test_responses/single_tweets/tweet_with_at_mentions_in_front.json", "It always does, doesn't it?", 0, 1428907275532476416, 0, "@rob_mose @primalpoly @jmasseypoet @SpaceX"},
-		{"test_responses/single_tweets/tweet_with_unicode_chars.json", "The fact that @michaelmalice new book ‘The Anarchist Handbook’ is just absolutely destroying on the charts is the largest white pill I’ve swallowed in years.", 0, 0, 0, ""},
+		{"test_responses/single_tweets/tweet_with_4_images.json", "These are public health officials who are making decisions about " +
+			"your lifestyle because they know more about health, fitness and well-being than you do", 0, 0, 0, ""},
+		{"test_responses/single_tweets/tweet_with_at_mentions_in_front.json", "It always does, doesn't it?", 0, 1428907275532476416, 0,
+			"@rob_mose @primalpoly @jmasseypoet @SpaceX"},
+		{"test_responses/single_tweets/tweet_with_unicode_chars.json", "The fact that @michaelmalice new book ‘The Anarchist Handbook’ " +
+			"is just absolutely destroying on the charts is the largest white pill I’ve swallowed in years.", 0, 0, 0, ""},
 		{"test_responses/single_tweets/tweet_with_quoted_tweet_as_link.json", "", 1422680899670274048, 0, 0, ""},
-		{"test_responses/single_tweets/tweet_with_quoted_tweet_as_link2.json", "sometimes they're too dimwitted to even get the wrong title right", 1396194494710788100, 1395882872729477131, 0, ""},
-		{"test_responses/single_tweets/tweet_with_quoted_tweet_as_link3.json", "I was using an analogy about creating out-groups but the Germans sure love their literalism", 1442092399358930946, 1335678942020300802, 0, ""},
-		{"test_responses/single_tweets/tweet_with_html_entities.json", "By the 1970s  the elite consensus was that \"the hunt for atomic spies\" had been a grotesque over-reaction to minor leaks that cost the lives of the Rosenbergs & ruined many innocents. Only when the USSR fell was it discovered that they & other spies had given away ALL the secrets", 0, 0, 0, ""},
+		{"test_responses/single_tweets/tweet_with_quoted_tweet_as_link2.json", "sometimes they're too dimwitted to even get the wrong " +
+			"title right", 1396194494710788100, 1395882872729477131, 0, ""},
+		{"test_responses/single_tweets/tweet_with_quoted_tweet_as_link3.json", "I was using an analogy about creating out-groups but " +
+			"the Germans sure love their literalism", 1442092399358930946, 1335678942020300802, 0, ""},
+		{"test_responses/single_tweets/tweet_with_html_entities.json", "By the 1970s  the elite consensus was that \"the hunt for " +
+			"atomic spies\" had been a grotesque over-reaction to minor leaks that cost the lives of the Rosenbergs & ruined many " +
+			"innocents. Only when the USSR fell was it discovered that they & other spies had given away ALL the secrets", 0, 0, 0, ""},
 	}
 
 	for _, v := range test_cases {
@@ -80,7 +87,8 @@ func TestGetCursor(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_resp)
 	assert.NoError(err)
 
-	assert.Equal("LBmGhsC+ibH1peAmgICjpbS0m98mgICj7a2lmd8mhsC4rbmsmN8mgMCqkbT1p+AmgsC4ucv4o+AmhoCyrf+nlt8mhMC9qfOwlt8mJQISAAA=", tweet_resp.GetCursor())
+	assert.Equal("LBmGhsC+ibH1peAmgICjpbS0m98mgICj7a2lmd8mhsC4rbmsmN8mgMCqkbT1p+AmgsC4ucv4o+AmhoCyrf+nlt8mhMC9qfOwlt8mJQISAAA=",
+		tweet_resp.GetCursor())
 }
 
 

@@ -33,7 +33,8 @@ func TestParseSingleTweet(t *testing.T) {
 	assert := assert.New(t)
 	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_unicode_chars.json")
 
-	assert.Equal("The fact that @michaelmalice new book ‘The Anarchist Handbook’ is just absolutely destroying on the charts is the largest white pill I’ve swallowed in years.", tweet.Text)
+	assert.Equal("The fact that @michaelmalice new book ‘The Anarchist Handbook’ is just absolutely destroying on the charts is the " +
+		"largest white pill I’ve swallowed in years.", tweet.Text)
 	assert.Len(tweet.Mentions, 1)
 	assert.Contains(tweet.Mentions, UserHandle("michaelmalice"))
 	assert.Empty(tweet.Urls)
@@ -72,7 +73,8 @@ func TestParseTweetWithQuotedTweetAndLink(t *testing.T) {
 	assert := assert.New(t)
 	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_quoted_tweet_and_url.json")
 
-	assert.Equal("This is video he’s talking about. Please watch. Is there a single US politician capable of doing this with the weasels and rats running American industry today?", tweet.Text)
+	assert.Equal("This is video he’s talking about. Please watch. Is there a single US politician capable of doing this with the " +
+		"weasels and rats running American industry today?", tweet.Text)
 	assert.Equal(TweetID(1497997890999898115), tweet.QuotedTweetID)
 
 	assert.Len(tweet.Urls, 1)

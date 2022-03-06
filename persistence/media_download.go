@@ -193,6 +193,7 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
 /**
  * Download a User's tiny profile image, if it hasn't been downloaded yet.
  * If it has been downloaded, do nothing.
+ * If this user should have a big profile picture, defer to the regular `DownloadUserContentFor` method.
  */
 func (p Profile) DownloadUserProfileImageTiny(u *scraper.User) error {
     if p.IsFollowing(u.Handle) {

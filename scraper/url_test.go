@@ -24,7 +24,8 @@ func TestParseAPIUrlCard(t *testing.T) {
     url := ParseAPIUrlCard(apiCard)
     assert.Equal("reason.com", url.Domain)
     assert.Equal("L.A. Teachers Union Leader: 'There's No Such Thing As Learning Loss'", url.Title)
-    assert.Equal("\"It’s OK that our babies may not have learned all their times tables,\" says Cecily Myart-Cruz. \"They learned resilience.\"", url.Description)
+    assert.Equal("\"It’s OK that our babies may not have learned all their times tables,\" says Cecily Myart-Cruz. \"They learned " +
+        "resilience.\"", url.Description)
     assert.Equal(600, url.ThumbnailWidth)
     assert.Equal(315, url.ThumbnailHeight)
     assert.Equal("https://pbs.twimg.com/card_img/1434998862305968129/odDi9EqO?format=jpg&name=600x600", url.ThumbnailRemoteUrl)
@@ -48,7 +49,8 @@ func TestParseAPIUrlCardWithPlayer(t *testing.T) {
     url := ParseAPIUrlCard(apiCard)
     assert.Equal("www.youtube.com", url.Domain)
     assert.Equal("The Politically Incorrect Guide to the Constitution (Starring Tom...", url.Title)
-    assert.Equal("Watch this episode on LBRY/Odysee: https://odysee.com/@capitalresearch:5/the-politically-incorrect-guide-to-the:8Watch this episode on Rumble: https://rumble...", url.Description)
+    assert.Equal("Watch this episode on LBRY/Odysee: https://odysee.com/@capitalresearch:5/the-politically-incorrect-guide-to-the:8" +
+        "Watch this episode on Rumble: https://rumble...", url.Description)
     assert.Equal("https://pbs.twimg.com/card_img/1437849456423194639/_1t0btyt?format=jpg&name=800x320_1", url.ThumbnailRemoteUrl)
     assert.Equal("_1t0btyt_800x320_1.jpg", url.ThumbnailLocalPath)
     assert.Equal(UserID(10228272), url.SiteID)
@@ -69,7 +71,8 @@ func TestParseAPIUrlCardWithPlayerAndPlaceholderThumbnail(t *testing.T) {
     url := ParseAPIUrlCard(apiCard)
     assert.Equal("www.youtube.com", url.Domain)
     assert.Equal("Did Michael Malice Turn Me into an Anarchist? | Ep 181", url.Title)
-    assert.Equal("SUBSCRIBE TO THE NEW SHOW W/ ELIJAH & SYDNEY: \"YOU ARE HERE\"YT: https://www.youtube.com/youareheredaily______________________________________________________...", url.Description)
+    assert.Equal("SUBSCRIBE TO THE NEW SHOW W/ ELIJAH & SYDNEY: \"YOU ARE HERE\"YT: https://www.youtube.com/youareheredaily____________" +
+        "__________________________________________...", url.Description)
     assert.Equal("https://pbs.twimg.com/cards/player-placeholder.png", url.ThumbnailRemoteUrl)
     assert.Equal("player-placeholder.png", url.ThumbnailLocalPath)
     assert.Equal(UserID(10228272), url.SiteID)
