@@ -400,7 +400,10 @@ func (api API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response, 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		content, _ := ioutil.ReadAll(resp.Body)
+		content, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
 		s := ""
 		for header := range resp.Header {
 			s += fmt.Sprintf("    %s: %s\n", header, resp.Header.Get(header))

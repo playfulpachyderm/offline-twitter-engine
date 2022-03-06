@@ -26,7 +26,7 @@ linters:
     # - wsl
     # - wrapcheck
     - lll
-    # - godox
+    - godox
     # - errorlint
 
 
@@ -97,10 +97,6 @@ linters-settings:
 #     # Exclude godoc examples from forbidigo checks.  Default is true.
 #     exclude_godoc_examples: false
 
-#   funlen:
-#     lines: 60
-#     statements: 40
-
 #   gci:
 #     # put imports beginning with prefix after 3rd-party packages;
 #     # only support one prefix
@@ -110,10 +106,6 @@ linters-settings:
 #   gocognit:
 #     # minimal code complexity to report, 30 by default (but we recommend 10-20)
 #     min-complexity: 10
-
-#   nestif:
-#     # minimal complexity of if statements to report, 5 by default
-#     min-complexity: 4
 
 #   goconst:
 #     # minimal length of string constant, 3 by default
@@ -205,11 +197,11 @@ linters-settings:
 #     # check that each sentence starts with a capital letter
 #     capital: false
 
-  # godox:
-  #   # report any comments starting with keywords, this is useful for TODO or FIXME comments that
-  #   # might be left in the code accidentally and should be resolved before merging
-  #   keywords: # default keywords are TODO, BUG, and FIXME, these can be overwritten by this setting
-  #     - XXX
+  godox:
+    # report any comments starting with keywords, this is useful for TODO or FIXME comments that
+    # might be left in the code accidentally and should be resolved before merging
+    keywords: # default keywords are TODO, BUG, and FIXME, these can be overwritten by this setting
+      - XXX
 
 #   gofmt:
 #     # simplify code: gofmt with `-s` option, true by default
@@ -329,27 +321,27 @@ linters-settings:
 #     # https://staticcheck.io/docs/options#checks
 #     checks: [ "all" ]
 
-#   govet:
-#     # report about shadowed variables
-#     check-shadowing: true
+  govet:
+    # report about shadowed variables
+    check-shadowing: true
 
-#     # settings per analyzer
-#     settings:
-#       printf: # analyzer name, run `go tool vet help` to see all analyzers
-#         funcs: # run `go tool vet help printf` to see available settings for `printf` analyzer
-#           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Infof
-#           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
-#           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
-#           - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
+    # settings per analyzer
+    # settings:
+    #   printf: # analyzer name, run `go tool vet help` to see all analyzers
+    #     funcs: # run `go tool vet help printf` to see available settings for `printf` analyzer
 
-#     # enable or disable analyzers by name
-#     # run `go tool vet help` to see all analyzers
-#     enable:
-#       - atomicalign
-#     enable-all: false
-#     disable:
-#       - shadow
-#     disable-all: false
+    # enable or disable analyzers by name
+    # run `go tool vet help` to see all analyzers
+    # enable:
+    #   - atomicalign
+    enable-all: true
+    # disable-all: false
+    disable:
+      # - shadow
+      - fieldalignment
+      - composites
+      - shadow
+
 
 #   depguard:
 #     list-type: blacklist

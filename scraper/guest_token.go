@@ -34,7 +34,10 @@ func GetGuestToken() (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		content, _ := ioutil.ReadAll(resp.Body)
+		content, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
 		return "", fmt.Errorf("HTTP %s: %s", resp.Status, content)
 	}
 

@@ -48,7 +48,10 @@ func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		content, _ := ioutil.ReadAll(resp.Body)
+		content, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
 		s := ""
 		for header := range resp.Header {
 			s += fmt.Sprintf("    %s: %s\n", header, resp.Header.Get(header))
@@ -133,7 +136,10 @@ func (api API) GetTweet(id TweetID, cursor string) (TweetResponse, error) {
 	defer resp.Body.Close()
 
 	if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusForbidden) {
-		content, _ := ioutil.ReadAll(resp.Body)
+		content, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
 		return TweetResponse{}, fmt.Errorf("Error getting %q.  HTTP %s: %s", req.URL, resp.Status, content)
 	}
 
@@ -206,7 +212,10 @@ func (api API) GetUser(handle UserHandle) (APIUser, error) {
 		// Sometimes it randomly gives 403 Forbidden.  API's fault, not ours
 		// We check for this below
 		if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusForbidden) {
-			content, _ := ioutil.ReadAll(resp.Body)
+			content, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				panic(err)
+			}
 			return APIUser{}, fmt.Errorf("response status %s: %s", resp.Status, content)
 		}
 
@@ -264,7 +273,10 @@ func (api API) Search(query string, cursor string) (TweetResponse, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		content, _ := ioutil.ReadAll(resp.Body)
+		content, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
 		return TweetResponse{}, fmt.Errorf("Error while searching for %q.  HTTP %s: %s", req.URL, resp.Status, content)
 	}
 
