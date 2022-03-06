@@ -128,6 +128,6 @@ func TestLoadProfile(t *testing.T) {
 	require.NoError(err)
 
 	assert.Equal(t, profile_path, profile.ProfileDir)
-	assert.Len(profile.UsersList, 2)
-	assert.Equal("user1", profile.UsersList[0].Handle)
+	assert.Len(t, profile.UsersList, 2)
+	assert.Equal(t, "user1", string(profile.UsersList[0].Handle))
 }
