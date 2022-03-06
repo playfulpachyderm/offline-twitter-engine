@@ -51,7 +51,7 @@ func (p Profile) SaveUser(u *scraper.User) error {
                pinned_tweet_id=?,
                is_content_downloaded=(is_content_downloaded or ?)
         `,
-        u.ID, u.DisplayName, u.Handle, u.Bio, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.JoinDate, u.IsPrivate,
+        u.ID, u.DisplayName, u.Handle, u.Bio, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.JoinDate.Unix(), u.IsPrivate,
         u.IsVerified, u.IsBanned, u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID,
         u.IsContentDownloaded, u.IsIdFake,
 
