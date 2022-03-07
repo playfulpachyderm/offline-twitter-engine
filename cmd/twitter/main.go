@@ -1,14 +1,14 @@
 package main
 
 import (
-	"os"
-	"fmt"
 	"flag"
+	"fmt"
+	"os"
 
 	log "github.com/sirupsen/logrus"
 
-	"offline_twitter/scraper"
 	"offline_twitter/persistence"
+	"offline_twitter/scraper"
 )
 
 /**
@@ -87,10 +87,10 @@ func main() {
 
 	profile, err = persistence.LoadProfile(*profile_dir)
 	if err != nil {
-		die("Could not load profile: " + err.Error(), true, 2)
+		die(fmt.Sprintf("Could not load profile: %s", err.Error()), true, 2)
 	}
 
-	switch (operation) {
+	switch operation {
 	case "create_profile":
 		create_profile(target)
 	case "fetch_user":
@@ -116,7 +116,7 @@ func main() {
 	case "list_followed":
 		list_followed()
 	default:
-		die("Invalid operation: " + operation, true, 3)
+		die(fmt.Sprintf("Invalid operation: %s", operation), true, 3)
 	}
 }
 
@@ -148,10 +148,10 @@ func fetch_user(handle scraper.UserHandle) {
 
 	err = profile.SaveUser(&user)
 	if err != nil {
-		die("Error saving user: " + err.Error(), false, 4)
+		die(fmt.Sprintf("Error saving user: %s", err.Error()), false, 4)
 	}
 
-	download_user_content(handle);
+	download_user_content(handle)
 	happy_exit("Saved the user")
 }
 
@@ -169,13 +169,13 @@ func fetch_tweet_only(tweet_identifier string) {
 
 	tweet, err := scraper.GetTweet(tweet_id)
 	if err != nil {
-		die("Error fetching tweet: " + err.Error(), false, -1)
+		die(fmt.Sprintf("Error fetching tweet: %s", err.Error()), false, -1)
 	}
 	log.Debug(tweet)
 
 	err = profile.SaveTweet(tweet)
 	if err != nil {
-		die("Error saving tweet: " + err.Error(), false, 4)
+		die(fmt.Sprintf("Error saving tweet: %s", err.Error()), false, 4)
 	}
 	happy_exit("Saved the tweet")
 }
@@ -222,7 +222,6 @@ func fetch_user_feed(handle string, how_many int) {
 	happy_exit(fmt.Sprintf("Saved %d tweets, %d retweets and %d users", len(trove.Tweets), len(trove.Retweets), len(trove.Users)))
 }
 
-
 func download_tweet_content(tweet_identifier string) {
 	tweet_id, err := extract_id_from(tweet_identifier)
 	if err != nil {
@@ -253,7 +252,7 @@ func download_user_content(handle scraper.UserHandle) {
 func search(query string) {
 	trove, err := scraper.Search(query, 1000)
 	if err != nil {
-		die("Error scraping search results: " + err.Error(), false, -100)
+		die(fmt.Sprintf("Error scraping search results: %s", err.Error()), false, -100)
 	}
 	profile.SaveTweetTrove(trove)
 

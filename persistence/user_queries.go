@@ -15,21 +15,21 @@ import (
  * - u: the User
  */
 func (p Profile) SaveUser(u *scraper.User) error {
-    if u.IsNeedingFakeID {
-        err := p.DB.QueryRow("select id from users where lower(handle) = lower(?)", u.Handle).Scan(&u.ID)
-        if err == sql.ErrNoRows {
-            // We need to continue-- create a new fake user
-            u.ID = p.NextFakeUserID()
-        } else if err == nil {
-            // We're done; everything is fine (ID has already been scanned into the User)
-            return nil
-        } else {
-            // A real error occurred
-            panic(fmt.Sprintf("Error checking for existence of fake user with handle %q: %s", u.Handle, err.Error()))
-        }
-    }
+	if u.IsNeedingFakeID {
+		err := p.DB.QueryRow("select id from users where lower(handle) = lower(?)", u.Handle).Scan(&u.ID)
+		if err == sql.ErrNoRows {
+			// We need to continue-- create a new fake user
+			u.ID = p.NextFakeUserID()
+		} else if err == nil {
+			// We're done; everything is fine (ID has already been scanned into the User)
+			return nil
+		} else {
+			// A real error occurred
+			panic(fmt.Sprintf("Error checking for existence of fake user with handle %q: %s", u.Handle, err.Error()))
+		}
+	}
 
-    _, err := p.DB.Exec(`
+	_, err := p.DB.Exec(`
         insert into users (id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private,
                            is_verified, is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path,
                            pinned_tweet_id, is_content_downloaded, is_id_fake)

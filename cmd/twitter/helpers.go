@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 	"os"
+	"regexp"
+	"strconv"
+	"strings"
+
 	"offline_twitter/scraper"
 	"offline_twitter/terminal_utils"
-	"strings"
-	"strconv"
-	"regexp"
 )
-
 
 /**
  * Help message to print if command syntax is incorrect
@@ -73,13 +73,13 @@ This application downloads tweets from twitter and saves them in a SQLite databa
           won't count toward the limit.
 `
 
-
 /**
  * Helper function
  */
 func die(text string, display_help bool, exit_code int) {
 	if text != "" {
-		fmt.Fprint(os.Stderr, terminal_utils.COLOR_RED + text + terminal_utils.COLOR_RESET + "\n")
+		outstring := terminal_utils.COLOR_RED + text + terminal_utils.COLOR_RESET + "\n"
+		fmt.Fprint(os.Stderr, outstring)
 	}
 	if display_help {
 		fmt.Fprint(os.Stderr, help_message)
@@ -91,8 +91,8 @@ func die(text string, display_help bool, exit_code int) {
  * Print a happy exit message and exit
  */
 func happy_exit(text string) {
-  fmt.Printf(terminal_utils.COLOR_GREEN + text + terminal_utils.COLOR_RESET + "\n")
-  fmt.Printf(terminal_utils.COLOR_GREEN + "Exiting successfully." + terminal_utils.COLOR_RESET + "\n")
+	fmt.Printf(terminal_utils.COLOR_GREEN + text + terminal_utils.COLOR_RESET + "\n")
+	fmt.Printf(terminal_utils.COLOR_GREEN + "Exiting successfully." + terminal_utils.COLOR_RESET + "\n")
 }
 
 /**

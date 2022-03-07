@@ -20,7 +20,6 @@ func (p Profile) SaveRetweet(r scraper.Retweet) error {
 	return err
 }
 
-
 /**
  * Retrieve a Retweet by ID
  */

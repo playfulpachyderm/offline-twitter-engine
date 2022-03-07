@@ -13,12 +13,12 @@ import (
 //go:embed schema.sql
 var sql_init string
 
-type Settings struct {}
+type Settings struct{}
 
 type Profile struct {
 	ProfileDir string
-	Settings Settings
-	DB *sql.DB
+	Settings   Settings
+	DB         *sql.DB
 }
 
 /**
@@ -27,10 +27,10 @@ type Profile struct {
 type ErrTargetAlreadyExists struct {
 	target string
 }
+
 func (err ErrTargetAlreadyExists) Error() string {
 	return fmt.Sprintf("Target already exists: %s", err.target)
 }
-
 
 /**
  * Create a new profile in the given location.
@@ -124,7 +124,6 @@ func NewProfile(target_dir string) (Profile, error) {
 	return Profile{target_dir, settings, db}, nil
 }
 
-
 /**
  * Loads the profile at the given location.  Fails if the given directory is not a Profile.
  *
@@ -139,9 +138,9 @@ func LoadProfile(profile_dir string) (Profile, error) {
 	sqlite_file := path.Join(profile_dir, "twitter.db")
 
 	for _, file := range []string{
-			settings_file,
-			sqlite_file,
-		} {
+		settings_file,
+		sqlite_file,
+	} {
 		if !file_exists(file) {
 			return Profile{}, fmt.Errorf("Invalid profile, could not find file: %s", file)
 		}
@@ -157,15 +156,15 @@ func LoadProfile(profile_dir string) (Profile, error) {
 		return Profile{}, err
 	}
 
-	db, err := sql.Open("sqlite3", sqlite_file + "?_foreign_keys=on&_journal_mode=WAL")
+	db, err := sql.Open("sqlite3", sqlite_file+"?_foreign_keys=on&_journal_mode=WAL")
 	if err != nil {
 		return Profile{}, err
 	}
 
 	ret := Profile{
 		ProfileDir: profile_dir,
-		Settings: settings,
-		DB: db,
+		Settings:   settings,
+		DB:         db,
 	}
 	err = ret.check_and_update_version()
 

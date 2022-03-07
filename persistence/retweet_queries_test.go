@@ -8,7 +8,6 @@ import (
 	"github.com/go-test/deep"
 )
 
-
 func TestSaveAndLoadRetweet(t *testing.T) {
 	require := require.New(t)
 

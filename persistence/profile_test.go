@@ -2,8 +2,9 @@ package persistence_test
 
 import (
 	"testing"
-	"os"
+
 	"errors"
+	"os"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -22,7 +23,6 @@ func file_exists(path string) bool {
 		panic(err)
 	}
 }
-
 
 /**
  * Should refuse to create a Profile if the target already exists (i.e., is a file or directory).
@@ -44,7 +44,6 @@ func TestNewProfileInvalidPath(t *testing.T) {
 	assert.True(t, is_right_type, "Expected 'ErrTargetAlreadyExists' error, got %T instead", err)
 }
 
-
 /**
  * Should correctly create a new Profile
  */
@@ -61,7 +60,7 @@ func TestNewProfile(t *testing.T) {
 	profile, err := persistence.NewProfile(profile_path)
 	require.NoError(err)
 
-	assert.Equal(profile_path,profile.ProfileDir)
+	assert.Equal(profile_path, profile.ProfileDir)
 
 	// Check files were created
 	contents, err := os.ReadDir(profile_path)
@@ -70,8 +69,8 @@ func TestNewProfile(t *testing.T) {
 
 	expected_files := []struct {
 		filename string
-		isDir bool
-	} {
+		isDir    bool
+	}{
 		{"images", true},
 		{"link_preview_images", true},
 		{"profile_images", true},
@@ -91,7 +90,6 @@ func TestNewProfile(t *testing.T) {
 	require.NoError(err)
 	assert.Equal(persistence.ENGINE_DATABASE_VERSION, version)
 }
-
 
 /**
  * Should correctly load the Profile
