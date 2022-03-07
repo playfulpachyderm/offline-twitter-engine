@@ -92,7 +92,9 @@ func (p Profile) SavePoll(poll scraper.Poll) error {
  * Get the list of images for a tweet
  */
 func (p Profile) GetImagesForTweet(t scraper.Tweet) (imgs []scraper.Image, err error) {
-	err = p.DB.Select(&imgs, "select id, tweet_id, width, height, remote_url, local_filename, is_downloaded from images where tweet_id=?", t.ID)
+	err = p.DB.Select(&imgs,
+        "select id, tweet_id, width, height, remote_url, local_filename, is_downloaded from images where tweet_id=?",
+    t.ID)
 	return
 }
 
@@ -101,8 +103,8 @@ func (p Profile) GetImagesForTweet(t scraper.Tweet) (imgs []scraper.Image, err e
  */
 func (p Profile) GetVideosForTweet(t scraper.Tweet) (vids []scraper.Video, err error) {
 	err = p.DB.Select(&vids, `
-        select id, tweet_id, width, height, remote_url, local_filename, thumbnail_remote_url, thumbnail_local_filename, duration, view_count,
-               is_downloaded, is_gif
+        select id, tweet_id, width, height, remote_url, local_filename, thumbnail_remote_url, thumbnail_local_filename, duration,
+               view_count, is_downloaded, is_gif
           from videos
          where tweet_id = ?
     `, t.ID)
@@ -114,8 +116,8 @@ func (p Profile) GetVideosForTweet(t scraper.Tweet) (vids []scraper.Video, err e
  */
 func (p Profile) GetUrlsForTweet(t scraper.Tweet) (urls []scraper.Url, err error) {
 	err = p.DB.Select(&urls, `
-        select tweet_id, domain, text, short_text, title, description, creator_id, site_id, thumbnail_width, thumbnail_height, thumbnail_remote_url,
-               thumbnail_local_path, has_card, has_thumbnail, is_content_downloaded
+        select tweet_id, domain, text, short_text, title, description, creator_id, site_id, thumbnail_width, thumbnail_height,
+               thumbnail_remote_url, thumbnail_local_path, has_card, has_thumbnail, is_content_downloaded
           from urls
          where tweet_id = ?
          order by rowid
