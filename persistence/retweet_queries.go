@@ -22,22 +22,11 @@ func (p Profile) SaveRetweet(r scraper.Retweet) error {
  * Retrieve a Retweet by ID
  */
 func (p Profile) GetRetweetById(id scraper.TweetID) (scraper.Retweet, error) {
-	stmt, err := p.DB.Prepare(`
+	var r scraper.Retweet
+	err := p.DB.Get(&r, `
 		select retweet_id, tweet_id, retweeted_by, retweeted_at
 		  from retweets
 		 where retweet_id = ?
-	`)
-	if err != nil {
-		return scraper.Retweet{}, err
-	}
-	defer stmt.Close()
-
-	var r scraper.Retweet
-
-	row := stmt.QueryRow(id)
-	err = row.Scan(&r.RetweetID, &r.TweetID, &r.RetweetedByID, &r.RetweetedAt)
-	if err != nil {
-		return scraper.Retweet{}, err
-	}
-	return r, nil
+	`, id)
+	return r, err
 }

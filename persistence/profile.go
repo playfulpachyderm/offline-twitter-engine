@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"database/sql"
+	sql "github.com/jmoiron/sqlx"
+	"github.com/jmoiron/sqlx/reflectx"
 	_ "github.com/mattn/go-sqlite3"
 	"gopkg.in/yaml.v2"
 )
@@ -64,15 +65,10 @@ func NewProfile(target_dir string) (Profile, error) {
 
 	// Create `twitter.db`
 	fmt.Printf("Creating............. %s\n", sqlite_file)
-	db, err := sql.Open("sqlite3", sqlite_file + "?_foreign_keys=on")
-	if err != nil {
-		return Profile{}, err
-	}
-	_, err = db.Exec(sql_init)
-	if err != nil {
-		return Profile{}, err
-	}
+	db := sql.MustOpen("sqlite3", sqlite_file+"?_foreign_keys=on")
+	db.MustExec(sql_init)
 	InitializeDatabaseVersion(db)
+	db.Mapper = reflectx.NewMapperFunc("db", ToSnakeCase)
 
 	// Create `settings.yaml`
 	fmt.Printf("Creating............. %s\n", settings_file)
@@ -156,10 +152,8 @@ func LoadProfile(profile_dir string) (Profile, error) {
 		return Profile{}, err
 	}
 
-	db, err := sql.Open("sqlite3", sqlite_file+"?_foreign_keys=on&_journal_mode=WAL")
-	if err != nil {
-		return Profile{}, err
-	}
+	db := sql.MustOpen("sqlite3", fmt.Sprintf("%s?_foreign_keys=on&_journal_mode=WAL", sqlite_file))
+	db.Mapper = reflectx.NewMapperFunc("db", ToSnakeCase)
 
 	ret := Profile{
 		ProfileDir: profile_dir,

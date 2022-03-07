@@ -25,7 +25,7 @@ type Poll struct {
     VotingDuration int  // In seconds
     VotingEndsAt Timestamp
 
-    LastUpdatedAt Timestamp
+    LastUpdatedAt Timestamp `db:"last_scraped_at"`
 }
 
 func ParseAPIPoll(apiCard APICard) Poll {

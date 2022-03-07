@@ -4,7 +4,7 @@ type Retweet struct {
 	RetweetID      TweetID
 	TweetID        TweetID
 	Tweet          *Tweet
-	RetweetedByID  UserID
+	RetweetedByID  UserID  `db:"retweeted_by"`
 	RetweetedBy    *User
 	RetweetedAt    Timestamp
 }

@@ -92,25 +92,7 @@ func (p Profile) SavePoll(poll scraper.Poll) error {
  * Get the list of images for a tweet
  */
 func (p Profile) GetImagesForTweet(t scraper.Tweet) (imgs []scraper.Image, err error) {
-	stmt, err := p.DB.Prepare("select id, width, height, remote_url, local_filename, is_downloaded from images where tweet_id=?")
-	if err != nil {
-		return
-	}
-	defer stmt.Close()
-	rows, err := stmt.Query(t.ID)
-	if err != nil {
-		return
-	}
-	var img scraper.Image
-
-	for rows.Next() {
-		err = rows.Scan(&img.ID, &img.Width, &img.Height, &img.RemoteURL, &img.LocalFilename, &img.IsDownloaded)
-		if err != nil {
-			return
-		}
-		img.TweetID = t.ID
-		imgs = append(imgs, img)
-	}
+	err = p.DB.Select(&imgs, "select id, tweet_id, width, height, remote_url, local_filename, is_downloaded from images where tweet_id=?", t.ID)
 	return
 }
 
@@ -118,93 +100,38 @@ func (p Profile) GetImagesForTweet(t scraper.Tweet) (imgs []scraper.Image, err e
  * Get the list of videos for a tweet
  */
 func (p Profile) GetVideosForTweet(t scraper.Tweet) (vids []scraper.Video, err error) {
-	stmt, err := p.DB.Prepare(`
-        select id, width, height, remote_url, local_filename, thumbnail_remote_url, thumbnail_local_filename, duration, view_count,
+	err = p.DB.Select(&vids, `
+        select id, tweet_id, width, height, remote_url, local_filename, thumbnail_remote_url, thumbnail_local_filename, duration, view_count,
                is_downloaded, is_gif
           from videos
          where tweet_id = ?
-    `)
-	if err != nil {
-		return
-	}
-	defer stmt.Close()
-	rows, err := stmt.Query(t.ID)
-	if err != nil {
-		return
-	}
-	var vid scraper.Video
-	for rows.Next() {
-		err = rows.Scan(&vid.ID, &vid.Width, &vid.Height, &vid.RemoteURL, &vid.LocalFilename, &vid.ThumbnailRemoteUrl,
-			&vid.ThumbnailLocalPath, &vid.Duration, &vid.ViewCount, &vid.IsDownloaded, &vid.IsGif)
-		if err != nil {
-			return
-		}
-		vid.TweetID = t.ID
-		vids = append(vids, vid)
-	}
-	return
+    `, t.ID)
+    return
 }
 
 /**
  * Get the list of Urls for a Tweet
  */
 func (p Profile) GetUrlsForTweet(t scraper.Tweet) (urls []scraper.Url, err error) {
-	stmt, err := p.DB.Prepare(`
-        select domain, text, short_text, title, description, creator_id, site_id, thumbnail_width, thumbnail_height, thumbnail_remote_url,
+	err = p.DB.Select(&urls, `
+        select tweet_id, domain, text, short_text, title, description, creator_id, site_id, thumbnail_width, thumbnail_height, thumbnail_remote_url,
                thumbnail_local_path, has_card, has_thumbnail, is_content_downloaded
           from urls
          where tweet_id = ?
          order by rowid
-    `)
-	if err != nil {
-		return
-	}
-	defer stmt.Close()
-	rows, err := stmt.Query(t.ID)
-	if err != nil {
-		return
-	}
-	var url scraper.Url
-	for rows.Next() {
-		err = rows.Scan(&url.Domain, &url.Text, &url.ShortText, &url.Title, &url.Description, &url.CreatorID, &url.SiteID,
-			&url.ThumbnailWidth, &url.ThumbnailHeight, &url.ThumbnailRemoteUrl, &url.ThumbnailLocalPath, &url.HasCard,
-			&url.HasThumbnail, &url.IsContentDownloaded)
-		if err != nil {
-			return
-		}
-		url.TweetID = t.ID
-		urls = append(urls, url)
-	}
-	return
+    `, t.ID)
+    return
 }
 
 /**
  * Get the list of Polls for a Tweet
  */
 func (p Profile) GetPollsForTweet(t scraper.Tweet) (polls []scraper.Poll, err error) {
-	stmt, err := p.DB.Prepare(`
-        select id, num_choices, choice1, choice1_votes, choice2, choice2_votes, choice3, choice3_votes, choice4, choice4_votes,
+	err = p.DB.Select(&polls, `
+        select id, tweet_id, num_choices, choice1, choice1_votes, choice2, choice2_votes, choice3, choice3_votes, choice4, choice4_votes,
                voting_duration, voting_ends_at, last_scraped_at
           from polls
          where tweet_id = ?
-    `)
-	if err != nil {
-		return
-	}
-	defer stmt.Close()
-	rows, err := stmt.Query(t.ID)
-	if err != nil {
-		return
-	}
-	var poll scraper.Poll
-	for rows.Next() {
-		err = rows.Scan(&poll.ID, &poll.NumChoices, &poll.Choice1, &poll.Choice1_Votes, &poll.Choice2, &poll.Choice2_Votes, &poll.Choice3,
-			&poll.Choice3_Votes, &poll.Choice4, &poll.Choice4_Votes, &poll.VotingDuration, &poll.VotingEndsAt, &poll.LastUpdatedAt)
-		if err != nil {
-			return
-		}
-		poll.TweetID = t.ID
-		polls = append(polls, poll)
-	}
-	return
+    `, t.ID)
+    return
 }

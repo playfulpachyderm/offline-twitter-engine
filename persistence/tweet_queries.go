@@ -10,11 +10,9 @@ import (
 func (p Profile) SaveTweet(t scraper.Tweet) error {
 	db := p.DB
 
-	tx, err := db.Begin()
-	if err != nil {
-		return err
-	}
-	_, err = db.Exec(`
+	tx := db.MustBegin()
+
+	_, err := db.Exec(`
         insert into tweets (id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id,
                             quoted_tweet_id, mentions, reply_mentions, hashtags, tombstone_type, is_stub, is_content_downloaded,
                             is_conversation_scraped, last_scraped_at)

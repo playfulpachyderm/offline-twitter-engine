@@ -2,7 +2,7 @@ package persistence
 
 import (
 	"fmt"
-	"database/sql"
+	sql "github.com/jmoiron/sqlx"
 
 	"offline_twitter/terminal_utils"
 )
@@ -77,10 +77,7 @@ var MIGRATIONS = []string{
  * Subsequent updates should change the number, not insert a new row.
  */
 func InitializeDatabaseVersion(db *sql.DB) {
-	_, err := db.Exec("insert into database_version (version_number) values (?)", ENGINE_DATABASE_VERSION)
-	if err != nil {
-		panic(err)
-	}
+	db.MustExec("insert into database_version (version_number) values (?)", ENGINE_DATABASE_VERSION)
 }
 
 func (p Profile) GetDatabaseVersion() (int, error) {
@@ -126,16 +123,11 @@ func (p Profile) UpgradeFromXToY(x int, y int) error {
 		fmt.Println(MIGRATIONS[i])
 		fmt.Printf(terminal_utils.COLOR_RESET)
 
-		_, err := p.DB.Exec(MIGRATIONS[i])
-		if err != nil {
-			return err
-		}
-		_, err = p.DB.Exec("update database_version set version_number = ?", i+1)
-		if err != nil {
-			return err
-		}
+		p.DB.MustExec(MIGRATIONS[i])
+		p.DB.MustExec("update database_version set version_number = ?", i+1)
+
 		fmt.Printf(terminal_utils.COLOR_YELLOW)
-		fmt.Printf("Now at database schema version %d.\n", i + 1)
+		fmt.Printf("Now at database schema version %d.\n", i+1)
 		fmt.Printf(terminal_utils.COLOR_RESET)
 	}
 	fmt.Printf(terminal_utils.COLOR_GREEN)

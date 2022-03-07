@@ -20,7 +20,7 @@ type Video struct {
     LocalFilename string
 
     ThumbnailRemoteUrl string
-    ThumbnailLocalPath string
+    ThumbnailLocalPath string `db:"thumbnail_local_filename"`
     Duration int  // milliseconds
     ViewCount int
 

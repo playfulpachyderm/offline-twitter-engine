@@ -111,3 +111,14 @@ func TestLoadProfile(t *testing.T) {
 
 	assert.Equal(t, profile_path, profile.ProfileDir)
 }
+
+/**
+ * Test the ToSnakeCase implementation
+ */
+func TestSnakeCase(t *testing.T) {
+	assert := assert.New(t)
+
+	assert.Equal("tweet_id", persistence.ToSnakeCase("TweetID"))
+	assert.Equal("i_am_a_computer", persistence.ToSnakeCase("IAmAComputer"))
+	assert.Equal("choice1_votes", persistence.ToSnakeCase("Choice1_Votes"))
+}

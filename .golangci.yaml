@@ -23,7 +23,6 @@ linters:
     - unused
     - varcheck
     - whitespace
-    # - wsl
     # - wrapcheck
     - lll
     - godox
@@ -545,48 +544,6 @@ linters-settings:
 #       - .Wrap(
 #       - .Wrapf(
 #       - .WithMessage(
-
-  wsl:
-    # See https://github.com/bombsimon/wsl/blob/master/doc/configuration.md for documentation of available settings.
-
-    # Controls if you're allowed to cuddle multiple variable declarations.
-    allow-cuddle-declarations: true
-
-    # # Controls if you may cuddle assignments and anything without needing an empty line between them.
-    # # Default: false
-    # allow-assign-and-anything: false
-    # # Controls if you may cuddle assignments and calls without needing an empty line between them.
-    # # Default: true
-    # allow-assign-and-call: true
-    # # Controls if you may cuddle assignments even if they span over multiple lines.
-    # # Default: true
-    # allow-multiline-assign: true
-    # # This option allows whitespace after each comment group that begins a block.
-    # # Default: false
-    # allow-separated-leading-comment: false
-    # # Controls if blocks can end with comments.
-    # # This is not encouraged sine it's usually code smell but might be useful do improve understanding or learning purposes.
-    # # To be allowed there must be no whitespace between the comment and the last statement or the comment and the closing brace.
-    # # Default: false
-    # allow-trailing-comment: false
-    # # Can be set to force trailing newlines at the end of case blocks to improve readability.
-    # # If the number of lines (including comments) in a case block exceeds this number
-    # # a linter error will be yielded if the case does not end with a newline.
-    # # Default: 0
-    # force-case-trailing-whitespace: 0
-    # # Enforces that an `if` statement checking an error variable is cuddled
-    # # with the line that assigned that error variable.
-    # # Default: false
-    # force-err-cuddling: false
-    # # Enforces that an assignment which is actually a short declaration (using `:=`)
-    # # is only allowed to cuddle with other short declarations, and not plain assignments, blocks, etc.
-    # # This rule helps make declarations stand out by themselves, much the same as grouping var statement.
-    # # Default: false
-    # force-short-decl-cuddling: false
-    # # Controls if the checks for slice append should be "strict"
-    # # in the sense that it will only allow these assignments to be cuddled with variables being appended.
-    # # Default: true
-    # strict-append: true
 
 #   # The custom section can be used to define linter plugins to be loaded at runtime.
 #   # See README doc for more info.
