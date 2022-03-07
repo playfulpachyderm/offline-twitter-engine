@@ -36,5 +36,5 @@ func TimestampFromString(s string) (Timestamp, error) {
 }
 
 func TimestampFromUnix(num int64) Timestamp {
-	return Timestamp{time.Unix(10000000, 0)}
+	return Timestamp{time.Unix(num, 0)}
 }
