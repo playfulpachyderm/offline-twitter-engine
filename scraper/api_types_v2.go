@@ -186,7 +186,7 @@ func (api_result APIV2Result) ToTweetTrove(ignore_null_entries bool) TweetTrove 
 			var ok bool
 			tombstoned_tweet.TombstoneText, ok = tombstone_types[quoted_api_result.Result.Tombstone.Text.Text]
 			if !ok {
-				panic(fmt.Sprintf("Unknown tombstone text: %s", quoted_api_result.Result.Tombstone.Text.Text))
+				panic(fmt.Errorf("Unknown tombstone text %q:\n  %w", quoted_api_result.Result.Tombstone.Text.Text, EXTERNAL_API_ERROR))
 			}
 			tombstoned_tweet.ID = int64(int_or_panic(api_result.Result.Legacy.APITweet.QuotedStatusIDStr))
 			handle, err := ParseHandleFromTweetUrl(api_result.Result.Legacy.APITweet.QuotedStatusPermalink.ExpandedURL)
@@ -209,7 +209,7 @@ func (api_result APIV2Result) ToTweetTrove(ignore_null_entries bool) TweetTrove 
 		// and the retweeted TweetResults; it should only be parsed for the real Tweet, not the Retweet
 		main_tweet, ok := ret.Tweets[TweetID(api_result.Result.Legacy.ID)]
 		if !ok {
-			panic(fmt.Sprintf("Tweet trove didn't contain its own tweet: %d", api_result.Result.Legacy.ID))
+			panic(fmt.Errorf("Tweet trove didn't contain its own tweet with ID %d:\n  %w", api_result.Result.Legacy.ID, EXTERNAL_API_ERROR))
 		}
 		if api_result.Result.Card.Legacy.Name == "summary_large_image" || api_result.Result.Card.Legacy.Name == "player" {
 			url := api_result.Result.Card.ParseAsUrl()
@@ -225,7 +225,7 @@ func (api_result APIV2Result) ToTweetTrove(ignore_null_entries bool) TweetTrove 
 				main_tweet.Urls[i] = url
 			}
 			if !found {
-				panic(fmt.Sprintf("Couldn't find the url in tweet ID: %d", api_result.Result.Legacy.ID))
+				panic(fmt.Errorf("Couldn't find the url in tweet ID %d:\n  %w", api_result.Result.Legacy.ID, EXTERNAL_API_ERROR))
 			}
 		} else if strings.Index(api_result.Result.Card.Legacy.Name, "poll") == 0 {
 			// Process polls

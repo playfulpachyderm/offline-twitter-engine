@@ -26,7 +26,7 @@ linters:
     # - wrapcheck
     - lll
     - godox
-    # - errorlint
+    - errorlint
 
 
 # # all available settings of specific linters
@@ -63,13 +63,10 @@ linters-settings:
     #   - io.Copy(*bytes.Buffer)
     #   - io.Copy(os.Stdout)
 
-#   errorlint:
-#     # Check whether fmt.Errorf uses the %w verb for formatting errors. See the readme for caveats
-#     errorf: true
-#     # Check for plain type assertions and type switches
-#     asserts: true
-#     # Check for plain error comparisons
-#     comparison: true
+  errorlint:
+    errorf: true      # Ensure Errorf only uses %w (not %v or %s etc) for errors
+    asserts: true     # Require errors.As instead of type-asserting
+    comparison: true  # Require errors.Is instead of equality-checking
 
 #   exhaustive:
 #     # check switch statements in generated files also

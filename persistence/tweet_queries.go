@@ -3,6 +3,7 @@ package persistence
 import (
 	"database/sql"
 	"strings"
+	"errors"
 
 	"offline_twitter/scraper"
 )
@@ -82,7 +83,7 @@ func (p Profile) IsTweetInDatabase(id scraper.TweetID) bool {
 	var dummy string
 	err := db.QueryRow("select 1 from tweets where id = ?", id).Scan(&dummy)
 	if err != nil {
-		if err != sql.ErrNoRows {
+		if !errors.Is(err, sql.ErrNoRows) {
 			// A real error
 			panic(err)
 		}
@@ -189,7 +190,7 @@ func (p Profile) CheckTweetContentDownloadNeeded(tweet scraper.Tweet) bool {
 	var is_content_downloaded bool
 	err := row.Scan(&is_content_downloaded)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return true
 		} else {
 			panic(err)

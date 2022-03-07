@@ -126,7 +126,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	// Process images
 	for _, media := range apiTweet.Entities.Media {
 		if media.Type != "photo" {  // TODO: remove this eventually
-			panic(fmt.Sprintf("Unknown media type: %q", media.Type))
+			panic(fmt.Errorf("Unknown media type %q:\n  %w", media.Type, EXTERNAL_API_ERROR))
 		}
 		new_image := ParseAPIMedia(media)
 		new_image.TweetID = ret.ID
@@ -145,7 +145,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	for _, mention := range strings.Split(apiTweet.Entities.ReplyMentions, " ") {
 		if mention != "" {
 			if mention[0] != '@' {
-				panic(fmt.Sprintf("Unknown ReplyMention value: %s", apiTweet.Entities.ReplyMentions))
+				panic(fmt.Errorf("Unknown ReplyMention value %q:\n  %w", apiTweet.Entities.ReplyMentions, EXTERNAL_API_ERROR))
 			}
 			ret.ReplyMentions = append(ret.ReplyMentions, UserHandle(mention[1:]))
 		}
@@ -158,7 +158,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 			continue
 		}
 		if len(apiTweet.ExtendedEntities.Media) != 1 {
-			panic(fmt.Sprintf("Surprising ExtendedEntities: %v", apiTweet.ExtendedEntities.Media))
+			panic(fmt.Errorf("Surprising ExtendedEntities: %v\n  %w", apiTweet.ExtendedEntities.Media, EXTERNAL_API_ERROR))
 		}
 		new_video := ParseAPIVideo(apiTweet.ExtendedEntities.Media[0], ret.ID)
 		ret.Videos = []Video{new_video}
@@ -194,7 +194,7 @@ func GetTweet(id TweetID) (Tweet, error) {
 	api := API{}
 	tweet_response, err := api.GetTweet(id, "")
 	if err != nil {
-		return Tweet{}, fmt.Errorf("Error in API call: %s", err)
+		return Tweet{}, fmt.Errorf("Error in API call:\n  %w", err)
 	}
 
 	single_tweet, ok := tweet_response.GlobalObjects.Tweets[fmt.Sprint(id)]

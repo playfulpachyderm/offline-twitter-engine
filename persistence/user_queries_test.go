@@ -194,14 +194,14 @@ func TestFollowUnfollowUser(t *testing.T) {
 	// Ensure the change was persisted
 	user_reloaded, err := profile.GetUserByHandle(user.Handle)
 	require.NoError(t, err)
-	assert.Equal(user.ID, user_reloaded.ID)  // Verify it's the same user
+	assert.Equal(user.ID, user_reloaded.ID) // Verify it's the same user
 	assert.True(user_reloaded.IsFollowed)
 
-	err = profile.SaveUser(&user)  // should NOT un-set is_followed
+	err = profile.SaveUser(&user) // should NOT un-set is_followed
 	assert.NoError(err)
 	user_reloaded, err = profile.GetUserByHandle(user.Handle)
 	require.NoError(t, err)
-	assert.Equal(user.ID, user_reloaded.ID)  // Verify it's the same user
+	assert.Equal(user.ID, user_reloaded.ID) // Verify it's the same user
 	assert.True(user_reloaded.IsFollowed)
 
 	profile.SetUserFollowed(&user, false)
@@ -210,7 +210,7 @@ func TestFollowUnfollowUser(t *testing.T) {
 	// Ensure the change was persisted
 	user_reloaded, err = profile.GetUserByHandle(user.Handle)
 	require.NoError(t, err)
-	assert.Equal(user.ID, user_reloaded.ID)  // Verify it's the same user
+	assert.Equal(user.ID, user_reloaded.ID) // Verify it's the same user
 	assert.False(user_reloaded.IsFollowed)
 }
 
@@ -233,16 +233,16 @@ func TestCreateUnknownUserWithHandle(t *testing.T) {
 
 	err := profile.SaveUser(&user)
 	assert.NoError(err)
-	assert.Equal(scraper.UserID(next_id + 1), user.ID)
+	assert.Equal(scraper.UserID(next_id+1), user.ID)
 
 	// Ensure the change was persisted
 	user_reloaded, err := profile.GetUserByHandle(user.Handle)
 	require.NoError(t, err)
-	assert.Equal(handle, user_reloaded.Handle)  // Verify it's the same user
-	assert.Equal(scraper.UserID(next_id + 1), user_reloaded.ID)
+	assert.Equal(handle, user_reloaded.Handle) // Verify it's the same user
+	assert.Equal(scraper.UserID(next_id+1), user_reloaded.ID)
 
 	// Why not tack this test on here: make sure NextFakeUserID works as expected
-	assert.Equal(next_id + 2, profile.NextFakeUserID())
+	assert.Equal(next_id+2, profile.NextFakeUserID())
 }
 
 /**
@@ -266,7 +266,7 @@ func TestCreateUnknownUserWithHandleThatAlreadyExists(t *testing.T) {
 	// The real user should not have been overwritten at all
 	user_reloaded, err := profile.GetUserByID(user.ID)
 	assert.NoError(err)
-	assert.False(user_reloaded.IsIdFake)  // This one particularly
+	assert.False(user_reloaded.IsIdFake) // This one particularly
 	assert.Equal(user.Handle, user_reloaded.Handle)
 	assert.Equal(user.Bio, user_reloaded.Bio)
 	assert.Equal(user.DisplayName, user_reloaded.DisplayName)

@@ -271,7 +271,7 @@ func (u UserResponse) ConvertToAPIUser() APIUser {
 		} else if api_error.Name == "NotFoundError" {
 			ret.DoesntExist = true
 		} else {
-			panic(fmt.Sprintf("Unknown api error: %q", api_error.Message))
+			panic(fmt.Errorf("Unknown api error %q:\n  %w", api_error.Message, EXTERNAL_API_ERROR))
 		}
 	}
 
@@ -401,7 +401,7 @@ func (t *TweetResponse) HandleTombstones() []UserHandle {
 
 			short_text, ok := tombstone_types[entry.GetTombstoneText()]
 			if !ok {
-				panic(fmt.Sprintf("Unknown tombstone text: %s", entry.GetTombstoneText()))
+				panic(fmt.Errorf("Unknown tombstone text %q:\n  %w", entry.GetTombstoneText(), EXTERNAL_API_ERROR))
 			}
 			tombstoned_tweet.TombstoneText = short_text
 

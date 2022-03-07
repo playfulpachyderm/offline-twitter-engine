@@ -230,7 +230,7 @@ func download_tweet_content(tweet_identifier string) {
 
 	tweet, err := profile.GetTweetById(tweet_id)
 	if err != nil {
-		panic(fmt.Sprintf("Couldn't get tweet (ID %d) from database: %s", tweet_id, err.Error()))
+		panic(fmt.Errorf("Couldn't get tweet (ID %d) from database:\n  %w", tweet_id, err))
 	}
 	err = profile.DownloadTweetContentFor(&tweet)
 	if err != nil {

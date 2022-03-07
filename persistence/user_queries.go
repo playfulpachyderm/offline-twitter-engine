@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"fmt"
+	"errors"
 	"database/sql"
 	"offline_twitter/scraper"
 )
@@ -16,7 +17,7 @@ import (
 func (p Profile) SaveUser(u *scraper.User) error {
 	if u.IsNeedingFakeID {
 		err := p.DB.QueryRow("select id from users where lower(handle) = lower(?)", u.Handle).Scan(&u.ID)
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			// We need to continue-- create a new fake user
 			u.ID = p.NextFakeUserID()
 		} else if err == nil {
@@ -24,7 +25,7 @@ func (p Profile) SaveUser(u *scraper.User) error {
 			return nil
 		} else {
 			// A real error occurred
-			panic(fmt.Sprintf("Error checking for existence of fake user with handle %q: %s", u.Handle, err.Error()))
+			panic(fmt.Errorf("Error checking for existence of fake user with handle %q:\n  %w", u.Handle, err))
 		}
 	}
 
@@ -79,7 +80,7 @@ func (p Profile) UserExists(handle scraper.UserHandle) bool {
 	var dummy string
 	err := db.QueryRow("select 1 from users where lower(handle) = lower(?)", handle).Scan(&dummy)
 	if err != nil {
-		if err != sql.ErrNoRows {
+		if !errors.Is(err, sql.ErrNoRows) {
 			// A real error
 			panic(err)
 		}
@@ -109,7 +110,7 @@ func (p Profile) GetUserByHandle(handle scraper.UserHandle) (scraper.User, error
          where lower(handle) = lower(?)
     `, handle)
 
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return ret, ErrNotInDatabase{"User", handle}
 	}
 	return ret, nil
@@ -136,7 +137,7 @@ func (p Profile) GetUserByID(id scraper.UserID) (scraper.User, error) {
           from users
          where id = ?
     `, id)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return ret, ErrNotInDatabase{"User", id}
 	}
 	return ret, err
@@ -164,7 +165,7 @@ func (p Profile) CheckUserContentDownloadNeeded(user scraper.User) bool {
 	var banner_image_url string
 	err := row.Scan(&is_content_downloaded, &profile_image_url, &banner_image_url)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return true
 		} else {
 			panic(err)
@@ -189,14 +190,14 @@ func (p Profile) CheckUserContentDownloadNeeded(user scraper.User) bool {
 func (p Profile) SetUserFollowed(user *scraper.User, is_followed bool) {
 	result, err := p.DB.Exec("update users set is_followed = ? where id = ?", is_followed, user.ID)
 	if err != nil {
-		panic(fmt.Sprintf("Error inserting user with handle %q: %s", user.Handle, err.Error()))
+		panic(fmt.Errorf("Error inserting user with handle %q:\n  %w", user.Handle, err))
 	}
 	count, err := result.RowsAffected()
 	if err != nil {
-		panic("Unknown error: " + err.Error())
+		panic(fmt.Errorf("Unknown error retrieving row count:\n  %w", err))
 	}
 	if count != 1 {
-		panic(fmt.Sprintf("User with handle %q not found", user.Handle))
+		panic(fmt.Errorf("User with handle %q not found", user.Handle))
 	}
 	user.IsFollowed = is_followed
 }

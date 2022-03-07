@@ -83,7 +83,7 @@ func (trove *TweetTrove) FetchTombstoneUsers() {
 		log.Debug("Getting tombstone user: " + handle)
 		user, err := GetUser(handle)
 		if err != nil {
-			panic(fmt.Sprintf("Error getting tombstoned user: %s\n  %s", handle, err.Error()))
+			panic(fmt.Errorf("Error getting tombstoned user with handle %q: \n  %w", handle, err))
 		}
 
 		if user.ID == 0 {
@@ -124,7 +124,11 @@ func (trove *TweetTrove) FillMissingUserIDs() {
 		if !is_found {
 			// The user probably deleted deleted their account, and thus `scraper.GetUser` failed.  So
 			// they're not in this trove's Users.
-			panic(fmt.Sprintf("Couldn't fill out this Tweet's UserID: %d, %s", tweet.ID, tweet.UserHandle))
+			panic(fmt.Errorf(
+				"Couldn't find user ID for user %q, while filling missing UserID in tweet with ID %d",
+				tweet.UserHandle,
+				tweet.ID,
+			))
 		}
 		tweet.UserID = user.ID
 		trove.Tweets[i] = tweet

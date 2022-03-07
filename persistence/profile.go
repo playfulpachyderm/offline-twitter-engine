@@ -22,16 +22,7 @@ type Profile struct {
 	DB         *sql.DB
 }
 
-/**
- * Custom error
- */
-type ErrTargetAlreadyExists struct {
-	target string
-}
-
-func (err ErrTargetAlreadyExists) Error() string {
-	return fmt.Sprintf("Target already exists: %s", err.target)
-}
+var ErrTargetAlreadyExists = fmt.Errorf("Target already exists")
 
 /**
  * Create a new profile in the given location.
@@ -45,7 +36,7 @@ func (err ErrTargetAlreadyExists) Error() string {
  */
 func NewProfile(target_dir string) (Profile, error) {
 	if file_exists(target_dir) {
-		return Profile{}, ErrTargetAlreadyExists{target_dir}
+		return Profile{}, fmt.Errorf("Could not create target %q:\n  %w", target_dir, ErrTargetAlreadyExists)
 	}
 
 	settings_file := path.Join(target_dir, "settings.yaml")

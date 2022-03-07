@@ -40,8 +40,7 @@ func TestNewProfileInvalidPath(t *testing.T) {
 	_, err = persistence.NewProfile(gibberish_path)
 	require.Error(err, "Should have failed to create a profile in an already existing directory!")
 
-	_, is_right_type := err.(persistence.ErrTargetAlreadyExists)
-	assert.True(t, is_right_type, "Expected 'ErrTargetAlreadyExists' error, got %T instead", err)
+	assert.ErrorIs(t, err, persistence.ErrTargetAlreadyExists)
 }
 
 /**

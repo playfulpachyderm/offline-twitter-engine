@@ -36,12 +36,12 @@ func (d DefaultDownloader) Curl(url string, outpath string) error {
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("Error downloading image %s: %s", url, err.Error())
+		return fmt.Errorf("Error downloading image %s:\n  %w", url, err)
 	}
 
 	err = os.WriteFile(outpath, data, 0644)
 	if err != nil {
-		return fmt.Errorf("Error writing to path: %s, url: %s: %s", outpath, url, err.Error())
+		return fmt.Errorf("Error writing to path %s, url %s:\n  %w", outpath, url, err)
 	}
 	return nil
 }
