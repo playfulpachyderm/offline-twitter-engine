@@ -14,13 +14,6 @@ import (
 const API_CONVERSATION_BASE_PATH = "https://twitter.com/i/api/2/timeline/conversation/"
 const API_USER_TIMELINE_BASE_PATH = "https://api.twitter.com/2/timeline/profile/"
 
-type APIError string
-func (e APIError) Error() string {
-	return string(e)
-}
-
-const END_OF_FEED = APIError("End of feed")
-
 type API struct{}
 
 func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) {

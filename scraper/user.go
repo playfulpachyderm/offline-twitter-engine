@@ -134,6 +134,7 @@ func ParseSingleUser(apiUser APIUser) (ret User, err error) {
     }
     ret.JoinDate, err = TimestampFromString(apiUser.CreatedAt)
     if err != nil {
+        err = fmt.Errorf("Error parsing time on user ID %d: %w", ret.ID, err)
         return
     }
     ret.IsPrivate = apiUser.Protected

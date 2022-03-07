@@ -1,5 +1,8 @@
 package scraper
 
+import (
+	"errors"
+)
 
 func TimestampToDateString(timestamp int) string {
 	panic("???")  // TODO
@@ -22,14 +25,12 @@ func Search(query string, min_results int) (trove TweetTrove, err error) {
 
 	if len(tweet_response.GlobalObjects.Tweets) < min_results && tweet_response.GetCursor() != "" {
 		err = api.GetMoreTweetsFromSearch(query, &tweet_response, min_results)
-		if err == END_OF_FEED {
+		if errors.Is(err, END_OF_FEED) {
 			println("End of feed!")
-		}
-		if err != nil && err != END_OF_FEED {
+		} else if err != nil {
 			return
 		}
 	}
-
 
 	return ParseTweetResponse(tweet_response)
 }

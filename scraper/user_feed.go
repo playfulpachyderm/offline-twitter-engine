@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"fmt"
+	"errors"
 )
 
 /**
@@ -18,12 +19,13 @@ func GetUserFeedFor(user_id UserID, min_tweets int) (trove TweetTrove, err error
 	api := API{}
 	tweet_response, err := api.GetFeedFor(user_id, "")
 	if err != nil {
+		err = fmt.Errorf("Error calling API to fetch user feed: UserID %d\n  %w", user_id, err)
 		return
 	}
 
 	if len(tweet_response.GlobalObjects.Tweets) < min_tweets && tweet_response.GetCursor() != "" {
 		err = api.GetMoreTweetsFromFeed(user_id, &tweet_response, min_tweets)
-		if err != nil && err != END_OF_FEED {
+		if err != nil && !errors.Is(err, END_OF_FEED) {
 			return
 		}
 	}
@@ -36,13 +38,13 @@ func GetUserFeedGraphqlFor(user_id UserID, min_tweets int) (trove TweetTrove, er
 	api := API{}
 	api_response, err := api.GetGraphqlFeedFor(user_id, "")
 	if err != nil {
-		err = fmt.Errorf("Error calling API to fetch user feed: UserID %d\n  %s", user_id, err.Error())
+		err = fmt.Errorf("Error calling API to fetch user feed: UserID %d\n  %w", user_id, err)
 		return
 	}
 
 	if len(api_response.Data.User.Result.Timeline.Timeline.Instructions[0].Entries) < min_tweets && api_response.GetCursorBottom() != "" {
 		err = api.GetMoreTweetsFromGraphqlFeed(user_id, &api_response, min_tweets)
-		if err != nil && err != END_OF_FEED {
+		if err != nil && !errors.Is(err, END_OF_FEED) {
 			return
 		}
 	}

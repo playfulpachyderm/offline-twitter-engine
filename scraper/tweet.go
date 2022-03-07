@@ -93,7 +93,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	if apiTweet.TombstoneText == "" {  // Skip time parsing for tombstones
 		ret.PostedAt, err = TimestampFromString(apiTweet.CreatedAt)
 		if err != nil {
-			return
+			return Tweet{}, fmt.Errorf("Error parsing time on tweet ID %d:\n %w", ret.ID, err)
 		}
 	}
 
@@ -223,12 +223,14 @@ func GetTweetFull(id TweetID) (trove TweetTrove, err error) {
 	api := API{}
 	tweet_response, err := api.GetTweet(id, "")
 	if err != nil {
+		err = fmt.Errorf("Error getting tweet: %d\n  %w", id, err)
 		return
 	}
 	if len(tweet_response.GlobalObjects.Tweets) < DEFAULT_MAX_REPLIES_EAGER_LOAD &&
 			tweet_response.GetCursor() != "" {
 		err = api.GetMoreReplies(id, &tweet_response, DEFAULT_MAX_REPLIES_EAGER_LOAD)
 		if err != nil {
+			err = fmt.Errorf("Error getting more tweet replies: %d\n  %w", id, err)
 			return
 		}
 	}
