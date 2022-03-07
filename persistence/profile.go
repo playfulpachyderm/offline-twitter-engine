@@ -17,7 +17,6 @@ type Settings struct {}
 
 type Profile struct {
 	ProfileDir string
-	UsersList []Follow
 	Settings Settings
 	DB *sql.DB
 }
@@ -48,7 +47,6 @@ func NewProfile(target_dir string) (Profile, error) {
 		return Profile{}, ErrTargetAlreadyExists{target_dir}
 	}
 
-	user_list_file := path.Join(target_dir, "users.yaml")
 	settings_file := path.Join(target_dir, "settings.yaml")
 	sqlite_file := path.Join(target_dir, "twitter.db")
 	profile_images_dir := path.Join(target_dir, "profile_images")
@@ -75,13 +73,6 @@ func NewProfile(target_dir string) (Profile, error) {
 		return Profile{}, err
 	}
 	InitializeDatabaseVersion(db)
-
-	// Create `users.txt`
-	fmt.Printf("Creating............. %s\n", user_list_file)
-	err = os.WriteFile(user_list_file, []byte{}, os.FileMode(0644))
-	if err != nil {
-		return Profile{}, err
-	}
 
 	// Create `settings.yaml`
 	fmt.Printf("Creating............. %s\n", settings_file)
@@ -130,7 +121,7 @@ func NewProfile(target_dir string) (Profile, error) {
 		return Profile{}, err
 	}
 
-	return Profile{target_dir, []Follow{}, settings, db}, nil
+	return Profile{target_dir, settings, db}, nil
 }
 
 
@@ -144,28 +135,16 @@ func NewProfile(target_dir string) (Profile, error) {
  * - the loaded Profile
  */
 func LoadProfile(profile_dir string) (Profile, error) {
-	user_list_file := path.Join(profile_dir, "users.yaml")
 	settings_file := path.Join(profile_dir, "settings.yaml")
 	sqlite_file := path.Join(profile_dir, "twitter.db")
 
 	for _, file := range []string{
-			user_list_file,
 			settings_file,
 			sqlite_file,
 		} {
 		if !file_exists(file) {
 			return Profile{}, fmt.Errorf("Invalid profile, could not find file: %s", file)
 		}
-	}
-
-	users_data, err := os.ReadFile(user_list_file)
-	if err != nil {
-		return Profile{}, err
-	}
-	users_list := []Follow{}
-	err = yaml.Unmarshal(users_data, &users_list);
-	if err != nil {
-		return Profile{}, err
 	}
 
 	settings_data, err := os.ReadFile(settings_file)
@@ -185,7 +164,6 @@ func LoadProfile(profile_dir string) (Profile, error) {
 
 	ret := Profile{
 		ProfileDir: profile_dir,
-		UsersList: users_list,
 		Settings: settings,
 		DB: db,
 	}

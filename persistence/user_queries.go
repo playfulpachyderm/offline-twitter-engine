@@ -266,3 +266,12 @@ func (p Profile) GetAllFollowedUsers() []scraper.UserHandle {
 
     return ret
 }
+
+func (p Profile) IsFollowing(handle scraper.UserHandle) bool {
+    for _, follow := range p.GetAllFollowedUsers() {
+        if follow == handle {
+            return true;
+        }
+    }
+    return false;
+}

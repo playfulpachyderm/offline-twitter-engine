@@ -3,7 +3,6 @@ package persistence_test
 import (
 	"testing"
 	"os"
-	"path"
 	"errors"
 
 	"github.com/stretchr/testify/assert"
@@ -63,14 +62,11 @@ func TestNewProfile(t *testing.T) {
 	require.NoError(err)
 
 	assert.Equal(profile_path,profile.ProfileDir)
-	if len(profile.UsersList) != 0 {
-		t.Errorf("Expected empty users list, got %v instead", profile.UsersList)
-	}
 
 	// Check files were created
 	contents, err := os.ReadDir(profile_path)
 	require.NoError(err)
-	assert.Len(contents, 8)
+	assert.Len(contents, 7)
 
 	expected_files := []struct {
 		filename string
@@ -81,7 +77,6 @@ func TestNewProfile(t *testing.T) {
 		{"profile_images", true},
 		{"settings.yaml", false},
 		{"twitter.db", false},
-		{"users.yaml", false},
 		{"video_thumbnails", true},
 		{"videos", true},
 	}
@@ -113,14 +108,8 @@ func TestLoadProfile(t *testing.T) {
 	_, err := persistence.NewProfile(profile_path)
 	require.NoError(err)
 
-	// Create some users
-	err = os.WriteFile(path.Join(profile_path, "users.yaml"), []byte("- user: user1\n- user: user2\n"), 0644)
-	require.NoError(err)
-
 	profile, err := persistence.LoadProfile(profile_path)
 	require.NoError(err)
 
 	assert.Equal(t, profile_path, profile.ProfileDir)
-	assert.Len(t, profile.UsersList, 2)
-	assert.Equal(t, "user1", string(profile.UsersList[0].Handle))
 }
