@@ -2,18 +2,16 @@ package persistence_test
 
 import (
 	"testing"
-	"time"
+
 	"fmt"
 	"math/rand"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
 	"github.com/go-test/deep"
 
 	"offline_twitter/scraper"
 )
-
 
 /**
  * Create a user, save it, reload it, and make sure it comes back the same
@@ -62,7 +60,7 @@ func TestModifyUser(t *testing.T) {
 	fake_user.IsVerified = false
 	fake_user.IsBanned = false
 	fake_user.FollowersCount = 1000
-	fake_user.JoinDate = time.Unix(1000, 0)
+	fake_user.JoinDate = scraper.TimestampFromUnix(1000)
 	fake_user.ProfileImageUrl = "asdf"
 	fake_user.IsContentDownloaded = true
 
@@ -70,14 +68,13 @@ func TestModifyUser(t *testing.T) {
 	err := profile.SaveUser(&fake_user)
 	require.NoError(err)
 
-
 	fake_user.DisplayName = "Display Name 2"
 	fake_user.Location = "location2"
 	fake_user.IsPrivate = true
 	fake_user.IsVerified = true
 	fake_user.IsBanned = true
 	fake_user.FollowersCount = 2000
-	fake_user.JoinDate = time.Unix(2000, 0)
+	fake_user.JoinDate = scraper.TimestampFromUnix(2000)
 	fake_user.ProfileImageUrl = "asdf2"
 	fake_user.IsContentDownloaded = false  // test No Worsening
 
@@ -113,7 +110,6 @@ func TestHandleIsCaseInsensitive(t *testing.T) {
 		t.Error(diff)
 	}
 }
-
 
 /**
  * Should correctly report whether the user exists in the database

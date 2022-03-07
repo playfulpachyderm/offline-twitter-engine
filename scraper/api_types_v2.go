@@ -84,21 +84,18 @@ func (card APIV2Card) ParseAsPoll() Poll {
 	}
 	id := int_or_panic(card_url.Hostname())
 
-	voting_ends_at, err := time.Parse(time.RFC3339, values["end_datetime_utc"].StringValue)
-	if err != nil {
-		panic(err)
-	}
-	last_updated_at, err := time.Parse(time.RFC3339, values["last_updated_datetime_utc"].StringValue)
-	if err != nil {
-		panic(err)
-	}
-
 	ret := Poll{}
 	ret.ID = PollID(id)
 	ret.NumChoices = parse_num_choices(card.Legacy.Name)
 	ret.VotingDuration = int_or_panic(values["duration_minutes"].StringValue) * 60
-	ret.VotingEndsAt = voting_ends_at
-	ret.LastUpdatedAt = last_updated_at
+	ret.VotingEndsAt, err = TimestampFromString(values["end_datetime_utc"].StringValue)
+	if err != nil {
+		panic(err)
+	}
+	ret.LastUpdatedAt, err = TimestampFromString(values["last_updated_datetime_utc"].StringValue)
+	if err != nil {
+		panic(err)
+	}
 
 	ret.Choice1 = values["choice1_label"].StringValue
 	ret.Choice1_Votes = int_or_panic(values["choice1_count"].StringValue)
@@ -262,7 +259,7 @@ func (api_v2_tweet APIV2Tweet) ToTweetTrove() TweetTrove {
 		retweet.RetweetID = TweetID(api_v2_tweet.ID)
 		retweet.TweetID = TweetID(api_v2_tweet.RetweetedStatusResult.Result.ID)
 		retweet.RetweetedByID = UserID(api_v2_tweet.APITweet.UserID)
-		retweet.RetweetedAt, err = time.Parse(time.RubyDate, api_v2_tweet.APITweet.CreatedAt)
+		retweet.RetweetedAt, err = TimestampFromString(api_v2_tweet.APITweet.CreatedAt)
 		if err != nil {
 			fmt.Printf("%v\n", api_v2_tweet)
 			panic(err)

@@ -1,8 +1,6 @@
 package persistence
 
 import (
-	"time"
-
 	"offline_twitter/scraper"
 )
 
@@ -83,9 +81,9 @@ func (p Profile) SavePoll(poll scraper.Poll) error {
                           last_scraped_at=?
         `,
 		poll.ID, poll.TweetID, poll.NumChoices, poll.Choice1, poll.Choice1_Votes, poll.Choice2, poll.Choice2_Votes, poll.Choice3,
-		poll.Choice3_Votes, poll.Choice4, poll.Choice4_Votes, poll.VotingDuration, poll.VotingEndsAt.Unix(), poll.LastUpdatedAt.Unix(),
+		poll.Choice3_Votes, poll.Choice4, poll.Choice4_Votes, poll.VotingDuration, poll.VotingEndsAt, poll.LastUpdatedAt,
 
-		poll.Choice1_Votes, poll.Choice2_Votes, poll.Choice3_Votes, poll.Choice4_Votes, poll.LastUpdatedAt.Unix(),
+		poll.Choice1_Votes, poll.Choice2_Votes, poll.Choice3_Votes, poll.Choice4_Votes, poll.LastUpdatedAt,
 	)
 	return err
 }
@@ -199,17 +197,13 @@ func (p Profile) GetPollsForTweet(t scraper.Tweet) (polls []scraper.Poll, err er
 		return
 	}
 	var poll scraper.Poll
-	var voting_ends_at int
-	var last_scraped_at int
 	for rows.Next() {
 		err = rows.Scan(&poll.ID, &poll.NumChoices, &poll.Choice1, &poll.Choice1_Votes, &poll.Choice2, &poll.Choice2_Votes, &poll.Choice3,
-			&poll.Choice3_Votes, &poll.Choice4, &poll.Choice4_Votes, &poll.VotingDuration, &voting_ends_at, &last_scraped_at)
+			&poll.Choice3_Votes, &poll.Choice4, &poll.Choice4_Votes, &poll.VotingDuration, &poll.VotingEndsAt, &poll.LastUpdatedAt)
 		if err != nil {
 			return
 		}
 		poll.TweetID = t.ID
-		poll.VotingEndsAt = time.Unix(int64(voting_ends_at), 0)
-		poll.LastUpdatedAt = time.Unix(int64(last_scraped_at), 0)
 		polls = append(polls, poll)
 	}
 	return

@@ -1,7 +1,6 @@
 package scraper
 
 import (
-    "time"
     "strings"
     "strconv"
     "net/url"
@@ -24,9 +23,9 @@ type Poll struct {
     Choice4_Votes int
 
     VotingDuration int  // In seconds
-    VotingEndsAt time.Time
+    VotingEndsAt Timestamp
 
-    LastUpdatedAt time.Time
+    LastUpdatedAt Timestamp
 }
 
 func ParseAPIPoll(apiCard APICard) Poll {
@@ -36,21 +35,18 @@ func ParseAPIPoll(apiCard APICard) Poll {
     }
     id := int_or_panic(card_url.Hostname())
 
-    voting_ends_at, err := time.Parse(time.RFC3339, apiCard.BindingValues.EndDatetimeUTC.StringValue)
-    if err != nil {
-        panic(err)
-    }
-    last_updated_at, err := time.Parse(time.RFC3339, apiCard.BindingValues.LastUpdatedAt.StringValue)
-    if err != nil {
-        panic(err)
-    }
-
     ret := Poll{}
     ret.ID = PollID(id)
     ret.NumChoices = parse_num_choices(apiCard.Name)
     ret.VotingDuration = int_or_panic(apiCard.BindingValues.DurationMinutes.StringValue) * 60
-    ret.VotingEndsAt = voting_ends_at
-    ret.LastUpdatedAt = last_updated_at
+    ret.VotingEndsAt, err = TimestampFromString(apiCard.BindingValues.EndDatetimeUTC.StringValue)
+    if err != nil {
+        panic(err)
+    }
+    ret.LastUpdatedAt, err = TimestampFromString(apiCard.BindingValues.LastUpdatedAt.StringValue)
+    if err != nil {
+        panic(err)
+    }
 
     ret.Choice1 = apiCard.BindingValues.Choice1.StringValue
     ret.Choice1_Votes = int_or_panic(apiCard.BindingValues.Choice1_Count.StringValue)

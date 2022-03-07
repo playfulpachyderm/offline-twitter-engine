@@ -1,7 +1,6 @@
 package scraper
 
 import (
-    "time"
     "fmt"
     "strings"
     "regexp"
@@ -32,7 +31,7 @@ type User struct {
     FollowersCount        int
     Location              string
     Website               string
-    JoinDate              time.Time
+    JoinDate              Timestamp
     IsPrivate             bool
     IsVerified            bool
     IsBanned              bool
@@ -72,7 +71,7 @@ Joined %s
         terminal_utils.WrapText(u.Bio, 60),
         u.FollowingCount,
         u.FollowersCount,
-        terminal_utils.FormatDate(u.JoinDate),
+        terminal_utils.FormatDate(u.JoinDate.Time),
         u.Location,
         u.Website,
     )
@@ -100,7 +99,7 @@ func GetUnknownUserWithHandle(handle UserHandle) User {
         FollowingCount: 0,
         Location: "<blank>",
         Website:"<blank>",
-        JoinDate: time.Unix(0, 0),
+        JoinDate: TimestampFromUnix(0),
         IsVerified: false,
         IsPrivate: false,
         IsNeedingFakeID: true,
@@ -133,7 +132,7 @@ func ParseSingleUser(apiUser APIUser) (ret User, err error) {
     if len(apiUser.Entities.URL.Urls) > 0 {
         ret.Website = apiUser.Entities.URL.Urls[0].ExpandedURL
     }
-    ret.JoinDate, err = time.Parse(time.RubyDate, apiUser.CreatedAt)
+    ret.JoinDate, err = TimestampFromString(apiUser.CreatedAt)
     if err != nil {
         return
     }

@@ -1,10 +1,9 @@
 package persistence
 
 import (
-    "fmt"
-    "database/sql"
-    "time"
-    "offline_twitter/scraper"
+	"fmt"
+	"database/sql"
+	"offline_twitter/scraper"
 )
 
 /**
@@ -51,20 +50,19 @@ func (p Profile) SaveUser(u *scraper.User) error {
                pinned_tweet_id=?,
                is_content_downloaded=(is_content_downloaded or ?)
         `,
-        u.ID, u.DisplayName, u.Handle, u.Bio, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.JoinDate.Unix(), u.IsPrivate,
-        u.IsVerified, u.IsBanned, u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID,
-        u.IsContentDownloaded, u.IsIdFake,
+		u.ID, u.DisplayName, u.Handle, u.Bio, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.JoinDate, u.IsPrivate,
+		u.IsVerified, u.IsBanned, u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID,
+		u.IsContentDownloaded, u.IsIdFake,
 
-        u.Bio, u.DisplayName, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.IsPrivate, u.IsVerified, u.IsBanned,
-        u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID, u.IsContentDownloaded,
-    )
-    if err != nil {
-        return err
-    }
+		u.Bio, u.DisplayName, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.IsPrivate, u.IsVerified, u.IsBanned,
+		u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID, u.IsContentDownloaded,
+	)
+	if err != nil {
+		return err
+	}
 
-    return nil
+	return nil
 }
-
 
 /**
  * Check if the database has a User with the given user handle.
@@ -189,89 +187,89 @@ func (p Profile) GetUserByID(id scraper.UserID) (scraper.User, error) {
  * why the No Worsening Principle is needed.
  */
 func (p Profile) CheckUserContentDownloadNeeded(user scraper.User) bool {
-    row := p.DB.QueryRow(`select is_content_downloaded, profile_image_url, banner_image_url from users where id = ?`, user.ID)
+	row := p.DB.QueryRow(`select is_content_downloaded, profile_image_url, banner_image_url from users where id = ?`, user.ID)
 
-    var is_content_downloaded bool
-    var profile_image_url string
-    var banner_image_url string
-    err := row.Scan(&is_content_downloaded, &profile_image_url, &banner_image_url)
-    if err != nil {
-        if err == sql.ErrNoRows {
-            return true
-        } else {
-            panic(err)
-        }
-    }
+	var is_content_downloaded bool
+	var profile_image_url string
+	var banner_image_url string
+	err := row.Scan(&is_content_downloaded, &profile_image_url, &banner_image_url)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return true
+		} else {
+			panic(err)
+		}
+	}
 
-    if !is_content_downloaded {
-        return true
-    }
-    if banner_image_url != user.BannerImageUrl {
-        return true
-    }
-    if profile_image_url != user.ProfileImageUrl {
-        return true
-    }
-    return false
+	if !is_content_downloaded {
+		return true
+	}
+	if banner_image_url != user.BannerImageUrl {
+		return true
+	}
+	if profile_image_url != user.ProfileImageUrl {
+		return true
+	}
+	return false
 }
 
 /**
  * Follow / unfollow a user.  Update the given User object's IsFollowed field.
  */
 func (p Profile) SetUserFollowed(user *scraper.User, is_followed bool) {
-    result, err := p.DB.Exec("update users set is_followed = ? where id = ?", is_followed, user.ID)
-    if err != nil {
-        panic(fmt.Sprintf("Error inserting user with handle %q: %s", user.Handle, err.Error()))
-    }
-    count, err := result.RowsAffected()
-    if err != nil {
-        panic("Unknown error: " + err.Error())
-    }
-    if count != 1 {
-        panic(fmt.Sprintf("User with handle %q not found", user.Handle))
-    }
-    user.IsFollowed = is_followed
+	result, err := p.DB.Exec("update users set is_followed = ? where id = ?", is_followed, user.ID)
+	if err != nil {
+		panic(fmt.Sprintf("Error inserting user with handle %q: %s", user.Handle, err.Error()))
+	}
+	count, err := result.RowsAffected()
+	if err != nil {
+		panic("Unknown error: " + err.Error())
+	}
+	if count != 1 {
+		panic(fmt.Sprintf("User with handle %q not found", user.Handle))
+	}
+	user.IsFollowed = is_followed
 }
 
 func (p Profile) NextFakeUserID() scraper.UserID {
-    _, err := p.DB.Exec("update fake_user_sequence set latest_fake_id = latest_fake_id + 1")
-    if err != nil {
-        panic(err)
-    }
-    var ret scraper.UserID
-    err = p.DB.QueryRow("select latest_fake_id from fake_user_sequence").Scan(&ret)
-    if err != nil {
-        panic(err)
-    }
-    return ret
+	_, err := p.DB.Exec("update fake_user_sequence set latest_fake_id = latest_fake_id + 1")
+	if err != nil {
+		panic(err)
+	}
+	var ret scraper.UserID
+	err = p.DB.QueryRow("select latest_fake_id from fake_user_sequence").Scan(&ret)
+	if err != nil {
+		panic(err)
+	}
+	return ret
 }
 
 func (p Profile) GetAllFollowedUsers() []scraper.UserHandle {
-    rows, err := p.DB.Query("select handle from users where is_followed = 1")
-    if err != nil {
-        panic(err)
-    }
+	rows, err := p.DB.Query("select handle from users where is_followed = 1")
+	if err != nil {
+		panic(err)
+	}
 
-    ret := []scraper.UserHandle{}
+	ret := []scraper.UserHandle{}
 
-    var tmp scraper.UserHandle
+	var tmp scraper.UserHandle
 
-    for rows.Next() {
-        err = rows.Scan(&tmp)
-        if err != nil {
-            panic(err)
-        }
-        ret = append(ret, tmp)
-    }
+	for rows.Next() {
+		err = rows.Scan(&tmp)
+		if err != nil {
+			panic(err)
+		}
+		ret = append(ret, tmp)
+	}
 
-    return ret
+	return ret
 }
 
 func (p Profile) IsFollowing(handle scraper.UserHandle) bool {
-    for _, follow := range p.GetAllFollowedUsers() {
-        if follow == handle {
-            return true;
-        }
-    }
-    return false;
+	for _, follow := range p.GetAllFollowedUsers() {
+		if follow == handle {
+			return true
+		}
+	}
+	return false
 }

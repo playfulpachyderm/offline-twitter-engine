@@ -3,7 +3,6 @@ package persistence
 import (
 	"database/sql"
 	"strings"
-	"time"
 
 	"offline_twitter/scraper"
 )
@@ -30,12 +29,12 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
                is_conversation_scraped=(is_conversation_scraped or ?),
                last_scraped_at=max(last_scraped_at, ?)
         `,
-		t.ID, t.UserID, t.Text, t.PostedAt.Unix(), t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.InReplyToID,
+		t.ID, t.UserID, t.Text, t.PostedAt, t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.InReplyToID,
 		t.QuotedTweetID, scraper.JoinArrayOfHandles(t.Mentions), scraper.JoinArrayOfHandles(t.ReplyMentions),
-		strings.Join(t.Hashtags, ","), t.TombstoneType, t.IsStub, t.IsContentDownloaded, t.IsConversationScraped, t.LastScrapedAt.Unix(),
+		strings.Join(t.Hashtags, ","), t.TombstoneType, t.IsStub, t.IsContentDownloaded, t.IsConversationScraped, t.LastScrapedAt,
 
 		t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.IsStub, t.IsContentDownloaded, t.IsConversationScraped,
-		t.LastScrapedAt.Unix(),
+		t.LastScrapedAt,
 	)
 
 	if err != nil {
@@ -111,22 +110,17 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
 	defer stmt.Close()
 
 	var t scraper.Tweet
-	var postedAt int
-	var last_scraped_at int
 	var mentions string
 	var reply_mentions string
 	var hashtags string
 
 	row := stmt.QueryRow(id)
-	err = row.Scan(&t.ID, &t.UserID, &t.Text, &postedAt, &t.NumLikes, &t.NumRetweets, &t.NumReplies, &t.NumQuoteTweets, &t.InReplyToID,
+	err = row.Scan(&t.ID, &t.UserID, &t.Text, &t.PostedAt, &t.NumLikes, &t.NumRetweets, &t.NumReplies, &t.NumQuoteTweets, &t.InReplyToID,
 		&t.QuotedTweetID, &mentions, &reply_mentions, &hashtags, &t.TombstoneType, &t.IsStub, &t.IsContentDownloaded,
-		&t.IsConversationScraped, &last_scraped_at)
+		&t.IsConversationScraped, &t.LastScrapedAt)
 	if err != nil {
 		return t, err
 	}
-
-	t.PostedAt = time.Unix(int64(postedAt), 0) // args are `seconds` and `nanoseconds`
-	t.LastScrapedAt = time.Unix(int64(last_scraped_at), 0)
 
 	t.Mentions = []scraper.UserHandle{}
 	for _, m := range strings.Split(mentions, ",") {

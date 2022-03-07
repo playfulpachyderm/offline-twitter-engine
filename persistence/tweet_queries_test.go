@@ -2,12 +2,13 @@ package persistence_test
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/go-test/deep"
+
+	"offline_twitter/scraper"
 )
 
 /**
@@ -74,7 +75,7 @@ func TestNoWorseningTweet(t *testing.T) {
 	tweet.IsContentDownloaded = true
 	tweet.IsStub = false
 	tweet.IsConversationScraped = true
-	tweet.LastScrapedAt = time.Unix(1000, 0)
+	tweet.LastScrapedAt = scraper.TimestampFromUnix(1000)
 
 	// Save the tweet
 	err := profile.SaveTweet(tweet)
@@ -84,7 +85,7 @@ func TestNoWorseningTweet(t *testing.T) {
 	tweet.IsContentDownloaded = false
 	tweet.IsStub = true
 	tweet.IsConversationScraped = false
-	tweet.LastScrapedAt = time.Unix(500, 0)
+	tweet.LastScrapedAt = scraper.TimestampFromUnix(500)
 	err = profile.SaveTweet(tweet)
 	require.NoError(err)
 
@@ -113,7 +114,7 @@ func TestModifyTweet(t *testing.T) {
 	tweet.IsStub = true
 	tweet.IsContentDownloaded = false
 	tweet.IsConversationScraped = false
-	tweet.LastScrapedAt = time.Unix(1000, 0)
+	tweet.LastScrapedAt = scraper.TimestampFromUnix(1000)
 
 	err := profile.SaveTweet(tweet)
 	require.NoError(err)
@@ -125,7 +126,7 @@ func TestModifyTweet(t *testing.T) {
 	tweet.IsStub = false
 	tweet.IsContentDownloaded = true
 	tweet.IsConversationScraped = true
-	tweet.LastScrapedAt = time.Unix(2000, 0)
+	tweet.LastScrapedAt = scraper.TimestampFromUnix(2000)
 
 	err = profile.SaveTweet(tweet)
 	require.NoError(err)

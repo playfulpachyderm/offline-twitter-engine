@@ -1,12 +1,12 @@
 package persistence_test
 
 import (
-	"time"
 	"fmt"
 	"math/rand"
+	"time"
 
-	"offline_twitter/scraper"
 	"offline_twitter/persistence"
+	"offline_twitter/scraper"
 )
 
 /**
@@ -40,28 +40,27 @@ func create_or_load_profile(profile_path string) persistence.Profile {
 	return profile
 }
 
-
 /**
  * Create a stable user with a fixed ID and handle
  */
 func create_stable_user() scraper.User {
 	return scraper.User{
-		ID: scraper.UserID(-1),
-		DisplayName: "stable display name",
-		Handle: scraper.UserHandle("handle stable"),
-		Bio: "stable bio",
-		FollowersCount: 10,
-		FollowingCount: 2000,
-		Location: "stable location",
-		Website:"stable website",
-		JoinDate: time.Unix(10000000, 0),
-		IsVerified: true,
-		IsPrivate: false,
-		ProfileImageUrl: "stable profile image url",
+		ID:                    scraper.UserID(-1),
+		DisplayName:           "stable display name",
+		Handle:                scraper.UserHandle("handle stable"),
+		Bio:                   "stable bio",
+		FollowersCount:        10,
+		FollowingCount:        2000,
+		Location:              "stable location",
+		Website:               "stable website",
+		JoinDate:              scraper.TimestampFromUnix(10000000),
+		IsVerified:            true,
+		IsPrivate:             false,
+		ProfileImageUrl:       "stable profile image url",
 		ProfileImageLocalPath: "stable profile image local path",
-		BannerImageUrl: "stable banner image url",
-		BannerImageLocalPath: "stable image local path",
-		PinnedTweetID: scraper.TweetID(345),
+		BannerImageUrl:        "stable banner image url",
+		BannerImageLocalPath:  "stable image local path",
+		PinnedTweetID:         scraper.TweetID(345),
 	}
 }
 
@@ -107,24 +106,23 @@ func create_video_from_id(id int) scraper.Video {
  */
 func create_url_from_id(id int) scraper.Url {
 	s := fmt.Sprint(id)
-	return scraper.Url {
-		TweetID: -1,
-		Domain: s + "domain",
-		Text: s + "text",
-		ShortText: s + "shorttext",
-		Title: s + "title",
-		Description: s + "description",
-		ThumbnailWidth: id * 23,
-		ThumbnailHeight: id * 7,
-		ThumbnailRemoteUrl: s + "remote url",
-		ThumbnailLocalPath: s + "local path",
-		CreatorID: scraper.UserID(id),
-		SiteID: scraper.UserID(id),
-		HasCard: true,
+	return scraper.Url{
+		TweetID:             -1,
+		Domain:              s + "domain",
+		Text:                s + "text",
+		ShortText:           s + "shorttext",
+		Title:               s + "title",
+		Description:         s + "description",
+		ThumbnailWidth:      id * 23,
+		ThumbnailHeight:     id * 7,
+		ThumbnailRemoteUrl:  s + "remote url",
+		ThumbnailLocalPath:  s + "local path",
+		CreatorID:           scraper.UserID(id),
+		SiteID:              scraper.UserID(id),
+		HasCard:             true,
 		IsContentDownloaded: false,
 	}
 }
-
 
 /**
  * Create a semi-stable Poll based on the given ID
@@ -132,19 +130,18 @@ func create_url_from_id(id int) scraper.Url {
 func create_poll_from_id(id int) scraper.Poll {
 	s := fmt.Sprint(id)
 	return scraper.Poll{
-		ID: scraper.PollID(id),
-		TweetID: -1,
-		NumChoices: 2,
-		Choice1: s,
-		Choice1_Votes: 1000,
-		Choice2: "Not " + s,
-		Choice2_Votes: 1500,
+		ID:             scraper.PollID(id),
+		TweetID:        -1,
+		NumChoices:     2,
+		Choice1:        s,
+		Choice1_Votes:  1000,
+		Choice2:        "Not " + s,
+		Choice2_Votes:  1500,
 		VotingDuration: 10,
-		VotingEndsAt: time.Unix(10000000, 0),
-		LastUpdatedAt: time.Unix(10000, 0),
+		VotingEndsAt:   scraper.TimestampFromUnix(10000000),
+		LastUpdatedAt:  scraper.TimestampFromUnix(10000),
 	}
 }
-
 
 /**
  * Create a stable tweet with a fixed ID and content
@@ -152,13 +149,13 @@ func create_poll_from_id(id int) scraper.Poll {
 func create_stable_tweet() scraper.Tweet {
 	tweet_id := scraper.TweetID(-1)
 	return scraper.Tweet{
-		ID: tweet_id,
-		UserID: -1,
-		Text: "stable text",
-		PostedAt: time.Unix(10000000, 0),
-		NumLikes: 10,
-		NumRetweets: 10,
-		NumReplies: 10,
+		ID:             tweet_id,
+		UserID:         -1,
+		Text:           "stable text",
+		PostedAt:       scraper.TimestampFromUnix(10000000),
+		NumLikes:       10,
+		NumRetweets:    10,
+		NumReplies:     10,
 		NumQuoteTweets: 10,
 		Videos: []scraper.Video{
 			create_video_from_id(-1),
@@ -175,7 +172,7 @@ func create_stable_tweet() scraper.Tweet {
 			create_poll_from_id(-1),
 		},
 		IsConversationScraped: true,
-		LastScrapedAt: time.Unix(100000000, 0),
+		LastScrapedAt:         scraper.TimestampFromUnix(100000000),
 	}
 }
 
@@ -185,10 +182,10 @@ func create_stable_tweet() scraper.Tweet {
 func create_stable_retweet() scraper.Retweet {
 	retweet_id := scraper.TweetID(-1)
 	return scraper.Retweet{
-		RetweetID: retweet_id,
-		TweetID: -1,
+		RetweetID:     retweet_id,
+		TweetID:       -1,
 		RetweetedByID: -1,
-		RetweetedAt: time.Unix(20000000, 0),
+		RetweetedAt:   scraper.TimestampFromUnix(20000000),
 	}
 }
 
@@ -200,25 +197,24 @@ func create_dummy_user() scraper.User {
 	userID := rand.Int()
 
 	return scraper.User{
-		ID: scraper.UserID(userID),
-		DisplayName: "display name",
-		Handle: scraper.UserHandle(fmt.Sprintf("handle%d", userID)),
-		Bio: "bio",
-		FollowersCount: 0,
-		FollowingCount: 1000,
-		Location: "location",
-		Website:"website",
-		JoinDate: time.Now().Truncate(1e9),  // Round to nearest second
-		IsVerified: false,
-		IsPrivate: true,
-		ProfileImageUrl: "profile image url",
+		ID:                    scraper.UserID(userID),
+		DisplayName:           "display name",
+		Handle:                scraper.UserHandle(fmt.Sprintf("handle%d", userID)),
+		Bio:                   "bio",
+		FollowersCount:        0,
+		FollowingCount:        1000,
+		Location:              "location",
+		Website:               "website",
+		JoinDate:              scraper.Timestamp{time.Now().Truncate(1e9)}, // Round to nearest second
+		IsVerified:            false,
+		IsPrivate:             true,
+		ProfileImageUrl:       "profile image url",
 		ProfileImageLocalPath: "profile image local path",
-		BannerImageUrl: "banner image url",
-		BannerImageLocalPath: "banner image local path",
-		PinnedTweetID: scraper.TweetID(234),
+		BannerImageUrl:        "banner image url",
+		BannerImageLocalPath:  "banner image local path",
+		PinnedTweetID:         scraper.TweetID(234),
 	}
 }
-
 
 /**
  * Create a new tweet with a random ID and content
@@ -243,21 +239,21 @@ func create_dummy_tweet() scraper.Tweet {
 	poll.TweetID = tweet_id
 
 	return scraper.Tweet{
-		ID: tweet_id,
-		UserID: -1,
-		Text: "text",
-		PostedAt: time.Now().Truncate(1e9),  // Round to nearest second
-		NumLikes: 1,
-		NumRetweets: 2,
-		NumReplies: 3,
+		ID:             tweet_id,
+		UserID:         -1,
+		Text:           "text",
+		PostedAt:       scraper.Timestamp{time.Now().Truncate(1e9)}, // Round to nearest second
+		NumLikes:       1,
+		NumRetweets:    2,
+		NumReplies:     3,
 		NumQuoteTweets: 4,
-		Videos: []scraper.Video{vid},
-		Urls: []scraper.Url{url1, url2},
-		Images: []scraper.Image{img1, img2},
-		Mentions: []scraper.UserHandle{"mention1", "mention2"},
-		ReplyMentions: []scraper.UserHandle{"replymention1", "replymention2"},
-		Hashtags: []string{"hash1", "hash2"},
-		Polls: []scraper.Poll{poll},
+		Videos:         []scraper.Video{vid},
+		Urls:           []scraper.Url{url1, url2},
+		Images:         []scraper.Image{img1, img2},
+		Mentions:       []scraper.UserHandle{"mention1", "mention2"},
+		ReplyMentions:  []scraper.UserHandle{"replymention1", "replymention2"},
+		Hashtags:       []string{"hash1", "hash2"},
+		Polls:          []scraper.Poll{poll},
 	}
 }
 
@@ -287,9 +283,9 @@ func create_dummy_retweet(tweet_id scraper.TweetID) scraper.Retweet {
 	retweet_id := scraper.TweetID(rand.Int())
 
 	return scraper.Retweet{
-		RetweetID: retweet_id,
-		TweetID: tweet_id,
+		RetweetID:     retweet_id,
+		TweetID:       tweet_id,
 		RetweetedByID: -1,
-		RetweetedAt: time.Unix(20000000, 0),
+		RetweetedAt:   scraper.TimestampFromUnix(20000000),
 	}
 }

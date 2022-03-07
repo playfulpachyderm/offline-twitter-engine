@@ -18,7 +18,7 @@ type Tweet struct {
 	UserHandle       UserHandle  // For processing tombstones
 	User             *User
 	Text             string
-	PostedAt         time.Time
+	PostedAt         Timestamp
 	NumLikes         int
 	NumRetweets      int
 	NumReplies       int
@@ -39,7 +39,7 @@ type Tweet struct {
 
 	IsContentDownloaded bool
 	IsConversationScraped bool
-	LastScrapedAt time.Time
+	LastScrapedAt Timestamp
 }
 
 
@@ -58,7 +58,7 @@ func (t Tweet) String() string {
 Replies: %d      RT: %d      QT: %d      Likes: %d
 `,
 		author,
-		terminal_utils.FormatDate(t.PostedAt),
+		terminal_utils.FormatDate(t.PostedAt.Time),
 		terminal_utils.WrapText(t.Text, 60),
 		t.NumReplies,
 		t.NumRetweets,
@@ -91,7 +91,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 
 	// Process "posted-at" date and time
 	if apiTweet.TombstoneText == "" {  // Skip time parsing for tombstones
-		ret.PostedAt, err = time.Parse(time.RubyDate, apiTweet.CreatedAt)
+		ret.PostedAt, err = TimestampFromString(apiTweet.CreatedAt)
 		if err != nil {
 			return
 		}
@@ -175,7 +175,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	// Process tombstones and other metadata
 	ret.TombstoneType = apiTweet.TombstoneText
 	ret.IsStub = !(ret.TombstoneType == "")
-	ret.LastScrapedAt = time.Unix(0, 0)  // Caller will change this for the tweet that was actually scraped
+	ret.LastScrapedAt = TimestampFromUnix(0)  // Caller will change this for the tweet that was actually scraped
 	ret.IsConversationScraped = false  // Safe due to the "No Worsening" principle
 
 	return
@@ -251,7 +251,7 @@ func GetTweetFull(id TweetID) (trove TweetTrove, err error) {
 	if !ok {
 		panic("Trove didn't contain its own tweet!")
 	}
-	tweet.LastScrapedAt = time.Now()
+	tweet.LastScrapedAt = Timestamp{time.Now()}
 	tweet.IsConversationScraped = true
 	trove.Tweets[id] = tweet
 

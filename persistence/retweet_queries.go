@@ -1,8 +1,6 @@
 package persistence
 
 import (
-	"time"
-
 	"offline_twitter/scraper"
 )
 
@@ -35,14 +33,11 @@ func (p Profile) GetRetweetById(id scraper.TweetID) (scraper.Retweet, error) {
 	defer stmt.Close()
 
 	var r scraper.Retweet
-	var retweeted_at int
 
 	row := stmt.QueryRow(id)
-	err = row.Scan(&r.RetweetID, &r.TweetID, &r.RetweetedByID, &retweeted_at)
+	err = row.Scan(&r.RetweetID, &r.TweetID, &r.RetweetedByID, &r.RetweetedAt)
 	if err != nil {
 		return scraper.Retweet{}, err
 	}
-
-	r.RetweetedAt = time.Unix(int64(retweeted_at), 0)
 	return r, nil
 }

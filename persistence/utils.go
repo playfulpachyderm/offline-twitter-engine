@@ -12,6 +12,7 @@ type ErrNotInDatabase struct {
 	Table string
 	Value interface{}
 }
+
 func (err ErrNotInDatabase) Error() string {
 	return fmt.Sprintf("Not in database: %s %q", err.Table, err.Value)
 }

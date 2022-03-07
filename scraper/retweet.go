@@ -1,16 +1,12 @@
 package scraper
 
-import (
-	"time"
-)
-
 type Retweet struct {
 	RetweetID      TweetID
 	TweetID        TweetID
 	Tweet          *Tweet
 	RetweetedByID  UserID
 	RetweetedBy    *User
-	RetweetedAt    time.Time
+	RetweetedAt    Timestamp
 }
 
 func ParseSingleRetweet(apiTweet APITweet) (ret Retweet, err error) {
@@ -19,6 +15,9 @@ func ParseSingleRetweet(apiTweet APITweet) (ret Retweet, err error) {
 	ret.RetweetID = TweetID(apiTweet.ID)
 	ret.TweetID = TweetID(apiTweet.RetweetedStatusID)
 	ret.RetweetedByID = UserID(apiTweet.UserID)
-	ret.RetweetedAt, err = time.Parse(time.RubyDate, apiTweet.CreatedAt)
+	ret.RetweetedAt, err = TimestampFromString(apiTweet.CreatedAt)
+	if err != nil {
+		panic(err)
+	}
 	return
 }
