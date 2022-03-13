@@ -3,7 +3,7 @@ package scraper
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -41,7 +41,7 @@ func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		content, err := ioutil.ReadAll(resp.Body)
+		content, err := io.ReadAll(resp.Body)
 		if err != nil {
 			panic(err)
 		}
@@ -52,7 +52,7 @@ func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) 
 		return TweetResponse{}, fmt.Errorf("HTTP %s\n%s\n%s", resp.Status, s, content)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return TweetResponse{}, fmt.Errorf("Error reading response body for GetUserFeedFor(%d):\n  %w", user_id, err)
 	}
@@ -131,14 +131,14 @@ func (api API) GetTweet(id TweetID, cursor string) (TweetResponse, error) {
 	defer resp.Body.Close()
 
 	if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusForbidden) {
-		content, err := ioutil.ReadAll(resp.Body)
+		content, err := io.ReadAll(resp.Body)
 		if err != nil {
 			panic(err)
 		}
 		return TweetResponse{}, fmt.Errorf("Error getting %q.  HTTP %s: %s", req.URL, resp.Status, content)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return TweetResponse{}, fmt.Errorf("Error reading HTTP request:\n  %w", err)
 	}
@@ -209,14 +209,14 @@ func (api API) GetUser(handle UserHandle) (APIUser, error) {
 		// Sometimes it randomly gives 403 Forbidden.  API's fault, not ours
 		// We check for this below
 		if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusForbidden) {
-			content, err := ioutil.ReadAll(resp.Body)
+			content, err := io.ReadAll(resp.Body)
 			if err != nil {
 				panic(err)
 			}
 			return APIUser{}, fmt.Errorf("response status %s: %s", resp.Status, content)
 		}
 
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return APIUser{}, fmt.Errorf("Error retrieving API response to GetUser(%s):\n  %w", handle, err)
 		}
@@ -270,14 +270,14 @@ func (api API) Search(query string, cursor string) (TweetResponse, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		content, err := ioutil.ReadAll(resp.Body)
+		content, err := io.ReadAll(resp.Body)
 		if err != nil {
 			panic(err)
 		}
 		return TweetResponse{}, fmt.Errorf("Error while searching for %q.  HTTP %s: %s", req.URL, resp.Status, content)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return TweetResponse{}, fmt.Errorf("Error retrieving API response for Search(%q):\n  %w", query, err)
 	}

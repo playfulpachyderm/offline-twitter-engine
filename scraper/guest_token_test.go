@@ -1,8 +1,9 @@
 package scraper_test
 
 import (
-	"testing"
 	"fmt"
+	"testing"
+
 	. "offline_twitter/scraper"
 )
 
@@ -19,11 +20,10 @@ func TestGetGuestToken(t *testing.T) {
 	fmt.Println(token)
 }
 
-
 // Tests the caching.  Should run much much faster than an HTTP request, since all requests
 // other than the first use the cache.
 func BenchmarkGetGuestToken(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		GetGuestToken()  // nolint:errcheck  // Don't care about errors, just want to time it
+		GetGuestToken() // nolint:errcheck  // Don't care about errors, just want to time it
 	}
 }

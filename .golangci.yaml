@@ -13,6 +13,7 @@ linters:
   disable-all: true
   enable:
     - deadcode
+    - depguard
     - errcheck
     - gosimple
     - govet
@@ -342,14 +343,14 @@ linters-settings:
       - shadow
 
 
-#   depguard:
-#     list-type: blacklist
-#     include-go-root: false
-#     packages:
-#       - github.com/sirupsen/logrus
-#     packages-with-error-message:
-#       # specify an error message to output when a blacklisted package is used
-#       - github.com/sirupsen/logrus: "logging is allowed only by logutils.Log"
+  depguard:
+    list-type: blacklist
+    include-go-root: true
+    packages:
+      - io/ioutil
+    packages-with-error-message:
+      # specify an error message to output when a blacklisted package is used
+      - io/ioutil: "replace with the matching functions from `io` or `os` packages"
 
 #   ifshort:
 #     # Maximum length of variable declaration measured in number of lines, after which linter won't suggest using short syntax.

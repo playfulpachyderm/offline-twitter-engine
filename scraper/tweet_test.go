@@ -2,7 +2,7 @@ package scraper_test
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"testing"
 
     "github.com/stretchr/testify/assert"
@@ -12,7 +12,7 @@ import (
 )
 
 func load_tweet_from_file(filename string) Tweet{
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		panic(err)
 	}
@@ -174,7 +174,7 @@ func TestTweetWithPoll(t *testing.T) {
 
 func TestParseTweetResponse(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/michael_malice_feed.json")
+	data, err := os.ReadFile("test_responses/michael_malice_feed.json")
 	if err != nil {
 		panic(err)
 	}
@@ -193,7 +193,7 @@ func TestParseTweetResponse(t *testing.T) {
 
 func TestParseTweetResponseWithTombstones(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/tombstones/tombstone_deleted.json")
+	data, err := os.ReadFile("test_responses/tombstones/tombstone_deleted.json")
 	if err != nil {
 		panic(err)
 	}

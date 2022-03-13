@@ -2,7 +2,7 @@ package scraper_test
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"testing"
 
     "github.com/stretchr/testify/assert"
@@ -13,7 +13,7 @@ import (
 
 func TestParseSingleRetweet(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/tweet_that_is_a_retweet.json")
+	data, err := os.ReadFile("test_responses/tweet_that_is_a_retweet.json")
 	if err != nil {
 		panic(err)
 	}

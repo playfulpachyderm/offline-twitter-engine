@@ -2,7 +2,7 @@ package scraper_test
 
 import (
 	"testing"
-	"io/ioutil"
+	"os"
 	"encoding/json"
 	"fmt"
 
@@ -16,7 +16,7 @@ import (
  * Parse an  APIV2User
  */
 func TestAPIV2ParseUser(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/api_v2/user_michael_malice.json")
+	data, err := os.ReadFile("test_responses/api_v2/user_michael_malice.json")
 	if err != nil {
 		panic(err)
 	}
@@ -53,7 +53,7 @@ func TestAPIV2ParseUser(t *testing.T) {
  * Parse a plain text tweet
  */
 func TestAPIV2ParseTweet(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/api_v2/tweet_plaintext.json")
+	data, err := os.ReadFile("test_responses/api_v2/tweet_plaintext.json")
 	if err != nil {
 		panic(err)
 	}
@@ -102,7 +102,7 @@ func TestAPIV2ParseTweet(t *testing.T) {
  */
 func TestAPIV2ParseTweetWithQuotedTweet(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/api_v2/tweet_with_quoted_tweet.json")
+	data, err := os.ReadFile("test_responses/api_v2/tweet_with_quoted_tweet.json")
 	if err != nil {
 		panic(err)
 	}
@@ -156,7 +156,7 @@ func TestAPIV2ParseTweetWithQuotedTweet(t *testing.T) {
  */
 func TestAPIV2ParseRetweet(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/api_v2/retweet.json")
+	data, err := os.ReadFile("test_responses/api_v2/retweet.json")
 	if err != nil {
 		panic(err)
 	}
@@ -216,7 +216,7 @@ func TestAPIV2ParseRetweet(t *testing.T) {
  */
 func TestAPIV2ParseRetweetedQuoteTweet(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/api_v2/retweet_with_quote_tweet.json")
+	data, err := os.ReadFile("test_responses/api_v2/retweet_with_quote_tweet.json")
 	if err != nil {
 		panic(err)
 	}
@@ -276,7 +276,7 @@ func TestAPIV2ParseRetweetedQuoteTweet(t *testing.T) {
  */
 func TestAPIV2ParseTweetWithQuotedTombstone(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/api_v2/tweet_with_quoted_tombstone.json")
+	data, err := os.ReadFile("test_responses/api_v2/tweet_with_quoted_tombstone.json")
 	if err != nil {
 		panic(err)
 	}
@@ -312,7 +312,7 @@ func TestAPIV2ParseTweetWithQuotedTombstone(t *testing.T) {
  */
 func TestAPIV2ParseTweetWithURL(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/api_v2/tweet_with_url.json")
+	data, err := os.ReadFile("test_responses/api_v2/tweet_with_url.json")
 	if err != nil {
 		panic(err)
 	}
@@ -349,7 +349,7 @@ func TestAPIV2ParseTweetWithURL(t *testing.T) {
  */
 func TestAPIV2ParseTweetWithURLPlayerCard(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/api_v2/tweet_with_url_player_card.json")
+	data, err := os.ReadFile("test_responses/api_v2/tweet_with_url_player_card.json")
 	if err != nil {
 		panic(err)
 	}
@@ -381,7 +381,7 @@ func TestAPIV2ParseTweetWithURLPlayerCard(t *testing.T) {
  */
 func TestAPIV2ParseTweetWithURLRetweet(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/api_v2/retweet_with_url.json")
+	data, err := os.ReadFile("test_responses/api_v2/retweet_with_url.json")
 	if err != nil {
 		panic(err)
 	}
@@ -408,7 +408,7 @@ func TestAPIV2ParseTweetWithURLRetweet(t *testing.T) {
  */
 func TestAPIV2ParseTweetWithPoll(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/api_v2/tweet_with_poll.json")
+	data, err := os.ReadFile("test_responses/api_v2/tweet_with_poll.json")
 	if err != nil {
 		panic(err)
 	}
@@ -444,7 +444,7 @@ func TestAPIV2ParseTweetWithPoll(t *testing.T) {
 
 
 func TestParseAPIV2UserFeed(t *testing.T) {
-	data, err := ioutil.ReadFile("test_responses/api_v2/user_feed_apiv2.json")
+	data, err := os.ReadFile("test_responses/api_v2/user_feed_apiv2.json")
 	if err != nil {
 		panic(err)
 	}
@@ -501,7 +501,7 @@ func TestParseAPIV2UserFeed(t *testing.T) {
  */
 func TestAPIV2FeedIsEmpty(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/api_v2/empty_response.json")
+	data, err := os.ReadFile("test_responses/api_v2/empty_response.json")
 	if err != nil {
 		panic(err)
 	}
@@ -528,7 +528,7 @@ func TestAPIV2FeedIsEmpty(t *testing.T) {
  */
 func TestAPIV2GetMainInstructionFromFeed(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/api_v2/user_feed_apiv2.json")
+	data, err := os.ReadFile("test_responses/api_v2/user_feed_apiv2.json")
 	if err != nil {
 		panic(err)
 	}
@@ -555,7 +555,7 @@ func TestAPIV2GetMainInstructionFromFeed(t *testing.T) {
  */
 func TestAPIV2TombstoneEntry(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/api_v2/tombstone_tweet.json")
+	data, err := os.ReadFile("test_responses/api_v2/tombstone_tweet.json")
 	require.NoError(t, err)
 
 	var tweet_result APIV2Result
@@ -571,7 +571,7 @@ func TestAPIV2TombstoneEntry(t *testing.T) {
 
 func TestTweetWithWarning(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/api_v2/tweet_with_warning.json")
+	data, err := os.ReadFile("test_responses/api_v2/tweet_with_warning.json")
 	require.NoError(t, err)
 	var tweet_result APIV2Result
 	err = json.Unmarshal(data, &tweet_result)

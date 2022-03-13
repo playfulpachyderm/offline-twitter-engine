@@ -2,7 +2,7 @@ package scraper_test
 
 import (
     "testing"
-    "io/ioutil"
+    "os"
     "encoding/json"
 
     "github.com/stretchr/testify/assert"
@@ -13,7 +13,7 @@ import (
 
 func TestParseAPIUrlCard(t *testing.T) {
     assert := assert.New(t)
-    data, err := ioutil.ReadFile("test_responses/tweet_content/url_card.json")
+    data, err := os.ReadFile("test_responses/tweet_content/url_card.json")
     if err != nil {
         panic(err)
     }
@@ -38,7 +38,7 @@ func TestParseAPIUrlCard(t *testing.T) {
 
 func TestParseAPIUrlCardWithPlayer(t *testing.T) {
     assert := assert.New(t)
-    data, err := ioutil.ReadFile("test_responses/tweet_content/url_card_with_player.json")
+    data, err := os.ReadFile("test_responses/tweet_content/url_card_with_player.json")
     if err != nil {
         panic(err)
     }
@@ -60,7 +60,7 @@ func TestParseAPIUrlCardWithPlayer(t *testing.T) {
 
 func TestParseAPIUrlCardWithPlayerAndPlaceholderThumbnail(t *testing.T) {
     assert := assert.New(t)
-    data, err := ioutil.ReadFile("test_responses/tweet_content/url_card_with_player_placeholder_image.json")
+    data, err := os.ReadFile("test_responses/tweet_content/url_card_with_player_placeholder_image.json")
     if err != nil {
         panic(err)
     }
@@ -82,7 +82,7 @@ func TestParseAPIUrlCardWithPlayerAndPlaceholderThumbnail(t *testing.T) {
 
 func TestParseAPIUrlCardWithoutThumbnail(t *testing.T) {
     assert := assert.New(t)
-    data, err := ioutil.ReadFile("test_responses/tweet_content/url_card_without_thumbnail.json")
+    data, err := os.ReadFile("test_responses/tweet_content/url_card_without_thumbnail.json")
     if err != nil {
         panic(err)
     }

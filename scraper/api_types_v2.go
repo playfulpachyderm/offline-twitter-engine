@@ -1,13 +1,13 @@
 package scraper
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
-	"io/ioutil"
-	"time"
-	"encoding/json"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -397,7 +397,7 @@ func (api API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response, 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		content, err := ioutil.ReadAll(resp.Body)
+		content, err := io.ReadAll(resp.Body)
 		if err != nil {
 			panic(err)
 		}
@@ -408,7 +408,7 @@ func (api API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response, 
 		return APIV2Response{}, fmt.Errorf("HTTP %s\n%s\n%s", resp.Status, s, content)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return APIV2Response{}, fmt.Errorf("Error reading HTTP response body:\n  %w", err)
 	}

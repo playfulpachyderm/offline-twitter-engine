@@ -2,7 +2,7 @@ package scraper_test
 
 import (
     "testing"
-    "io/ioutil"
+    "os"
     "encoding/json"
 
     "github.com/stretchr/testify/assert"
@@ -13,7 +13,7 @@ import (
 
 func TestParsePoll2Choices(t *testing.T) {
     assert := assert.New(t)
-    data, err := ioutil.ReadFile("test_responses/tweet_content/poll_card_2_options.json")
+    data, err := os.ReadFile("test_responses/tweet_content/poll_card_2_options.json")
     if err != nil {
         panic(err)
     }
@@ -37,7 +37,7 @@ func TestParsePoll2Choices(t *testing.T) {
 
 func TestParsePoll4Choices(t *testing.T) {
     assert := assert.New(t)
-    data, err := ioutil.ReadFile("test_responses/tweet_content/poll_card_4_options_ended.json")
+    data, err := os.ReadFile("test_responses/tweet_content/poll_card_4_options_ended.json")
     if err != nil {
         panic(err)
     }

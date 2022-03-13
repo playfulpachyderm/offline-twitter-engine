@@ -2,7 +2,7 @@ package scraper_test
 
 import (
 	"testing"
-	"io/ioutil"
+	"os"
 	"encoding/json"
 
 	"github.com/stretchr/testify/assert"
@@ -42,7 +42,7 @@ func TestNormalizeContent(t *testing.T) {
 	}
 
 	for _, v := range test_cases {
-		data, err := ioutil.ReadFile(v.filename)
+		data, err := os.ReadFile(v.filename)
 		if err != nil {
 			panic(err)
 		}
@@ -63,7 +63,7 @@ func TestNormalizeContent(t *testing.T) {
 
 func TestUserProfileToAPIUser(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/michael_malice_user_profile.json")
+	data, err := os.ReadFile("test_responses/michael_malice_user_profile.json")
 	if err != nil {
 		panic(err)
 	}
@@ -79,7 +79,7 @@ func TestUserProfileToAPIUser(t *testing.T) {
 
 func TestGetCursor(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/midriffs_anarchist_cookbook.json")
+	data, err := os.ReadFile("test_responses/midriffs_anarchist_cookbook.json")
 	if err != nil {
 		panic(err)
 	}
@@ -102,7 +102,7 @@ func TestIsEndOfFeed(t *testing.T) {
 		{"test_responses/kwiber_end_of_feed.json", true},
 	}
 	for _, v := range test_cases {
-		data, err := ioutil.ReadFile(v.filename)
+		data, err := os.ReadFile(v.filename)
 		if err != nil {
 			panic(err)
 		}
@@ -116,7 +116,7 @@ func TestIsEndOfFeed(t *testing.T) {
 
 func TestHandleTombstonesHidden(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/tombstones/tombstone_hidden_1.json")
+	data, err := os.ReadFile("test_responses/tombstones/tombstone_hidden_1.json")
 	if err != nil {
 		panic(err)
 	}
@@ -146,7 +146,7 @@ func TestHandleTombstonesHidden(t *testing.T) {
 
 func TestHandleTombstonesDeleted(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/tombstones/tombstone_deleted.json")
+	data, err := os.ReadFile("test_responses/tombstones/tombstone_deleted.json")
 	if err != nil {
 		panic(err)
 	}
@@ -169,7 +169,7 @@ func TestHandleTombstonesDeleted(t *testing.T) {
 
 func TestHandleTombstonesUnavailable(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/tombstones/tombstone_unavailable.json")
+	data, err := os.ReadFile("test_responses/tombstones/tombstone_unavailable.json")
 	if err != nil {
 		panic(err)
 	}

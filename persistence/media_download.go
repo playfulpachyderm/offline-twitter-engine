@@ -2,7 +2,7 @@ package persistence
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"path"
@@ -34,7 +34,7 @@ func (d DefaultDownloader) Curl(url string, outpath string) error {
 		return fmt.Errorf("Error %s: %s", url, resp.Status)
 	}
 
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("Error downloading image %s:\n  %w", url, err)
 	}

@@ -2,7 +2,7 @@ package scraper_test
 
 import (
     "testing"
-    "io/ioutil"
+    "os"
     "encoding/json"
 
     "github.com/stretchr/testify/assert"
@@ -13,7 +13,7 @@ import (
 
 func TestParseAPIVideo(t *testing.T) {
     assert := assert.New(t)
-    data, err := ioutil.ReadFile("test_responses/tweet_content/video.json")
+    data, err := os.ReadFile("test_responses/tweet_content/video.json")
     if err != nil {
         panic(err)
     }

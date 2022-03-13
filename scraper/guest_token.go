@@ -1,11 +1,12 @@
 package scraper
 
-import "fmt"
-import "time"
-
-import "io/ioutil"
-import "net/http"
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"time"
+)
 
 type GuestTokenResponse struct {
 	Token       string `json:"guest_token"`
@@ -34,14 +35,14 @@ func GetGuestToken() (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		content, err := ioutil.ReadAll(resp.Body)
+		content, err := io.ReadAll(resp.Body)
 		if err != nil {
 			panic(err)
 		}
 		return "", fmt.Errorf("HTTP %s: %s", resp.Status, content)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("Error reading HTTP response body:\n  %w", err)
 	}

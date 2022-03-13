@@ -3,7 +3,7 @@ package scraper_test
 import (
 	"testing"
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"net/http"
 
 	"github.com/jarcoal/httpmock"
@@ -15,7 +15,7 @@ import (
 
 func TestParseSingleUser(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/michael_malice_user_profile.json")
+	data, err := os.ReadFile("test_responses/michael_malice_user_profile.json")
 	if err != nil {
 		panic(err)
 	}
@@ -54,7 +54,7 @@ func TestParseSingleUser(t *testing.T) {
  */
 func TestParseBannedUser(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/suspended_user.json")
+	data, err := os.ReadFile("test_responses/suspended_user.json")
 	if err != nil {
 		panic(err)
 	}
@@ -79,7 +79,7 @@ func TestParseBannedUser(t *testing.T) {
  */
 func TestParseDeletedUser(t *testing.T) {
 	assert := assert.New(t)
-	data, err := ioutil.ReadFile("test_responses/deleted_user.json")
+	data, err := os.ReadFile("test_responses/deleted_user.json")
 	if err != nil {
 		panic(err)
 	}
