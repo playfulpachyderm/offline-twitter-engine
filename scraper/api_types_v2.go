@@ -378,12 +378,12 @@ func (api API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response, 
 	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequest("GET", get_graphql_user_timeline_url(user_id, cursor), nil)
 	if err != nil {
-		return APIV2Response{}, err
+		return APIV2Response{}, fmt.Errorf("Error initializing HTTP request:\n  %w", err)
 	}
 
 	err = ApiRequestAddTokens(req)
 	if err != nil {
-		return APIV2Response{}, err
+		return APIV2Response{}, fmt.Errorf("Error adding tokens to HTTP request:\n  %w", err)
 	}
 
 	if cursor != "" {
@@ -392,7 +392,7 @@ func (api API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response, 
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return APIV2Response{}, err
+		return APIV2Response{}, fmt.Errorf("Error executing HTTP request:\n  %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -410,13 +410,16 @@ func (api API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response, 
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return APIV2Response{}, err
+		return APIV2Response{}, fmt.Errorf("Error reading HTTP response body:\n  %w", err)
 	}
 	log.Debug(string(body))
 
 	var response APIV2Response
 	err = json.Unmarshal(body, &response)
-	return response, err
+	if err != nil {
+		return response, fmt.Errorf("Error parsing API response for GetGraphqlFeedFor(%d):\n  %w", user_id, err)
+	}
+	return response, nil
 }
 
 /**

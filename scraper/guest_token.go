@@ -22,13 +22,13 @@ func GetGuestToken() (string, error) {
 	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequest("POST", "https://api.twitter.com/1.1/guest/activate.json", nil)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error initializing HTTP request:\n  %w", err)
 	}
-	req.Header.Set("Authorization", "Bearer " + BEARER_TOKEN)
+	req.Header.Set("Authorization", "Bearer "+BEARER_TOKEN)
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error executing HTTP request:\n  %w", err)
 	}
 
 	defer resp.Body.Close()
@@ -43,12 +43,12 @@ func GetGuestToken() (string, error) {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error reading HTTP response body:\n  %w", err)
 	}
 
 	err = json.Unmarshal(body, &guestToken)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Error parsing API response:\n  %w", err)
 	}
 
 	guestToken.RefreshedAt = time.Now()

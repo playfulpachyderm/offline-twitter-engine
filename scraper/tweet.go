@@ -200,7 +200,7 @@ func GetTweet(id TweetID) (Tweet, error) {
 	single_tweet, ok := tweet_response.GlobalObjects.Tweets[fmt.Sprint(id)]
 
 	if !ok {
-		return Tweet{}, fmt.Errorf("Didn't get the tweet!\n%v", tweet_response)
+		return Tweet{}, fmt.Errorf("Didn't get the tweet!")
 	}
 
 	return ParseSingleTweet(single_tweet)

@@ -20,12 +20,12 @@ func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) 
 	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s%d.json", API_USER_TIMELINE_BASE_PATH, user_id), nil)
 	if err != nil {
-		return TweetResponse{}, err
+		return TweetResponse{}, fmt.Errorf("Error initializing HTTP request for GetFeedFor(%d):\n  %w", user_id, err)
 	}
 
 	err = ApiRequestAddTokens(req)
 	if err != nil {
-		return TweetResponse{}, err
+		return TweetResponse{}, fmt.Errorf("Error adding tokens to HTTP request:\n  %w", err)
 	}
 
 	ApiRequestAddAllParams(req)
@@ -36,7 +36,7 @@ func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) 
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return TweetResponse{}, err
+		return TweetResponse{}, fmt.Errorf("Error executing HTTP request for GetFeedFor(%d):\n  %w", user_id, err)
 	}
 	defer resp.Body.Close()
 
@@ -54,13 +54,16 @@ func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) 
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return TweetResponse{}, err
+		return TweetResponse{}, fmt.Errorf("Error reading response body for GetUserFeedFor(%d):\n  %w", user_id, err)
 	}
 	log.Debug(string(body))
 
 	var response TweetResponse
 	err = json.Unmarshal(body, &response)
-	return response, err
+	if err != nil {
+		return response, fmt.Errorf("Error parsing API response for GetUserFeedFor(%d):\n  %w", user_id, err)
+	}
+	return response, nil
 }
 
 /**
@@ -104,17 +107,16 @@ func (api API) GetMoreTweetsFromFeed(user_id UserID, response *TweetResponse, mi
 	return nil
 }
 
-
 func (api API) GetTweet(id TweetID, cursor string) (TweetResponse, error) {
 	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s%d.json", API_CONVERSATION_BASE_PATH, id), nil)
 	if err != nil {
-		return TweetResponse{}, err
+		return TweetResponse{}, fmt.Errorf("Error initializing HTTP request:\n  %w", err)
 	}
 
 	err = ApiRequestAddTokens(req)
 	if err != nil {
-		return TweetResponse{}, err
+		return TweetResponse{}, fmt.Errorf("Error adding tokens to HTTP request:\n  %w", err)
 	}
 
 	ApiRequestAddAllParams(req)
@@ -124,7 +126,7 @@ func (api API) GetTweet(id TweetID, cursor string) (TweetResponse, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return TweetResponse{}, err
+		return TweetResponse{}, fmt.Errorf("Error executing HTTP request:\n  %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -138,13 +140,16 @@ func (api API) GetTweet(id TweetID, cursor string) (TweetResponse, error) {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return TweetResponse{}, err
+		return TweetResponse{}, fmt.Errorf("Error reading HTTP request:\n  %w", err)
 	}
 	log.Debug(string(body))
 
 	var response TweetResponse
 	err = json.Unmarshal(body, &response)
-	return response, err
+	if err != nil {
+		return response, fmt.Errorf("Error parsing API response for GetTweet(%d):\n  %w", id, err)
+	}
+	return response, nil
 }
 
 // Resend the request to get more replies if necessary
@@ -178,27 +183,26 @@ func UpdateQueryCursor(req *http.Request, new_cursor string, is_tweet bool) {
 	req.URL.RawQuery = query.Encode()
 }
 
-
 func (api API) GetUser(handle UserHandle) (APIUser, error) {
 	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequest(
 		"GET",
-		"https://api.twitter.com/graphql/4S2ihIKfF3xhp-ENxvUAfQ/UserByScreenName?variables=%7B%22screen_name%22%3A%22" + string(handle) +
+		"https://api.twitter.com/graphql/4S2ihIKfF3xhp-ENxvUAfQ/UserByScreenName?variables=%7B%22screen_name%22%3A%22"+string(handle)+
 			"%22%2C%22withHighlightedLabel%22%3Atrue%7D",
 		nil)
 	if err != nil {
-		return APIUser{}, err
+		return APIUser{}, fmt.Errorf("Error initializing HTTP request:\n  %w", err)
 	}
 	err = ApiRequestAddTokens(req)
 	if err != nil {
-		return APIUser{}, err
+		return APIUser{}, fmt.Errorf("Error adding tokens to HTTP request:\n  %w", err)
 	}
 
 	var response UserResponse
 	for retries := 0; retries < 3; retries += 1 {
 		resp, err := client.Do(req)
 		if err != nil {
-			return APIUser{}, err
+			return APIUser{}, fmt.Errorf("Error executing HTTP request for GetUser(%s):\n  %w", handle, err)
 		}
 		defer resp.Body.Close()
 
@@ -214,13 +218,13 @@ func (api API) GetUser(handle UserHandle) (APIUser, error) {
 
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return APIUser{}, err
+			return APIUser{}, fmt.Errorf("Error retrieving API response to GetUser(%s):\n  %w", handle, err)
 		}
 		log.Debug(string(body))
 
 		err = json.Unmarshal(body, &response)
 		if err != nil {
-			return APIUser{}, err
+			return APIUser{}, fmt.Errorf("Error parsing API response to GetUser(%s):\n  %w", handle, err)
 		}
 
 		// Retry ONLY if the error is code 50 (random authentication failure), NOT on real errors
@@ -240,16 +244,16 @@ func (api API) Search(query string, cursor string) (TweetResponse, error) {
 	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequest(
 		"GET",
-		"https://twitter.com/i/api/2/search/adaptive.json?count=50&spelling_corrections=1&query_source=typed_query&pc=1&q=" +
+		"https://twitter.com/i/api/2/search/adaptive.json?count=50&spelling_corrections=1&query_source=typed_query&pc=1&q="+
 			url.QueryEscape(query),
 		nil)
 	if err != nil {
-		return TweetResponse{}, err
+		return TweetResponse{}, fmt.Errorf("Error initializing HTTP request:\n  %w", err)
 	}
 
 	err = ApiRequestAddTokens(req)
 	if err != nil {
-		return TweetResponse{}, err
+		return TweetResponse{}, fmt.Errorf("Error adding tokens to HTTP request:\n  %w", err)
 	}
 
 	ApiRequestAddAllParams(req)
@@ -261,7 +265,7 @@ func (api API) Search(query string, cursor string) (TweetResponse, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return TweetResponse{}, err
+		return TweetResponse{}, fmt.Errorf("Error executing HTTP request for Search(%q):\n  %w", query, err)
 	}
 	defer resp.Body.Close()
 
@@ -275,13 +279,16 @@ func (api API) Search(query string, cursor string) (TweetResponse, error) {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return TweetResponse{}, err
+		return TweetResponse{}, fmt.Errorf("Error retrieving API response for Search(%q):\n  %w", query, err)
 	}
 	// fmt.Println(string(body))
 
 	var response TweetResponse
 	err = json.Unmarshal(body, &response)
-	return response, err
+	if err != nil {
+		return response, fmt.Errorf("Error parsing API response to Search(%q):\n  %w", query, err)
+	}
+	return response, nil
 }
 
 func (api API) GetMoreTweetsFromSearch(query string, response *TweetResponse, max_results int) error {
@@ -311,10 +318,9 @@ func (api API) GetMoreTweetsFromSearch(query string, response *TweetResponse, ma
 	return nil
 }
 
-
 // Add Bearer token and guest token
 func ApiRequestAddTokens(req *http.Request) error {
-	req.Header.Set("Authorization", "Bearer " + BEARER_TOKEN)
+	req.Header.Set("Authorization", "Bearer "+BEARER_TOKEN)
 	req.Header.Set("x-twitter-client-language", "en")
 
 	guestToken, err := GetGuestToken()

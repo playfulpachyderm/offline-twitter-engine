@@ -28,7 +28,7 @@ func (d DefaultDownloader) Curl(url string, outpath string) error {
 	println(url)
 	resp, err := http.Get(url)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error executing HTTP GET(%q):\n  %w", url, err)
 	}
 	if resp.StatusCode != 200 {
 		return fmt.Errorf("Error %s: %s", url, resp.Status)
@@ -53,7 +53,7 @@ func (p Profile) download_tweet_image(img *scraper.Image, downloader MediaDownlo
 	outfile := path.Join(p.ProfileDir, "images", img.LocalFilename)
 	err := downloader.Curl(img.RemoteURL, outfile)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error downloading tweet image (TweetID %d):\n  %w", img.TweetID, err)
 	}
 	img.IsDownloaded = true
 	return p.SaveImage(*img)
@@ -67,14 +67,14 @@ func (p Profile) download_tweet_video(v *scraper.Video, downloader MediaDownload
 	outfile := path.Join(p.ProfileDir, "videos", v.LocalFilename)
 	err := downloader.Curl(v.RemoteURL, outfile)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error downloading video (TweetID %d):\n  %w", v.TweetID, err)
 	}
 
 	// Download the thumbnail
 	outfile = path.Join(p.ProfileDir, "video_thumbnails", v.ThumbnailLocalPath)
 	err = downloader.Curl(v.ThumbnailRemoteUrl, outfile)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error downloading video thumbnail (TweetID %d):\n  %w", v.TweetID, err)
 	}
 
 	v.IsDownloaded = true
@@ -89,7 +89,7 @@ func (p Profile) download_link_thumbnail(url *scraper.Url, downloader MediaDownl
 		outfile := path.Join(p.ProfileDir, "link_preview_images", url.ThumbnailLocalPath)
 		err := downloader.Curl(url.ThumbnailRemoteUrl, outfile)
 		if err != nil {
-			return err
+			return fmt.Errorf("Error downloading link thumbnail (TweetID %d):\n  %w", url.TweetID, err)
 		}
 	}
 	url.IsContentDownloaded = true
@@ -166,7 +166,7 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
 
 	err := downloader.Curl(target_url, outfile)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error downloading profile image for user %q:\n  %w", u.Handle, err)
 	}
 
 	// Skip it if there's no banner image
@@ -179,7 +179,7 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
 			err = downloader.Curl(u.BannerImageUrl+"/600x200", outfile)
 		}
 		if err != nil {
-			return err
+			return fmt.Errorf("Error downloading banner image for user %q:\n  %w", u.Handle, err)
 		}
 	}
 

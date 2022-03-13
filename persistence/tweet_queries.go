@@ -2,8 +2,9 @@ package persistence
 
 import (
 	"database/sql"
-	"strings"
 	"errors"
+	"fmt"
+	"strings"
 
 	"offline_twitter/scraper"
 )
@@ -37,7 +38,7 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
 	)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("Error executing SaveTweet(ID %d):\n  %w", t.ID, err)
 	}
 	for _, url := range t.Urls {
 		err := p.SaveUrl(url)
@@ -60,7 +61,7 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
 	for _, hashtag := range t.Hashtags {
 		_, err := db.Exec("insert into hashtags (tweet_id, text) values (?, ?) on conflict do nothing", t.ID, hashtag)
 		if err != nil {
-			return err
+			return fmt.Errorf("Error inserting hashtag %q on tweet ID %d:\n  %w", hashtag, t.ID, err)
 		}
 	}
 	for _, poll := range t.Polls {
@@ -72,7 +73,7 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
 
 	err = tx.Commit()
 	if err != nil {
-		return err
+		return fmt.Errorf("Error committing SaveTweet transaction:\n  %w", err)
 	}
 	return nil
 }
@@ -104,7 +105,7 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
     `)
 
 	if err != nil {
-		return scraper.Tweet{}, err
+		return scraper.Tweet{}, fmt.Errorf("Error preparing statement in GetTweetByID(%d):\n  %w", id, err)
 	}
 	defer stmt.Close()
 
@@ -118,7 +119,7 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
 		&t.QuotedTweetID, &mentions, &reply_mentions, &hashtags, &t.TombstoneType, &t.IsStub, &t.IsContentDownloaded,
 		&t.IsConversationScraped, &t.LastScrapedAt)
 	if err != nil {
-		return t, err
+		return t, fmt.Errorf("Error parsing result in GetTweetByID(%d):\n  %w", id, err)
 	}
 
 	t.Mentions = []scraper.UserHandle{}

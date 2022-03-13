@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+
 	sql "github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/reflectx"
 	_ "github.com/mattn/go-sqlite3"
@@ -51,7 +52,7 @@ func NewProfile(target_dir string) (Profile, error) {
 	fmt.Printf("Creating new profile: %s\n", target_dir)
 	err := os.Mkdir(target_dir, os.FileMode(0755))
 	if err != nil {
-		return Profile{}, err
+		return Profile{}, fmt.Errorf("Error creating directory %q:\n  %w", target_dir, err)
 	}
 
 	// Create `twitter.db`
@@ -66,46 +67,46 @@ func NewProfile(target_dir string) (Profile, error) {
 	settings := Settings{}
 	data, err := yaml.Marshal(&settings)
 	if err != nil {
-		return Profile{}, err
+		return Profile{}, fmt.Errorf("Error YAML-marshalling [empty!] settings file:\n  %w", err)
 	}
 	err = os.WriteFile(settings_file, data, os.FileMode(0644))
 	if err != nil {
-		return Profile{}, err
+		return Profile{}, fmt.Errorf("Error creating settings file %q:\n  %w", settings_file, err)
 	}
 
 	// Create `profile_images`
 	fmt.Printf("Creating............. %s/\n", profile_images_dir)
 	err = os.Mkdir(profile_images_dir, os.FileMode(0755))
 	if err != nil {
-		return Profile{}, err
+		return Profile{}, fmt.Errorf("Error creating %q:\n  %w", profile_images_dir, err)
 	}
 
 	// Create `link_thumbnail_images`
 	fmt.Printf("Creating............. %s/\n", link_thumbnails_dir)
 	err = os.Mkdir(link_thumbnails_dir, os.FileMode(0755))
 	if err != nil {
-		return Profile{}, err
+		return Profile{}, fmt.Errorf("Error creating %q:\n  %w", link_thumbnails_dir, err)
 	}
 
 	// Create `images`
 	fmt.Printf("Creating............. %s/\n", images_dir)
 	err = os.Mkdir(images_dir, os.FileMode(0755))
 	if err != nil {
-		return Profile{}, err
+		return Profile{}, fmt.Errorf("Error creating %q:\n  %w", images_dir, err)
 	}
 
 	// Create `videos`
 	fmt.Printf("Creating............. %s/\n", videos_dir)
 	err = os.Mkdir(videos_dir, os.FileMode(0755))
 	if err != nil {
-		return Profile{}, err
+		return Profile{}, fmt.Errorf("Error creating %q:\n  %w", videos_dir, err)
 	}
 
 	// Create `video_thumbnails`
 	fmt.Printf("Creating............. %s/\n", video_thumbnails_dir)
 	err = os.Mkdir(video_thumbnails_dir, os.FileMode(0755))
 	if err != nil {
-		return Profile{}, err
+		return Profile{}, fmt.Errorf("Error creating %q:\n  %w", video_thumbnails_dir, err)
 	}
 
 	return Profile{target_dir, settings, db}, nil
@@ -135,12 +136,12 @@ func LoadProfile(profile_dir string) (Profile, error) {
 
 	settings_data, err := os.ReadFile(settings_file)
 	if err != nil {
-		return Profile{}, err
+		return Profile{}, fmt.Errorf("Error reading %q:\n  %w", settings_file, err)
 	}
 	settings := Settings{}
 	err = yaml.Unmarshal(settings_data, &settings)
 	if err != nil {
-		return Profile{}, err
+		return Profile{}, fmt.Errorf("Error YAML-unmarshalling %q:\n  %w", settings_file, err)
 	}
 
 	db := sql.MustOpen("sqlite3", fmt.Sprintf("%s?_foreign_keys=on&_journal_mode=WAL", sqlite_file))

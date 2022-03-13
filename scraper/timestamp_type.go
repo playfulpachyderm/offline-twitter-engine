@@ -1,9 +1,9 @@
 package scraper
 
 import (
-	"time"
-	"fmt"
 	"database/sql/driver"
+	"fmt"
+	"time"
 )
 
 type Timestamp struct {
@@ -11,7 +11,7 @@ type Timestamp struct {
 }
 
 func (t Timestamp) Value() (driver.Value, error) {
-    return t.Unix(), nil
+	return t.Unix(), nil
 }
 
 func (t *Timestamp) Scan(src interface{}) error {
@@ -32,7 +32,7 @@ func TimestampFromString(s string) (Timestamp, error) {
 	if err == nil {
 		return Timestamp{tmp}, nil
 	}
-	return Timestamp{}, err
+	return Timestamp{}, fmt.Errorf("Error parsing timestamp:\n  %w", err)
 }
 
 func TimestampFromUnix(num int64) Timestamp {

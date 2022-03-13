@@ -87,7 +87,7 @@ func (p Profile) GetDatabaseVersion() (int, error) {
 
 	err := row.Scan(&version)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("Error checking database version:\n  %w", err)
 	}
 	return version, nil
 }

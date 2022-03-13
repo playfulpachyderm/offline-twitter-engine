@@ -23,7 +23,7 @@ linters:
     - unused
     - varcheck
     - whitespace
-    # - wrapcheck
+    - wrapcheck
     - lll
     - godox
     - errorlint
@@ -533,17 +533,11 @@ linters-settings:
 #     multi-if: false   # Enforces newlines (or comments) after every multi-line if statement
 #     multi-func: false # Enforces newlines (or comments) after every multi-line function signature
 
-#   wrapcheck:
-#     # An array of strings that specify substrings of signatures to ignore.
-#     # If this set, it will override the default set of ignored signatures.
-#     # See https://github.com/tomarrell/wrapcheck#configuration for more information.
-#     ignoreSigs:
-#       - .Errorf(
-#       - errors.New(
-#       - errors.Unwrap(
-#       - .Wrap(
-#       - .Wrapf(
-#       - .WithMessage(
+  wrapcheck:
+    # An array of strings that specify substrings of signatures to ignore.
+    # If this set, it will override the default set of ignored signatures.
+    # See https://github.com/tomarrell/wrapcheck#configuration for more information.
+    ignoreSigs:
 
 #   # The custom section can be used to define linter plugins to be loaded at runtime.
 #   # See README doc for more info.

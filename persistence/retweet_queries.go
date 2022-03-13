@@ -1,6 +1,8 @@
 package persistence
 
 import (
+	"fmt"
+
 	"offline_twitter/scraper"
 )
 
@@ -15,7 +17,10 @@ func (p Profile) SaveRetweet(r scraper.Retweet) error {
 		`,
 		r.RetweetID, r.TweetID, r.RetweetedByID, r.RetweetedAt.Unix(),
 	)
-	return err
+	if err != nil {
+		return fmt.Errorf("Error executing SaveRetweet(%d):\n  %w", r.RetweetID, err)
+	}
+	return nil
 }
 
 /**
@@ -28,5 +33,8 @@ func (p Profile) GetRetweetById(id scraper.TweetID) (scraper.Retweet, error) {
 		  from retweets
 		 where retweet_id = ?
 	`, id)
-	return r, err
+	if err != nil {
+		return r, fmt.Errorf("Error executing GetRetweetById(%d):\n  %w", id, err)
+	}
+	return r, nil
 }

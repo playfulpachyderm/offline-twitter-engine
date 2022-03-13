@@ -1,9 +1,10 @@
 package persistence
 
 import (
-	"fmt"
-	"errors"
 	"database/sql"
+	"errors"
+	"fmt"
+
 	"offline_twitter/scraper"
 )
 
@@ -59,7 +60,7 @@ func (p Profile) SaveUser(u *scraper.User) error {
 		u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID, u.IsContentDownloaded,
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error executing SaveUser(%s):\n  %w", u.Handle, err)
 	}
 
 	return nil
@@ -140,7 +141,10 @@ func (p Profile) GetUserByID(id scraper.UserID) (scraper.User, error) {
 	if errors.Is(err, sql.ErrNoRows) {
 		return ret, ErrNotInDatabase{"User", id}
 	}
-	return ret, err
+	if err != nil {
+		panic(err)
+	}
+	return ret, nil
 }
 
 /**
