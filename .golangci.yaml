@@ -27,9 +27,16 @@ linters:
     - lll
     - godox
     - errorlint
+    - nolintlint
 
 
-# # all available settings of specific linters
+  # Useless linters:
+  # - dogsled
+  # - wsl  (don't like it for now)
+
+# TODO: "go fix" -- what is it?  What does it do?
+
+
 linters-settings:
 #   cyclop:
 #     # the maximal code complexity to report
@@ -38,10 +45,6 @@ linters-settings:
 #     package-average: 0.0
 #     # should ignore tests (default false)
 #     skip-tests: false
-
-#   dogsled:
-#     # checks assignments with too many blank identifiers; default is 2
-#     max-blank-identifiers: 2
 
 #   dupl:
 #     # tokens count to trigger issue, 150 by default
@@ -430,17 +433,17 @@ linters-settings:
 #     # include method names and field names (i.e., qualified names) in checks
 #     q: false
 
-#   nolintlint:
-#     # Enable to ensure that nolint directives are all used. Default is true.
-#     allow-unused: false
-#     # Disable to ensure that nolint directives don't have a leading space. Default is true.
-#     allow-leading-space: true
-#     # Exclude following linters from requiring an explanation.  Default is [].
-#     allow-no-explanation: []
-#     # Enable to require an explanation of nonzero length after each nolint directive. Default is false.
-#     require-explanation: true
-#     # Enable to require nolint directives to mention the specific linter being suppressed. Default is false.
-#     require-specific: true
+  nolintlint:
+    # Enable to ensure that nolint directives are all used. Default is true.
+    allow-unused: false
+    # Disable to ensure that nolint directives don't have a leading space. Default is true.
+    allow-leading-space: true
+    # Exclude following linters from requiring an explanation.  Default is [].
+    allow-no-explanation: []
+    # Enable to require an explanation of nonzero length after each nolint directive. Default is false.
+    require-explanation: true
+    # Enable to require nolint directives to mention the specific linter being suppressed. Default is false.
+    require-specific: true
 
 #   rowserrcheck:
 #     packages:
