@@ -3,9 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"regexp"
 	"strconv"
-	"strings"
 
 	"offline_twitter/scraper"
 	"offline_twitter/terminal_utils"
@@ -104,23 +102,11 @@ func happy_exit(text string) {
  * returns: the id at the end of the tweet: e.g., 1395882872729477131
  */
 func extract_id_from(url string) (scraper.TweetID, error) {
-	var id_str string
+	_, id, is_ok := scraper.TryParseTweetUrl(url)
+	if is_ok {
+		return id, nil
+	}
 
-	if regexp.MustCompile(`^\d+$`).MatchString(url) {
-		id_str = url
-	} else {
-		parts := strings.Split(url, "/")
-		if len(parts) != 6 {
-			return 0, fmt.Errorf("Tweet format isn't right (%d)", len(parts))
-		}
-		if parts[0] != "https:" || parts[1] != "" || parts[2] != "twitter.com" || parts[4] != "status" {
-			return 0, fmt.Errorf("Tweet format isn't right")
-		}
-		id_str = parts[5]
-	}
-	id, err := strconv.Atoi(id_str)
-	if err != nil {
-		return 0, err
-	}
-	return scraper.TweetID(id), nil
+	num, err := strconv.Atoi(url)
+	return scraper.TweetID(num), err
 }
