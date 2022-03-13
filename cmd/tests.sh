@@ -23,36 +23,36 @@ cd data
 
 # Fetch a user
 test $(find profile_images | wc -l) = "1"                      # should be empty to begin
-tw fetch_user Denlesks
-test "$(sqlite3 twitter.db "select handle from users")" = "Denlesks"
+tw fetch_user wrathofgnon
+test "$(sqlite3 twitter.db "select handle from users")" = "wrathofgnon"
 test $(sqlite3 twitter.db "select count(*) from users") = "1"
-test $(sqlite3 twitter.db "select is_content_downloaded from users where handle = 'Denlesks'") = "1"
+test $(sqlite3 twitter.db "select is_content_downloaded from users where handle = 'wrathofgnon'") = "1"
 test $(find profile_images | wc -l) = "3"                      # should have gotten 2 images
-test -f profile_images/Denlesks_profile_22YJvhC7.jpg
-test -f profile_images/Denlesks_banner_1585776052.jpg
-tw fetch_user Denlesks                                         # try to double-download it
+test -f profile_images/wrathofgnon_profile_fB-3BRin.jpg
+test -f profile_images/wrathofgnon_banner_1503908468.jpg
+tw fetch_user wrathofgnon                                      # try to double-download it
 test $(sqlite3 twitter.db "select count(*) from users") = "1"  # shouldn't have added a new row
 
 
-# Fetch a tweet with images
-tw fetch_tweet_only https://twitter.com/Denlesks/status/1261483383483293700
+# # Fetch a tweet with images
+tw fetch_tweet_only https://twitter.com/wrathofgnon/status/1503016316642689026
 test $(sqlite3 twitter.db "select count(*) from tweets") = "1"
-test "$(sqlite3 twitter.db "select text from tweets")" = "These are public health officials who are making decisions about your lifestyle because they know more about health, fitness and well-being than you do"
+test "$(sqlite3 twitter.db "select text from tweets")" = "The I Am A Mayor Who Is Serious About Reducing My Town's Dependence on Fossil Fuels Starter Pack. Inquire within for more details."
 test $(sqlite3 twitter.db "select count(*) from images") = "4"
 
 # Download its images
-test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 1261483383483293700 and is_downloaded = 0") = "4"
-test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 1261483383483293700 and is_downloaded = 1") = "0"
-test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1261483383483293700") = "0"
+test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 1503016316642689026 and is_downloaded = 0") = "4"
+test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 1503016316642689026 and is_downloaded = 1") = "0"
+test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1503016316642689026") = "0"
 test $(find images | wc -l) = "1"
-tw download_tweet_content https://twitter.com/Denlesks/status/1261483383483293700
-test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 1261483383483293700 and is_downloaded = 0") = "0"
-test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 1261483383483293700 and is_downloaded = 1") = "4"
-test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1261483383483293700") = "1"
+tw download_tweet_content https://twitter.com/wrathofgnon/status/1503016316642689026
+test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 1503016316642689026 and is_downloaded = 0") = "0"
+test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 1503016316642689026 and is_downloaded = 1") = "4"
+test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1503016316642689026") = "1"
 test $(find images | wc -l) = "5"
 
 # Try to double-download it
-tw fetch_tweet_only https://twitter.com/Denlesks/status/1261483383483293700
+tw fetch_tweet_only https://twitter.com/wrathofgnon/status/1503016316642689026
 test $(sqlite3 twitter.db "select count(*) from tweets") = "1"
 test $(sqlite3 twitter.db "select count(*) from images") = "4"
 
