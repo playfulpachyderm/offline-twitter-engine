@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"math/rand"
 
+	"github.com/go-test/deep"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/go-test/deep"
 
 	"offline_twitter/scraper"
 )
@@ -76,7 +76,7 @@ func TestModifyUser(t *testing.T) {
 	fake_user.FollowersCount = 2000
 	fake_user.JoinDate = scraper.TimestampFromUnix(2000)
 	fake_user.ProfileImageUrl = "asdf2"
-	fake_user.IsContentDownloaded = false  // test No Worsening
+	fake_user.IsContentDownloaded = false // test No Worsening
 
 	// Save the modified user
 	err = profile.SaveUser(&fake_user)

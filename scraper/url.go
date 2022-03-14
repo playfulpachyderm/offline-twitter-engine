@@ -2,28 +2,28 @@ package scraper
 
 import (
 	"fmt"
+	"net/url"
 	"path"
 	"regexp"
-	"net/url"
 )
 
 type Url struct {
 	TweetID TweetID
 
-	Domain string
-	Text string
-	ShortText string
-	Title string
-	Description string
-	ThumbnailWidth int
-	ThumbnailHeight int
+	Domain             string
+	Text               string
+	ShortText          string
+	Title              string
+	Description        string
+	ThumbnailWidth     int
+	ThumbnailHeight    int
 	ThumbnailRemoteUrl string
 	ThumbnailLocalPath string
-	CreatorID UserID
-	SiteID UserID
+	CreatorID          UserID
+	SiteID             UserID
 
-	HasCard bool
-	HasThumbnail bool
+	HasCard             bool
+	HasThumbnail        bool
 	IsContentDownloaded bool
 }
 
@@ -86,7 +86,7 @@ func TryParseTweetUrl(url string) (UserHandle, TweetID, bool) {
 	if matches == nil {
 		return UserHandle(""), TweetID(0), false
 	}
-	if len(matches) != 3 {  // matches[0] is the full string
+	if len(matches) != 3 { // matches[0] is the full string
 		panic(matches)
 	}
 	return UserHandle(matches[1]), TweetID(int_or_panic(matches[2])), true

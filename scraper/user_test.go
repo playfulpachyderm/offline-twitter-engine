@@ -1,14 +1,14 @@
 package scraper_test
 
 import (
-	"testing"
 	"encoding/json"
-	"os"
 	"net/http"
+	"os"
+	"testing"
 
 	"github.com/jarcoal/httpmock"
-    "github.com/stretchr/testify/assert"
-    "github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	. "offline_twitter/scraper"
 )
@@ -31,7 +31,7 @@ func TestParseSingleUser(t *testing.T) {
 	assert.Equal(UserID(44067298), user.ID)
 	assert.Equal("Michael Malice", user.DisplayName)
 	assert.Equal(UserHandle("michaelmalice"), user.Handle)
-	assert.Equal("Author of Dear Reader, The New Right & The Anarchist Handbook\nHost of \"YOUR WELCOME\" \nSubject of Ego & Hubris by " +
+	assert.Equal("Author of Dear Reader, The New Right & The Anarchist Handbook\nHost of \"YOUR WELCOME\" \nSubject of Ego & Hubris by "+
 		"Harvey Pekar\nUnderwear Model\nHe/Him ⚑", user.Bio)
 	assert.Equal(941, user.FollowingCount)
 	assert.Equal(208589, user.FollowersCount)
@@ -39,7 +39,7 @@ func TestParseSingleUser(t *testing.T) {
 	assert.Equal("https://amzn.to/3oInafv", user.Website)
 	assert.Equal(int64(1243920952), user.JoinDate.Unix())
 	assert.False(user.IsPrivate)
-	assert.True (user.IsVerified)
+	assert.True(user.IsVerified)
 	assert.False(user.IsBanned)
 	assert.Equal("https://pbs.twimg.com/profile_images/1064051934812913664/Lbwdb_C9.jpg", user.ProfileImageUrl)
 	assert.Equal("https://pbs.twimg.com/profile_images/1064051934812913664/Lbwdb_C9_normal.jpg", user.GetTinyProfileImageUrl())
@@ -90,7 +90,7 @@ func TestParseDeletedUser(t *testing.T) {
 	handle := "Some Random Deleted User"
 
 	apiUser := user_resp.ConvertToAPIUser()
-	apiUser.ScreenName = string(handle)  // This is done in scraper.GetUser, since users are retrieved by handle anyway
+	apiUser.ScreenName = string(handle) // This is done in scraper.GetUser, since users are retrieved by handle anyway
 
 	user, err := ParseSingleUser(apiUser)
 	require.NoError(t, err)

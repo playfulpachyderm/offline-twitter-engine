@@ -8,9 +8,9 @@ import (
 )
 
 type TweetTrove struct {
-	Tweets    map[TweetID]Tweet
-	Users     map[UserID]User
-	Retweets  map[TweetID]Retweet
+	Tweets   map[TweetID]Tweet
+	Users    map[UserID]User
+	Retweets map[TweetID]Retweet
 
 	TombstoneUsers []UserHandle
 }
@@ -38,7 +38,7 @@ func (trove TweetTrove) Transform() (tweets []Tweet, retweets []Retweet, users [
 		retweets = append(retweets, val)
 	}
 	return
-}  // TODO: refactor until this function isn't needed anymore
+} // TODO: refactor until this function isn't needed anymore
 
 /**
  * Search for a user by handle.  Second param is whether the user was found or not.

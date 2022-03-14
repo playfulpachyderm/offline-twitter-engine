@@ -13,13 +13,13 @@ import (
 )
 
 type CardValue struct {
-	Type string `json:"type"`
+	Type        string `json:"type"`
 	StringValue string `json:"string_value"`
-	ImageValue struct {
+	ImageValue  struct {
 		AltText string `json:"alt"`
-		Height int `json:"height"`
-		Width int `json:"width"`
-		Url string `json:"url"`
+		Height  int    `json:"height"`
+		Width   int    `json:"width"`
+		Url     string `json:"url"`
 	} `json:"image_value"`
 	UserValue struct {
 		ID int64 `json:"id_str,string"`
@@ -30,13 +30,14 @@ type CardValue struct {
 type APIV2Card struct {
 	Legacy struct {
 		BindingValues []struct {
-			Key string `json:"key"`
+			Key   string    `json:"key"`
 			Value CardValue `json:"value"`
 		} `json:"binding_values"`
 		Name string `json:"name"`
-		Url string `json:"url"`
+		Url  string `json:"url"`
 	} `json:"legacy"`
 }
+
 func (card APIV2Card) ParseAsUrl() Url {
 	values := make(map[string]CardValue)
 	for _, obj := range card.Legacy.BindingValues {
@@ -121,6 +122,7 @@ type APIV2UserResult struct {
 		} `json:"result"`
 	} `json:"user_results"`
 }
+
 func (u APIV2UserResult) ToUser() User {
 	user, err := ParseSingleUser(u.UserResults.Result.Legacy)
 	if err != nil {
@@ -131,16 +133,16 @@ func (u APIV2UserResult) ToUser() User {
 }
 
 type _Result struct {
-	ID int64 `json:"rest_id,string"`
-	Legacy APIV2Tweet `json:"legacy"`
+	ID        int64      `json:"rest_id,string"`
+	Legacy    APIV2Tweet `json:"legacy"`
 	Tombstone *struct {
 		Text struct {
 			Text string `json:"text"`
 		} `json:"text"`
 	} `json:"tombstone"`
-	Core *APIV2UserResult `json:"core"`
-	Card APIV2Card `json:"card"`
-	QuotedStatusResult *APIV2Result `json:"quoted_status_result"`
+	Core               *APIV2UserResult `json:"core"`
+	Card               APIV2Card        `json:"card"`
+	QuotedStatusResult *APIV2Result     `json:"quoted_status_result"`
 }
 
 type APIV2Result struct {
@@ -149,11 +151,12 @@ type APIV2Result struct {
 		Tweet _Result `json:"tweet"`
 	} `json:"result"`
 }
+
 func (api_result APIV2Result) ToTweetTrove(ignore_null_entries bool) TweetTrove {
 	ret := NewTweetTrove()
 
 	// Start by checking if this is a null entry in a feed
-	if api_result.Result.Tombstone != nil && ignore_null_entries{
+	if api_result.Result.Tombstone != nil && ignore_null_entries {
 		// TODO: this is becoming really spaghetti.  Why do we need a separate execution path for this?
 		return ret
 	}
@@ -221,7 +224,7 @@ func (api_result APIV2Result) ToTweetTrove(ignore_null_entries bool) TweetTrove 
 					continue
 				}
 				found = true
-				url.Text = main_tweet.Urls[i].Text  // Copy the expanded URL over, since the card doesn't have it in the new API
+				url.Text = main_tweet.Urls[i].Text // Copy the expanded URL over, since the card doesn't have it in the new API
 				main_tweet.Urls[i] = url
 			}
 			if !found {
@@ -245,6 +248,7 @@ type APIV2Tweet struct {
 	RetweetedStatusResult *APIV2Result `json:"retweeted_status_result"`
 	APITweet
 }
+
 func (api_v2_tweet APIV2Tweet) ToTweetTrove() TweetTrove {
 	ret := NewTweetTrove()
 
@@ -252,7 +256,6 @@ func (api_v2_tweet APIV2Tweet) ToTweetTrove() TweetTrove {
 	if api_v2_tweet.RetweetedStatusResult != nil {
 		orig_tweet_trove := api_v2_tweet.RetweetedStatusResult.ToTweetTrove(false)
 		ret.MergeWith(orig_tweet_trove)
-
 
 		retweet := Retweet{}
 		var err error
@@ -277,25 +280,24 @@ func (api_v2_tweet APIV2Tweet) ToTweetTrove() TweetTrove {
 }
 
 type APIV2Entry struct {
-	EntryID string `json:"entryId"`
-	SortIndex int64 `json:"sortIndex,string"`
-	Content struct {
+	EntryID   string `json:"entryId"`
+	SortIndex int64  `json:"sortIndex,string"`
+	Content   struct {
 		ItemContent struct {
-			EntryType string `json:"entryType"`
+			EntryType    string      `json:"entryType"`
 			TweetResults APIV2Result `json:"tweet_results"`
 		} `json:"itemContent"`
 
 		// Cursors
-		EntryType string `json:"entryType"`
-		Value string `json:"value"`
+		EntryType  string `json:"entryType"`
+		Value      string `json:"value"`
 		CursorType string `json:"cursorType"`
-
 	} `json:"content"`
 }
 
 type APIV2Instruction struct {
-	Type string `json:"type"`
-	Entries []APIV2Entry`json:"entries"`
+	Type    string       `json:"type"`
+	Entries []APIV2Entry `json:"entries"`
 }
 
 type APIV2Response struct {
@@ -324,7 +326,7 @@ func (api_response APIV2Response) GetMainInstruction() *APIV2Instruction {
 
 func (api_response APIV2Response) GetCursorBottom() string {
 	entries := api_response.GetMainInstruction().Entries
-	last_entry := entries[len(entries) - 1]
+	last_entry := entries[len(entries)-1]
 	if last_entry.Content.CursorType != "Bottom" {
 		panic("No bottom cursor found")
 	}
@@ -349,7 +351,7 @@ func (api_response APIV2Response) IsEmpty() bool {
  */
 func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 	ret := NewTweetTrove()
-	for _, entry := range api_response.GetMainInstruction().Entries {  // TODO: the second Instruction is the pinned tweet
+	for _, entry := range api_response.GetMainInstruction().Entries { // TODO: the second Instruction is the pinned tweet
 		if !strings.HasPrefix(entry.EntryID, "tweet-") {
 			continue
 		}
@@ -363,12 +365,11 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 	return ret, nil
 }
 
-
 func get_graphql_user_timeline_url(user_id UserID, cursor string) string {
 	if cursor != "" {
-		return "https://twitter.com/i/api/graphql/CwLU7qTfeu0doqhSr6tW4A/UserTweetsAndReplies?variables=%7B%22userId%22%3A%22" + fmt.Sprint(user_id) + "%22%2C%22count%22%3A40%2C%22cursor%22%3A%22" + url.QueryEscape(cursor) + "%22%2C%22includePromotedContent%22%3Atrue%2C%22withCommunity%22%3Atrue%2C%22withSuperFollowsUserFields%22%3Atrue%2C%22withBirdwatchPivots%22%3Afalse%2C%22withDownvotePerspective%22%3Afalse%2C%22withReactionsMetadata%22%3Afalse%2C%22withReactionsPerspective%22%3Afalse%2C%22withSuperFollowsTweetFields%22%3Atrue%2C%22withVoice%22%3Atrue%2C%22withV2Timeline%22%3Afalse%2C%22__fs_interactive_text%22%3Afalse%2C%22__fs_responsive_web_uc_gql_enabled%22%3Afalse%2C%22__fs_dont_mention_me_view_api_enabled%22%3Afalse%7D"  // nolint:lll  // It's a URL, come on
+		return "https://twitter.com/i/api/graphql/CwLU7qTfeu0doqhSr6tW4A/UserTweetsAndReplies?variables=%7B%22userId%22%3A%22" + fmt.Sprint(user_id) + "%22%2C%22count%22%3A40%2C%22cursor%22%3A%22" + url.QueryEscape(cursor) + "%22%2C%22includePromotedContent%22%3Atrue%2C%22withCommunity%22%3Atrue%2C%22withSuperFollowsUserFields%22%3Atrue%2C%22withBirdwatchPivots%22%3Afalse%2C%22withDownvotePerspective%22%3Afalse%2C%22withReactionsMetadata%22%3Afalse%2C%22withReactionsPerspective%22%3Afalse%2C%22withSuperFollowsTweetFields%22%3Atrue%2C%22withVoice%22%3Atrue%2C%22withV2Timeline%22%3Afalse%2C%22__fs_interactive_text%22%3Afalse%2C%22__fs_responsive_web_uc_gql_enabled%22%3Afalse%2C%22__fs_dont_mention_me_view_api_enabled%22%3Afalse%7D" // nolint:lll  // It's a URL, come on
 	}
-	return "https://twitter.com/i/api/graphql/CwLU7qTfeu0doqhSr6tW4A/UserTweetsAndReplies?variables=%7B%22userId%22%3A%22" + fmt.Sprint(user_id) + "%22%2C%22count%22%3A40%2C%22includePromotedContent%22%3Afalse%2C%22withCommunity%22%3Atrue%2C%22withSuperFollowsUserFields%22%3Atrue%2C%22withBirdwatchPivots%22%3Afalse%2C%22withDownvotePerspective%22%3Afalse%2C%22withReactionsMetadata%22%3Afalse%2C%22withReactionsPerspective%22%3Afalse%2C%22withSuperFollowsTweetFields%22%3Atrue%2C%22withVoice%22%3Atrue%2C%22withV2Timeline%22%3Afalse%2C%22__fs_interactive_text%22%3Afalse%2C%22__fs_dont_mention_me_view_api_enabled%22%3Afalse%7D"  // nolint:lll  // It's a URL, come on
+	return "https://twitter.com/i/api/graphql/CwLU7qTfeu0doqhSr6tW4A/UserTweetsAndReplies?variables=%7B%22userId%22%3A%22" + fmt.Sprint(user_id) + "%22%2C%22count%22%3A40%2C%22includePromotedContent%22%3Afalse%2C%22withCommunity%22%3Atrue%2C%22withSuperFollowsUserFields%22%3Atrue%2C%22withBirdwatchPivots%22%3Afalse%2C%22withDownvotePerspective%22%3Afalse%2C%22withReactionsMetadata%22%3Afalse%2C%22withReactionsPerspective%22%3Afalse%2C%22withSuperFollowsTweetFields%22%3Atrue%2C%22withVoice%22%3Atrue%2C%22withV2Timeline%22%3Afalse%2C%22__fs_interactive_text%22%3Afalse%2C%22__fs_dont_mention_me_view_api_enabled%22%3Afalse%7D" // nolint:lll  // It's a URL, come on
 }
 
 /**
@@ -446,7 +447,7 @@ func (api API) GetMoreTweetsFromGraphqlFeed(user_id UserID, response *APIV2Respo
 		}
 		if fresh_response.IsEmpty() {
 			// Response has a pinned tweet, but no other content: end of feed has been reached
-			return END_OF_FEED  // TODO: check that there actually is a pinned tweet and the request didn't just fail lol
+			return END_OF_FEED // TODO: check that there actually is a pinned tweet and the request didn't just fail lol
 		}
 
 		last_response = &fresh_response

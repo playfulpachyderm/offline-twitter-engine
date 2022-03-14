@@ -1,9 +1,9 @@
 package scraper
 
 import (
-	"time"
 	"fmt"
 	"strings"
+	"time"
 
 	"offline_twitter/terminal_utils"
 )
@@ -13,18 +13,18 @@ const DEFAULT_MAX_REPLIES_EAGER_LOAD = 50
 type TweetID int64
 
 type Tweet struct {
-	ID               TweetID
-	UserID           UserID
-	UserHandle       UserHandle  // For processing tombstones
-	User             *User
-	Text             string
-	PostedAt         Timestamp
-	NumLikes         int
-	NumRetweets      int
-	NumReplies       int
-	NumQuoteTweets   int
-	InReplyToID      TweetID
-	QuotedTweetID    TweetID
+	ID             TweetID
+	UserID         UserID
+	UserHandle     UserHandle // For processing tombstones
+	User           *User
+	Text           string
+	PostedAt       Timestamp
+	NumLikes       int
+	NumRetweets    int
+	NumReplies     int
+	NumQuoteTweets int
+	InReplyToID    TweetID
+	QuotedTweetID  TweetID
 
 	Images        []Image
 	Videos        []Video
@@ -35,13 +35,12 @@ type Tweet struct {
 	Polls         []Poll
 
 	TombstoneType string
-	IsStub bool
+	IsStub        bool
 
-	IsContentDownloaded bool
+	IsContentDownloaded   bool
 	IsConversationScraped bool
-	LastScrapedAt Timestamp
+	LastScrapedAt         Timestamp
 }
-
 
 func (t Tweet) String() string {
 	var author string
@@ -52,7 +51,7 @@ func (t Tweet) String() string {
 	}
 
 	ret := fmt.Sprintf(
-`%s
+		`%s
 %s
 %s
 Replies: %d      RT: %d      QT: %d      Likes: %d
@@ -67,11 +66,11 @@ Replies: %d      RT: %d      QT: %d      Likes: %d
 	)
 
 	if len(t.Images) > 0 {
-		ret += fmt.Sprintf(terminal_utils.COLOR_GREEN + "images: %d\n" + terminal_utils.COLOR_RESET, len(t.Images))
+		ret += fmt.Sprintf(terminal_utils.COLOR_GREEN+"images: %d\n"+terminal_utils.COLOR_RESET, len(t.Images))
 	}
 	if len(t.Urls) > 0 {
 		ret += "urls: [\n"
-		for _, url := range(t.Urls) {
+		for _, url := range t.Urls {
 			ret += "  " + url.Text + "\n"
 		}
 		ret += "]"
@@ -90,7 +89,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	ret.Text = apiTweet.FullText
 
 	// Process "posted-at" date and time
-	if apiTweet.TombstoneText == "" {  // Skip time parsing for tombstones
+	if apiTweet.TombstoneText == "" { // Skip time parsing for tombstones
 		ret.PostedAt, err = TimestampFromString(apiTweet.CreatedAt)
 		if err != nil {
 			return Tweet{}, fmt.Errorf("Error parsing time on tweet ID %d:\n %w", ret.ID, err)
@@ -125,7 +124,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 
 	// Process images
 	for _, media := range apiTweet.Entities.Media {
-		if media.Type != "photo" {  // TODO: remove this eventually
+		if media.Type != "photo" { // TODO: remove this eventually
 			panic(fmt.Errorf("Unknown media type %q:\n  %w", media.Type, EXTERNAL_API_ERROR))
 		}
 		new_image := ParseAPIMedia(media)
@@ -151,7 +150,6 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		}
 	}
 
-
 	// Process videos
 	for _, entity := range apiTweet.ExtendedEntities.Media {
 		if entity.Type != "video" && entity.Type != "animated_gif" {
@@ -175,12 +173,11 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	// Process tombstones and other metadata
 	ret.TombstoneType = apiTweet.TombstoneText
 	ret.IsStub = !(ret.TombstoneType == "")
-	ret.LastScrapedAt = TimestampFromUnix(0)  // Caller will change this for the tweet that was actually scraped
-	ret.IsConversationScraped = false  // Safe due to the "No Worsening" principle
+	ret.LastScrapedAt = TimestampFromUnix(0) // Caller will change this for the tweet that was actually scraped
+	ret.IsConversationScraped = false        // Safe due to the "No Worsening" principle
 
 	return
 }
-
 
 /**
  * Get a single tweet with no replies from the API.
@@ -206,7 +203,6 @@ func GetTweet(id TweetID) (Tweet, error) {
 	return ParseSingleTweet(single_tweet)
 }
 
-
 /**
  * Return a list of tweets, including the original and the rest of its thread,
  * along with a list of associated users.
@@ -227,7 +223,7 @@ func GetTweetFull(id TweetID) (trove TweetTrove, err error) {
 		return
 	}
 	if len(tweet_response.GlobalObjects.Tweets) < DEFAULT_MAX_REPLIES_EAGER_LOAD &&
-			tweet_response.GetCursor() != "" {
+		tweet_response.GetCursor() != "" {
 		err = api.GetMoreReplies(id, &tweet_response, DEFAULT_MAX_REPLIES_EAGER_LOAD)
 		if err != nil {
 			err = fmt.Errorf("Error getting more tweet replies: %d\n  %w", id, err)

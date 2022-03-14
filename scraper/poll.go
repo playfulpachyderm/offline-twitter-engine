@@ -1,82 +1,82 @@
 package scraper
 
 import (
-    "strings"
-    "strconv"
-    "net/url"
+	"net/url"
+	"strconv"
+	"strings"
 )
 
 type PollID int64
 
 type Poll struct {
-    ID         PollID
-    TweetID    TweetID
-    NumChoices int
+	ID         PollID
+	TweetID    TweetID
+	NumChoices int
 
-    Choice1 string
-    Choice1_Votes int
-    Choice2 string
-    Choice2_Votes int
-    Choice3 string
-    Choice3_Votes int
-    Choice4 string
-    Choice4_Votes int
+	Choice1       string
+	Choice1_Votes int
+	Choice2       string
+	Choice2_Votes int
+	Choice3       string
+	Choice3_Votes int
+	Choice4       string
+	Choice4_Votes int
 
-    VotingDuration int  // In seconds
-    VotingEndsAt Timestamp
+	VotingDuration int // In seconds
+	VotingEndsAt   Timestamp
 
-    LastUpdatedAt Timestamp `db:"last_scraped_at"`
+	LastUpdatedAt Timestamp `db:"last_scraped_at"`
 }
 
 func ParseAPIPoll(apiCard APICard) Poll {
-    card_url, err := url.Parse(apiCard.ShortenedUrl)
-    if err != nil {
-        panic(err)
-    }
-    id := int_or_panic(card_url.Hostname())
+	card_url, err := url.Parse(apiCard.ShortenedUrl)
+	if err != nil {
+		panic(err)
+	}
+	id := int_or_panic(card_url.Hostname())
 
-    ret := Poll{}
-    ret.ID = PollID(id)
-    ret.NumChoices = parse_num_choices(apiCard.Name)
-    ret.VotingDuration = int_or_panic(apiCard.BindingValues.DurationMinutes.StringValue) * 60
-    ret.VotingEndsAt, err = TimestampFromString(apiCard.BindingValues.EndDatetimeUTC.StringValue)
-    if err != nil {
-        panic(err)
-    }
-    ret.LastUpdatedAt, err = TimestampFromString(apiCard.BindingValues.LastUpdatedAt.StringValue)
-    if err != nil {
-        panic(err)
-    }
+	ret := Poll{}
+	ret.ID = PollID(id)
+	ret.NumChoices = parse_num_choices(apiCard.Name)
+	ret.VotingDuration = int_or_panic(apiCard.BindingValues.DurationMinutes.StringValue) * 60
+	ret.VotingEndsAt, err = TimestampFromString(apiCard.BindingValues.EndDatetimeUTC.StringValue)
+	if err != nil {
+		panic(err)
+	}
+	ret.LastUpdatedAt, err = TimestampFromString(apiCard.BindingValues.LastUpdatedAt.StringValue)
+	if err != nil {
+		panic(err)
+	}
 
-    ret.Choice1 = apiCard.BindingValues.Choice1.StringValue
-    ret.Choice1_Votes = int_or_panic(apiCard.BindingValues.Choice1_Count.StringValue)
-    ret.Choice2 = apiCard.BindingValues.Choice2.StringValue
-    ret.Choice2_Votes = int_or_panic(apiCard.BindingValues.Choice2_Count.StringValue)
+	ret.Choice1 = apiCard.BindingValues.Choice1.StringValue
+	ret.Choice1_Votes = int_or_panic(apiCard.BindingValues.Choice1_Count.StringValue)
+	ret.Choice2 = apiCard.BindingValues.Choice2.StringValue
+	ret.Choice2_Votes = int_or_panic(apiCard.BindingValues.Choice2_Count.StringValue)
 
-    if ret.NumChoices > 2 {
-        ret.Choice3 = apiCard.BindingValues.Choice3.StringValue
-        ret.Choice3_Votes = int_or_panic(apiCard.BindingValues.Choice3_Count.StringValue)
-    }
-    if ret.NumChoices > 3 {
-        ret.Choice4 = apiCard.BindingValues.Choice4.StringValue
-        ret.Choice4_Votes = int_or_panic(apiCard.BindingValues.Choice4_Count.StringValue)
-    }
+	if ret.NumChoices > 2 {
+		ret.Choice3 = apiCard.BindingValues.Choice3.StringValue
+		ret.Choice3_Votes = int_or_panic(apiCard.BindingValues.Choice3_Count.StringValue)
+	}
+	if ret.NumChoices > 3 {
+		ret.Choice4 = apiCard.BindingValues.Choice4.StringValue
+		ret.Choice4_Votes = int_or_panic(apiCard.BindingValues.Choice4_Count.StringValue)
+	}
 
-    return ret
+	return ret
 }
 
 func parse_num_choices(card_name string) int {
-    if strings.Index(card_name, "poll") != 0 || strings.Index(card_name, "choice") != 5 {
-        panic("Not valid card name: " + card_name)
-    }
+	if strings.Index(card_name, "poll") != 0 || strings.Index(card_name, "choice") != 5 {
+		panic("Not valid card name: " + card_name)
+	}
 
-    return int_or_panic(card_name[4:5])
+	return int_or_panic(card_name[4:5])
 }
 
 func int_or_panic(s string) int {
-    result, err := strconv.Atoi(s)
-    if err != nil {
-        panic(err)
-    }
-    return result
+	result, err := strconv.Atoi(s)
+	if err != nil {
+		panic(err)
+	}
+	return result
 }

@@ -2,12 +2,13 @@ package persistence_test
 
 import (
 	"testing"
+
 	"os"
 
 	"github.com/stretchr/testify/require"
 
-	"offline_twitter/scraper"
 	"offline_twitter/persistence"
+	"offline_twitter/scraper"
 )
 
 func TestVersionUpgrade(t *testing.T) {
@@ -25,7 +26,7 @@ func TestVersionUpgrade(t *testing.T) {
 	require.False(profile.IsTweetInDatabase(test_tweet_id), "Test tweet shouldn't be in db yet")
 
 	persistence.MIGRATIONS = append(persistence.MIGRATIONS, test_migration)
-	err := profile.UpgradeFromXToY(persistence.ENGINE_DATABASE_VERSION, persistence.ENGINE_DATABASE_VERSION + 1)
+	err := profile.UpgradeFromXToY(persistence.ENGINE_DATABASE_VERSION, persistence.ENGINE_DATABASE_VERSION+1)
 	require.NoError(err)
 
 	require.True(profile.IsTweetInDatabase(test_tweet_id), "Migration should have created the tweet, but it didn't")

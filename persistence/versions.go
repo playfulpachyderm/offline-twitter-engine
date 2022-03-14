@@ -7,29 +7,27 @@ import (
 	"offline_twitter/terminal_utils"
 )
 
-
 const ENGINE_DATABASE_VERSION = 11
 
-
 type VersionMismatchError struct {
-	EngineVersion int
+	EngineVersion   int
 	DatabaseVersion int
 }
+
 func (e VersionMismatchError) Error() string {
 	return fmt.Sprintf(
-`This profile was created with database schema version %d, which is newer than this application's database schema version, %d.
+		`This profile was created with database schema version %d, which is newer than this application's database schema version, %d.
 Please upgrade this application to a newer version to use this profile.  Or downgrade the profile's schema version, somehow.`,
-			e.DatabaseVersion, e.EngineVersion,
+		e.DatabaseVersion, e.EngineVersion,
 	)
 }
-
 
 /**
  * The Nth entry is the migration that moves you from version N to version N+1.
  * `len(MIGRATIONS)` should always equal `ENGINE_DATABASE_VERSION`.
  */
 var MIGRATIONS = []string{
-`create table polls (rowid integer primary key,
+	`create table polls (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
     tweet_id integer not null,
     num_choices integer not null,
@@ -50,25 +48,25 @@ var MIGRATIONS = []string{
 
     foreign key(tweet_id) references tweets(id)
 	);`,
-`alter table tweets add column is_conversation_scraped boolean default 0;
+	`alter table tweets add column is_conversation_scraped boolean default 0;
 	alter table tweets add column last_scraped_at integer not null default 0`,
-`update tombstone_types set tombstone_text = 'This Tweet is from a suspended account' where rowid = 2;
+	`update tombstone_types set tombstone_text = 'This Tweet is from a suspended account' where rowid = 2;
 	insert into tombstone_types (rowid, short_name, tombstone_text)
 	                     values (5, 'violated', 'This Tweet violated the Twitter Rules'),
 	                            (6, 'no longer exists', 'This Tweet is from an account that no longer exists')`,
-`alter table videos add column thumbnail_remote_url text not null default "missing";
+	`alter table videos add column thumbnail_remote_url text not null default "missing";
 	alter table videos add column thumbnail_local_filename text not null default "missing"`,
-`alter table videos add column duration integer not null default 0;
+	`alter table videos add column duration integer not null default 0;
 	alter table videos add column view_count integer not null default 0`,
-`alter table users add column is_banned boolean default 0`,
-`alter table urls add column short_text text not null default ""`,
-`insert into tombstone_types (rowid, short_name, tombstone_text) values (7, 'age-restricted', 'Age-restricted adult content. '
+	`alter table users add column is_banned boolean default 0`,
+	`alter table urls add column short_text text not null default ""`,
+	`insert into tombstone_types (rowid, short_name, tombstone_text) values (7, 'age-restricted', 'Age-restricted adult content. '
 	|| 'This content might not be appropriate for people under 18 years old. To view this media, you’ll need to log in to Twitter')`,
-`alter table users add column is_followed boolean default 0`,
-`create table fake_user_sequence(latest_fake_id integer not null);
+	`alter table users add column is_followed boolean default 0`,
+	`create table fake_user_sequence(latest_fake_id integer not null);
 	insert into fake_user_sequence values(0x4000000000000000);
 	alter table users add column is_id_fake boolean default 0;`,
-`delete from urls where rowid in (select urls.rowid from tweets join urls on tweets.id = urls.tweet_id where urls.text like
+	`delete from urls where rowid in (select urls.rowid from tweets join urls on tweets.id = urls.tweet_id where urls.text like
 	'https://twitter.com/%/status/' || tweets.quoted_tweet_id || "%")`,
 }
 

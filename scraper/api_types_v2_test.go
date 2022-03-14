@@ -1,10 +1,10 @@
 package scraper_test
 
 import (
-	"testing"
-	"os"
 	"encoding/json"
 	"fmt"
+	"os"
+	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -34,7 +34,7 @@ func TestAPIV2ParseUser(t *testing.T) {
 	assert.Equal(user.ID, UserID(44067298))
 	assert.Equal(user.DisplayName, "Michael Malice")
 	assert.Equal(user.Handle, UserHandle("michaelmalice"))
-	assert.Equal(user.Bio, "Author of Dear Reader, The New Right & The Anarchist Handbook\nHost of \"YOUR WELCOME\" \nSubject of Ego & " +
+	assert.Equal(user.Bio, "Author of Dear Reader, The New Right & The Anarchist Handbook\nHost of \"YOUR WELCOME\" \nSubject of Ego & "+
 		"Hubris by Harvey Pekar\nHe/Him ⚑\n@SheathUnderwear Model")
 	assert.Equal(user.FollowingCount, 964)
 	assert.Equal(user.FollowersCount, 334571)
@@ -70,7 +70,7 @@ func TestAPIV2ParseTweet(t *testing.T) {
 	assert.True(ok)
 	assert.Equal(tweet.ID, TweetID(1485708879174508550))
 	assert.Equal(tweet.UserID, UserID(44067298))
-	assert.Equal(tweet.Text, "If Boris Johnson is driven out of office, it wouldn't mark the first time the Tories had four PMs in a " +
+	assert.Equal(tweet.Text, "If Boris Johnson is driven out of office, it wouldn't mark the first time the Tories had four PMs in a "+
 		"row\nThey had previously governed the UK for 13 years with 4 PMs, from 1951-1964")
 	assert.Equal(tweet.PostedAt.Unix(), int64(1643055574))
 	assert.Equal(tweet.QuotedTweetID, TweetID(0))
@@ -133,7 +133,7 @@ func TestAPIV2ParseTweetWithQuotedTweet(t *testing.T) {
 	assert.True(ok)
 	assert.Equal(TweetID(1485690410899021826), quote_tweet.ID)
 	assert.Equal(TweetID(1485690069079846915), quote_tweet.QuotedTweetID)
-	assert.Equal("Hatred is powerless in and of itself despite all the agitprop to the contrary\nHatred didnt stop Trump's election, " +
+	assert.Equal("Hatred is powerless in and of itself despite all the agitprop to the contrary\nHatred didnt stop Trump's election, "+
 		"for example", quote_tweet.Text)
 
 	// Should be 2 users: quoter and quoted
@@ -182,7 +182,7 @@ func TestAPIV2ParseRetweet(t *testing.T) {
 	// Check the video
 	v := tweet.Videos[0]
 	assert.Equal("https://pbs.twimg.com/ext_tw_video_thumb/1485627274594590721/pu/img/O6mMKrsqWl8WcMy1.jpg", v.ThumbnailRemoteUrl)
-	assert.Equal(0, v.ViewCount)  // TODO: make this work
+	assert.Equal(0, v.ViewCount) // TODO: make this work
 	assert.Equal(720, v.Height)
 	assert.Equal(720, v.Width)
 	assert.Equal(30066, v.Duration)
@@ -199,7 +199,6 @@ func TestAPIV2ParseRetweet(t *testing.T) {
 	assert.True(ok)
 	assert.Equal(UserID(44067298), retweeting_user.ID)
 	assert.Equal(UserHandle("michaelmalice"), retweeting_user.Handle)
-
 
 	// Should be 1 retweet
 	assert.Equal(1, len(trove.Retweets))
@@ -270,7 +269,6 @@ func TestAPIV2ParseRetweetedQuoteTweet(t *testing.T) {
 	assert.Equal(UserID(599817378), retweet.RetweetedByID)
 }
 
-
 /**
  * Parse tweet with quoted tombstone
  */
@@ -300,12 +298,11 @@ func TestAPIV2ParseTweetWithQuotedTombstone(t *testing.T) {
 	assert.True(ok)
 	assert.Equal(TweetID(1485774025347371008), tombstoned_tweet.ID)
 	assert.Equal("no longer exists", tombstoned_tweet.TombstoneType)
-	assert.True (tombstoned_tweet.IsStub)
+	assert.True(tombstoned_tweet.IsStub)
 	assert.Equal(UserHandle("coltnkat"), tombstoned_tweet.UserHandle)
 
 	assert.Equal(0, len(trove.Retweets))
 }
-
 
 /**
  * Parse a tweet with a link
@@ -326,7 +323,7 @@ func TestAPIV2ParseTweetWithURL(t *testing.T) {
 	assert.Equal(1, len(trove.Tweets))
 	tweet, ok := trove.Tweets[1485695695025803264]
 	assert.True(ok)
-	assert.Equal("This led to what I discussed as \"anguish signaling,\" where progs competed in proclaiming their distress both to " +
+	assert.Equal("This led to what I discussed as \"anguish signaling,\" where progs competed in proclaiming their distress both to "+
 		"show they were the Good Guys but also to get the pack to regroup, akin to wolves howling.", tweet.Text)
 
 	assert.Equal(1, len(tweet.Urls))
@@ -335,7 +332,7 @@ func TestAPIV2ParseTweetWithURL(t *testing.T) {
 	assert.Equal("observer.com", url.Domain)
 	assert.Equal("Why Evangelical Progressives Need to Demonstrate Anguish Publicly", url.Title)
 	assert.Equal("https://observer.com/2016/12/why-evangelical-progressives-need-to-demonstrate-anguish-publicly/", url.Text)
-	assert.Equal("The concept of “virtue signaling” gained a great deal of currency in this past year. It’s a way to demonstrate to " +
+	assert.Equal("The concept of “virtue signaling” gained a great deal of currency in this past year. It’s a way to demonstrate to "+
 		"others that one is a good person without having to do anything", url.Description)
 	assert.Equal("https://pbs.twimg.com/card_img/1485694664640507911/WsproWyP?format=jpg&name=600x600", url.ThumbnailRemoteUrl)
 	assert.Equal(600, url.ThumbnailWidth)
@@ -439,9 +436,8 @@ func TestAPIV2ParseTweetWithPoll(t *testing.T) {
 
 	assert.Equal(int64(1643137976), poll.VotingEndsAt.Unix())
 	assert.Equal(int64(1643055638), poll.LastUpdatedAt.Unix())
-	assert.Equal(1440 * 60, poll.VotingDuration)
+	assert.Equal(1440*60, poll.VotingDuration)
 }
-
 
 func TestParseAPIV2UserFeed(t *testing.T) {
 	data, err := os.ReadFile("test_responses/api_v2/user_feed_apiv2.json")
@@ -494,7 +490,6 @@ func TestParseAPIV2UserFeed(t *testing.T) {
 
 	fmt.Printf("%d Users, %d Tweets, %d Retweets\n", len(tweet_trove.Users), len(tweet_trove.Tweets), len(tweet_trove.Retweets))
 }
-
 
 /**
  * Should correctly identify an "empty" response
@@ -562,12 +557,11 @@ func TestAPIV2TombstoneEntry(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	require.NoError(t, err)
 
-	trove := tweet_result.ToTweetTrove(true)  // 'true' indicates to ignore empty entries
+	trove := tweet_result.ToTweetTrove(true) // 'true' indicates to ignore empty entries
 	assert.Len(trove.Tweets, 0)
 	assert.Len(trove.Users, 0)
 	assert.Len(trove.Retweets, 0)
 }
-
 
 func TestTweetWithWarning(t *testing.T) {
 	assert := assert.New(t)

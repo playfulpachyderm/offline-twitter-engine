@@ -1,12 +1,12 @@
 package scraper
 
 type Retweet struct {
-	RetweetID      TweetID
-	TweetID        TweetID
-	Tweet          *Tweet
-	RetweetedByID  UserID  `db:"retweeted_by"`
-	RetweetedBy    *User
-	RetweetedAt    Timestamp
+	RetweetID     TweetID
+	TweetID       TweetID
+	Tweet         *Tweet
+	RetweetedByID UserID `db:"retweeted_by"`
+	RetweetedBy   *User
+	RetweetedAt   Timestamp
 }
 
 func ParseSingleRetweet(apiTweet APITweet) (ret Retweet, err error) {

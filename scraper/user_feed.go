@@ -1,8 +1,8 @@
 package scraper
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 )
 
 /**
@@ -32,7 +32,6 @@ func GetUserFeedFor(user_id UserID, min_tweets int) (trove TweetTrove, err error
 
 	return ParseTweetResponse(tweet_response)
 }
-
 
 func GetUserFeedGraphqlFor(user_id UserID, min_tweets int) (trove TweetTrove, err error) {
 	api := API{}

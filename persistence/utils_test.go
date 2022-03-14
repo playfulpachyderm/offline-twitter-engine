@@ -70,13 +70,13 @@ func create_stable_user() scraper.User {
 func create_image_from_id(id int) scraper.Image {
 	filename := fmt.Sprintf("image%d.jpg", id)
 	return scraper.Image{
-		ID: scraper.ImageID(id),
-		TweetID: -1,
-		Width: id * 10,
-		Height: id * 5,
-		RemoteURL: filename,
+		ID:            scraper.ImageID(id),
+		TweetID:       -1,
+		Width:         id * 10,
+		Height:        id * 5,
+		RemoteURL:     filename,
 		LocalFilename: filename,
-		IsDownloaded: false,
+		IsDownloaded:  false,
 	}
 }
 
@@ -86,18 +86,18 @@ func create_image_from_id(id int) scraper.Image {
 func create_video_from_id(id int) scraper.Video {
 	filename := fmt.Sprintf("video%d.jpg", id)
 	return scraper.Video{
-		ID: scraper.VideoID(id),
-		TweetID: -1,
-		Width: id * 10,
-		Height: id * 5,
-		RemoteURL: filename,
-		LocalFilename: filename,
+		ID:                 scraper.VideoID(id),
+		TweetID:            -1,
+		Width:              id * 10,
+		Height:             id * 5,
+		RemoteURL:          filename,
+		LocalFilename:      filename,
 		ThumbnailRemoteUrl: filename,
 		ThumbnailLocalPath: filename,
-		Duration: 10000,
-		ViewCount: 200,
-		IsDownloaded: false,
-		IsGif: false,
+		Duration:           10000,
+		ViewCount:          200,
+		IsDownloaded:       false,
+		IsGif:              false,
 	}
 }
 
@@ -265,13 +265,13 @@ func create_dummy_tombstone() scraper.Tweet {
 	tweet_id := scraper.TweetID(rand.Int())
 
 	return scraper.Tweet{
-		ID: tweet_id,
-		UserID: -1,
+		ID:            tweet_id,
+		UserID:        -1,
 		TombstoneType: "deleted",
-		IsStub: true,
-		Mentions: []scraper.UserHandle{},
+		IsStub:        true,
+		Mentions:      []scraper.UserHandle{},
 		ReplyMentions: []scraper.UserHandle{},
-		Hashtags: []string{},
+		Hashtags:      []string{},
 	}
 }
 

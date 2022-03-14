@@ -27,6 +27,7 @@ linters:
     - wrapcheck
     - lll
     - godox
+    - gofmt
     - errorlint
     - nolintlint
 
@@ -203,9 +204,9 @@ linters-settings:
     keywords: # default keywords are TODO, BUG, and FIXME, these can be overwritten by this setting
       - XXX
 
-#   gofmt:
-#     # simplify code: gofmt with `-s` option, true by default
-#     simplify: true
+  gofmt:
+    # simplify code: gofmt with `-s` option, true by default
+    simplify: true
 
 #   gofumpt:
 #     # Select the Go version to target. The default is `1.15`.

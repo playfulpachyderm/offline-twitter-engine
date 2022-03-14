@@ -6,11 +6,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-    "github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
 
 	. "offline_twitter/scraper"
 )
-
 
 func TestExpandShortUrl(t *testing.T) {
 	redirecting_to := "redirect target"

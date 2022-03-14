@@ -5,13 +5,13 @@ import (
 	"os"
 	"testing"
 
-    "github.com/stretchr/testify/assert"
-    "github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	. "offline_twitter/scraper"
 )
 
-func load_tweet_from_file(filename string) Tweet{
+func load_tweet_from_file(filename string) Tweet {
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		panic(err)
@@ -28,12 +28,11 @@ func load_tweet_from_file(filename string) Tweet{
 	return tweet
 }
 
-
 func TestParseSingleTweet(t *testing.T) {
 	assert := assert.New(t)
 	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_unicode_chars.json")
 
-	assert.Equal("The fact that @michaelmalice new book ‘The Anarchist Handbook’ is just absolutely destroying on the charts is the " +
+	assert.Equal("The fact that @michaelmalice new book ‘The Anarchist Handbook’ is just absolutely destroying on the charts is the "+
 		"largest white pill I’ve swallowed in years.", tweet.Text)
 	assert.Len(tweet.Mentions, 1)
 	assert.Contains(tweet.Mentions, UserHandle("michaelmalice"))
@@ -73,7 +72,7 @@ func TestParseTweetWithQuotedTweetAndLink(t *testing.T) {
 	assert := assert.New(t)
 	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_quoted_tweet_and_url.json")
 
-	assert.Equal("This is video he’s talking about. Please watch. Is there a single US politician capable of doing this with the " +
+	assert.Equal("This is video he’s talking about. Please watch. Is there a single US politician capable of doing this with the "+
 		"weasels and rats running American industry today?", tweet.Text)
 	assert.Equal(TweetID(1497997890999898115), tweet.QuotedTweetID)
 
@@ -135,7 +134,7 @@ func TestParseTweetWithMultipleUrls(t *testing.T) {
 
 	assert.False(tweet.Urls[0].HasCard)
 	assert.False(tweet.Urls[1].HasCard)
-	assert.True (tweet.Urls[2].HasCard)
+	assert.True(tweet.Urls[2].HasCard)
 
 	assert.Equal("Biden’s victory came from the suburbs", tweet.Urls[2].Title)
 }
@@ -166,11 +165,10 @@ func TestTweetWithPoll(t *testing.T) {
 	assert.Equal(624, p.Choice2_Votes)
 	assert.Equal(778, p.Choice3_Votes)
 	assert.Equal(1138, p.Choice4_Votes)
-	assert.Equal(1440 * 60, p.VotingDuration)
+	assert.Equal(1440*60, p.VotingDuration)
 	assert.Equal(int64(1638331934), p.VotingEndsAt.Unix())
 	assert.Equal(int64(1638331935), p.LastUpdatedAt.Unix())
 }
-
 
 func TestParseTweetResponse(t *testing.T) {
 	assert := assert.New(t)
@@ -186,7 +184,7 @@ func TestParseTweetResponse(t *testing.T) {
 	require.NoError(t, err)
 	tweets, retweets, users := trove.Transform()
 
-	assert.Len(tweets, 29 - 3)
+	assert.Len(tweets, 29-3)
 	assert.Len(retweets, 3)
 	assert.Len(users, 9)
 }

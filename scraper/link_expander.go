@@ -2,10 +2,9 @@ package scraper
 
 import (
 	"fmt"
-	"time"
 	"net/http"
+	"time"
 )
-
 
 /**
  * Return the expanded version of a short URL.  Input must be a real short URL.
@@ -21,7 +20,7 @@ func ExpandShortUrl(short_url string) string {
 
 	resp, err := client.Get(short_url)
 	if err != nil {
-		panic(err)  // TODO: handle timeouts
+		panic(err) // TODO: handle timeouts
 	}
 	if resp.StatusCode != 301 {
 		panic(fmt.Errorf("Unknown status code returned when expanding short url %q: %s\n  %w", short_url, resp.Status, EXTERNAL_API_ERROR))

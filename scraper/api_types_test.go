@@ -1,9 +1,9 @@
 package scraper_test
 
 import (
-	"testing"
-	"os"
 	"encoding/json"
+	"os"
+	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -11,17 +11,16 @@ import (
 	. "offline_twitter/scraper"
 )
 
-
 func TestNormalizeContent(t *testing.T) {
 	assert := assert.New(t)
 	test_cases := []struct {
-		filename string
-		eventual_full_text string
-		quoted_status_id TweetID
-		in_reply_to_id TweetID
+		filename            string
+		eventual_full_text  string
+		quoted_status_id    TweetID
+		in_reply_to_id      TweetID
 		retweeted_status_id TweetID
-		reply_mentions string
-	} {
+		reply_mentions      string
+	}{
 		{"test_responses/single_tweets/tweet_that_is_a_reply_with_gif.json", "", 0, 1395882872729477131, 0, "@michaelmalice"},
 		{"test_responses/single_tweets/tweet_with_image.json", "this saddens me every time", 0, 0, 0, ""},
 		{"test_responses/single_tweets/tweet_that_is_a_reply.json", "Noted", 0, 1396194494710788100, 0, "@RvaTeddy @michaelmalice"},
@@ -48,7 +47,7 @@ func TestNormalizeContent(t *testing.T) {
 		}
 		var tweet APITweet
 		err = json.Unmarshal(data, &tweet)
-		assert.NoError(err, "Failed at " + v.filename)
+		assert.NoError(err, "Failed at "+v.filename)
 
 		tweet.NormalizeContent()
 
@@ -59,7 +58,6 @@ func TestNormalizeContent(t *testing.T) {
 		assert.Equal(v.reply_mentions, tweet.Entities.ReplyMentions, "Reply mentions")
 	}
 }
-
 
 func TestUserProfileToAPIUser(t *testing.T) {
 	assert := assert.New(t)
@@ -76,7 +74,6 @@ func TestUserProfileToAPIUser(t *testing.T) {
 	assert.Equal(user_resp.Data.User.Legacy.FollowersCount, result.FollowersCount)
 }
 
-
 func TestGetCursor(t *testing.T) {
 	assert := assert.New(t)
 	data, err := os.ReadFile("test_responses/midriffs_anarchist_cookbook.json")
@@ -91,13 +88,12 @@ func TestGetCursor(t *testing.T) {
 		tweet_resp.GetCursor())
 }
 
-
 func TestIsEndOfFeed(t *testing.T) {
 	assert := assert.New(t)
 	test_cases := []struct {
-		filename string
+		filename       string
 		is_end_of_feed bool
-	} {
+	}{
 		{"test_responses/michael_malice_feed.json", false},
 		{"test_responses/kwiber_end_of_feed.json", true},
 	}
@@ -112,7 +108,6 @@ func TestIsEndOfFeed(t *testing.T) {
 		assert.Equal(v.is_end_of_feed, tweet_resp.IsEndOfFeed())
 	}
 }
-
 
 func TestHandleTombstonesHidden(t *testing.T) {
 	assert := assert.New(t)
