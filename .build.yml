@@ -104,7 +104,7 @@ tasks:
       if [[ -z "$version" ]]
       then
           # Not on a release branch; just exit this task
-          exit
+          complete-build
       fi
 
       sudo apt install -y curl gnupg
