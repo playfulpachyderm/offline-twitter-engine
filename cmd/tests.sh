@@ -205,9 +205,9 @@ test $(find link_preview_images | wc -l) = $initial_link_preview_images_count  #
 
 
 # Test a tweet thread with a deleted account; should generate a user with a fake ID
-tw fetch_tweet https://twitter.com/michaelmalice/status/1497272681497980928
-test $(sqlite3 twitter.db "select is_id_fake from users where handle = 'GregCunningham0'") = 1
-test $(sqlite3 twitter.db "select count(*) from tweets where user_id = (select id from users where handle = 'GregCunningham0')") = 1
+tw fetch_tweet https://twitter.com/CovfefeAnon/status/1365278017233313795
+test $(sqlite3 twitter.db "select is_id_fake from users where handle = '_selfoptimizer'") = 1
+test $(sqlite3 twitter.db "select count(*) from tweets where user_id = (select id from users where handle = '_selfoptimizer')") = 1
 
 
 # Test search
