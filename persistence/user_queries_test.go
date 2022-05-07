@@ -215,6 +215,38 @@ func TestFollowUnfollowUser(t *testing.T) {
 }
 
 /**
+ * Should correctly report whether a User is followed or not, according to the DB (not the in-memory objects)
+ */
+func TestIsFollowingUser(t *testing.T) {
+	assert := assert.New(t)
+
+	profile_path := "test_profiles/TestUserQueries"
+	profile := create_or_load_profile(profile_path)
+
+	// Create the user
+	user := create_dummy_user()
+	assert.False(user.IsFollowed)
+	err := profile.SaveUser(&user)
+	assert.NoError(err)
+
+	// Make sure the user isn't "followed"
+	assert.False(profile.IsFollowing(user))
+	user.IsFollowed = true
+	assert.False(profile.IsFollowing(user)) // Should check the DB not the in-memory User
+	user.IsFollowed = false
+
+	profile.SetUserFollowed(&user, true)
+
+	assert.True(profile.IsFollowing(user))
+	user.IsFollowed = false
+	assert.True(profile.IsFollowing(user)) // Check the DB, not the User
+	user.IsFollowed = true
+
+	profile.SetUserFollowed(&user, false)
+	assert.False(profile.IsFollowing(user))
+}
+
+/**
  * Should create a new Unknown User from the given handle.
  * The Unknown User should work consistently with other Users.
  */

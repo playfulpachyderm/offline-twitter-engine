@@ -193,7 +193,7 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
  * If this user should have a big profile picture, defer to the regular `DownloadUserContentFor` method.
  */
 func (p Profile) DownloadUserProfileImageTiny(u *scraper.User) error {
-	if p.IsFollowing(u.Handle) {
+	if p.IsFollowing(*u) {
 		return p.DownloadUserContentFor(u)
 	}
 

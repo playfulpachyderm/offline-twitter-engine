@@ -240,11 +240,12 @@ func (p Profile) GetAllFollowedUsers() []scraper.UserHandle {
 	return ret
 }
 
-func (p Profile) IsFollowing(handle scraper.UserHandle) bool {
-	for _, follow := range p.GetAllFollowedUsers() {
-		if follow == handle {
-			return true
-		}
+func (p Profile) IsFollowing(user scraper.User) bool {
+	row := p.DB.QueryRow("select is_followed from users where id like ?", user.ID)
+	var ret bool
+	err := row.Scan(&ret)
+	if err != nil {
+		panic(err)
 	}
-	return false
+	return ret
 }
