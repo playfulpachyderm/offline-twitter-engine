@@ -226,6 +226,8 @@ func TestIsFollowingUser(t *testing.T) {
 	// Create the user
 	user := create_dummy_user()
 	assert.False(user.IsFollowed)
+	assert.False(profile.IsFollowing(user))
+
 	err := profile.SaveUser(&user)
 	assert.NoError(err)
 

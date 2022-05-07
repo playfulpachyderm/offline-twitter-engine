@@ -245,7 +245,10 @@ func (p Profile) IsFollowing(user scraper.User) bool {
 	var ret bool
 	err := row.Scan(&ret)
 	if err != nil {
-		panic(err)
+		if err == sql.ErrNoRows {
+			return false
+		}
+		panic(err) // A real error
 	}
 	return ret
 }
