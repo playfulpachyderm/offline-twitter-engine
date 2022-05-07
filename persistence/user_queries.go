@@ -36,7 +36,8 @@ func (p Profile) SaveUser(u *scraper.User) error {
                            pinned_tweet_id, is_content_downloaded, is_id_fake)
         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             on conflict do update
-           set bio=?,
+           set handle=?,
+               bio=?,
                display_name=?,
                following_count=?,
                followers_count=?,
@@ -56,7 +57,7 @@ func (p Profile) SaveUser(u *scraper.User) error {
 		u.IsVerified, u.IsBanned, u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID,
 		u.IsContentDownloaded, u.IsIdFake,
 
-		u.Bio, u.DisplayName, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.IsPrivate, u.IsVerified, u.IsBanned,
+		u.Handle, u.Bio, u.DisplayName, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.IsPrivate, u.IsVerified, u.IsBanned,
 		u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID, u.IsContentDownloaded,
 	)
 	if err != nil {

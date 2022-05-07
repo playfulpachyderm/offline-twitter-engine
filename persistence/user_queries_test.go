@@ -53,48 +53,53 @@ func TestModifyUser(t *testing.T) {
 	profile_path := "test_profiles/TestUserQueries"
 	profile := create_or_load_profile(profile_path)
 
-	fake_user := create_dummy_user()
-	fake_user.DisplayName = "Display Name 1"
-	fake_user.Location = "location1"
-	fake_user.IsPrivate = false
-	fake_user.IsVerified = false
-	fake_user.IsBanned = false
-	fake_user.FollowersCount = 1000
-	fake_user.JoinDate = scraper.TimestampFromUnix(1000)
-	fake_user.ProfileImageUrl = "asdf"
-	fake_user.IsContentDownloaded = true
+	user := create_dummy_user()
+	user.DisplayName = "Display Name 1"
+	user.Location = "location1"
+	user.Handle = "handle 1"
+	user.IsPrivate = false
+	user.IsVerified = false
+	user.IsBanned = false
+	user.FollowersCount = 1000
+	user.JoinDate = scraper.TimestampFromUnix(1000)
+	user.ProfileImageUrl = "asdf"
+	user.IsContentDownloaded = true
 
 	// Save the user so it can be modified
-	err := profile.SaveUser(&fake_user)
+	err := profile.SaveUser(&user)
 	require.NoError(err)
 
-	fake_user.DisplayName = "Display Name 2"
-	fake_user.Location = "location2"
-	fake_user.IsPrivate = true
-	fake_user.IsVerified = true
-	fake_user.IsBanned = true
-	fake_user.FollowersCount = 2000
-	fake_user.JoinDate = scraper.TimestampFromUnix(2000)
-	fake_user.ProfileImageUrl = "asdf2"
-	fake_user.IsContentDownloaded = false // test No Worsening
+	new_handle := scraper.UserHandle(fmt.Sprintf("handle %d", rand.Int31()))
+
+	user.DisplayName = "Display Name 2"
+	user.Location = "location2"
+	user.Handle = new_handle
+	user.IsPrivate = true
+	user.IsVerified = true
+	user.IsBanned = true
+	user.FollowersCount = 2000
+	user.JoinDate = scraper.TimestampFromUnix(2000)
+	user.ProfileImageUrl = "asdf2"
+	user.IsContentDownloaded = false // test No Worsening
 
 	// Save the modified user
-	err = profile.SaveUser(&fake_user)
+	err = profile.SaveUser(&user)
 	require.NoError(err)
 
 	// Reload the modified user
-	new_fake_user, err := profile.GetUserByID(fake_user.ID)
+	new_user, err := profile.GetUserByID(user.ID)
 	require.NoError(err)
 
-	assert.Equal("Display Name 2", new_fake_user.DisplayName)
-	assert.Equal("location2", new_fake_user.Location)
-	assert.True(new_fake_user.IsPrivate)
-	assert.True(new_fake_user.IsVerified)
-	assert.True(new_fake_user.IsBanned)
-	assert.Equal(2000, new_fake_user.FollowersCount)
-	assert.Equal(int64(1000), new_fake_user.JoinDate.Unix())
-	assert.Equal("asdf2", new_fake_user.ProfileImageUrl)
-	assert.True(new_fake_user.IsContentDownloaded)
+	assert.Equal("Display Name 2", new_user.DisplayName)
+	assert.Equal(new_handle, new_user.Handle)
+	assert.Equal("location2", new_user.Location)
+	assert.True(new_user.IsPrivate)
+	assert.True(new_user.IsVerified)
+	assert.True(new_user.IsBanned)
+	assert.Equal(2000, new_user.FollowersCount)
+	assert.Equal(int64(1000), new_user.JoinDate.Unix())
+	assert.Equal("asdf2", new_user.ProfileImageUrl)
+	assert.True(new_user.IsContentDownloaded)
 }
 
 func TestHandleIsCaseInsensitive(t *testing.T) {
