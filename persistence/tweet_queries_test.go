@@ -76,6 +76,7 @@ func TestNoWorseningTweet(t *testing.T) {
 	tweet.IsStub = false
 	tweet.IsConversationScraped = true
 	tweet.LastScrapedAt = scraper.TimestampFromUnix(1000)
+	tweet.Text = "Yes text"
 
 	// Save the tweet
 	err := profile.SaveTweet(tweet)
@@ -86,6 +87,7 @@ func TestNoWorseningTweet(t *testing.T) {
 	tweet.IsStub = true
 	tweet.IsConversationScraped = false
 	tweet.LastScrapedAt = scraper.TimestampFromUnix(500)
+	tweet.Text = ""
 	err = profile.SaveTweet(tweet)
 	require.NoError(err)
 
@@ -97,6 +99,85 @@ func TestNoWorseningTweet(t *testing.T) {
 	assert.True(new_tweet.IsContentDownloaded, "Should have preserved is-content-downloaded status")
 	assert.True(new_tweet.IsConversationScraped, "Should have preserved is-conversation-scraped status")
 	assert.Equal(int64(1000), new_tweet.LastScrapedAt.Unix(), "Should have preserved last-scraped-at time")
+	assert.Equal(new_tweet.Text, "Yes text", "Text should not get clobbered if it becomes unavailable")
+}
+
+/**
+ * The tweet was a tombstone and is now available; it should be updated
+ */
+func TestUntombstoningTweet(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	profile_path := "test_profiles/TestTweetQueries"
+	profile := create_or_load_profile(profile_path)
+
+	tweet := create_dummy_tweet()
+	tweet.TombstoneType = "hidden" // e.g., account was priv
+	tweet.IsStub = true
+	tweet.Text = ""
+
+	// Save the tweet
+	err := profile.SaveTweet(tweet)
+	require.NoError(err)
+
+	// Tweet suddenly becomes available
+	tweet.TombstoneType = ""
+	tweet.IsStub = false
+	tweet.Text = "Some text"
+	err = profile.SaveTweet(tweet)
+	require.NoError(err)
+
+	// Reload the tweet
+	new_tweet, err := profile.GetTweetById(tweet.ID)
+	require.NoError(err)
+
+	assert.False(new_tweet.IsStub, "Should no longer be a stub after re-scrape")
+	assert.Equal(new_tweet.TombstoneType, "", "Tweet shouldn't be a tombstone anymore")
+	assert.Equal(new_tweet.Text, "Some text", "Should have created the text")
+}
+
+/**
+ * The "unavailable" tombstone type is not reliable, you should be able to update away from it but
+ * not toward it
+ */
+func TestChangingTombstoningTweet(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	profile_path := "test_profiles/TestTweetQueries"
+	profile := create_or_load_profile(profile_path)
+
+	tweet := create_dummy_tweet()
+	tweet.TombstoneType = "unavailable"
+	tweet.IsStub = true
+	tweet.Text = ""
+
+	// Save the tweet
+	err := profile.SaveTweet(tweet)
+	require.NoError(err)
+
+	// New tombstone type
+	tweet.TombstoneType = "hidden"
+	err = profile.SaveTweet(tweet)
+	require.NoError(err)
+
+	// Reload the tweet
+	new_tweet, err := profile.GetTweetById(tweet.ID)
+	require.NoError(err)
+
+	assert.Equal(new_tweet.TombstoneType, "hidden", "Should be able to overwrite 'unavailable' tombstone")
+
+	// New tombstone type
+	new_tweet.TombstoneType = "hidden"
+	err = profile.SaveTweet(new_tweet)
+	require.NoError(err)
+
+	// Reload the tweet
+	new_tweet2, err := profile.GetTweetById(new_tweet.ID)
+	require.NoError(err)
+
+	assert.Equal(new_tweet2.TombstoneType, "hidden", "'Unavailable' shouldn't clobber other tombstone types")
 }
 
 func TestModifyTweet(t *testing.T) {
@@ -127,6 +208,7 @@ func TestModifyTweet(t *testing.T) {
 	tweet.IsContentDownloaded = true
 	tweet.IsConversationScraped = true
 	tweet.LastScrapedAt = scraper.TimestampFromUnix(2000)
+	tweet.TombstoneType = "deleted"
 
 	err = profile.SaveTweet(tweet)
 	require.NoError(err)
@@ -143,6 +225,7 @@ func TestModifyTweet(t *testing.T) {
 	assert.True(new_tweet.IsContentDownloaded)
 	assert.True(new_tweet.IsConversationScraped)
 	assert.Equal(int64(2000), new_tweet.LastScrapedAt.Unix())
+	assert.Equal(new_tweet.TombstoneType, "deleted")
 }
 
 /**

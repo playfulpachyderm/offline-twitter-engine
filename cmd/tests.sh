@@ -203,6 +203,13 @@ test $(find link_preview_images | wc -l) = $initial_link_preview_images_count  #
 # test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454521424144654344") = 0  # TODO this guy got banned
 # test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454522147750260742") = 1
 
+# Test updating a tombstone (e.g., the QT-ing user is blocked but acct is not priv)
+tw fetch_tweet https://twitter.com/michaelmalice/status/1479540552081326085
+test "$(sqlite3 twitter.db "select tombstone_type, text from tweets where id = 1479540319410696192")" = "4|"
+
+tw fetch_tweet_only 1479540319410696192  # Should remove the tombstone type and update the text
+test "$(sqlite3 twitter.db "select tombstone_type, text from tweets where id = 1479540319410696192")" = "|Eyyy! Look! Another one on my block list! Well done @michaelmalice, you silck person."
+
 
 # Test a tweet thread with a deleted account; should generate a user with a fake ID
 tw fetch_tweet https://twitter.com/CovfefeAnon/status/1365278017233313795

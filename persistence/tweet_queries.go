@@ -20,11 +20,25 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
                             is_conversation_scraped, last_scraped_at)
         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, (select rowid from tombstone_types where short_name=?), ?, ?, ?, ?)
             on conflict do update
-           set num_likes=?,
+           set text=(case
+                     when is_stub then
+                         ?
+                     else
+                         text
+                     end
+               ),
+               num_likes=?,
                num_retweets=?,
                num_replies=?,
                num_quote_tweets=?,
                is_stub=(is_stub and ?),
+               tombstone_type=(case
+                               when ?='unavailable' and tombstone_type not in (0, 4) then
+                                   tombstone_type
+                               else
+                                   (select rowid from tombstone_types where short_name=?)
+                               end
+               ),
                is_content_downloaded=(is_content_downloaded or ?),
                is_conversation_scraped=(is_conversation_scraped or ?),
                last_scraped_at=max(last_scraped_at, ?)
@@ -33,8 +47,8 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
 		t.QuotedTweetID, scraper.JoinArrayOfHandles(t.Mentions), scraper.JoinArrayOfHandles(t.ReplyMentions),
 		strings.Join(t.Hashtags, ","), t.TombstoneType, t.IsStub, t.IsContentDownloaded, t.IsConversationScraped, t.LastScrapedAt,
 
-		t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.IsStub, t.IsContentDownloaded, t.IsConversationScraped,
-		t.LastScrapedAt,
+		t.Text, t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.IsStub, t.TombstoneType, t.TombstoneType,
+		t.IsContentDownloaded, t.IsConversationScraped, t.LastScrapedAt,
 	)
 
 	if err != nil {
