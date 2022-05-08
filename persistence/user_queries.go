@@ -187,10 +187,7 @@ func (p Profile) CheckUserContentDownloadNeeded(user scraper.User) bool {
 		return true
 	}
 	profile_path := p.get_profile_image_output_path(user)
-	if !file_exists(profile_path) {
-		return true
-	}
-	return false
+	return !file_exists(profile_path)
 }
 
 /**
