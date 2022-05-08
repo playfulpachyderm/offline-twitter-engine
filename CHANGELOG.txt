@@ -74,3 +74,14 @@ v0.1.4
 - BUGFIXES: Fixed some annoying bugs caused by Twitter's poor API
 	- ignore empty entries in a user feed instead of crashing
 	- quote tweets no longer include their quoted tweet as an embedded link
+
+v0.1.5
+------
+
+- BUGFIX: users changing their profile images should be not broken now
+- Major refactoring (testing, massive linting improvements, proper Go dependencies like sqlx, etc)
+- Improve tombstone handling
+	- Update tweet content when a tombstone becomes available
+	- Update tombstone type of a tweet if it changes
+	- If a tweet gets hidden / deleted, it can become a tombstone without losing its content
+- Enable support for users that change their handles

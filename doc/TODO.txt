@@ -3,16 +3,22 @@ User profile images and banner images => extract to table.  Add `is_downloaded` 
 
 TODO update-all
 
-TODO delete users.txt, users.yaml
-
 TODO fetch-older-tweets:
 get tweets older than 3200 ago
 
+TODO: downloading-modes
+- Could compose the following:
+	- Primary user's top-level tweets and threads
+	- Primary user's replies
+	- Primary user's retweets
+	- Parents and replies for primary user's tweets/replies
 
 
 TODO broadcast-cards
 panic: Unknown card type: 3691233323:periscope_broadcast
 panic: Unknown card type: 745291183405076480:broadcast
+twitter fetch_tweet https://twitter.com/r_w_degen/status/1497672129256566785 => panic: Unknown card type: 3691233323:audiospace
+					https://twitter.com/pompilivs/status/1497647006445146113 => same
 
 TODO consecutive-tombstones
 Conversation threads with two or more consecutive tombstones don't get scraped correctly
@@ -23,12 +29,6 @@ Video size reduction:
 - add "bitrate" and "available bitrates" fields
 - option to upgrade or downgrade video quality
 
-TODO tombstone updating:
-- "Tweet is unavailable" tombstones are not always accurate.  In user feed, they show as "not available" but the real reason is "deleted" etc; should update the tombstone type when fetching the conversation view
-- tweet-to-stub: If a tweet is deleted after getting a non-stub version, should still show a tombstone (or a modified one at least)
-- stub-to-tweet: If a user un-privates after getting a stub-version (or tweet becomes available for other reasons), stub versions should write the real content and "stub" status should be removed
-- "Account owner limits who can view these tweets" tombstone: https://twitter.com/michaelmalice/status/1479540552081326085
-
 TODO https://twitter.com/michaelmalice/status/1461031030278742020 => tombstone should say "account no longer exists" but it says "Tweet is unavailable"
 
 TODO: Problem tweets
@@ -36,6 +36,8 @@ TODO: Problem tweets
 - https://twitter.com/CovfefeAnon/status/1427693931047837702: parent thread not loading (possible GUI problem)
 - "account no longer exists" tombstone not being collected
 - tweet with warning label not getting scraped right: https://twitter.com/michaelmalice/status/1493324611999748098
+- fails to produce any result for the first tweet in the thread => https://twitter.com/CovfefeAnon/status/1498877082838962181
+- Invalid tweet url (mobile.twitter.com) => https://twitter.com/Mememarkets1/status/1499538952315088897
 
 TODO: videos-view-count
 - videos don't parse properly in APIv2
@@ -46,4 +48,6 @@ TODO: APIv2-pinned-tweets
 TODO video-not-downloading: https://twitter.com/JustinPulitzer/status/1496709662602932224
 
 TODO sqlx
-- https://github.com/jmoiron/sqlx
+- increase coverage (not sure why this is done partially)
+
+TODO get-user-tweets-user-doesn't-exist
