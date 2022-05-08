@@ -13,7 +13,7 @@ import (
  * Some types to spy on a MediaDownloader
  */
 type SpyResult struct {
-	url string
+	url     string
 	outpath string
 }
 
@@ -21,6 +21,7 @@ type SpyResult struct {
 type FakeDownloader struct {
 	Spy *[]SpyResult
 }
+
 func NewFakeDownloader() FakeDownloader {
 	ret := FakeDownloader{}
 	ret.Spy = &[]SpyResult{}
@@ -38,7 +39,6 @@ func (d FakeDownloader) Contains(result SpyResult) bool {
 	}
 	return false
 }
-
 
 func test_all_downloaded(tweet scraper.Tweet, yes_or_no bool, t *testing.T) {
 	error_msg := map[bool]string{
@@ -116,8 +116,14 @@ func TestDownloadUserContent(t *testing.T) {
 
 	// Check that the downloader was called with the appropriate stuff
 	assert.Len(*fake_downloader.Spy, 2)
-	assert.True(fake_downloader.Contains(SpyResult{"profile image url", "test_profiles/TestMediaQueries/profile_images/profile image local path"}))
-	assert.True(fake_downloader.Contains(SpyResult{"banner image url", "test_profiles/TestMediaQueries/profile_images/banner image local path"}))
+	assert.True(fake_downloader.Contains(SpyResult{
+		"profile image url",
+		"test_profiles/TestMediaQueries/profile_images/profile image local path",
+	}))
+	assert.True(fake_downloader.Contains(SpyResult{
+		"banner image url",
+		"test_profiles/TestMediaQueries/profile_images/banner image local path",
+	}))
 
 	// The User should now be marked "yes downloaded"
 	assert.True(user.IsContentDownloaded)
@@ -148,5 +154,8 @@ func TestDownloadDefaultUserContent(t *testing.T) {
 
 	// Check that the downloader was called with the appropriate stuff
 	assert.Len(*fake_downloader.Spy, 1)
-	assert.True(fake_downloader.Contains(SpyResult{scraper.DEFAULT_PROFILE_IMAGE_URL, "test_profiles/TestMediaQueries/profile_images/default_profile.png"}))
+	assert.True(fake_downloader.Contains(SpyResult{
+		scraper.DEFAULT_PROFILE_IMAGE_URL,
+		"test_profiles/TestMediaQueries/profile_images/default_profile.png",
+	}))
 }
