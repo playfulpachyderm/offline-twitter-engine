@@ -153,14 +153,12 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
 		return nil
 	}
 
-	var outfile string
-	var target_url string
+	outfile := p.get_profile_image_output_path(*u)
 
+	var target_url string
 	if u.ProfileImageUrl == "" {
-		outfile = path.Join(p.ProfileDir, "profile_images", path.Base(scraper.DEFAULT_PROFILE_IMAGE_URL))
 		target_url = scraper.DEFAULT_PROFILE_IMAGE_URL
 	} else {
-		outfile = path.Join(p.ProfileDir, "profile_images", u.ProfileImageLocalPath)
 		target_url = u.ProfileImageUrl
 	}
 
@@ -171,7 +169,7 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
 
 	// Skip it if there's no banner image
 	if u.BannerImageLocalPath != "" {
-		outfile = path.Join(p.ProfileDir, "profile_images", u.BannerImageLocalPath)
+		outfile = p.get_banner_image_output_path(*u)
 		err = downloader.Curl(u.BannerImageUrl, outfile)
 
 		if err != nil && strings.Contains(err.Error(), "404 Not Found") {

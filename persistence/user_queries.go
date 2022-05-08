@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"path"
 
 	"offline_twitter/scraper"
 )
@@ -252,4 +253,21 @@ func (p Profile) IsFollowing(user scraper.User) bool {
 		panic(err) // A real error
 	}
 	return ret
+}
+
+/**
+ * Utility function to compute the path to save banner image to
+ */
+func (p Profile) get_banner_image_output_path(u scraper.User) string {
+	return path.Join(p.ProfileDir, "profile_images", u.BannerImageLocalPath)
+}
+
+/**
+ * Utility function to compute the path to save profile image to
+ */
+func (p Profile) get_profile_image_output_path(u scraper.User) string {
+	if u.ProfileImageUrl == "" {
+		return path.Join(p.ProfileDir, "profile_images", path.Base(scraper.DEFAULT_PROFILE_IMAGE_URL))
+	}
+	return path.Join(p.ProfileDir, "profile_images", u.ProfileImageLocalPath)
 }

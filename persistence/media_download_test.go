@@ -9,9 +9,36 @@ import (
 	"offline_twitter/scraper"
 )
 
-type FakeDownloader struct{}
+/**
+ * Some types to spy on a MediaDownloader
+ */
+type SpyResult struct {
+	url string
+	outpath string
+}
 
-func (d FakeDownloader) Curl(url string, outpath string) error { return nil }
+// TODO: doesn't need to be a struct, can just be the spy; also, the pointer might be unnecessary
+type FakeDownloader struct {
+	Spy *[]SpyResult
+}
+func NewFakeDownloader() FakeDownloader {
+	ret := FakeDownloader{}
+	ret.Spy = &[]SpyResult{}
+	return ret
+}
+func (d FakeDownloader) Curl(url string, outpath string) error {
+	*d.Spy = append(*d.Spy, SpyResult{url, outpath})
+	return nil
+}
+func (d FakeDownloader) Contains(result SpyResult) bool {
+	for _, r := range *d.Spy {
+		if r == result {
+			return true
+		}
+	}
+	return false
+}
+
 
 func test_all_downloaded(tweet scraper.Tweet, yes_or_no bool, t *testing.T) {
 	error_msg := map[bool]string{
@@ -53,7 +80,7 @@ func TestDownloadTweetContent(t *testing.T) {
 	test_all_downloaded(tweet, false, t)
 
 	// Do the (fake) downloading
-	err = profile.DownloadTweetContentWithInjector(&tweet, FakeDownloader{})
+	err = profile.DownloadTweetContentWithInjector(&tweet, NewFakeDownloader())
 	require.NoError(t, err)
 
 	// It should all be marked "yes downloaded" now
@@ -83,8 +110,14 @@ func TestDownloadUserContent(t *testing.T) {
 	assert.False(user.IsContentDownloaded)
 
 	// Do the (fake) downloading
-	err = profile.DownloadUserContentWithInjector(&user, FakeDownloader{})
+	fake_downloader := NewFakeDownloader()
+	err = profile.DownloadUserContentWithInjector(&user, fake_downloader)
 	require.NoError(t, err)
+
+	// Check that the downloader was called with the appropriate stuff
+	assert.Len(*fake_downloader.Spy, 2)
+	assert.True(fake_downloader.Contains(SpyResult{"profile image url", "test_profiles/TestMediaQueries/profile_images/profile image local path"}))
+	assert.True(fake_downloader.Contains(SpyResult{"banner image url", "test_profiles/TestMediaQueries/profile_images/banner image local path"}))
 
 	// The User should now be marked "yes downloaded"
 	assert.True(user.IsContentDownloaded)
@@ -93,4 +126,27 @@ func TestDownloadUserContent(t *testing.T) {
 	new_user, err := profile.GetUserByID(user.ID)
 	require.NoError(t, err)
 	assert.True(new_user.IsContentDownloaded)
+}
+
+/**
+ * Should download the right stuff if User has no banner image and default profile image
+ */
+func TestDownloadDefaultUserContent(t *testing.T) {
+	assert := assert.New(t)
+	profile_path := "test_profiles/TestMediaQueries"
+	profile := create_or_load_profile(profile_path)
+
+	user := create_dummy_user()
+	user.BannerImageUrl = ""
+	user.BannerImageLocalPath = ""
+	user.ProfileImageUrl = ""
+
+	// Do the (fake) downloading
+	fake_downloader := NewFakeDownloader()
+	err := profile.DownloadUserContentWithInjector(&user, fake_downloader)
+	require.NoError(t, err)
+
+	// Check that the downloader was called with the appropriate stuff
+	assert.Len(*fake_downloader.Spy, 1)
+	assert.True(fake_downloader.Contains(SpyResult{scraper.DEFAULT_PROFILE_IMAGE_URL, "test_profiles/TestMediaQueries/profile_images/default_profile.png"}))
 }
