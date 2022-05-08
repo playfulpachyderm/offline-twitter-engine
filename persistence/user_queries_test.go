@@ -5,6 +5,7 @@ import (
 
 	"fmt"
 	"math/rand"
+	"os"
 
 	"github.com/go-test/deep"
 	"github.com/stretchr/testify/assert"
@@ -164,13 +165,15 @@ func TestCheckUserContentDownloadNeeded(t *testing.T) {
 	err = profile.SaveUser(&user)
 	require.NoError(t, err)
 
-	// If everything is up to date, no download should be required
+	// If the file exists, then it should not require any download
+	_, err = os.Create("test_profiles/TestUserQueries/profile_images/" + user.BannerImageLocalPath)
+	require.NoError(t, err)
+	_, err = os.Create("test_profiles/TestUserQueries/profile_images/" + user.ProfileImageLocalPath)
+	require.NoError(t, err)
 	assert.False(profile.CheckUserContentDownloadNeeded(user))
 
-	// Change an URL, but don't save it-- needs to be different from what's in the DB
-	user.BannerImageUrl = "banner url2"
-
 	// Download needed for new banner image
+	user.BannerImageLocalPath = "banner url2"
 	assert.True(profile.CheckUserContentDownloadNeeded(user))
 }
 

@@ -181,10 +181,13 @@ func (p Profile) CheckUserContentDownloadNeeded(user scraper.User) bool {
 	if !is_content_downloaded {
 		return true
 	}
-	if banner_image_url != user.BannerImageUrl {
+
+	banner_path := p.get_banner_image_output_path(user)
+	if banner_path != "" && !file_exists(banner_path) {
 		return true
 	}
-	if profile_image_url != user.ProfileImageUrl {
+	profile_path := p.get_profile_image_output_path(user)
+	if !file_exists(profile_path) {
 		return true
 	}
 	return false

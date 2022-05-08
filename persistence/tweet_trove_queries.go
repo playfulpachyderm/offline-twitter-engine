@@ -12,19 +12,19 @@ import (
  */
 func (p Profile) SaveTweetTrove(trove TweetTrove) {
 	for i, u := range trove.Users {
-		// Download download their tiny profile image
-		err := p.DownloadUserProfileImageTiny(&u)
-		if err != nil {
-			panic(fmt.Errorf("Error downloading user content for user with ID %d and handle %s:\n  %w", u.ID, u.Handle, err))
-		}
-
-		err = p.SaveUser(&u)
+		err := p.SaveUser(&u)
 		if err != nil {
 			panic(fmt.Errorf("Error saving user with ID %d and handle %s:\n  %w", u.ID, u.Handle, err))
 		}
 		fmt.Println(u.Handle, u.ID)
 		// If the User's ID was updated in saving (i.e., Unknown User), update it in the Trove too
 		trove.Users[i] = u
+
+		// Download their tiny profile image
+		err = p.DownloadUserProfileImageTiny(&u)
+		if err != nil {
+			panic(fmt.Errorf("Error downloading user content for user with ID %d and handle %s:\n  %w", u.ID, u.Handle, err))
+		}
 	}
 
 	// TODO: this is called earlier in the process as well, before parsing.  Is that call redundant?  Too tired to figure out right now
