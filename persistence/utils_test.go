@@ -300,7 +300,7 @@ func create_dummy_retweet(tweet_id scraper.TweetID) scraper.Retweet {
  */
 func create_space_from_id(id int) scraper.Space {
 	return scraper.Space{
-		ID: scraper.SpaceID(fmt.Sprintf("some_id_%d", id)),
+		ID:       scraper.SpaceID(fmt.Sprintf("some_id_%d", id)),
 		ShortUrl: fmt.Sprintf("short_url_%d", id),
 	}
 }
