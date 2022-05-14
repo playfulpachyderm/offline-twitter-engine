@@ -117,6 +117,12 @@ func TestParseTweetUrl(t *testing.T) {
 	assert.Equal(UserHandle("NerdNoticing"), handle)
 	assert.Equal(TweetID(1263192389050654720), id)
 
+	// Test a `mobile.twitter.com` url
+	handle, id, is_ok = TryParseTweetUrl("https://mobile.twitter.com/APhilosophae/status/1497720548540964864")
+	assert.True(is_ok)
+	assert.Equal(UserHandle("APhilosophae"), handle)
+	assert.Equal(TweetID(1497720548540964864), id)
+
 	// Test invalid url
 	_, _, is_ok = TryParseTweetUrl("https://twitter.com/NerdNoticing/status/1263192389050654720s=20")
 	assert.False(is_ok)
