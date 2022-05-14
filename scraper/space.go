@@ -3,8 +3,8 @@ package scraper
 type SpaceID string
 
 type Space struct {
-	ID       SpaceID
-	ShortUrl string
+	ID       SpaceID `db:"id"`
+	ShortUrl string  `db:"short_url"`
 }
 
 func ParseAPISpace(apiCard APICard) Space {

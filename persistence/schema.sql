@@ -112,6 +112,11 @@ create table polls (rowid integer primary key,
     foreign key(tweet_id) references tweets(id)
 );
 
+create table spaces(rowid integer primary key,
+    id text unique not null,
+    short_url text not null
+);
+
 create table images (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
     tweet_id integer not null,

@@ -103,6 +103,17 @@ func (p Profile) SavePoll(poll scraper.Poll) error {
 }
 
 /**
+ * Save a Space
+ */
+func (p Profile) SaveSpace(space scraper.Space) error {
+	_, err := p.DB.NamedExec(`insert into spaces (id, short_url) values (:id, :short_url) on conflict do nothing`, space)
+	if err != nil {
+		return fmt.Errorf("Error saving Space (ID %s):\n  %w", space.ID, err)
+	}
+	return nil
+}
+
+/**
  * Get the list of images for a tweet
  */
 func (p Profile) GetImagesForTweet(t scraper.Tweet) (imgs []scraper.Image, err error) {
@@ -149,5 +160,13 @@ func (p Profile) GetPollsForTweet(t scraper.Tweet) (polls []scraper.Poll, err er
 		  from polls
 		 where tweet_id = ?
 	`, t.ID)
+	return
+}
+
+/**
+ * Get a Space by ID
+ */
+func (p Profile) GetSpace(id scraper.SpaceID) (space scraper.Space, err error) {
+	err = p.DB.Get(&space, `select id, short_url from spaces where id = ?`, id)
 	return
 }

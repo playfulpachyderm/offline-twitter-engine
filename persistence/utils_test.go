@@ -289,3 +289,10 @@ func create_dummy_retweet(tweet_id scraper.TweetID) scraper.Retweet {
 		RetweetedAt:   scraper.TimestampFromUnix(20000000),
 	}
 }
+
+func create_dummy_space() scraper.Space {
+	return scraper.Space{
+		ID: scraper.SpaceID(fmt.Sprintf("some_id_%d", rand.Int())),
+		ShortUrl: fmt.Sprintf("short_url_%d", rand.Int()),
+	}
+}

@@ -29,15 +29,12 @@ Video size reduction:
 - add "bitrate" and "available bitrates" fields
 - option to upgrade or downgrade video quality
 
-TODO https://twitter.com/michaelmalice/status/1461031030278742020 => tombstone should say "account no longer exists" but it says "Tweet is unavailable"
-
 TODO: Problem tweets
 - https://twitter.com/TyCardon/status/1480640777281839106: "Media has been disabled in response to report by copyright owner"
 - https://twitter.com/CovfefeAnon/status/1427693931047837702: parent thread not loading (possible GUI problem)
-- "account no longer exists" tombstone not being collected
+- "account no longer exists" tombstone not being collected => https://twitter.com/michaelmalice/status/1461031030278742020
 - tweet with warning label not getting scraped right: https://twitter.com/michaelmalice/status/1493324611999748098
 - fails to produce any result for the first tweet in the thread => https://twitter.com/CovfefeAnon/status/1498877082838962181
-- Invalid tweet url (mobile.twitter.com) => https://twitter.com/Mememarkets1/status/1499538952315088897
 
 TODO: videos-view-count
 - videos don't parse properly in APIv2

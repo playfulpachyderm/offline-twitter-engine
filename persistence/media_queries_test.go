@@ -277,3 +277,22 @@ func TestModifyPoll(t *testing.T) {
 		t.Error(diff)
 	}
 }
+
+/**
+ * Create a Space, save it, reload it, and make sure it comes back the same
+ */
+func TestSaveAndLoadSpace(t *testing.T) {
+	require := require.New(t)
+	profile_path := "test_profiles/TestMediaQueries"
+	profile := create_or_load_profile(profile_path)
+
+	space := create_dummy_space()
+	err := profile.SaveSpace(space)
+	require.NoError(err)
+
+	new_space, err := profile.GetSpace(space.ID)
+	require.NoError(err)
+	if diff := deep.Equal(space, new_space); diff != nil {
+		t.Error(diff)
+	}
+}
