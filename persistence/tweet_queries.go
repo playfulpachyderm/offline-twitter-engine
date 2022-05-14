@@ -14,11 +14,20 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
 
 	tx := db.MustBegin()
 
+	var space_id scraper.SpaceID
+	for _, space := range t.Spaces {
+		err := p.SaveSpace(space)
+		if err != nil {
+			return err
+		}
+		space_id = space.ID
+	}
+
 	_, err := db.Exec(`
         insert into tweets (id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id,
-                            quoted_tweet_id, mentions, reply_mentions, hashtags, tombstone_type, is_stub, is_content_downloaded,
+                            quoted_tweet_id, mentions, reply_mentions, hashtags, space_id, tombstone_type, is_stub, is_content_downloaded,
                             is_conversation_scraped, last_scraped_at)
-        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, (select rowid from tombstone_types where short_name=?), ?, ?, ?, ?)
+        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, nullif(?, ''), (select rowid from tombstone_types where short_name=?), ?, ?, ?, ?)
             on conflict do update
            set text=(case
                      when is_stub then
@@ -45,7 +54,7 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
         `,
 		t.ID, t.UserID, t.Text, t.PostedAt, t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.InReplyToID,
 		t.QuotedTweetID, scraper.JoinArrayOfHandles(t.Mentions), scraper.JoinArrayOfHandles(t.ReplyMentions),
-		strings.Join(t.Hashtags, ","), t.TombstoneType, t.IsStub, t.IsContentDownloaded, t.IsConversationScraped, t.LastScrapedAt,
+		strings.Join(t.Hashtags, ","), space_id, t.TombstoneType, t.IsStub, t.IsContentDownloaded, t.IsConversationScraped, t.LastScrapedAt,
 
 		t.Text, t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.IsStub, t.TombstoneType, t.TombstoneType,
 		t.IsContentDownloaded, t.IsConversationScraped, t.LastScrapedAt,
@@ -112,7 +121,7 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
 
 	stmt, err := db.Prepare(`
         select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
-               mentions, reply_mentions, hashtags, ifnull(tombstone_types.short_name, ""), is_stub, is_content_downloaded,
+               mentions, reply_mentions, hashtags, ifnull(space_id, ''), ifnull(tombstone_types.short_name, ""), is_stub, is_content_downloaded,
                is_conversation_scraped, last_scraped_at
           from tweets left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
          where id = ?
@@ -127,10 +136,11 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
 	var mentions string
 	var reply_mentions string
 	var hashtags string
+	var space_id scraper.SpaceID
 
 	row := stmt.QueryRow(id)
 	err = row.Scan(&t.ID, &t.UserID, &t.Text, &t.PostedAt, &t.NumLikes, &t.NumRetweets, &t.NumReplies, &t.NumQuoteTweets, &t.InReplyToID,
-		&t.QuotedTweetID, &mentions, &reply_mentions, &hashtags, &t.TombstoneType, &t.IsStub, &t.IsContentDownloaded,
+		&t.QuotedTweetID, &mentions, &reply_mentions, &hashtags, &space_id, &t.TombstoneType, &t.IsStub, &t.IsContentDownloaded,
 		&t.IsConversationScraped, &t.LastScrapedAt)
 	if err != nil {
 		return t, fmt.Errorf("Error parsing result in GetTweetByID(%d):\n  %w", id, err)
@@ -153,6 +163,15 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
 		if h != "" {
 			t.Hashtags = append(t.Hashtags, h)
 		}
+	}
+
+	t.Spaces = []scraper.Space{}
+	if space_id != "" {
+		space, err := p.GetSpace(space_id)
+		if err != nil {
+			return t, err
+		}
+		t.Spaces = append(t.Spaces, space)
 	}
 
 	imgs, err := p.GetImagesForTweet(t)

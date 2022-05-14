@@ -51,6 +51,7 @@ create table tweets (rowid integer primary key,
     mentions text,        -- comma-separated
     reply_mentions text,  -- comma-separated
     hashtags text,        -- comma-separated
+    space_id text,
     tombstone_type integer default 0,
     is_stub boolean default 0,
 
@@ -58,6 +59,7 @@ create table tweets (rowid integer primary key,
     is_conversation_scraped boolean default 0,
     last_scraped_at integer not null default 0,
     foreign key(user_id) references users(id)
+    foreign key(space_id) references spaces(id)
 );
 
 create table retweets(rowid integer primary key,

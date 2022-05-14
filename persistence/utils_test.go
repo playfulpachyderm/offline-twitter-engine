@@ -171,6 +171,9 @@ func create_stable_tweet() scraper.Tweet {
 		Polls: []scraper.Poll{
 			create_poll_from_id(-1),
 		},
+		Spaces: []scraper.Space{
+			create_space_from_id(-1),
+		},
 		IsConversationScraped: true,
 		LastScrapedAt:         scraper.TimestampFromUnix(100000000),
 	}
@@ -254,6 +257,7 @@ func create_dummy_tweet() scraper.Tweet {
 		ReplyMentions:  []scraper.UserHandle{"replymention1", "replymention2"},
 		Hashtags:       []string{"hash1", "hash2"},
 		Polls:          []scraper.Poll{poll},
+		Spaces:         []scraper.Space{create_space_from_id(rand.Int())},
 	}
 }
 
@@ -272,6 +276,7 @@ func create_dummy_tombstone() scraper.Tweet {
 		Mentions:      []scraper.UserHandle{},
 		ReplyMentions: []scraper.UserHandle{},
 		Hashtags:      []string{},
+		Spaces:        []scraper.Space{},
 	}
 }
 
