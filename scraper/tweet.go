@@ -33,6 +33,7 @@ type Tweet struct {
 	Hashtags      []string
 	Urls          []Url
 	Polls         []Poll
+	Spaces        []Space
 
 	TombstoneType string
 	IsStub        bool
@@ -107,6 +108,10 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	for _, url := range apiTweet.Entities.URLs {
 		var url_object Url
 		if apiTweet.Card.ShortenedUrl == url.ShortenedUrl {
+			if apiTweet.Card.Name == "3691233323:audiospace" {
+				// This "url" is just a link to a Space.  Don't process it as a Url
+				continue
+			}
 			url_object = ParseAPIUrlCard(apiTweet.Card)
 		}
 		url_object.Text = url.ExpandedURL
@@ -168,6 +173,12 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		poll := ParseAPIPoll(apiTweet.Card)
 		poll.TweetID = ret.ID
 		ret.Polls = []Poll{poll}
+	}
+
+	// Process spaces
+	if apiTweet.Card.Name == "3691233323:audiospace" {
+		space := ParseAPISpace(apiTweet.Card)
+		ret.Spaces = []Space{space}
 	}
 
 	// Process tombstones and other metadata

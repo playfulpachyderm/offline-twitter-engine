@@ -23,5 +23,5 @@ func TestParseSpace(t *testing.T) {
 
 	space := ParseAPISpace(apiCard)
 	assert.Equal(SpaceID("1YpKkZVyQjoxj"), space.ID)
-	assert.Equal("https://t.co/WBPAHNF8Om", space.Url)
+	assert.Equal("https://t.co/WBPAHNF8Om", space.ShortUrl)
 }

@@ -170,6 +170,16 @@ func TestTweetWithPoll(t *testing.T) {
 	assert.Equal(int64(1638331935), p.LastUpdatedAt.Unix())
 }
 
+func TestTweetWithSpace(t *testing.T) {
+	assert := assert.New(t)
+	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_space_card.json")
+	assert.Len(tweet.Urls, 0)
+	assert.Len(tweet.Spaces, 1)
+
+	s := tweet.Spaces[0]
+	assert.Equal(SpaceID("1YpKkZVyQjoxj"), s.ID)
+}
+
 func TestParseTweetResponse(t *testing.T) {
 	assert := assert.New(t)
 	data, err := os.ReadFile("test_responses/michael_malice_feed.json")
