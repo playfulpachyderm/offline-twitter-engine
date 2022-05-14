@@ -13,7 +13,7 @@ import (
 )
 
 /**
- * Parse an  APIV2User
+ * Parse an APIV2User
  */
 func TestAPIV2ParseUser(t *testing.T) {
 	data, err := os.ReadFile("test_responses/api_v2/user_michael_malice.json")

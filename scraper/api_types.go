@@ -124,6 +124,11 @@ type APICard struct {
 		LastUpdatedAt struct {
 			StringValue string `json:"string_value"`
 		} `json:"last_updated_datetime_utc"`
+
+		// For Spaces
+		ID struct {
+			StringValue string `json:"string_value"`
+		} `json:"id"`
 	} `json:"binding_values"`
 }
 
