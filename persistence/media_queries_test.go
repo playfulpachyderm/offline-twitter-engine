@@ -286,7 +286,7 @@ func TestSaveAndLoadSpace(t *testing.T) {
 	profile_path := "test_profiles/TestMediaQueries"
 	profile := create_or_load_profile(profile_path)
 
-	space := create_dummy_space()
+	space := create_space_from_id(rand.Int())
 	err := profile.SaveSpace(space)
 	require.NoError(err)
 
