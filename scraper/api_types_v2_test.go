@@ -439,6 +439,32 @@ func TestAPIV2ParseTweetWithPoll(t *testing.T) {
 	assert.Equal(1440*60, poll.VotingDuration)
 }
 
+/**
+ * Parse a tweet with a Space
+ */
+func TestAPIV2ParseTweetWithSpace(t *testing.T) {
+	assert := assert.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/tweet_with_audiospaces_card.json")
+	if err != nil {
+		panic(err)
+	}
+
+	var tweet_result APIV2Result
+	err = json.Unmarshal(data, &tweet_result)
+	assert.NoError(err)
+
+	trove := tweet_result.ToTweetTrove(true)
+
+	assert.Len(trove.Tweets, 1)
+	tweet, ok := trove.Tweets[1497647006445146113]
+	require.True(t, ok)
+	assert.Len(tweet.Urls, 0)
+	assert.Len(tweet.Spaces, 1)
+
+	s := tweet.Spaces[0]
+	assert.Equal(SpaceID("1dRJZlRNZDzKB"), s.ID)
+}
+
 func TestParseAPIV2UserFeed(t *testing.T) {
 	data, err := os.ReadFile("test_responses/api_v2/user_feed_apiv2.json")
 	if err != nil {

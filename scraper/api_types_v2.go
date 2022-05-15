@@ -113,6 +113,17 @@ func (card APIV2Card) ParseAsPoll() Poll {
 	}
 	return ret
 }
+func (card APIV2Card) ParseAsSpace() Space {
+	values := make(map[string]CardValue)
+	for _, obj := range card.Legacy.BindingValues {
+		values[obj.Key] = obj.Value
+	}
+	ret := Space{}
+	ret.ID = SpaceID(values["id"].StringValue)
+	ret.ShortUrl = values["card_url"].StringValue
+
+	return ret
+}
 
 type APIV2UserResult struct {
 	UserResults struct {
@@ -235,6 +246,19 @@ func (api_result APIV2Result) ToTweetTrove(ignore_null_entries bool) TweetTrove 
 			poll := api_result.Result.Card.ParseAsPoll()
 			poll.TweetID = main_tweet.ID
 			main_tweet.Polls = []Poll{poll}
+			ret.Tweets[main_tweet.ID] = main_tweet
+		} else if api_result.Result.Card.Legacy.Name == "3691233323:audiospace" {
+			space := api_result.Result.Card.ParseAsSpace()
+			main_tweet.Spaces = []Space{space}
+
+			// Remove it from the Urls
+			for i, url := range main_tweet.Urls {
+				if url.ShortText == space.ShortUrl {
+					main_tweet.Urls = append(main_tweet.Urls[:i], main_tweet.Urls[i+1:]...)
+					break
+				}
+			}
+
 			ret.Tweets[main_tweet.ID] = main_tweet
 		}
 	}
