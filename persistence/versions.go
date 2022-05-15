@@ -7,7 +7,7 @@ import (
 	"offline_twitter/terminal_utils"
 )
 
-const ENGINE_DATABASE_VERSION = 11
+const ENGINE_DATABASE_VERSION = 12
 
 type VersionMismatchError struct {
 	EngineVersion   int
@@ -68,6 +68,11 @@ var MIGRATIONS = []string{
 	alter table users add column is_id_fake boolean default 0;`,
 	`delete from urls where rowid in (select urls.rowid from tweets join urls on tweets.id = urls.tweet_id where urls.text like
 	'https://twitter.com/%/status/' || tweets.quoted_tweet_id || "%")`,
+	`create table spaces(rowid integer primary key,
+	    id text unique not null,
+	    short_url text not null
+	);
+	alter table tweets add column space_id text references spaces(id)`,
 }
 
 /**

@@ -85,3 +85,9 @@ v0.1.5
 	- Update tombstone type of a tweet if it changes
 	- If a tweet gets hidden / deleted, it can become a tombstone without losing its content
 - Enable support for users that change their handles
+
+v0.1.6
+------
+
+- Add support for `mobile.twitter.com` tweet URLs
+- Add basic support for Spaces (i.e., can now basically detect whether a tweet links to a Space or not)
