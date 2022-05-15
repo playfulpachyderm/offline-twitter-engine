@@ -98,6 +98,17 @@ tw download_tweet_content https://twitter.com/Cernovich/status/14444295170202746
 test $(find videos | wc -l) = "$((initial_videos_count + 1))"
 
 
+# Fetch a tweet with a poll
+tw fetch_tweet 1465534109573390348
+test $(sqlite3 twitter.db "select count(*) from polls where tweet_id = 1465534109573390348") = "1"
+test "$(sqlite3 twitter.db "select choice1, choice2, choice3, choice4 from polls where tweet_id = 1465534109573390348")" = "Tribal armband|Marijuana leaf|Butterfly|Maple leaf"
+test "$(sqlite3 twitter.db "select choice1_votes, choice2_votes, choice3_votes, choice4_votes from polls where tweet_id = 1465534109573390348")" = "1593|624|778|1138"
+
+
+# Fetch a tweet with a Twitter Space
+tw fetch_tweet https://twitter.com/pompilivs/status/1497647006445146113
+test $(sqlite3 twitter.db "select count(*) from spaces") = "1"
+test $(sqlite3 twitter.db "select space_id from tweets where id = 1497647006445146113") = "1dRJZlRNZDzKB"
 
 # Download a full thread
 test ! -e profile_images/default_profile.png
@@ -220,11 +231,6 @@ test $(sqlite3 twitter.db "select count(*) from tweets where user_id = (select i
 # Test search
 tw search "from:michaelmalice constitution"
 test $(sqlite3 twitter.db "select count(*) from tweets where user_id = 44067298 and text like '%constitution%'") -gt "30"  # Not sure exactly how many
-
-tw fetch_tweet 1465534109573390348
-test $(sqlite3 twitter.db "select count(*) from polls where tweet_id = 1465534109573390348") = "1"
-test "$(sqlite3 twitter.db "select choice1, choice2, choice3, choice4 from polls where tweet_id = 1465534109573390348")" = "Tribal armband|Marijuana leaf|Butterfly|Maple leaf"
-test "$(sqlite3 twitter.db "select choice1_votes, choice2_votes, choice3_votes, choice4_votes from polls where tweet_id = 1465534109573390348")" = "1593|624|778|1138"
 
 
 # Test fetching a banned user
