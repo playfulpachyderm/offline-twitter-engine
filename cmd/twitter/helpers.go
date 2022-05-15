@@ -1,6 +1,7 @@
 package main
 
 import (
+  _ "embed"
 	"fmt"
 	"os"
 	"strconv"
@@ -12,64 +13,8 @@ import (
 /**
  * Help message to print if command syntax is incorrect
  */
-const help_message = `Usage: twitter [--profile <profile_dir>] [<flags>] <operation> <TARGET>
-This application downloads tweets from twitter and saves them in a SQLite database.
-
-<profile_dir>:
-    Optional.  Indicates the path to the directory containing the data directories, database files, and settings files.
-    By default, will use the current working directory.
-    Ignored if <operation> is "create_profile".
-
-<operation>:
-    create_profile
-          <TARGET> is the directory to create.  It must not exist already.
-          <profile_dir> will be ignored if provided.
-
-    fetch_user
-    download_user_content
-          <TARGET> is the user handle.
-          "download_user_content" will save a local copy of the user's banner and profile images.
-
-    fetch_tweet
-    fetch_tweet_only
-          <TARGET> is either the full URL of the tweet, or its ID.
-          If using "fetch_tweet_only", then only that specific tweet will be saved.  "fetch_tweet" will save the whole
-          thread including replies.
-
-    download_tweet_content
-          <TARGET> is either the full URL of the tweet, or its ID.
-          Downloads videos and images embedded in the tweet.
-
-    get_user_tweets
-    get_user_tweets_all
-          <TARGET> is the user handle.
-          Gets the most recent ~50 tweets.
-          If "get_user_tweets_all" is used, gets up to ~3200 tweets (API limit).
-
-    follow
-    unfollow
-          <TARGET> is the user handle
-
-    list_followed
-          No <TARGET> is needed; will be ignored if given.
-          Lists all the users (by their @handle) that are followed.
-
-    search
-          <TARGET> is the search query.  Should be wrapped in quotes if it has spaces.
-
-<flags>:
-    -h, --help
-          Print this message, then exit.
-
-    -v, --version
-          Print the version number and exit.
-
-    -n, --number
-          Set the number of tweets to fetch, when getting a feed.  Default is 50.
-          Setting this flag means you will get at least that many "tweets plus retweets" from that user (unless of
-          course they don't have that many).  The total amount of tweets returned will be larger, because quoted tweets
-          won't count toward the limit.
-`
+//go:embed help_message.txt
+var help_message string
 
 /**
  * Helper function
