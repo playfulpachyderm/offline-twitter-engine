@@ -98,6 +98,39 @@ tw download_tweet_content https://twitter.com/Cernovich/status/14444295170202746
 test $(find videos -mindepth 2 | wc -l) = "$((initial_videos_count + 1))"
 
 
+# Fetch a tweet with 2 gifs
+initial_videos_count=$(find videos -mindepth 2 | wc -l)
+test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1580185800968327168 and is_gif = 1") = "0"
+tw fetch_tweet https://twitter.com/emo_garfield420/status/1580185800968327168
+test $(find videos -mindepth 2 | wc -l) = "$((initial_videos_count + 2))"
+test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1580185800968327168 and is_gif = 1") = "2"
+
+# Fetch a tweet with 2 videos
+test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1579701786252042240 and is_gif = 0") = "0"
+tw fetch_user FairwayWill
+tw fetch_tweet_only https://twitter.com/FairwayWill/status/1579701786252042240
+test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1579701786252042240 and is_gif = 0") = "2"
+
+initial_videos_count=$(find videos -mindepth 2 | wc -l)
+tw download_tweet_content https://twitter.com/FairwayWill/status/1579701786252042240
+test $(find videos -mindepth 2 | wc -l) = "$((initial_videos_count + 2))"
+
+# Fetch a tweet with a video and an image
+test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1579292281898766336") = "0"
+test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 1579292281898766336") = "0"
+tw fetch_user mexicanwilddog
+tw fetch_tweet_only https://twitter.com/mexicanwilddog/status/1579292281898766336
+test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1579292281898766336") = "1"
+test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 1579292281898766336") = "1"
+
+initial_videos_count=$(find videos -mindepth 2 | wc -l)
+initial_images_count=$(find images -mindepth 2 | wc -l)
+tw download_tweet_content https://twitter.com/mexicanwilddog/status/1579292281898766336
+test $(find videos -mindepth 2 | wc -l) = "$((initial_videos_count + 1))"
+test $(find images -mindepth 2 | wc -l) = "$((initial_images_count + 1))"
+
+
+
 # Fetch a tweet with a poll
 tw fetch_tweet 1465534109573390348
 test $(sqlite3 twitter.db "select count(*) from polls where tweet_id = 1465534109573390348") = "1"

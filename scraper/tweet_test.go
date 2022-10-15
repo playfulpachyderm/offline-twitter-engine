@@ -101,9 +101,14 @@ func TestParseTweetWith2Videos(t *testing.T) {
 	v1 := tweet.Videos[0]
 	assert.Equal("https://video.twimg.com/ext_tw_video/1579701730148847617/pu/vid/576x576/ghA0fyf58v-2naWR.mp4?tag=12", v1.RemoteURL)
 	assert.False(v1.IsGif)
+	assert.Equal("gh/ghA0fyf58v-2naWR.mp4", v1.LocalFilename)
+	assert.Equal("xU/xUlghaCXbPOVN7vI.jpg", v1.ThumbnailLocalPath)
+
 	v2 := tweet.Videos[1]
 	assert.Equal("https://video.twimg.com/ext_tw_video/1579701730157252608/pu/vid/480x480/VQ69Ut84XT2BgIzX.mp4?tag=12", v2.RemoteURL)
 	assert.False(v2.IsGif)
+	assert.Equal("VQ/VQ69Ut84XT2BgIzX.mp4", v2.LocalFilename)
+	assert.Equal("dY/dYN55HDytKvM1Bi8.jpg", v2.ThumbnailLocalPath)
 }
 
 func TestParseTweetWithImageAndVideo(t *testing.T) {
