@@ -17,7 +17,8 @@ type Image struct {
 }
 
 func ParseAPIMedia(apiMedia APIMedia) Image {
-	local_filename := path.Base(apiMedia.MediaURLHttps)
+	local_filename := get_prefixed_path(path.Base(apiMedia.MediaURLHttps))
+
 	return Image{
 		ID:            ImageID(apiMedia.ID),
 		RemoteURL:     apiMedia.MediaURLHttps,

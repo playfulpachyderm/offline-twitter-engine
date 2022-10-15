@@ -26,6 +26,6 @@ func TestParseAPIMedia(t *testing.T) {
 	assert.Equal("https://pbs.twimg.com/media/E18sEUrWYAk8dBl.jpg", image.RemoteURL)
 	assert.Equal(593, image.Width)
 	assert.Equal(239, image.Height)
-	assert.Equal("E18sEUrWYAk8dBl.jpg", image.LocalFilename)
+	assert.Equal("E1/E18sEUrWYAk8dBl.jpg", image.LocalFilename)
 	assert.False(image.IsDownloaded)
 }

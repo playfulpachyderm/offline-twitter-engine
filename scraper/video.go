@@ -1,7 +1,7 @@
 package scraper
 
 import (
-	"fmt"
+	"net/url"
 	"path"
 	"sort"
 )
@@ -28,9 +28,18 @@ type Video struct {
 	IsGif        bool
 }
 
+func get_filename(remote_url string) string {
+	u, err := url.Parse(remote_url)
+	if err != nil {
+		panic(err)
+	}
+	return path.Base(u.Path)
+}
+
 func ParseAPIVideo(apiVideo APIExtendedMedia, tweet_id TweetID) Video {
 	variants := apiVideo.VideoInfo.Variants
 	sort.Sort(variants)
+	video_remote_url := variants[0].URL
 
 	var view_count int
 
@@ -51,18 +60,18 @@ func ParseAPIVideo(apiVideo APIExtendedMedia, tweet_id TweetID) Video {
 		}
 	}
 
-	local_filename := fmt.Sprintf("%d.mp4", tweet_id)
+	local_filename := get_prefixed_path(get_filename(video_remote_url))
 
 	return Video{
 		ID:            VideoID(apiVideo.ID),
 		TweetID:       tweet_id,
 		Width:         apiVideo.OriginalInfo.Width,
 		Height:        apiVideo.OriginalInfo.Height,
-		RemoteURL:     variants[0].URL,
+		RemoteURL:     video_remote_url,
 		LocalFilename: local_filename,
 
 		ThumbnailRemoteUrl: apiVideo.MediaURLHttps,
-		ThumbnailLocalPath: path.Base(apiVideo.MediaURLHttps),
+		ThumbnailLocalPath: get_prefixed_path(path.Base(apiVideo.MediaURLHttps)),
 		Duration:           apiVideo.VideoInfo.Duration,
 		ViewCount:          view_count,
 

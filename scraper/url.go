@@ -60,6 +60,15 @@ func ParseAPIUrlCard(apiCard APICard) Url {
 	return ret
 }
 
+func get_prefixed_path(p string) string {
+	local_prefix_regex := regexp.MustCompile(`^[\w-]{2}`)
+	local_prefix := local_prefix_regex.FindString(p)
+	if len(local_prefix) != 2 {
+		panic(fmt.Sprintf("Unable to extract a 2-letter prefix for filename %s", p))
+	}
+	return path.Join(local_prefix, p)
+}
+
 func get_thumbnail_local_path(remote_url string) string {
 	u, err := url.Parse(remote_url)
 	if err != nil {
@@ -73,7 +82,9 @@ func get_thumbnail_local_path(remote_url string) string {
 		panic(err)
 	}
 
-	return fmt.Sprintf("%s_%s.%s", path.Base(u.Path), query_params["name"][0], query_params["format"][0])
+	return get_prefixed_path(
+		fmt.Sprintf("%s_%s.%s", path.Base(u.Path), query_params["name"][0], query_params["format"][0]),
+	)
 }
 
 /**

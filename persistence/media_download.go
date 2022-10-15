@@ -39,6 +39,16 @@ func (d DefaultDownloader) Curl(url string, outpath string) error {
 		return fmt.Errorf("Error downloading image %s:\n  %w", url, err)
 	}
 
+	// Ensure the output directory exists
+	dirname := path.Dir(outpath)
+	if dirname != "." {
+		err = os.Mkdir(dirname, 0755)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	// Write the downloaded data
 	err = os.WriteFile(outpath, data, 0644)
 	if err != nil {
 		return fmt.Errorf("Error writing to path %s, url %s:\n  %w", outpath, url, err)

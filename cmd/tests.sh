@@ -44,12 +44,12 @@ test $(sqlite3 twitter.db "select count(*) from images") = "4"
 test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 1503016316642689026 and is_downloaded = 0") = "4"
 test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 1503016316642689026 and is_downloaded = 1") = "0"
 test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1503016316642689026") = "0"
-test $(find images | wc -l) = "1"
+test $(find images -mindepth 2 | wc -l) = "0"
 tw download_tweet_content https://twitter.com/wrathofgnon/status/1503016316642689026
 test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 1503016316642689026 and is_downloaded = 0") = "0"
 test $(sqlite3 twitter.db "select count(*) from images where tweet_id = 1503016316642689026 and is_downloaded = 1") = "4"
 test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1503016316642689026") = "1"
-test $(find images | wc -l) = "5"
+test $(find images -mindepth 2 | wc -l) = "4"
 
 # Try to double-download it
 tw fetch_tweet_only https://twitter.com/wrathofgnon/status/1503016316642689026
@@ -68,14 +68,14 @@ test $(sqlite3 twitter.db "select count(*) from videos") = "1"
 test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1581025285524242432 and is_downloaded = 0") = "1"
 test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1581025285524242432 and is_downloaded = 1") = "0"
 test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1581025285524242432") = "0"
-test $(find videos | wc -l) = "1"
-test $(find video_thumbnails | wc -l) = "1"
+test $(find videos -mindepth 2 | wc -l) = "0"
+test $(find video_thumbnails -mindepth 2| wc -l) = "0"
 tw download_tweet_content 1581025285524242432
 test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1581025285524242432 and is_downloaded = 0") = "0"
 test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1581025285524242432 and is_downloaded = 1") = "1"
 test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1581025285524242432") = "1"
-test $(find videos | wc -l) = "2"
-test $(find video_thumbnails | wc -l) = "2"
+test $(find videos -mindepth 2 | wc -l) = "1"
+test $(find video_thumbnails -mindepth 2 | wc -l) = "1"
 
 # Try to double-download it
 tw fetch_tweet_only https://twitter.com/SpaceX/status/1581025285524242432
@@ -85,7 +85,7 @@ test $(sqlite3 twitter.db "select count(*) from videos") = "1"
 
 # Fetch a tweet with a GIF
 tw fetch_user Cernovich
-initial_videos_count=$(find videos | wc -l)
+initial_videos_count=$(find videos -mindepth 2 | wc -l)  # Don't count prefix dirs
 initial_videos_db_count=$(sqlite3 twitter.db "select count(*) from videos")
 tw fetch_tweet_only https://twitter.com/Cernovich/status/1444429517020274693
 
@@ -93,9 +93,9 @@ test $(sqlite3 twitter.db "select count(*) from videos") = "$((initial_videos_db
 test $(sqlite3 twitter.db "select is_gif from videos where tweet_id = 1444429517020274693") = "1"
 
 # Download the GIF
-test $(find videos | wc -l) = "$((initial_videos_count))"   # Shouldn't have changed yet
+test $(find videos -mindepth 2 | wc -l) = "$((initial_videos_count))"   # Shouldn't have changed yet
 tw download_tweet_content https://twitter.com/Cernovich/status/1444429517020274693
-test $(find videos | wc -l) = "$((initial_videos_count + 1))"
+test $(find videos -mindepth 2 | wc -l) = "$((initial_videos_count + 1))"
 
 
 # Fetch a tweet with a poll
@@ -189,12 +189,12 @@ test $urls_count_after_2x = $urls_count_after
 # Download the link's preview image
 test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1024074310082748416") = "0"
 test $(sqlite3 twitter.db "select is_content_downloaded from urls where tweet_id = 1024074310082748416") = "0"
-initial_link_preview_images_count=$(find link_preview_images | wc -l)
+initial_link_preview_images_count=$(find link_preview_images -mindepth 2 | wc -l)
 tw download_tweet_content 1024074310082748416
 test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1024074310082748416") = "1"
 test $(sqlite3 twitter.db "select is_content_downloaded from urls where tweet_id = 1024074310082748416") = "1"
-test $(find link_preview_images | wc -l) = "$((initial_link_preview_images_count + 1))"
-test -f link_preview_images/${thumbnail_name}_400x400.jpg
+test $(find link_preview_images -mindepth 2 | wc -l) = "$((initial_link_preview_images_count + 1))"
+find link_preview_images | grep ${thumbnail_name}_400x400.jpg
 
 
 # Test a tweet with a URL but no thumbnail

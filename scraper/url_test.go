@@ -29,7 +29,7 @@ func TestParseAPIUrlCard(t *testing.T) {
 	assert.Equal(600, url.ThumbnailWidth)
 	assert.Equal(315, url.ThumbnailHeight)
 	assert.Equal("https://pbs.twimg.com/card_img/1434998862305968129/odDi9EqO?format=jpg&name=600x600", url.ThumbnailRemoteUrl)
-	assert.Equal("odDi9EqO_600x600.jpg", url.ThumbnailLocalPath)
+	assert.Equal("od/odDi9EqO_600x600.jpg", url.ThumbnailLocalPath)
 	assert.Equal(UserID(155581583), url.CreatorID)
 	assert.Equal(UserID(16467567), url.SiteID)
 	assert.True(url.HasThumbnail)
@@ -52,7 +52,7 @@ func TestParseAPIUrlCardWithPlayer(t *testing.T) {
 	assert.Equal("Watch this episode on LBRY/Odysee: https://odysee.com/@capitalresearch:5/the-politically-incorrect-guide-to-the:8"+
 		"Watch this episode on Rumble: https://rumble...", url.Description)
 	assert.Equal("https://pbs.twimg.com/card_img/1437849456423194639/_1t0btyt?format=jpg&name=800x320_1", url.ThumbnailRemoteUrl)
-	assert.Equal("_1t0btyt_800x320_1.jpg", url.ThumbnailLocalPath)
+	assert.Equal("_1/_1t0btyt_800x320_1.jpg", url.ThumbnailLocalPath)
 	assert.Equal(UserID(10228272), url.SiteID)
 	assert.True(url.HasThumbnail)
 	assert.False(url.IsContentDownloaded)
