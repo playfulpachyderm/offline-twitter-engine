@@ -20,6 +20,26 @@ pipeline:
       - cd cmd
       - ./tests.sh
 
+  version_bump_test:
+    image: offline-twitter/go
+    when:
+      branch: release-*
+    commands:
+      - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^release-)\d+\.\d+\.\d+")
+      - curl https://apt.playfulpachyderm.com/KEY.gpg | sudo apt-key add -
+      - echo "deb https://apt.playfulpachyderm.com/ ./" | sudo tee /etc/apt/sources.list.d/offline_twitter.list
+      - sudo apt update
+      - sudo apt install -y offline-twitter-engine
+      - which twitter
+      - twitter create_profile outdated_profile
+      - cd outdated_profile
+      - twitter fetch_user michaelmalice
+      - twitter get_user_tweets michaelmalice
+      - (cd ../cmd && ./compile $version)
+      - which ../cmd/tw
+      - ../cmd/tw fetch_user michaelmalice
+
+
 
 
   # dpkg_build_and_upload:
