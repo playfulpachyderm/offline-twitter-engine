@@ -42,7 +42,7 @@ func (d DefaultDownloader) Curl(url string, outpath string) error {
 	// Ensure the output directory exists
 	dirname := path.Dir(outpath)
 	if dirname != "." {
-		err = os.Mkdir(dirname, 0755)
+		err = os.MkdirAll(dirname, 0755)
 		if err != nil {
 			panic(err)
 		}
