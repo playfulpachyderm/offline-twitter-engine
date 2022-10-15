@@ -103,7 +103,6 @@ func (trove *TweetTrove) FetchTombstoneUsers() {
 
 /**
  * Checks for tombstoned tweets and fills in their UserIDs based on the collected tombstoned users.
-
  * To be called after calling "scraper.GetUser" on all the tombstoned users.
  *
  * At this point, those users should have been added to this trove's Users collection, and the

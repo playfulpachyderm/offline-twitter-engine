@@ -33,6 +33,7 @@ TODO: Problem tweets
 - "account no longer exists" tombstone not being collected => https://twitter.com/michaelmalice/status/1461031030278742020
 - tweet with warning label not getting scraped right: https://twitter.com/michaelmalice/status/1493324611999748098
 - fails to produce any result for the first tweet in the thread => https://twitter.com/CovfefeAnon/status/1498877082838962181
+- twitter fetch_tweet 1517683230421528576 => panic: ScreenName is empty!
 
 TODO: videos-view-count
 - videos don't parse properly in APIv2

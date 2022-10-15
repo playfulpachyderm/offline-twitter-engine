@@ -1,0 +1,34 @@
+# All pipeline steps run in their own container, but the working directory (with code) is in a shared
+# volume,  which is mounted in all the containers.  So modifying the filesystem (within the working dir)
+# is persistent between build steps.
+
+pipeline:
+  lint:
+    image: offline-twitter/go
+    commands:
+      - golangci-lint run
+
+  test:
+    image: offline-twitter/go
+    commands:
+      - mkdir persistence/test_profiles
+      - go test -bench=. -cover ./...
+
+  integration_test:
+    image: offline-twitter/go
+    commands:
+      - cd cmd
+      - ./tests.sh
+
+
+
+  # dpkg_build_and_upload:
+  #   when:
+  #     branch: release-*
+  #   image: offline-twitter/deploy
+  #   commands:
+  #     - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^release-)\d+\.\d+\.\d+")
+  #     - cd build
+  #     - ./build_dpkg.sh $version
+  #     - scp offline-twitter_$${version}_all.deb aptrepo@apt.playfulpachyderm.com:/apt-repo/test-repo
+  #     - ssh aptrepo@apt.playfulpachyderm.com "cd ~/test-repo && ./update.sh"
