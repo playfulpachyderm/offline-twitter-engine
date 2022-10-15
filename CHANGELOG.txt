@@ -91,3 +91,9 @@ v0.1.6
 
 - Add support for `mobile.twitter.com` tweet URLs
 - Add basic support for Spaces (i.e., can now basically detect whether a tweet links to a Space or not)
+
+v0.1.7
+------
+
+- Add support for multiple videos as well as videos and images in the same tweet
+- Restructure media file storage into sub-directories to improve performance when retrieving them

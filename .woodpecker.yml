@@ -14,11 +14,11 @@ pipeline:
       - mkdir persistence/test_profiles
       - go test -bench=. -cover ./...
 
-  # integration_test:
-  #   image: offline-twitter/go
-  #   commands:
-  #     - cd cmd
-  #     - ./tests.sh
+  integration_test:
+    image: offline-twitter/go
+    commands:
+      - cd cmd
+      - ./tests.sh
 
   version_bump_test:
     image: offline-twitter/go
@@ -39,16 +39,13 @@ pipeline:
       - which ../cmd/tw
       - ../cmd/tw fetch_user michaelmalice
 
-
-
-
-  # dpkg_build_and_upload:
-  #   when:
-  #     branch: release-*
-  #   image: offline-twitter/deploy
-  #   commands:
-  #     - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^release-)\d+\.\d+\.\d+")
-  #     - cd build
-  #     - ./build_dpkg.sh $version
-  #     - scp offline-twitter_$${version}_all.deb aptrepo@apt.playfulpachyderm.com:/apt-repo/test-repo
-  #     - ssh aptrepo@apt.playfulpachyderm.com "cd ~/test-repo && ./update.sh"
+  dpkg_build_and_upload:
+    when:
+      branch: release-*
+    image: offline-twitter/deploy
+    commands:
+      - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^release-)\d+\.\d+\.\d+")
+      - cd build
+      - ./build_dpkg.sh $version
+      - scp offline-twitter-engine_$${version}_all.deb aptrepo@apt.playfulpachyderm.com:/apt-repo/test-repo
+      - ssh aptrepo@apt.playfulpachyderm.com "cd ~/test-repo && ./update.sh"
