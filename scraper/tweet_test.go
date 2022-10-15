@@ -92,6 +92,36 @@ func TestParseTweetWithVideo(t *testing.T) {
 	assert.False(v.IsGif)
 }
 
+func TestParseTweetWith2Videos(t *testing.T) {
+	assert := assert.New(t)
+	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_2_videos.json")
+	assert.Empty(tweet.Images)
+	assert.Len(tweet.Videos, 2)
+
+	v1 := tweet.Videos[0]
+	assert.Equal("https://video.twimg.com/ext_tw_video/1579701730148847617/pu/vid/576x576/ghA0fyf58v-2naWR.mp4?tag=12", v1.RemoteURL)
+	assert.False(v1.IsGif)
+	v2 := tweet.Videos[1]
+	assert.Equal("https://video.twimg.com/ext_tw_video/1579701730157252608/pu/vid/480x480/VQ69Ut84XT2BgIzX.mp4?tag=12", v2.RemoteURL)
+	assert.False(v2.IsGif)
+}
+
+func TestParseTweetWithImageAndVideo(t *testing.T) {
+	assert := assert.New(t)
+	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_image_and_video.json")
+	assert.Len(tweet.Images, 1)
+	assert.Len(tweet.Videos, 1)
+
+	img := tweet.Images[0]
+	assert.Equal(img.ID, ImageID(1579292192580911104))
+	assert.Equal(img.RemoteURL, "https://pbs.twimg.com/media/FerF4bdVQAAKeYJ.jpg")
+
+	vid := tweet.Videos[0]
+	assert.Equal(vid.ID, VideoID(1579292197752430592))
+	assert.Equal(vid.ThumbnailRemoteUrl, "https://pbs.twimg.com/ext_tw_video_thumb/1579292197752430592/pu/img/soG4wMWOy3AVpllM.jpg")
+	assert.Equal(vid.RemoteURL, "https://video.twimg.com/ext_tw_video/1579292197752430592/pu/vid/640x750/UE-PSqG2EE5N2dN8.mp4?tag=12")
+}
+
 func TestParseTweetWithGif(t *testing.T) {
 	assert := assert.New(t)
 	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_that_is_a_reply_with_gif.json")

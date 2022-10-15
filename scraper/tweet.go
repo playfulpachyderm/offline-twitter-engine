@@ -160,12 +160,18 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		if entity.Type != "video" && entity.Type != "animated_gif" {
 			continue
 		}
-		if len(apiTweet.ExtendedEntities.Media) != 1 {
-			panic(fmt.Errorf("Surprising ExtendedEntities: %v\n  %w", apiTweet.ExtendedEntities.Media, EXTERNAL_API_ERROR))
+
+		new_video := ParseAPIVideo(entity, ret.ID)  // This assigns TweetID
+		ret.Videos = append(ret.Videos, new_video)
+
+		// Remove the thumbnail from the Images list
+		updated_imgs := []Image{}
+		for _, img := range ret.Images {
+			if VideoID(img.ID) != new_video.ID {
+				updated_imgs = append(updated_imgs, img)
+			}
 		}
-		new_video := ParseAPIVideo(apiTweet.ExtendedEntities.Media[0], ret.ID)
-		ret.Videos = []Video{new_video}
-		ret.Images = []Image{}
+		ret.Images = updated_imgs
 	}
 
 	// Process polls

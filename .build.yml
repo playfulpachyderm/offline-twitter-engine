@@ -71,8 +71,8 @@ tasks:
   - install_golangci-lint: |
       SECONDS=0
 
-      curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sudo sh -s -- -b /usr/local/go/bin v1.40.1
-      sudo ln /usr/local/go/bin/golangci-lint /usr/bin/golangci-lint
+      curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sudo sh -s -- -b /usr/local/go/bin v1.50.0
+      sudo ln /usr/local/go/bin/golangci-lint /usr/local/bin/golangci-lint
 
       duration=$SECONDS
       echo "Task completed in $(($duration / 60))m$(($duration % 60))s."
