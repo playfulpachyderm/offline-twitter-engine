@@ -14,11 +14,11 @@ pipeline:
       - mkdir persistence/test_profiles
       - go test -bench=. -cover ./...
 
-  integration_test:
-    image: offline-twitter/go
-    commands:
-      - cd cmd
-      - ./tests.sh
+  # integration_test:
+  #   image: offline-twitter/go
+  #   commands:
+  #     - cd cmd
+  #     - ./tests.sh
 
   version_bump_test:
     image: offline-twitter/go
@@ -35,7 +35,7 @@ pipeline:
       - cd outdated_profile
       - twitter fetch_user michaelmalice
       - twitter get_user_tweets michaelmalice
-      - (cd ../cmd && ./compile $version)
+      - (cd ../cmd && ./compile.sh $version)
       - which ../cmd/tw
       - ../cmd/tw fetch_user michaelmalice
 
