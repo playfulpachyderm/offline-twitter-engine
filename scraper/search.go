@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"errors"
+	"fmt"
 )
 
 func TimestampToDateString(timestamp int) string {
@@ -32,5 +33,14 @@ func Search(query string, min_results int) (trove TweetTrove, err error) {
 		}
 	}
 
-	return ParseTweetResponse(tweet_response)
+	trove, err = ParseTweetResponse(tweet_response)
+	if err != nil {
+		err = fmt.Errorf("Error parsing the tweet trove for search query %q:\n  %w", query, err)
+		return
+	}
+
+	// Filling tombstones and tombstoned users is probably not necessary here, but we still
+	// need to fetch Spaces
+	err = trove.PostProcess()
+	return
 }

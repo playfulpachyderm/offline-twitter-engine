@@ -54,8 +54,6 @@ func GetUserFeedGraphqlFor(user_id UserID, min_tweets int) (trove TweetTrove, er
 	}
 
 	fmt.Println("------------")
-	trove.FetchTombstoneUsers()
-	trove.FillMissingUserIDs()
-
-	return trove, nil
+	err = trove.PostProcess()
+	return trove, err
 }

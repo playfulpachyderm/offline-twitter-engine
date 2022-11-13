@@ -25,22 +25,6 @@ func NewTweetTrove() TweetTrove {
 }
 
 /**
- * Make it compatible with previous silly interface if needed
- */
-func (trove TweetTrove) Transform() (tweets []Tweet, retweets []Retweet, users []User) {
-	for _, val := range trove.Tweets {
-		tweets = append(tweets, val)
-	}
-	for _, val := range trove.Users {
-		users = append(users, val)
-	}
-	for _, val := range trove.Retweets {
-		retweets = append(retweets, val)
-	}
-	return
-} // TODO: refactor until this function isn't needed anymore
-
-/**
  * Search for a user by handle.  Second param is whether the user was found or not.
  */
 func (trove TweetTrove) FindUserByHandle(handle UserHandle) (User, bool) {
@@ -107,9 +91,6 @@ func (trove *TweetTrove) FetchTombstoneUsers() {
  *
  * At this point, those users should have been added to this trove's Users collection, and the
  * Tweets have a field `UserHandle` which can be used to pair them with newly fetched Users.
- *
- * This will still fail if the user deleted their account (instead of getting banned, blocking the
- * quote-tweeter, etc), because then that user won't show up .
  */
 func (trove *TweetTrove) FillMissingUserIDs() {
 	for i := range trove.Tweets {
@@ -132,4 +113,10 @@ func (trove *TweetTrove) FillMissingUserIDs() {
 		tweet.UserID = user.ID
 		trove.Tweets[i] = tweet
 	}
+}
+
+func (trove *TweetTrove) PostProcess() error {
+	trove.FetchTombstoneUsers()
+	trove.FillMissingUserIDs()
+	return nil
 }

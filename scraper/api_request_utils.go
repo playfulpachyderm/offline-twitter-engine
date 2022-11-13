@@ -220,7 +220,7 @@ func (api API) GetUser(handle UserHandle) (APIUser, error) {
 		if err != nil {
 			return APIUser{}, fmt.Errorf("Error retrieving API response to GetUser(%s):\n  %w", handle, err)
 		}
-		log.Debug(string(body))
+		log.Debug("GetUser(" + string(handle) + "): " + string(body))
 
 		err = json.Unmarshal(body, &response)
 		if err != nil {

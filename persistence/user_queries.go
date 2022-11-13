@@ -23,7 +23,9 @@ func (p Profile) SaveUser(u *scraper.User) error {
 			// We need to continue-- create a new fake user
 			u.ID = p.NextFakeUserID()
 		} else if err == nil {
-			// We're done; everything is fine (ID has already been scanned into the User)
+			// We're done; a user exists with this handle already.  No need to fake anything, and we have no new data
+			// to provide (since the ID is fake).
+			// ID has already been scanned into the User, for use by the caller.
 			return nil
 		} else {
 			// A real error occurred

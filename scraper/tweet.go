@@ -256,10 +256,13 @@ func GetTweetFull(id TweetID) (trove TweetTrove, err error) {
 		panic(err)
 	}
 	trove.TombstoneUsers = tombstoned_users
-	trove.FetchTombstoneUsers()
 
 	// Quoted tombstones need their user_id filled out from the tombstoned_users list
-	trove.FillMissingUserIDs()
+	err = trove.PostProcess()
+	if err != nil {
+		err = fmt.Errorf("Error getting tweet (id %d):\n  %w", id, err)
+		return
+	}
 
 	// Find the main tweet and update its "is_conversation_downloaded" and "last_scraped_at"
 	tweet, ok := trove.Tweets[id]
@@ -269,8 +272,6 @@ func GetTweetFull(id TweetID) (trove TweetTrove, err error) {
 	tweet.LastScrapedAt = Timestamp{time.Now()}
 	tweet.IsConversationScraped = true
 	trove.Tweets[id] = tweet
-
-	// tweets, retweets, users = trove.Transform()
 
 	return
 }

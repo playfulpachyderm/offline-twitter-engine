@@ -61,7 +61,7 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
 	)
 
 	if err != nil {
-		return fmt.Errorf("Error executing SaveTweet(ID %d):\n  %w", t.ID, err)
+		return fmt.Errorf("Error executing SaveTweet(ID %d).  Info: %#v:\n  %w", t.ID, t, err)
 	}
 	for _, url := range t.Urls {
 		err := p.SaveUrl(url)

@@ -227,11 +227,10 @@ func TestParseTweetResponse(t *testing.T) {
 
 	trove, err := ParseTweetResponse(tweet_resp)
 	require.NoError(t, err)
-	tweets, retweets, users := trove.Transform()
 
-	assert.Len(tweets, 29-3)
-	assert.Len(retweets, 3)
-	assert.Len(users, 9)
+	assert.Len(trove.Tweets, 29-3)
+	assert.Len(trove.Retweets, 3)
+	assert.Len(trove.Users, 9)
 }
 
 func TestParseTweetResponseWithTombstones(t *testing.T) {
@@ -249,9 +248,8 @@ func TestParseTweetResponseWithTombstones(t *testing.T) {
 
 	trove, err := ParseTweetResponse(tweet_resp)
 	require.NoError(t, err)
-	tweets, retweets, users := trove.Transform()
 
-	assert.Len(tweets, 2)
-	assert.Len(retweets, 0)
-	assert.Len(users, 1)
+	assert.Len(trove.Tweets, 2)
+	assert.Len(trove.Retweets, 0)
+	assert.Len(trove.Users, 1)
 }

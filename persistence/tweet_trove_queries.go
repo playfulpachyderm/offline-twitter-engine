@@ -18,6 +18,19 @@ func (p Profile) SaveTweetTrove(trove TweetTrove) {
 		}
 		fmt.Println(u.Handle, u.ID)
 		// If the User's ID was updated in saving (i.e., Unknown User), update it in the Trove too
+		// Also update tweets, retweets and spaces that reference this UserID
+		for j, tweet := range trove.Tweets {
+			if tweet.UserID == trove.Users[i].ID {
+				tweet.UserID = u.ID
+				trove.Tweets[j] = tweet
+			}
+		}
+		for j, retweet := range trove.Retweets {
+			if retweet.RetweetedByID == trove.Users[i].ID {
+				retweet.RetweetedByID = u.ID
+				trove.Retweets[j] = retweet
+			}
+		}
 		trove.Users[i] = u
 
 		// Download their tiny profile image
@@ -28,7 +41,9 @@ func (p Profile) SaveTweetTrove(trove TweetTrove) {
 	}
 
 	// TODO: this is called earlier in the process as well, before parsing.  Is that call redundant?  Too tired to figure out right now
-	trove.FillMissingUserIDs()
+	// Update: Yes it's redundant.  Places that return tweet troves should call `PostProcess`
+	// before returning, which includes `FillMissingUserIDs`.
+	// trove.FillMissingUserIDs()
 
 	for _, t := range trove.Tweets {
 		err := p.SaveTweet(t)
