@@ -106,13 +106,13 @@ test $(find videos -mindepth 2 | wc -l) = "$((initial_videos_count + 2))"
 test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1580185800968327168 and is_gif = 1") = "2"
 
 # Fetch a tweet with 2 videos
-test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1579701786252042240 and is_gif = 0") = "0"
-tw fetch_user FairwayWill
-tw fetch_tweet_only https://twitter.com/FairwayWill/status/1579701786252042240
-test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1579701786252042240 and is_gif = 0") = "2"
+test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1591025378143129601 and is_gif = 0") = "0"
+tw fetch_user alifarhat79
+tw fetch_tweet_only https://twitter.com/alifarhat79/status/1591025378143129601
+test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1591025378143129601 and is_gif = 0") = "2"
 
 initial_videos_count=$(find videos -mindepth 2 | wc -l)
-tw download_tweet_content https://twitter.com/FairwayWill/status/1579701786252042240
+tw download_tweet_content https://twitter.com/alifarhat79/status/1591025378143129601
 test $(find videos -mindepth 2 | wc -l) = "$((initial_videos_count + 2))"
 
 # Fetch a tweet with a video and an image
