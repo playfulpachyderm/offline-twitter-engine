@@ -485,3 +485,85 @@ func (api API) GetMoreTweetsFromGraphqlFeed(user_id UserID, response *APIV2Respo
 	}
 	return nil
 }
+
+type SpaceResponse struct {
+	Data struct {
+		AudioSpace struct {
+			Metadata struct {
+				RestId                      string `json:"rest_id"`
+				State                       string
+				Title                       string
+				MediaKey                    string `json:"media_key"`
+				CreatedAt                   int64  `json:"created_at"`
+				StartedAt                   int64  `json:"started_at"`
+				EndedAt                     int64  `json:"ended_at,string"`
+				UpdatedAt                   int64  `json:"updated_at"`
+				DisallowJoin                bool   `json:"disallow_join"`
+				NarrowCastSpaceType         int64  `json:"narrow_cast_space_type"`
+				IsEmployeeOnly              bool   `json:"is_employee_only"`
+				IsLocked                    bool   `json:"is_locked"`
+				IsSpaceAvailableForReplay   bool   `json:"is_space_available_for_replay"`
+				IsSpaceAvailableForClipping bool   `json:"is_space_available_for_clipping"`
+				ConversationControls        int64  `json:"conversation_controls"`
+				TotalReplayWatched          int64  `json:"total_replay_watched"`
+				TotalLiveListeners          int64  `json:"total_live_listeners"`
+				CreatorResults              struct {
+					Result struct {
+						ID     int64   `json:"rest_id,string"`
+						Legacy APIUser `json:"legacy"`
+					} `json:"result"`
+				} `json:"creator_results"`
+			}
+			Participants struct {
+				Total  int
+				Admins []struct {
+					Start int
+					User  struct {
+						RestId int64 `json:"rest_id,string"`
+					}
+				}
+				Speakers []struct {
+					User struct {
+						RestId int64 `json:"rest_id,string"`
+					}
+				}
+			}
+		}
+	}
+}
+
+func (r SpaceResponse) ToTweetTrove() TweetTrove {
+	data := r.Data.AudioSpace
+
+	ret := NewTweetTrove()
+	space := Space{}
+	space.ID = SpaceID(data.Metadata.RestId)
+	space.Title = data.Metadata.Title
+	space.State = data.Metadata.State
+	space.CreatedAt = TimestampFromUnix(data.Metadata.CreatedAt)
+	space.StartedAt = TimestampFromUnix(data.Metadata.StartedAt)
+	space.EndedAt = TimestampFromUnix(data.Metadata.EndedAt)
+	space.UpdatedAt = TimestampFromUnix(data.Metadata.UpdatedAt)
+	space.IsAvailableForReplay = data.Metadata.IsSpaceAvailableForReplay
+	space.ReplayWatchCount = data.Metadata.TotalReplayWatched
+	space.LiveListenersCount = data.Metadata.TotalLiveListeners
+	space.IsDetailsFetched = true
+
+	for _, admin := range data.Participants.Admins {
+		space.ParticipantIds = append(space.ParticipantIds, UserID(admin.User.RestId))
+	}
+	for _, speaker := range data.Participants.Speakers {
+		space.ParticipantIds = append(space.ParticipantIds, UserID(speaker.User.RestId))
+	}
+
+	ret.Spaces[space.ID] = space
+
+	creator, err := ParseSingleUser(data.Metadata.CreatorResults.Result.Legacy)
+	if err != nil {
+		panic(err)
+	}
+	creator.ID = UserID(data.Metadata.CreatorResults.Result.ID)
+	ret.Users[creator.ID] = creator
+
+	return ret
+}

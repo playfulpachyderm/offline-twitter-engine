@@ -463,6 +463,42 @@ func TestAPIV2ParseTweetWithSpace(t *testing.T) {
 
 	s := tweet.Spaces[0]
 	assert.Equal(SpaceID("1dRJZlRNZDzKB"), s.ID)
+	assert.Equal("https://t.co/5RLbEwQgvH", s.ShortUrl)
+	assert.False(s.IsDetailsFetched)
+}
+
+func TestParseSpaceResponse(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+	data, err := os.ReadFile("test_responses/tweet_content/space_object.json")
+	if err != nil {
+		panic(err)
+	}
+
+	var response SpaceResponse
+	err = json.Unmarshal(data, &response)
+	assert.NoError(err)
+
+	trove := response.ToTweetTrove()
+	require.Len(trove.Spaces, 1)
+	space := trove.Spaces["1BdxYypQzBgxX"]
+	assert.Equal(space.Title, "dreary weather 🌧️☔🌬️")
+	assert.Equal(int64(1665884387263), space.CreatedAt.Time.Unix())
+	assert.Equal(int64(1665884388222), space.StartedAt.Time.Unix())
+	assert.Equal(int64(1665887491804), space.EndedAt.Time.Unix())
+	assert.Equal(int64(1665887492705), space.UpdatedAt.Time.Unix())
+	assert.False(space.IsAvailableForReplay)
+	assert.Equal(int64(4), space.ReplayWatchCount)
+	assert.Equal(int64(1), space.LiveListenersCount)
+	assert.True(space.IsDetailsFetched)
+
+	assert.Len(space.ParticipantIds, 2)
+	assert.Equal(UserID(1356335022815539201), space.ParticipantIds[0])
+	assert.Equal(UserID(1523838615377350656), space.ParticipantIds[1])
+
+	require.Len(trove.Users, 1)
+	user := trove.Users[1356335022815539201]
+	assert.Equal(847, user.FollowersCount)
 }
 
 func TestParseAPIV2UserFeed(t *testing.T) {

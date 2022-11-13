@@ -213,6 +213,8 @@ func TestTweetWithSpace(t *testing.T) {
 
 	s := tweet.Spaces[0]
 	assert.Equal(SpaceID("1YpKkZVyQjoxj"), s.ID)
+	assert.Equal("https://t.co/WBPAHNF8Om", s.ShortUrl)
+	assert.False(s.IsDetailsFetched)
 }
 
 func TestParseTweetResponse(t *testing.T) {
