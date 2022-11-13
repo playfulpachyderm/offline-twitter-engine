@@ -490,6 +490,7 @@ func TestParseSpaceResponse(t *testing.T) {
 	assert.False(space.IsAvailableForReplay)
 	assert.Equal(int64(4), space.ReplayWatchCount)
 	assert.Equal(int64(1), space.LiveListenersCount)
+
 	assert.True(space.IsDetailsFetched)
 
 	assert.Len(space.ParticipantIds, 2)
