@@ -502,6 +502,21 @@ func TestParseSpaceResponse(t *testing.T) {
 	assert.Equal(847, user.FollowersCount)
 }
 
+func TestParseEmptySpaceResponse(t *testing.T) {
+	require := require.New(t)
+	data, err := os.ReadFile("test_responses/tweet_content/space_object_empty.json")
+	if err != nil {
+		panic(err)
+	}
+
+	var response SpaceResponse
+	err = json.Unmarshal(data, &response)
+	require.NoError(err)
+
+	trove := response.ToTweetTrove()
+	require.Len(trove.Spaces, 0)
+}
+
 func TestParseAPIV2UserFeed(t *testing.T) {
 	data, err := os.ReadFile("test_responses/api_v2/user_feed_apiv2.json")
 	if err != nil {

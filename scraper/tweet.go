@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	log "github.com/sirupsen/logrus"
 
 	"offline_twitter/terminal_utils"
 )
@@ -33,7 +34,12 @@ type Tweet struct {
 	Hashtags      []string
 	Urls          []Url
 	Polls         []Poll
+
+	// TODO get-rid-of-spaces: Might be good to get rid of `Spaces`.  Only used in APIv1 I think.
+	// A first-step would be to delete the Spaces after pulling them out of a Tweet into the Trove
+	// in ParseTweetResponse.  Then they will only be getting saved once rather than twice.
 	Spaces        []Space
+	SpaceID       SpaceID
 
 	TombstoneType string
 	IsStub        bool
@@ -185,6 +191,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	if apiTweet.Card.Name == "3691233323:audiospace" {
 		space := ParseAPISpace(apiTweet.Card)
 		ret.Spaces = []Space{space}
+		ret.SpaceID = space.ID
 	}
 
 	// Process tombstones and other metadata
@@ -258,6 +265,7 @@ func GetTweetFull(id TweetID) (trove TweetTrove, err error) {
 	trove.TombstoneUsers = tombstoned_users
 
 	// Quoted tombstones need their user_id filled out from the tombstoned_users list
+	log.Debug("Running tweet trove post-processing\n")
 	err = trove.PostProcess()
 	if err != nil {
 		err = fmt.Errorf("Error getting tweet (id %d):\n  %w", id, err)
@@ -294,6 +302,9 @@ func ParseTweetResponse(resp TweetResponse) (TweetTrove, error) {
 				return trove, err
 			}
 			trove.Tweets[new_tweet.ID] = new_tweet
+			for _, space := range new_tweet.Spaces {
+				trove.Spaces[space.ID] = space
+			}
 		} else {
 			new_retweet, err := ParseSingleRetweet(single_tweet)
 			if err != nil {

@@ -538,6 +538,11 @@ func (r SpaceResponse) ToTweetTrove() TweetTrove {
 	ret := NewTweetTrove()
 	space := Space{}
 	space.ID = SpaceID(data.Metadata.RestId)
+	if space.ID == "" {
+		// The response is empty.  Abort processing
+		return ret
+	}
+
 	space.Title = data.Metadata.Title
 	space.State = data.Metadata.State
 	space.CreatedAt = TimestampFromUnix(data.Metadata.CreatedAt)
