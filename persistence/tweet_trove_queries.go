@@ -31,6 +31,12 @@ func (p Profile) SaveTweetTrove(trove TweetTrove) {
 				trove.Retweets[j] = retweet
 			}
 		}
+		for j, space := range trove.Spaces {
+			if space.CreatedById == trove.Users[i].ID {
+				space.CreatedById = u.ID
+				trove.Spaces[j] = space
+			}
+		}
 		trove.Users[i] = u
 
 		// Download their tiny profile image
@@ -40,10 +46,12 @@ func (p Profile) SaveTweetTrove(trove TweetTrove) {
 		}
 	}
 
-	// TODO: this is called earlier in the process as well, before parsing.  Is that call redundant?  Too tired to figure out right now
-	// Update: Yes it's redundant.  Places that return tweet troves should call `PostProcess`
-	// before returning, which includes `FillMissingUserIDs`.
-	// trove.FillMissingUserIDs()
+	for _, s := range trove.Spaces {
+		err := p.SaveSpace(s)
+		if err != nil {
+			panic(fmt.Errorf("Error saving space with ID %s:\n  %w", s.ID, err))
+		}
+	}
 
 	for _, t := range trove.Tweets {
 		err := p.SaveTweet(t)

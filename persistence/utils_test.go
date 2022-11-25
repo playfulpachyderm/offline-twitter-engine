@@ -174,6 +174,7 @@ func create_stable_tweet() scraper.Tweet {
 		Spaces: []scraper.Space{
 			create_space_from_id(-1),
 		},
+		SpaceID:               scraper.SpaceID("some_id_-1"),
 		IsConversationScraped: true,
 		LastScrapedAt:         scraper.TimestampFromUnix(100000000),
 	}
@@ -241,6 +242,9 @@ func create_dummy_tweet() scraper.Tweet {
 	poll := create_poll_from_id(rand.Int())
 	poll.TweetID = tweet_id
 
+	space := create_space_from_id(rand.Int())
+	space_id := space.ID
+
 	return scraper.Tweet{
 		ID:             tweet_id,
 		UserID:         -1,
@@ -257,7 +261,8 @@ func create_dummy_tweet() scraper.Tweet {
 		ReplyMentions:  []scraper.UserHandle{"replymention1", "replymention2"},
 		Hashtags:       []string{"hash1", "hash2"},
 		Polls:          []scraper.Poll{poll},
-		Spaces:         []scraper.Space{create_space_from_id(rand.Int())},
+		Spaces:         []scraper.Space{space},
+		SpaceID:        space_id,
 	}
 }
 
@@ -300,7 +305,15 @@ func create_dummy_retweet(tweet_id scraper.TweetID) scraper.Retweet {
  */
 func create_space_from_id(id int) scraper.Space {
 	return scraper.Space{
-		ID:       scraper.SpaceID(fmt.Sprintf("some_id_%d", id)),
-		ShortUrl: fmt.Sprintf("short_url_%d", id),
+		ID:             scraper.SpaceID(fmt.Sprintf("some_id_%d", id)),
+		ShortUrl:       fmt.Sprintf("short_url_%d", id),
+		State:          "Ended",
+		Title:          "Some Title",
+		CreatedAt:      scraper.TimestampFromUnix(1000),
+		StartedAt:      scraper.TimestampFromUnix(2000),
+		EndedAt:        scraper.TimestampFromUnix(3000),
+		UpdatedAt:      scraper.TimestampFromUnix(4000),
+		CreatedById:    -1,
+		ParticipantIds: []scraper.UserID{-1},
 	}
 }

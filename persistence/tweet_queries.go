@@ -14,13 +14,12 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
 
 	tx := db.MustBegin()
 
-	var space_id scraper.SpaceID
+	// Has to be done first since Tweet has a foreign key to Space
 	for _, space := range t.Spaces {
 		err := p.SaveSpace(space)
 		if err != nil {
 			return err
 		}
-		space_id = space.ID
 	}
 
 	_, err := db.Exec(`
@@ -54,7 +53,8 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
         `,
 		t.ID, t.UserID, t.Text, t.PostedAt, t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.InReplyToID,
 		t.QuotedTweetID, scraper.JoinArrayOfHandles(t.Mentions), scraper.JoinArrayOfHandles(t.ReplyMentions),
-		strings.Join(t.Hashtags, ","), space_id, t.TombstoneType, t.IsStub, t.IsContentDownloaded, t.IsConversationScraped, t.LastScrapedAt,
+		strings.Join(t.Hashtags, ","), t.SpaceID, t.TombstoneType, t.IsStub, t.IsContentDownloaded, t.IsConversationScraped,
+		t.LastScrapedAt,
 
 		t.Text, t.NumLikes, t.NumRetweets, t.NumReplies, t.NumQuoteTweets, t.IsStub, t.TombstoneType, t.TombstoneType,
 		t.IsContentDownloaded, t.IsConversationScraped, t.LastScrapedAt,
@@ -136,11 +136,10 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
 	var mentions string
 	var reply_mentions string
 	var hashtags string
-	var space_id scraper.SpaceID
 
 	row := stmt.QueryRow(id)
 	err = row.Scan(&t.ID, &t.UserID, &t.Text, &t.PostedAt, &t.NumLikes, &t.NumRetweets, &t.NumReplies, &t.NumQuoteTweets, &t.InReplyToID,
-		&t.QuotedTweetID, &mentions, &reply_mentions, &hashtags, &space_id, &t.TombstoneType, &t.IsStub, &t.IsContentDownloaded,
+		&t.QuotedTweetID, &mentions, &reply_mentions, &hashtags, &t.SpaceID, &t.TombstoneType, &t.IsStub, &t.IsContentDownloaded,
 		&t.IsConversationScraped, &t.LastScrapedAt)
 	if err != nil {
 		return t, fmt.Errorf("Error parsing result in GetTweetByID(%d):\n  %w", id, err)
@@ -166,8 +165,8 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
 	}
 
 	t.Spaces = []scraper.Space{}
-	if space_id != "" {
-		space, err := p.GetSpace(space_id)
+	if t.SpaceID != "" {
+		space, err := p.GetSpaceById(t.SpaceID)
 		if err != nil {
 			return t, err
 		}

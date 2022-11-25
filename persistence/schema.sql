@@ -116,7 +116,29 @@ create table polls (rowid integer primary key,
 
 create table spaces(rowid integer primary key,
     id text unique not null,
-    short_url text not null
+    created_by_id integer,
+    short_url text not null,
+    state text not null,
+    title text not null,
+    created_at integer not null,
+    started_at integer not null,
+    ended_at integer not null,
+    updated_at integer not null,
+    is_available_for_replay boolean not null,
+    replay_watch_count integer,
+    live_listeners_count integer,
+    is_details_fetched boolean not null default 0,
+
+    foreign key(created_by_id) references users(id)
+);
+
+create table space_participants(rowid integer primary key,
+    user_id integer not null,
+    space_id not null,
+
+    foreign key(space_id) references spaces(id)
+    -- No foreign key for users, since they may not be downloaded yet and I don't want to
+    -- download every user who joins a space
 );
 
 create table images (rowid integer primary key,
