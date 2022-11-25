@@ -249,7 +249,14 @@ func (api_result APIV2Result) ToTweetTrove(ignore_null_entries bool) TweetTrove 
 			ret.Tweets[main_tweet.ID] = main_tweet
 		} else if api_result.Result.Card.Legacy.Name == "3691233323:audiospace" {
 			space := api_result.Result.Card.ParseAsSpace()
-			main_tweet.Spaces = []Space{space}
+			// Attach it to the Tweet that linked it
+			main_tweet.SpaceID = space.ID
+			// Put it in the trove; avoid clobbering
+			if existing_space, is_ok := ret.Spaces[space.ID]; !is_ok || !existing_space.IsDetailsFetched {
+				ret.Spaces[space.ID] = space
+			}
+
+			// main_tweet.Spaces = []Space{space}
 
 			// Remove it from the Urls
 			for i, url := range main_tweet.Urls {

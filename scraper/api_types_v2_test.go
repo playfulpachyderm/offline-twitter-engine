@@ -444,6 +444,7 @@ func TestAPIV2ParseTweetWithPoll(t *testing.T) {
  */
 func TestAPIV2ParseTweetWithSpace(t *testing.T) {
 	assert := assert.New(t)
+	require := require.New(t)
 	data, err := os.ReadFile("test_responses/api_v2/tweet_with_audiospaces_card.json")
 	if err != nil {
 		panic(err)
@@ -457,11 +458,14 @@ func TestAPIV2ParseTweetWithSpace(t *testing.T) {
 
 	assert.Len(trove.Tweets, 1)
 	tweet, ok := trove.Tweets[1497647006445146113]
-	require.True(t, ok)
+	require.True(ok)
 	assert.Len(tweet.Urls, 0)
-	assert.Len(tweet.Spaces, 1)
+	assert.Equal(tweet.SpaceID, SpaceID("1dRJZlRNZDzKB"))
 
-	s := tweet.Spaces[0]
+	require.Len(trove.Spaces, 1)
+	s, is_ok := trove.Spaces["1dRJZlRNZDzKB"]
+	require.True(is_ok)
+
 	assert.Equal(SpaceID("1dRJZlRNZDzKB"), s.ID)
 	assert.Equal("https://t.co/5RLbEwQgvH", s.ShortUrl)
 	assert.False(s.IsDetailsFetched)

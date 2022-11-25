@@ -27,11 +27,11 @@ func (p Profile) SaveSpace(s scraper.Space) error {
 		       short_url=case when short_url == "" then :short_url else short_url end,
 		       state=:state,
 		       title=:title,
-		       updated_at=:updated_at,
+		       updated_at=max(:updated_at, updated_at),
 		       is_available_for_replay=:is_available_for_replay,
 		       replay_watch_count=:replay_watch_count,
 		       live_listeners_count=:live_listeners_count,
-		       is_details_fetched=:is_details_fetched
+		       is_details_fetched=(is_details_fetched or :is_details_fetched)
 	`, &s)
 	if err != nil {
 		return fmt.Errorf("Error saving space (space ID %q, value: %#v):\n  %w", s.ID, s, err)
