@@ -659,3 +659,23 @@ func TestTweetWithWarning(t *testing.T) {
 	assert.Len(trove.Tweets, 2)
 	assert.Len(trove.Users, 3)
 }
+
+func TestRetweetWithVisibilityResults(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/retweet_with_visibility_results.json")
+	require.NoError(err)
+	var tweet_result APIV2Result
+	err = json.Unmarshal(data, &tweet_result)
+	require.NoError(err)
+
+	trove := tweet_result.ToTweetTrove(true)
+
+	assert.Len(trove.Retweets, 1)
+	assert.Len(trove.Tweets, 1)
+	assert.Len(trove.Users, 2)
+
+	rt, is_ok := trove.Retweets[1595999178593034241]
+	require.True(is_ok)
+	assert.Equal(rt.TweetID, TweetID(1595973736833892356))
+}

@@ -290,8 +290,15 @@ func (api_v2_tweet APIV2Tweet) ToTweetTrove() TweetTrove {
 
 		retweet := Retweet{}
 		var err error
+
 		retweet.RetweetID = TweetID(api_v2_tweet.ID)
-		retweet.TweetID = TweetID(api_v2_tweet.RetweetedStatusResult.Result.ID)
+		if api_v2_tweet.RetweetedStatusResult.Result.Legacy.ID == 0 && api_v2_tweet.RetweetedStatusResult.Result.Tweet.Legacy.ID != 0 {
+			// Tweet is a "TweetWithVisibilityResults" (See above comment for more).
+			retweet.TweetID = TweetID(api_v2_tweet.RetweetedStatusResult.Result.Tweet.ID)
+		} else {
+			retweet.TweetID = TweetID(api_v2_tweet.RetweetedStatusResult.Result.ID)
+		}
+
 		retweet.RetweetedByID = UserID(api_v2_tweet.APITweet.UserID)
 		retweet.RetweetedAt, err = TimestampFromString(api_v2_tweet.APITweet.CreatedAt)
 		if err != nil {

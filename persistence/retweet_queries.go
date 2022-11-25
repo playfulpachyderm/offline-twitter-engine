@@ -18,7 +18,7 @@ func (p Profile) SaveRetweet(r scraper.Retweet) error {
 		r.RetweetID, r.TweetID, r.RetweetedByID, r.RetweetedAt.Unix(),
 	)
 	if err != nil {
-		return fmt.Errorf("Error executing SaveRetweet(%d):\n  %w", r.RetweetID, err)
+		return fmt.Errorf("Error executing SaveRetweet(%#v):\n  %w", r, err)
 	}
 	return nil
 }
