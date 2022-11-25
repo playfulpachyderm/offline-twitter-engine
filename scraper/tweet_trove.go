@@ -120,8 +120,31 @@ func (trove *TweetTrove) FillMissingUserIDs() {
 	}
 }
 
+func (trove *TweetTrove) FillSpaceDetails() error {
+	fmt.Println("Filling space details")
+	for i := range trove.Spaces {
+		fmt.Printf("Getting space: %q\n", trove.Spaces[i].ID)
+		new_trove, err := FetchSpaceDetail(trove.Spaces[i].ID)
+		if err != nil {
+			return err
+		}
+		// Replace the old space in the trove with the new, updated one
+		new_space, is_ok := new_trove.Spaces[i]
+		if is_ok {
+			// Necessary to check is_ok because the space response could be empty, in which case
+			// we don't want to overwrite it
+			trove.Spaces[i] = new_space
+		}
+	}
+	return nil
+}
+
 func (trove *TweetTrove) PostProcess() error {
 	trove.FetchTombstoneUsers()
 	trove.FillMissingUserIDs()
+	err := trove.FillSpaceDetails()
+	if err != nil {
+		return err
+	}
 	return nil
 }

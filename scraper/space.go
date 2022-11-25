@@ -1,5 +1,9 @@
 package scraper
 
+import (
+	"fmt"
+)
+
 type SpaceID string
 
 type Space struct {
@@ -31,4 +35,13 @@ func ParseAPISpace(apiCard APICard) Space {
 	ret.IsDetailsFetched = false
 
 	return ret
+}
+
+func FetchSpaceDetail(id SpaceID) (TweetTrove, error) {
+	api := API{}
+	space_response, err := api.GetSpace(id)
+	if err != nil {
+		return TweetTrove{}, fmt.Errorf("Error in API call to fetch Space (id %q):\n  %w", id, err)
+	}
+	return space_response.ToTweetTrove(), nil
 }
