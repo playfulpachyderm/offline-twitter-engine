@@ -2,9 +2,9 @@ package scraper
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
-	log "github.com/sirupsen/logrus"
 
 	"offline_twitter/terminal_utils"
 )
@@ -38,8 +38,8 @@ type Tweet struct {
 	// TODO get-rid-of-spaces: Might be good to get rid of `Spaces`.  Only used in APIv1 I think.
 	// A first-step would be to delete the Spaces after pulling them out of a Tweet into the Trove
 	// in ParseTweetResponse.  Then they will only be getting saved once rather than twice.
-	Spaces        []Space
-	SpaceID       SpaceID
+	Spaces  []Space
+	SpaceID SpaceID
 
 	TombstoneType string
 	IsStub        bool
