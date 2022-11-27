@@ -1,3 +1,5 @@
+TODO update videos schema to account for download status (success, fail, DCMA, etc). bool -> int? or str? Or add a 'is valid/has been DMCAed' flag?
+
 TODO user-images-extract-to-table:
 User profile images and banner images => extract to table.  Add `is_downloaded` column.  Add test for double-downloading a user, shouldn't change the write-times on these files
 
@@ -28,7 +30,7 @@ Video size reduction:
 - option to upgrade or downgrade video quality
 
 TODO: Problem tweets
-- https://twitter.com/TyCardon/status/1480640777281839106: "Media has been disabled in response to report by copyright owner"
+- DONE - https://twitter.com/TyCardon/status/1480640777281839106: "Media has been disabled in response to report by copyright owner"
 - https://twitter.com/CovfefeAnon/status/1427693931047837702: parent thread not loading (possible GUI problem)
 - "account no longer exists" tombstone not being collected => https://twitter.com/michaelmalice/status/1461031030278742020
 - tweet with warning label not getting scraped right: https://twitter.com/michaelmalice/status/1493324611999748098
