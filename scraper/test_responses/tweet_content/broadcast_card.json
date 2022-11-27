@@ -1,0 +1,269 @@
+{
+  "name": "745291183405076480:broadcast",
+  "url": "https://t.co/ahBMOsAWS6",
+  "card_type_url": "http://card-type-url-is-deprecated.invalid",
+  "binding_values": {
+    "broadcast_url": {
+      "type": "STRING",
+      "string_value": "https://twitter.com/i/broadcasts/1zqJVPnYLYdKB"
+    },
+    "broadcast_state": {
+      "type": "STRING",
+      "string_value": "TIMED_OUT"
+    },
+    "broadcast_is_high_latency": {
+      "type": "BOOLEAN",
+      "boolean_value": true
+    },
+    "broadcast_orientation": {
+      "type": "STRING",
+      "string_value": "0"
+    },
+    "broadcast_source": {
+      "type": "STRING",
+      "string_value": "livecms"
+    },
+    "broadcast_height": {
+      "type": "STRING",
+      "string_value": "1080"
+    },
+    "broadcast_width": {
+      "type": "STRING",
+      "string_value": "1920"
+    },
+    "broadcaster_username": {
+      "type": "STRING",
+      "string_value": "realGeorgeHotz"
+    },
+    "broadcaster_display_name": {
+      "type": "STRING",
+      "string_value": "George Hotz 🐀"
+    },
+    "broadcaster_twitter_id": {
+      "type": "STRING",
+      "string_value": "771970414155182081"
+    },
+    "broadcast_title": {
+      "type": "STRING",
+      "string_value": "so how does twitter work?"
+    },
+    "broadcast_media_id": {
+      "type": "STRING",
+      "string_value": "1593109458179489792"
+    },
+    "broadcast_media_key": {
+      "type": "STRING",
+      "string_value": "28_1593109458179489792"
+    },
+    "broadcast_id": {
+      "type": "STRING",
+      "string_value": "1zqJVPnYLYdKB"
+    },
+    "site": {
+      "type": "USER",
+      "user_value": {
+        "id_str": "771970414155182081",
+        "path": []
+      },
+      "scribe_key": "publisher_id"
+    },
+    "broadcast_thumbnail_small": {
+      "type": "IMAGE",
+      "image_value": {
+        "url": "https://pbs.twimg.com/card_img/1596683457421139968/7aYwHyMF?format=jpg&name=386x202",
+        "width": 386,
+        "height": 202
+      }
+    },
+    "broadcast_thumbnail": {
+      "type": "IMAGE",
+      "image_value": {
+        "url": "https://pbs.twimg.com/card_img/1596683457421139968/7aYwHyMF?format=jpg&name=600x314",
+        "width": 600,
+        "height": 314
+      }
+    },
+    "broadcast_thumbnail_large": {
+      "type": "IMAGE",
+      "image_value": {
+        "url": "https://pbs.twimg.com/card_img/1596683457421139968/7aYwHyMF?format=jpg&name=800x419",
+        "width": 800,
+        "height": 419
+      }
+    },
+    "broadcast_thumbnail_x_large": {
+      "type": "IMAGE",
+      "image_value": {
+        "url": "https://pbs.twimg.com/card_img/1596683457421139968/7aYwHyMF?format=png&name=2048x2048_2_exp",
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    "broadcast_thumbnail_color": {
+      "type": "IMAGE_COLOR",
+      "image_color_value": {
+        "palette": [
+          {
+            "percentage": 51.46,
+            "rgb": {
+              "red": 24,
+              "green": 20,
+              "blue": 21
+            }
+          },
+          {
+            "percentage": 34.81,
+            "rgb": {
+              "red": 119,
+              "green": 104,
+              "blue": 120
+            }
+          },
+          {
+            "percentage": 8.94,
+            "rgb": {
+              "red": 169,
+              "green": 112,
+              "blue": 76
+            }
+          },
+          {
+            "percentage": 2.7,
+            "rgb": {
+              "red": 113,
+              "green": 94,
+              "blue": 94
+            }
+          },
+          {
+            "percentage": 0.98,
+            "rgb": {
+              "red": 66,
+              "green": 37,
+              "blue": 24
+            }
+          }
+        ]
+      }
+    },
+    "broadcast_thumbnail_original": {
+      "type": "IMAGE",
+      "image_value": {
+        "url": "https://pbs.twimg.com/card_img/1596683457421139968/7aYwHyMF?format=jpg&name=orig",
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    "card_url": {
+      "type": "STRING",
+      "string_value": "https://t.co/ahBMOsAWS6",
+      "scribe_key": "card_url"
+    }
+  },
+  "users": {
+    "771970414155182081": {
+      "id_str": "771970414155182081",
+      "name": "George Hotz 🐀",
+      "screen_name": "realGeorgeHotz",
+      "location": "San Diego, CA",
+      "description": "President @comma_ai. Founder https://t.co/xCz9sMUkif. Intern @Twitter",
+      "url": "https://t.co/jjCk5yWXey",
+      "entities": {
+        "url": {
+          "urls": [
+            {
+              "url": "https://t.co/jjCk5yWXey",
+              "expanded_url": "http://1m2019.com/",
+              "display_url": "1m2019.com",
+              "indices": [
+                0,
+                23
+              ]
+            }
+          ]
+        },
+        "description": {
+          "urls": [
+            {
+              "url": "https://t.co/xCz9sMUkif",
+              "expanded_url": "http://tinygrad.org",
+              "display_url": "tinygrad.org",
+              "indices": [
+                29,
+                52
+              ]
+            }
+          ]
+        }
+      },
+      "followers_count": 127791,
+      "fast_followers_count": 0,
+      "normal_followers_count": 127791,
+      "friends_count": 68,
+      "listed_count": 706,
+      "created_at": "Sat Sep 03 07:17:44 +0000 2016",
+      "favourites_count": 189,
+      "statuses_count": 590,
+      "media_count": 4,
+      "profile_image_url_https": "https://pbs.twimg.com/profile_images/772342671721455616/FE79-7Ev_normal.jpg",
+      "profile_banner_url": "https://pbs.twimg.com/profile_banners/771970414155182081/1472975904",
+      "profile_image_extensions_media_availability": null,
+      "profile_image_extensions_alt_text": null,
+      "profile_image_extensions": {
+        "mediaStats": {
+          "r": {
+            "missing": null
+          },
+          "ttl": -1
+        }
+      },
+      "profile_banner_extensions_media_availability": null,
+      "profile_banner_extensions_alt_text": null,
+      "profile_banner_extensions": {
+        "mediaStats": {
+          "r": {
+            "missing": null
+          },
+          "ttl": -1
+        }
+      },
+      "profile_link_color": "1DA1F2",
+      "has_extended_profile": true,
+      "default_profile": true,
+      "pinned_tweet_ids": [
+        1595277021612953600
+      ],
+      "pinned_tweet_ids_str": [
+        "1595277021612953601"
+      ],
+      "has_custom_timelines": true,
+      "advertiser_account_type": "promotable_user",
+      "advertiser_account_service_levels": [
+        "analytics"
+      ],
+      "profile_interstitial_type": "",
+      "business_profile_state": "none",
+      "translator_type": "none",
+      "withheld_in_countries": [],
+      "ext": {
+        "highlightedLabel": {
+          "r": {
+            "ok": {}
+          },
+          "ttl": -1
+        }
+      }
+    }
+  },
+  "card_platform": {
+    "platform": {
+      "device": {
+        "name": "Swift",
+        "version": "12"
+      },
+      "audience": {
+        "name": "production"
+      }
+    }
+  }
+}

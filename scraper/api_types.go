@@ -125,6 +125,57 @@ type APICard struct {
 			StringValue string `json:"string_value"`
 		} `json:"last_updated_datetime_utc"`
 
+		// For Broadcasts
+		BroadcastURL struct {
+			StringValue string `json:"string_value"`
+		} `json:"broadcast_url"`
+		BroadcastShortURL struct {
+			StringValue string `json:"string_value"`
+		} `json:"broadcast_short_url"`
+		BroadcastState struct {
+			StringValue string `json:"string_value"`
+		} `json:"broadcast_state"`
+		BroadcastIsHighLatency struct {
+			StringValue string `json:"string_value"`
+		} `json:"broadcast_is_high_latency"`
+		BroadcastOrientation struct {
+			StringValue string `json:"string_value"`
+		} `json:"broadcast_orientation"`
+		BroadcastSource struct {
+			StringValue string `json:"string_value"`
+		} `json:"broadcast_source"`
+		BroadcastHeight struct {
+			StringValue string `json:"string_value"`
+		} `json:"broadcast_height"`
+		BroadcastWidth struct {
+			StringValue string `json:"string_value"`
+		} `json:"broadcast_width"`
+		BroadcasterDisplayName struct {
+			StringValue string `json:"string_value"`
+		} `json:"broadcaster_display_name"`
+		BroadcasterTwitterID struct {
+			StringValue string `json:"string_value"`
+		} `json:"broadcaster_twitter_id""`
+		BroadcastMediaID struct {
+			StringValue string `json:"string_value"`
+		} `json:"broadcast_media_id"`
+		BroadcastMediaKey struct {
+			StringValue string `json:"string_value"`
+		} `json:"broadcast_media_key"`
+		BroadcastID struct {
+			StringValue string `json:"string_value"`
+		} `json:"broadcast_id"`
+		BroadcastTitle struct {
+			StringValue string `json:"string_value"`
+		} `json:"broadcast_title"`
+		BroadcastThumbnailOriginal struct {
+			ImageValue struct {
+				Url    string `json:"url"`
+				Width  int    `json:"width"`
+				Height int    `json:"height"`
+			} `json:"image_value"`
+		} `json:"broadcast_thumbnail_original"`
+
 		// For Spaces
 		ID struct {
 			StringValue string `json:"string_value"`

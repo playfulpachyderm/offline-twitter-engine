@@ -141,6 +141,32 @@ create table space_participants(rowid integer primary key,
     -- download every user who joins a space
 );
 
+create table broadcasts (rowid integer primary key,
+    id text unique not null,
+    tweet_id integer not null,
+    state text not null,
+    height int not null,
+    width int not null,
+    title text not null,
+    thumbnail_width int not null,
+    thumbnail_height int not null,
+    thumbnail_remote_url text,
+    thumbnail_local_path text,
+    broadcaster_id int not null,
+    url text not null,
+    short_url text not null,
+    orientation text not null,
+    source text not null,
+    media_id text not null,
+    media_key text not null,
+    -- site
+
+    is_thumbnail_downloaded boolean,
+
+    foreign key(tweet_id) references tweets(id),
+    foreign key(broadcaster_id) references users(id)
+);
+
 create table images (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
     tweet_id integer not null,
@@ -163,6 +189,8 @@ create table videos (rowid integer primary key,
     thumbnail_remote_url text not null default "missing",
     thumbnail_local_filename text not null default "missing",
     duration integer not null default 0,
+    bitrate integer not null default 0,
+    bitrates_available text not null default "",
     view_count integer not null default 0,
     is_gif boolean default 0,
     is_downloaded boolean default 0,
