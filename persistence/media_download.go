@@ -1,6 +1,8 @@
 package persistence
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,6 +19,8 @@ type MediaDownloader interface {
 
 type DefaultDownloader struct{}
 
+var ErrorDCMA error = errors.New("Error Video is DCMAed, unable to download (HTTP 403 Forbidden)")
+
 /**
  * Download a file over HTTP and save it.
  *
@@ -30,6 +34,27 @@ func (d DefaultDownloader) Curl(url string, outpath string) error {
 	if err != nil {
 		return fmt.Errorf("Error executing HTTP GET(%q):\n  %w", url, err)
 	}
+
+	if resp.StatusCode == 403 {
+		var response struct {
+			Error_response string `json:"error_response"`
+		}
+		body, err := io.ReadAll(resp.Body)
+		fmt.Println("body = " + string(body))
+
+		if err != nil {
+			panic(err)
+		}
+
+		json.Unmarshal(body, &response)
+
+		if response.Error_response == "Dmcaed" {
+			return ErrorDCMA
+		}
+
+		return fmt.Errorf("Error 403 Forbidden %s: %s", url, resp.Status)
+	}
+
 	if resp.StatusCode != 200 {
 		return fmt.Errorf("Error %s: %s", url, resp.Status)
 	}
@@ -76,18 +101,23 @@ func (p Profile) download_tweet_video(v *scraper.Video, downloader MediaDownload
 	// Download the video
 	outfile := path.Join(p.ProfileDir, "videos", v.LocalFilename)
 	err := downloader.Curl(v.RemoteURL, outfile)
-	if err != nil {
+
+	if err == ErrorDCMA {
+		v.IsDownloaded = false //Would need to change the database schema / or add a flag
+	} else if err != nil {
 		return fmt.Errorf("Error downloading video (TweetID %d):\n  %w", v.TweetID, err)
+	} else {
+		v.IsDownloaded = true
 	}
 
 	// Download the thumbnail
 	outfile = path.Join(p.ProfileDir, "video_thumbnails", v.ThumbnailLocalPath)
 	err = downloader.Curl(v.ThumbnailRemoteUrl, outfile)
 	if err != nil {
+		v.IsDownloaded = false
 		return fmt.Errorf("Error downloading video thumbnail (TweetID %d):\n  %w", v.TweetID, err)
 	}
 
-	v.IsDownloaded = true
 	return p.SaveVideo(*v)
 }
 
