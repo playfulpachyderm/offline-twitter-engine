@@ -24,8 +24,9 @@ type Video struct {
 	Duration           int    // milliseconds
 	ViewCount          int
 
-	IsDownloaded bool
-	IsGif        bool
+	IsDownloaded    bool
+	IsBlockedByDMCA bool
+	IsGif           bool
 }
 
 func get_filename(remote_url string) string {
@@ -75,7 +76,8 @@ func ParseAPIVideo(apiVideo APIExtendedMedia, tweet_id TweetID) Video {
 		Duration:           apiVideo.VideoInfo.Duration,
 		ViewCount:          view_count,
 
-		IsDownloaded: false,
-		IsGif:        apiVideo.Type == "animated_gif",
+		IsDownloaded:    false,
+		IsBlockedByDMCA: false,
+		IsGif:           apiVideo.Type == "animated_gif",
 	}
 }

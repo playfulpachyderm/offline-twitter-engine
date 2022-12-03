@@ -205,8 +205,9 @@ func (u User) GetTinyProfileImageUrl() string {
 	// Check that the format is as expected
 	r := regexp.MustCompile(`(\.\w{2,4})$`)
 	if !r.MatchString(u.ProfileImageUrl) {
-		panic(fmt.Errorf("Weird profile image url (here is the file extension?): %s", u.ProfileImageUrl))
+		return u.ProfileImageUrl
 	}
+
 	return r.ReplaceAllString(u.ProfileImageUrl, "_normal$1")
 }
 
@@ -218,5 +219,11 @@ func (u User) GetTinyProfileImageLocalPath() string {
 	if u.ProfileImageUrl == "" {
 		return path.Base(u.GetTinyProfileImageUrl())
 	}
+
+	r := regexp.MustCompile(`(\.\w{2,4})$`)
+	if !r.MatchString(u.GetTinyProfileImageUrl()) {
+		return string(u.Handle) + "_profile_" + path.Base(u.GetTinyProfileImageUrl()+".jpg")
+	}
+
 	return string(u.Handle) + "_profile_" + path.Base(u.GetTinyProfileImageUrl())
 }

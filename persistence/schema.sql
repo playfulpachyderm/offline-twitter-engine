@@ -166,6 +166,7 @@ create table videos (rowid integer primary key,
     view_count integer not null default 0,
     is_gif boolean default 0,
     is_downloaded boolean default 0,
+    is_blocked_by_dmca boolean not null default 0,
 
     foreign key(tweet_id) references tweets(id)
 );

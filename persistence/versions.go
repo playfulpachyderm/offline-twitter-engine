@@ -2,12 +2,13 @@ package persistence
 
 import (
 	"fmt"
+
 	sql "github.com/jmoiron/sqlx"
 
 	"offline_twitter/terminal_utils"
 )
 
-const ENGINE_DATABASE_VERSION = 12
+const ENGINE_DATABASE_VERSION = 13
 
 type VersionMismatchError struct {
 	EngineVersion   int
@@ -73,6 +74,7 @@ var MIGRATIONS = []string{
 	    short_url text not null
 	);
 	alter table tweets add column space_id text references spaces(id)`,
+	`alter table videos add column is_blocked_by_dmca boolean not null default 0`,
 }
 
 /**

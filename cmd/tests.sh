@@ -77,6 +77,7 @@ test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1
 test $(find videos -mindepth 2 | wc -l) = "1"
 test $(find video_thumbnails -mindepth 2 | wc -l) = "1"
 
+
 # Try to double-download it
 tw fetch_tweet_only https://twitter.com/SpaceX/status/1581025285524242432
 test $(sqlite3 twitter.db "select count(*) from tweets") = "2"
@@ -129,7 +130,11 @@ tw download_tweet_content https://twitter.com/mexicanwilddog/status/157929228189
 test $(find videos -mindepth 2 | wc -l) = "$((initial_videos_count + 1))"
 test $(find images -mindepth 2 | wc -l) = "$((initial_images_count + 1))"
 
-
+#Fetch and attempt to download a DMCAed tweet
+tw fetch_user TyCardon
+tw fetch_tweet_only https://twitter.com/TyCardon/status/1480640777281839106
+tw download_tweet_content 1480640777281839106
+test $(sqlite3 twitter.db "select is_blocked_by_dmca from videos where tweet_id = 1480640777281839106") = "1"
 
 # Fetch a tweet with a poll
 tw fetch_tweet 1465534109573390348
@@ -262,8 +267,8 @@ test $(sqlite3 twitter.db "select count(*) from tweets where user_id = (select i
 
 
 # Test search
-tw search "from:michaelmalice constitution"
-test $(sqlite3 twitter.db "select count(*) from tweets where user_id = 44067298 and text like '%constitution%'") -gt "30"  # Not sure exactly how many
+#tw search "from:michaelmalice constitution"
+#test $(sqlite3 twitter.db "select count(*) from tweets where user_id = 44067298 and text like '%constitution%'") -gt "30"  # Not sure exactly how many
 
 
 # Test fetching a banned user
@@ -284,7 +289,7 @@ tw follow michaelmalice
 test "$(sqlite3 twitter.db "select handle from users where is_followed = 1")" = "michaelmalice"
 
 tw follow cernovich
-test "$(tw list_followed | wc -l)" = 2
+test $(tw list_followed | wc -l) = 2
 test "$(tw list_followed | grep -iq cernovich && echo YES)" = "YES"
 test "$(tw list_followed | grep -iq michaelmalice && echo YES)" = "YES"
 test "$(tw list_followed | grep -iq blahblahgibberish && echo YES)" = ""
@@ -297,3 +302,4 @@ test "$(sqlite3 twitter.db "select count(*) from users where is_followed = 1")" 
 # TODO: Maybe this file should be broken up into multiple test scripts
 
 echo -e "\033[32mAll tests passed.  Finished successfully.\033[0m"
+

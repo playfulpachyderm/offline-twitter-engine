@@ -37,16 +37,17 @@ func (p Profile) SaveImage(img scraper.Image) error {
 func (p Profile) SaveVideo(vid scraper.Video) error {
 	_, err := p.DB.Exec(`
 		insert into videos (id, tweet_id, width, height, remote_url, local_filename, thumbnail_remote_url, thumbnail_local_filename,
-		                    duration, view_count, is_downloaded, is_gif)
-		            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		                    duration, view_count, is_downloaded, is_blocked_by_dmca, is_gif)
+		            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		       on conflict do update
 		               set is_downloaded=(is_downloaded or ?),
-		                   view_count=max(view_count, ?)
+		                   view_count=max(view_count, ?),
+						   is_blocked_by_dmca = ?
 		`,
 		vid.ID, vid.TweetID, vid.Width, vid.Height, vid.RemoteURL, vid.LocalFilename, vid.ThumbnailRemoteUrl, vid.ThumbnailLocalPath,
-		vid.Duration, vid.ViewCount, vid.IsDownloaded, vid.IsGif,
+		vid.Duration, vid.ViewCount, vid.IsDownloaded, vid.IsBlockedByDMCA, vid.IsGif,
 
-		vid.IsDownloaded, vid.ViewCount,
+		vid.IsDownloaded, vid.ViewCount, vid.IsBlockedByDMCA,
 	)
 	if err != nil {
 		return fmt.Errorf("Error saving video (tweet ID %d):\n  %w", vid.TweetID, err)
@@ -118,7 +119,7 @@ func (p Profile) GetImagesForTweet(t scraper.Tweet) (imgs []scraper.Image, err e
 func (p Profile) GetVideosForTweet(t scraper.Tweet) (vids []scraper.Video, err error) {
 	err = p.DB.Select(&vids, `
 		select id, tweet_id, width, height, remote_url, local_filename, thumbnail_remote_url, thumbnail_local_filename, duration,
-		       view_count, is_downloaded, is_gif
+		       view_count, is_downloaded, is_blocked_by_dmca, is_gif
 		  from videos
 		 where tweet_id = ?
 	`, t.ID)

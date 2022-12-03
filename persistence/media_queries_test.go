@@ -93,6 +93,7 @@ func TestSaveAndLoadVideo(t *testing.T) {
 	vid := create_video_from_id(rand.Int())
 	vid.TweetID = tweet.ID
 	vid.IsGif = true
+	vid.IsBlockedByDMCA = true
 
 	// Save the Video
 	err := profile.SaveVideo(vid)
@@ -128,6 +129,7 @@ func TestModifyVideo(t *testing.T) {
 	require.Equal(scraper.VideoID(-1), vid.ID, "Got the wrong video back")
 
 	vid.IsDownloaded = true
+	vid.IsBlockedByDMCA = true
 	vid.ViewCount = 23000
 
 	// Save the changes

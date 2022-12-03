@@ -19,7 +19,7 @@ type MediaDownloader interface {
 
 type DefaultDownloader struct{}
 
-var ErrorDCMA error = errors.New("Error Video is DCMAed, unable to download (HTTP 403 Forbidden)")
+var ErrorDMCA error = errors.New("Error Video is DMCAed, unable to download (HTTP 403 Forbidden)")
 
 /**
  * Download a file over HTTP and save it.
@@ -46,10 +46,13 @@ func (d DefaultDownloader) Curl(url string, outpath string) error {
 			panic(err)
 		}
 
-		json.Unmarshal(body, &response)
+		err = json.Unmarshal(body, &response)
+		if err != nil {
+			panic(err)
+		}
 
 		if response.Error_response == "Dmcaed" {
-			return ErrorDCMA
+			return ErrorDMCA
 		}
 
 		return fmt.Errorf("Error 403 Forbidden %s: %s", url, resp.Status)
@@ -102,8 +105,9 @@ func (p Profile) download_tweet_video(v *scraper.Video, downloader MediaDownload
 	outfile := path.Join(p.ProfileDir, "videos", v.LocalFilename)
 	err := downloader.Curl(v.RemoteURL, outfile)
 
-	if err == ErrorDCMA {
-		v.IsDownloaded = false //Would need to change the database schema / or add a flag
+	if errors.Is(err, ErrorDMCA) {
+		v.IsDownloaded = false
+		v.IsBlockedByDMCA = true
 	} else if err != nil {
 		return fmt.Errorf("Error downloading video (TweetID %d):\n  %w", v.TweetID, err)
 	} else {
