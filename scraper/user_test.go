@@ -131,23 +131,18 @@ func TestParseHandleFromShortenedTweetUrl(t *testing.T) {
 	assert.Equal(UserHandle("MarkSnyderJr1"), result)
 }
 
-// Test Get Tiny URLs
+// Should compute tiny profile image URLs correctly, and fix local paths if needed (e.g., "_normal" and no file extension)
 func TestGetTinyURLs(t *testing.T) {
 	assert := assert.New(t)
-
 	u := User{
 		ProfileImageUrl: "https://pbs.twimg.com/profile_images/1208124284/iwRReicO.jpg",
 		Handle:          "testUser",
 	}
-
 	assert.Equal(u.GetTinyProfileImageUrl(), "https://pbs.twimg.com/profile_images/1208124284/iwRReicO_normal.jpg")
-
 	assert.Equal(u.GetTinyProfileImageLocalPath(), "testUser_profile_iwRReicO_normal.jpg")
 
-	//append in "_normal" to generate new problematic tweet sample
+	// User with poorly formed profile image URL
 	u.ProfileImageUrl = "https://pbs.twimg.com/profile_images/1208124284/iwRReicO_normal"
-
 	assert.Equal(u.GetTinyProfileImageUrl(), "https://pbs.twimg.com/profile_images/1208124284/iwRReicO_normal")
-
 	assert.Equal(u.GetTinyProfileImageLocalPath(), "testUser_profile_iwRReicO_normal.jpg")
 }

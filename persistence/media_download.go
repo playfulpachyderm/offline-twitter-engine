@@ -19,7 +19,7 @@ type MediaDownloader interface {
 
 type DefaultDownloader struct{}
 
-var ErrorDMCA error = errors.New("Error Video is DMCAed, unable to download (HTTP 403 Forbidden)")
+var ErrorDMCA error = errors.New("video is DMCAed, unable to download (HTTP 403 Forbidden)")
 
 /**
  * Download a file over HTTP and save it.
@@ -40,22 +40,19 @@ func (d DefaultDownloader) Curl(url string, outpath string) error {
 			Error_response string `json:"error_response"`
 		}
 		body, err := io.ReadAll(resp.Body)
-		fmt.Println("body = " + string(body))
-
 		if err != nil {
 			panic(err)
 		}
+		fmt.Println(string(body))
 
 		err = json.Unmarshal(body, &response)
 		if err != nil {
 			panic(err)
 		}
-
 		if response.Error_response == "Dmcaed" {
 			return ErrorDMCA
 		}
-
-		return fmt.Errorf("Error 403 Forbidden %s: %s", url, resp.Status)
+		// Not a DCMA; fall through
 	}
 
 	if resp.StatusCode != 200 {
