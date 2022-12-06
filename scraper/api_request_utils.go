@@ -14,7 +14,35 @@ import (
 const API_CONVERSATION_BASE_PATH = "https://twitter.com/i/api/2/timeline/conversation/"
 const API_USER_TIMELINE_BASE_PATH = "https://api.twitter.com/2/timeline/profile/"
 
-type API struct{}
+type API struct {
+	IsAuthenticated     bool
+	GuestToken          string
+	AuthenticationToken string
+}
+
+func NewGuestSession() API {
+	// TODO api-refactor: Return a new API with its GuestToken set using `GetGuestToken()` from "scraper/guest_token.go"
+	panic("TODO")
+}
+
+func (api *API) LogIn(username string, password string) {
+	// TODO authentication: Log in and save the authentication token(s), set `IsAuthenticated = true`
+	panic("TODO")
+}
+
+func (api API) do_http(url string, cursor string, result *interface{}) {
+	if api.IsAuthenticated {
+		// TODO authentication: add authentication headers/params
+	} else {
+		// TODO api-refactor: add guest headers / params
+	}
+
+	// TODO api-refactor: do the HTTP request and unmarshal the result into the `result` struct
+	// - if `cursor != ""`, then add the cursor to the request as in `UpdateQueryCursor` before
+	// executing the request.
+	// - ignore `referrer=tweet` (aka the boolean param) for now
+	// - ignore retries for now
+}
 
 func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) {
 	client := &http.Client{Timeout: 10 * time.Second}
