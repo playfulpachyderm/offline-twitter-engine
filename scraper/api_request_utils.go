@@ -21,27 +21,89 @@ type API struct {
 }
 
 func NewGuestSession() API {
-	// TODO api-refactor: Return a new API with its GuestToken set using `GetGuestToken()` from "scraper/guest_token.go"
-	panic("TODO")
+	// test to check if a guest token is created? Use the existing one?
+	// test to check if a the api returns the guest token properly
+	guestAPIString, err := GetGuestToken()
+	if err != nil {
+		panic(err)
+	}
+
+	return API{
+		IsAuthenticated:     false,
+		GuestToken:          guestAPIString,
+		AuthenticationToken: "",
+	}
 }
 
 func (api *API) LogIn(username string, password string) {
 	// TODO authentication: Log in and save the authentication token(s), set `IsAuthenticated = true`
+
+	api.IsAuthenticated = true
+
 	panic("TODO")
 }
 
-func (api API) do_http(url string, cursor string, result *interface{}) {
+func (api API) do_http(url string, cursor string, result *interface{}) error {
+	client := &http.Client{Timeout: 10 * time.Second}
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("Error initializing HTTP request:\n  %w", err)
+	}
+
+	if cursor != "" {
+		query := req.URL.Query()
+		query.Add("cursor", cursor)
+		// TODO Add 'referrer=tweet' to the url passed by the necessesary caller functions
+		// if is_tweet {
+		// 	query.Add("referrer", "tweet")
+		// }
+		req.URL.RawQuery = query.Encode()
+	}
+
+	// TODO Add the query params to the caller functions url
+	// GetTweet, Search, and GetFeed use it, GetUser and GetSpace do not use.
+	// ApiRequestAddAllParams(req)
+
 	if api.IsAuthenticated {
 		// TODO authentication: add authentication headers/params
 	} else {
-		// TODO api-refactor: add guest headers / params
+		req.Header.Set("Authorization", "Bearer "+BEARER_TOKEN)
+		req.Header.Set("x-twitter-client-language", "en")
+		req.Header.Set("X-Guest-Token", api.GuestToken)
 	}
 
-	// TODO api-refactor: do the HTTP request and unmarshal the result into the `result` struct
-	// - if `cursor != ""`, then add the cursor to the request as in `UpdateQueryCursor` before
-	// executing the request.
-	// - ignore `referrer=tweet` (aka the boolean param) for now
-	// - ignore retries for now
+	// TODO retries
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("Error executing HTTP request:\n  %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 403 {
+		content, err := io.ReadAll(resp.Body)
+		if err != nil {
+			panic(err) //If this fails something royally fucked up
+		}
+
+		responseHeaders := ""
+		for header := range resp.Header {
+			responseHeaders += fmt.Sprintf("    %s: %s\n", header, resp.Header.Get(header))
+		}
+		return fmt.Errorf("HTTP %s\n%s\n%s", resp.Status, responseHeaders, content)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("Error reading response body:\n  %w", err)
+	}
+	log.Debug(string(body))
+
+	err = json.Unmarshal(body, result)
+	if err != nil {
+		return fmt.Errorf("Error parsing API response:\n  %w", err)
+	}
+	return nil
+
 }
 
 func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) {
@@ -137,7 +199,7 @@ func (api API) GetMoreTweetsFromFeed(user_id UserID, response *TweetResponse, mi
 
 func (api API) GetSpace(id SpaceID) (SpaceResponse, error) {
 	client := &http.Client{Timeout: 10 * time.Second}
-	log.Debug("asdfasd")
+
 	req, err := http.NewRequest("GET", "https://twitter.com/i/api/graphql/Ha9BKBF0uAz9d4-lz0jnYA/AudioSpaceById?variables=%7B%22id%22%3A%22"+string(id)+"%22%2C%22isMetatagsQuery%22%3Afalse%2C%22withSuperFollowsUserFields%22%3Atrue%2C%22withDownvotePerspective%22%3Afalse%2C%22withReactionsMetadata%22%3Afalse%2C%22withReactionsPerspective%22%3Afalse%2C%22withSuperFollowsTweetFields%22%3Atrue%2C%22withReplays%22%3Atrue%7D&features=%7B%22spaces_2022_h2_clipping%22%3Atrue%2C%22spaces_2022_h2_spaces_communities%22%3Atrue%2C%22responsive_web_twitter_blue_verified_badge_is_enabled%22%3Atrue%2C%22verified_phone_label_enabled%22%3Afalse%2C%22tweetypie_unmention_optimization_enabled%22%3Atrue%2C%22responsive_web_uc_gql_enabled%22%3Atrue%2C%22vibe_api_enabled%22%3Atrue%2C%22responsive_web_edit_tweet_api_enabled%22%3Atrue%2C%22graphql_is_translatable_rweb_tweet_is_translatable_enabled%22%3Atrue%2C%22standardized_nudges_misinfo%22%3Atrue%2C%22tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled%22%3Afalse%2C%22responsive_web_graphql_timeline_navigation_enabled%22%3Atrue%2C%22interactive_text_enabled%22%3Atrue%2C%22responsive_web_text_conversations_enabled%22%3Afalse%2C%22responsive_web_enhance_cards_enabled%22%3Atrue%7D", //nolint:lll  // It's a URL, come on
 		nil)
 	if err != nil {
