@@ -103,7 +103,6 @@ func (api API) do_http(url string, cursor string, result *interface{}) error {
 		return fmt.Errorf("Error parsing API response:\n  %w", err)
 	}
 	return nil
-
 }
 
 func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) {
