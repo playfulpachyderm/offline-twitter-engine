@@ -420,10 +420,14 @@ func (api API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response, 
 		return APIV2Response{}, fmt.Errorf("Error initializing HTTP request:\n  %w", err)
 	}
 
-	err = ApiRequestAddTokens(req)
+	req.Header.Set("Authorization", "Bearer "+BEARER_TOKEN)
+	req.Header.Set("x-twitter-client-language", "en")
+
+	guestToken, err := GetGuestToken()
 	if err != nil {
 		return APIV2Response{}, fmt.Errorf("Error adding tokens to HTTP request:\n  %w", err)
 	}
+	req.Header.Set("X-Guest-Token", guestToken)
 
 	if cursor != "" {
 		UpdateQueryCursor(req, cursor, false)
