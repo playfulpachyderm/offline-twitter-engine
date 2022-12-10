@@ -18,7 +18,7 @@ func TimestampToDateString(timestamp int) string {
  * - videos
  */
 func Search(query string, min_results int) (trove TweetTrove, err error) {
-	api := API{}
+	api := NewGuestSession()
 	tweet_response, err := api.Search(query, "")
 	if err != nil {
 		return

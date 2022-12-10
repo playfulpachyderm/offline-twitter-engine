@@ -212,7 +212,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
  * returns: the single Tweet
  */
 func GetTweet(id TweetID) (Tweet, error) {
-	api := API{}
+	api := NewGuestSession()
 	tweet_response, err := api.GetTweet(id, "")
 	if err != nil {
 		return Tweet{}, fmt.Errorf("Error in API call:\n  %w", err)
@@ -240,7 +240,7 @@ func GetTweet(id TweetID) (Tweet, error) {
  * returns: the tweet, list of its replies and context, and users associated with those replies
  */
 func GetTweetFull(id TweetID) (trove TweetTrove, err error) {
-	api := API{}
+	api := NewGuestSession()
 	tweet_response, err := api.GetTweet(id, "")
 	if err != nil {
 		err = fmt.Errorf("Error getting tweet: %d\n  %w", id, err)

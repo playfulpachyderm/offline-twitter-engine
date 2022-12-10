@@ -156,13 +156,13 @@ func ParseSingleUser(apiUser APIUser) (ret User, err error) {
 
 // Calls API#GetUser and returns the parsed result
 func GetUser(handle UserHandle) (User, error) {
-	api := API{}
+	api := NewGuestSession()
 	apiUser, err := api.GetUser(handle)
 	if apiUser.ScreenName == "" {
 		apiUser.ScreenName = string(handle)
 	}
 	if err != nil {
-		return User{}, err
+		return User{}, fmt.Errorf("Error fetching user %q:\n  %w", handle, err)
 	}
 	return ParseSingleUser(apiUser)
 }
