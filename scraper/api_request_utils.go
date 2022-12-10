@@ -245,8 +245,8 @@ func UpdateQueryCursor(req *http.Request, new_cursor string, is_tweet bool) {
 
 func (api API) GetUser(handle UserHandle) (APIUser, error) {
 	// TODO: break up this URL into params so it's readable
-	url, err := url.Parse("https://api.twitter.com/graphql/4S2ihIKfF3xhp-ENxvUAfQ/UserByScreenName?variables=%7B%22screen_name%22%3A%22" + string(handle) +
-		"%22%2C%22withHighlightedLabel%22%3Atrue%7D")
+	url, err := url.Parse("https://api.twitter.com/graphql/4S2ihIKfF3xhp-ENxvUAfQ/UserByScreenName?variables=%7B%22screen_name%22%3A%22" +
+		string(handle) + "%22%2C%22withHighlightedLabel%22%3Atrue%7D")
 	if err != nil {
 		panic(err)
 	}
