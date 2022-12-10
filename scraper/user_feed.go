@@ -16,7 +16,7 @@ import (
  * returns: a slice of Tweets, Retweets, and Users
  */
 func GetUserFeedFor(user_id UserID, min_tweets int) (trove TweetTrove, err error) {
-	api := API{}
+	api := NewGuestSession()
 	tweet_response, err := api.GetFeedFor(user_id, "")
 	if err != nil {
 		err = fmt.Errorf("Error calling API to fetch user feed: UserID %d\n  %w", user_id, err)
@@ -34,7 +34,7 @@ func GetUserFeedFor(user_id UserID, min_tweets int) (trove TweetTrove, err error
 }
 
 func GetUserFeedGraphqlFor(user_id UserID, min_tweets int) (trove TweetTrove, err error) {
-	api := API{}
+	api := NewGuestSession()
 	api_response, err := api.GetGraphqlFeedFor(user_id, "")
 	if err != nil {
 		err = fmt.Errorf("Error calling API to fetch user feed: UserID %d\n  %w", user_id, err)

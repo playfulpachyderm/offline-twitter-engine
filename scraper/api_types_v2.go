@@ -1,13 +1,9 @@
 package scraper
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -414,57 +410,15 @@ func get_graphql_user_timeline_url(user_id UserID, cursor string) string {
  * Get a User feed using the new GraphQL twitter api
  */
 func (api API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response, error) {
-	client := &http.Client{Timeout: 10 * time.Second}
-	req, err := http.NewRequest("GET", get_graphql_user_timeline_url(user_id, cursor), nil)
+	url, err := url.Parse(get_graphql_user_timeline_url(user_id, cursor))
 	if err != nil {
-		return APIV2Response{}, fmt.Errorf("Error initializing HTTP request:\n  %w", err)
+		panic(err)
 	}
-
-	req.Header.Set("Authorization", "Bearer "+BEARER_TOKEN)
-	req.Header.Set("x-twitter-client-language", "en")
-
-	guestToken, err := GetGuestToken()
-	if err != nil {
-		return APIV2Response{}, fmt.Errorf("Error adding tokens to HTTP request:\n  %w", err)
-	}
-	req.Header.Set("X-Guest-Token", guestToken)
-
-	if cursor != "" {
-		query := req.URL.Query()
-		query.Add("cursor", cursor)
-		req.URL.RawQuery = query.Encode()
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return APIV2Response{}, fmt.Errorf("Error executing HTTP request:\n  %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		content, err := io.ReadAll(resp.Body)
-		if err != nil {
-			panic(err)
-		}
-		s := ""
-		for header := range resp.Header {
-			s += fmt.Sprintf("    %s: %s\n", header, resp.Header.Get(header))
-		}
-		return APIV2Response{}, fmt.Errorf("HTTP %s\n%s\n%s", resp.Status, s, content)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return APIV2Response{}, fmt.Errorf("Error reading HTTP response body:\n  %w", err)
-	}
-	log.Debug(string(body))
 
 	var response APIV2Response
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		return response, fmt.Errorf("Error parsing API response for GetGraphqlFeedFor(%d):\n  %w", user_id, err)
-	}
-	return response, nil
+	err = api.do_http(url.String(), cursor, &response)
+
+	return response, err
 }
 
 /**

@@ -21,8 +21,6 @@ type API struct {
 }
 
 func NewGuestSession() API {
-	// test to check if a guest token is created? Use the existing one?
-	// test to check if a the api returns the guest token properly
 	guestAPIString, err := GetGuestToken()
 	if err != nil {
 		panic(err)
