@@ -430,7 +430,9 @@ func (api API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response, 
 	req.Header.Set("X-Guest-Token", guestToken)
 
 	if cursor != "" {
-		UpdateQueryCursor(req, cursor, false)
+		query := req.URL.Query()
+		query.Add("cursor", cursor)
+		req.URL.RawQuery = query.Encode()
 	}
 
 	resp, err := client.Do(req)

@@ -234,15 +234,6 @@ func (api API) GetMoreReplies(tweet_id TweetID, response *TweetResponse, max_rep
 	return nil
 }
 
-func UpdateQueryCursor(req *http.Request, new_cursor string, is_tweet bool) {
-	query := req.URL.Query()
-	query.Add("cursor", new_cursor)
-	if is_tweet {
-		query.Add("referrer", "tweet")
-	}
-	req.URL.RawQuery = query.Encode()
-}
-
 func (api API) GetUser(handle UserHandle) (APIUser, error) {
 	// TODO: break up this URL into params so it's readable
 	url, err := url.Parse("https://api.twitter.com/graphql/4S2ihIKfF3xhp-ENxvUAfQ/UserByScreenName?variables=%7B%22screen_name%22%3A%22" +
