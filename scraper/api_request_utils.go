@@ -337,7 +337,7 @@ func (api API) GetMoreTweetsFromSearch(query string, response *TweetResponse, ma
 		if err != nil {
 			return err
 		}
-		if fresh_response.GetCursor() == last_response.GetCursor() && len(fresh_response.GlobalObjects.Tweets) == 0 {
+		if fresh_response.GetCursor() == last_response.GetCursor() || len(fresh_response.GlobalObjects.Tweets) == 0 {
 			// Empty response, cursor same as previous: end of feed has been reached
 			return END_OF_FEED
 		}

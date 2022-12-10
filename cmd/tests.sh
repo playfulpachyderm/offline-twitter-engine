@@ -267,8 +267,8 @@ test $(sqlite3 twitter.db "select count(*) from tweets where user_id = (select i
 
 
 # Test search
-#tw search "from:michaelmalice constitution"
-#test $(sqlite3 twitter.db "select count(*) from tweets where user_id = 44067298 and text like '%constitution%'") -gt "30"  # Not sure exactly how many
+tw search "from:michaelmalice constitution"
+test $(sqlite3 twitter.db "select count(*) from tweets where user_id = 44067298 and text like '%constitution%'") -gt "30"  # Not sure exactly how many
 
 
 # Test fetching a banned user
