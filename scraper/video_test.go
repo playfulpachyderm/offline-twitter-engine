@@ -33,5 +33,6 @@ func TestParseAPIVideo(t *testing.T) {
 	assert.Equal("eU/eUTaYYfuAJ8FyjUi.jpg", video.ThumbnailLocalPath)
 	assert.Equal(275952, video.ViewCount)
 	assert.Equal(88300, video.Duration)
+	assert.Equal([]int{632000, 950000, 2176000}, video.BitratesAvailable)
 	assert.False(video.IsDownloaded)
 }

@@ -22,6 +22,8 @@ type Video struct {
 	ThumbnailRemoteUrl string
 	ThumbnailLocalPath string `db:"thumbnail_local_filename"`
 	Duration           int    // milliseconds
+	Bitrate            int
+	BitratesAvailable  []int
 	ViewCount          int
 
 	IsDownloaded    bool
@@ -63,6 +65,15 @@ func ParseAPIVideo(apiVideo APIExtendedMedia, tweet_id TweetID) Video {
 
 	local_filename := get_prefixed_path(get_filename(video_remote_url))
 
+	bitrates := []int{}
+	for _, v := range variants {
+		if v.Bitrate == 0 {
+			// Skip the .m3u8 one
+			continue
+		}
+		bitrates = append([]int{v.Bitrate}, bitrates...)
+	}
+
 	return Video{
 		ID:            VideoID(apiVideo.ID),
 		TweetID:       tweet_id,
@@ -74,6 +85,7 @@ func ParseAPIVideo(apiVideo APIExtendedMedia, tweet_id TweetID) Video {
 		ThumbnailRemoteUrl: apiVideo.MediaURLHttps,
 		ThumbnailLocalPath: get_prefixed_path(path.Base(apiVideo.MediaURLHttps)),
 		Duration:           apiVideo.VideoInfo.Duration,
+		BitratesAvailable:  bitrates,
 		ViewCount:          view_count,
 
 		IsDownloaded:    false,
