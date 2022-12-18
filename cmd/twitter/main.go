@@ -69,7 +69,7 @@ func main() {
 	log.SetLevel(logging_level)
 
 	if len(args) < 2 {
-		if len(args) == 1 && args[0] == "list_followed" {
+		if len(args) == 1 && (args[0] == "list_followed" || args[0] == "update_all") {
 			// "list_followed" doesn't need a target, so create a fake second arg
 			args = append(args, "")
 		} else {
@@ -115,6 +115,8 @@ func main() {
 		follow_user(target, false)
 	case "list_followed":
 		list_followed()
+	case "update_all":
+		update_all()
 	default:
 		die(fmt.Sprintf("Invalid operation: %s", operation), true, 3)
 	}
@@ -276,5 +278,21 @@ func follow_user(handle string, is_followed bool) {
 func list_followed() {
 	for _, handle := range profile.GetAllFollowedUsers() {
 		fmt.Println(handle)
+	}
+}
+
+func update_all() {
+	user_count := 0
+	signal_finished := make(chan struct{})
+
+	for _, handle := range profile.GetAllFollowedUsers() {
+		go func() {
+			fetch_user_feed(string(handle), 50)
+			signal_finished <- struct{}{}
+		}()
+		user_count += 1
+	}
+	for i := 0; i < user_count; i++ {
+		<-signal_finished
 	}
 }
