@@ -19,6 +19,8 @@ type API struct {
 	IsAuthenticated     bool
 	GuestToken          string
 	AuthenticationToken string
+	Client              http.Client
+	CSRFToken           string
 }
 
 func NewGuestSession() API {
@@ -31,6 +33,8 @@ func NewGuestSession() API {
 		IsAuthenticated:     false,
 		GuestToken:          guestAPIString,
 		AuthenticationToken: "",
+		Client:              http.Client{Timeout: 10 * time.Second},
+		CSRFToken:           "",
 	}
 }
 
@@ -104,11 +108,26 @@ func (api *API) LogIn(username string, password string) {
 		panic(err)
 	}
 
-	panic("TODO")
+	dummyURL, err := url.Parse(loginURL)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, cookie := range api.Client.Jar.Cookies(dummyURL) {
+		if cookie.Name == "ct0" {
+			api.CSRFToken = cookie.Value
+		}
+	}
+
+	if api.CSRFToken == "" {
+		panic("No CSRF Token Found")
+	}
+
+	api.IsAuthenticated = true
+
 }
 
 func (api *API) do_http_POST(url string, body string, result interface{}) error {
-	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequest("POST", url, strings.NewReader(body))
 	if err != nil {
 		return fmt.Errorf("Error initializing HTTP POST request:\n  %w", err)
@@ -129,7 +148,7 @@ func (api *API) do_http_POST(url string, body string, result interface{}) error 
 		req.Header.Set("X-Guest-Token", api.GuestToken)
 	}
 
-	resp, err := client.Do(req)
+	resp, err := api.Client.Do(req)
 	if err != nil {
 		return fmt.Errorf("Error executing HTTP POST request:\n  %w", err)
 	}
@@ -163,7 +182,6 @@ func (api *API) do_http_POST(url string, body string, result interface{}) error 
 }
 
 func (api API) do_http(url string, cursor string, result interface{}) error {
-	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return fmt.Errorf("Error initializing HTTP GET request:\n  %w", err)
@@ -189,7 +207,7 @@ func (api API) do_http(url string, cursor string, result interface{}) error {
 		req.Header.Set("X-Guest-Token", api.GuestToken)
 	}
 
-	resp, err := client.Do(req)
+	resp, err := api.Client.Do(req)
 	if err != nil {
 		return fmt.Errorf("Error executing HTTP request:\n  %w", err)
 	}
