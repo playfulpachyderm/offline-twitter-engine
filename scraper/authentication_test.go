@@ -1,6 +1,7 @@
 package scraper_test
 
 import (
+	"fmt"
 	"offline_twitter/scraper"
 	"testing"
 
@@ -19,4 +20,9 @@ func TestAuthentication(t *testing.T) {
 	assert.True(api.IsAuthenticated)
 	assert.NotEqual(api.CSRFToken, "")
 
+	response, err := api.GetLikesFor(1458284524761075714, "")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(response)
 }
