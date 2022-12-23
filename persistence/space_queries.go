@@ -25,12 +25,12 @@ func (p Profile) SaveSpace(s scraper.Space) error {
 		   set id=:id,
 		       created_by_id=case when created_by_id is not null then created_by_id else nullif(:created_by_id, 0) end,
 		       short_url=case when short_url == "" then :short_url else short_url end,
-		       state=:state,
+		       state=case when :state != "" then :state else state end,
 		       title=case when :is_details_fetched then :title else title end,
 		       updated_at=max(:updated_at, updated_at),
 		       is_available_for_replay=:is_available_for_replay,
 		       replay_watch_count=:replay_watch_count,
-		       live_listeners_count=:live_listeners_count,
+		       live_listeners_count=max(:live_listeners_count, live_listeners_count),
 		       is_details_fetched=(is_details_fetched or :is_details_fetched)
 	`, &s)
 	if err != nil {

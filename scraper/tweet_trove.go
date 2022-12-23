@@ -130,6 +130,10 @@ func (trove *TweetTrove) FillSpaceDetails() error {
 		}
 		// Replace the old space in the trove with the new, updated one
 		new_space, is_ok := new_trove.Spaces[i]
+		if new_space.ShortUrl == "" {
+			// Copy over the short-url, which doesn't seem to exist on a full Space response
+			new_space.ShortUrl = trove.Spaces[i].ShortUrl
+		}
 		if is_ok {
 			// Necessary to check is_ok because the space response could be empty, in which case
 			// we don't want to overwrite it

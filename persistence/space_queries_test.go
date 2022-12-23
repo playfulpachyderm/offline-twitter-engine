@@ -38,10 +38,12 @@ func TestNoWorseningSpace(t *testing.T) {
 
 	space := create_space_from_id(rand.Int())
 	space.ShortUrl = "Some Short Url"
+	space.State = "Some State"
 	space.Title = "Debating Somebody"
 	space.CreatedAt = scraper.TimestampFromUnix(1000)
 	space.UpdatedAt = scraper.TimestampFromUnix(2000)
 	space.CreatedById = scraper.UserID(-1)
+	space.LiveListenersCount = 100
 	space.IsDetailsFetched = true
 
 	// Save the space
@@ -51,9 +53,11 @@ func TestNoWorseningSpace(t *testing.T) {
 	// Worsen the space, then re-save
 	space.ShortUrl = ""
 	space.Title = ""
+	space.State = ""
 	space.CreatedAt = scraper.TimestampFromUnix(0)
 	space.UpdatedAt = scraper.TimestampFromUnix(0)
 	space.CreatedById = scraper.UserID(0)
+	space.LiveListenersCount = 0
 	space.IsDetailsFetched = false
 	err = profile.SaveSpace(space)
 	require.NoError(err)
@@ -63,9 +67,11 @@ func TestNoWorseningSpace(t *testing.T) {
 	require.NoError(err)
 
 	assert.Equal(new_space.ShortUrl, "Some Short Url")
+	assert.Equal(new_space.State, "Some State")
 	assert.Equal(new_space.Title, "Debating Somebody")
 	assert.Equal(new_space.CreatedAt, scraper.TimestampFromUnix(1000))
 	assert.Equal(new_space.UpdatedAt, scraper.TimestampFromUnix(2000))
 	assert.Equal(new_space.CreatedById, scraper.UserID(-1))
+	assert.Equal(new_space.LiveListenersCount, int64(100))
 	assert.True(new_space.IsDetailsFetched)
 }
