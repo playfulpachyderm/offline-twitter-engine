@@ -22,8 +22,7 @@ login_curl = "https://twitter.com/i/api/1.1/onboarding/task.json"
 username = "offline_twatter"
 password = "S1pKIW#eRT016iA@OFcK"
 
-response = requests.post(login_curl, headers=headers, params={"flow_name": "login"}, json={"input_flow_data":{"flow_context":{"debug_overrides":{},"start_location":{"location":"unknown"}}},"subtask_versions":{"action_list":2,"alert_dialog":1,"app_download_cta":1,"check_logged_in_account":1,"choice_selection":3,"contacts_live_sync_permission_prompt":0,"cta":7,"email_verification":2,"end_flow":1,"enter_date":1,"enter_email":2,"enter_password":5,"enter_phone":2,"enter_recaptcha":1,"enter_text":5,"enter_username":2,"generic_urt":3,"in_app_notification":1,"interest_picker":3,"js_instrumentation":1,"menu_dialog":1,"notifications_permission_prompt":2,"open_account":2,"open_home_timeline":1,"open_link":1,"phone_verification":4,"privacy_options":1,"security_key":3,"select_avatar":4,"select_banner":2,"settings_list":7,"show_code":1,"sign_up":2,"sign_up_review":4,"tweet_selection_urt":1,"update_users":1,"upload_media":1,"user_recommendations_list":4,"user_recommendations_urt":1,"wait_spinner":3,"web_modal":1}})
-
+response = requests.post(login_curl, headers=headers, params={"flow_name": "login"})
 assert response.status_code == 200, f"HTTP Response code {response.status_code}{response.json()}"
 flow_token = response.json()['flow_token']
 
@@ -40,8 +39,8 @@ second_request_data = {
     ]
 }
 
-response2 = requests.post(login_curl, headers=headers, json=second_request_data)
-assert response2.status_code == 200, f"HTTP Response code {response2.status_code}{response2.json()}"
+response2 = requests.post(login_curl, headers=headers, json=second_request_data, cookies=response.cookies)
+assert response2.status_code == 200, f"HTTP Response code {response2.status_code}, {response2.json()}"
 flow_token = response2.json()["flow_token"]
 
 
@@ -67,8 +66,8 @@ third_request_data = {
     ]
 }
 
-response3 = requests.post(login_curl, headers=headers, json=third_request_data)
-assert response3.status_code == 200, f"HTTP Response code {response3.status_code}{response3.json()}"
+response3 = requests.post(login_curl, headers=headers, json=third_request_data, cookies=response.cookies)
+assert response3.status_code == 200, f"HTTP Response code {response3.status_code}, {response3.json()}"
 flow_token = response3.json()["flow_token"]
 
 fourth_request_data = {
@@ -84,8 +83,8 @@ fourth_request_data = {
     ]
 }
 
-response4 = requests.post(login_curl, headers = headers, json=fourth_request_data)
-assert response4.status_code == 200, f"HTTP Response code {response4.status_code}"
+response4 = requests.post(login_curl, headers = headers, json=fourth_request_data, cookies=response.cookies)
+assert response4.status_code == 200, f"HTTP Response code {response4.status_code}: {response4.json()}"
 flow_token = response4.json()["flow_token"]
 
 fifth_request_data = {
@@ -100,8 +99,8 @@ fifth_request_data = {
     ]
 }
 
-response5 = requests.post(login_curl, headers = headers, json=fifth_request_data)
-assert response5.status_code == 200, f"HTTP Response code {response5.status_code}"
+response5 = requests.post(login_curl, headers = headers, json=fifth_request_data, cookies=response.cookies)
+assert response5.status_code == 200, f"HTTP Response code {response5.status_code}: {response5.json()}"
 flow_token = response5.json()["flow_token"]
 cookie = response5.headers["set-cookie"]
 cookie_dict = response5.cookies
@@ -119,7 +118,9 @@ likes_headers = {
 
 likes_url = 'https://twitter.com/i/api/graphql/2Z6LYO4UTM4BnWjaNCod6g/Likes?variables=%7B%22userId%22%3A%221458284524761075714%22%2C%22count%22%3A20%2C%22includePromotedContent%22%3Afalse%2C%22withSuperFollowsUserFields%22%3Atrue%2C%22withDownvotePerspective%22%3Afalse%2C%22withReactionsMetadata%22%3Afalse%2C%22withReactionsPerspective%22%3Afalse%2C%22withSuperFollowsTweetFields%22%3Atrue%2C%22withClientEventToken%22%3Afalse%2C%22withBirdwatchNotes%22%3Afalse%2C%22withVoice%22%3Atrue%2C%22withV2Timeline%22%3Atrue%7D&features=%7B%22responsive_web_twitter_blue_verified_badge_is_enabled%22%3Atrue%2C%22verified_phone_label_enabled%22%3Afalse%2C%22responsive_web_graphql_timeline_navigation_enabled%22%3Atrue%2C%22unified_cards_ad_metadata_container_dynamic_card_content_query_enabled%22%3Atrue%2C%22tweetypie_unmention_optimization_enabled%22%3Atrue%2C%22responsive_web_uc_gql_enabled%22%3Atrue%2C%22vibe_api_enabled%22%3Atrue%2C%22responsive_web_edit_tweet_api_enabled%22%3Atrue%2C%22graphql_is_translatable_rweb_tweet_is_translatable_enabled%22%3Atrue%2C%22standardized_nudges_misinfo%22%3Atrue%2C%22tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled%22%3Afalse%2C%22interactive_text_enabled%22%3Atrue%2C%22responsive_web_text_conversations_enabled%22%3Afalse%2C%22responsive_web_enhance_cards_enabled%22%3Atrue%7D'
 
-likes_response = requests.get(likes_url, headers=likes_headers, cookies=cookie_dict)
+feed_url = "https://twitter.com/i/api/graphql/CwLU7qTfeu0doqhSr6tW4A/UserTweetsAndReplies?variables=%7B%22userId%22%3A%221458284524761075714%22%2C%22count%22%3A40%2C%22includePromotedContent%22%3Afalse%2C%22withCommunity%22%3Atrue%2C%22withSuperFollowsUserFields%22%3Atrue%2C%22withBirdwatchPivots%22%3Afalse%2C%22withDownvotePerspective%22%3Afalse%2C%22withReactionsMetadata%22%3Afalse%2C%22withReactionsPerspective%22%3Afalse%2C%22withSuperFollowsTweetFields%22%3Atrue%2C%22withVoice%22%3Atrue%2C%22withV2Timeline%22%3Afalse%2C%22__fs_interactive_text%22%3Afalse%2C%22__fs_dont_mention_me_view_api_enabled%22%3Afalse%7D"
+
+likes_response = requests.get(feed_url, headers=likes_headers, cookies=cookie_dict)
 assert likes_response.status_code == 200, f"HTTP Response code {likes_response.status_code}: {likes_response.text}"
 
 
