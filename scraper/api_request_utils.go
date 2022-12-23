@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"strings"
 	"time"
@@ -29,11 +30,18 @@ func NewGuestSession() API {
 		panic(err)
 	}
 
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		panic(err)
+	}
 	return API{
 		IsAuthenticated:     false,
 		GuestToken:          guestAPIString,
 		AuthenticationToken: "",
-		Client:              http.Client{Timeout: 10 * time.Second},
+		Client:              http.Client{
+								Timeout: 10 * time.Second,
+								Jar: jar,
+							 },
 		CSRFToken:           "",
 	}
 }
@@ -60,6 +68,7 @@ func (api *API) LogIn(username string, password string) {
 
 	err = api.do_http_POST(loginURL, login_body, &result)
 	if err != nil {
+		fmt.Printf("%#v\n", api.Client.Jar)
 		panic(err)
 	}
 
@@ -199,6 +208,10 @@ func (api API) do_http(url string, cursor string, result interface{}) error {
 
 	if api.IsAuthenticated {
 		// TODO authentication: add authentication headers/params
+		if api.CSRFToken == "" {
+			panic("No CSRF token set!")
+		}
+		req.Header.Set("x-csrf-token", api.CSRFToken)
 	} else {
 		// Not authenticated; use guest token
 		if api.GuestToken == "" {
@@ -223,7 +236,7 @@ func (api API) do_http(url string, cursor string, result interface{}) error {
 		for header := range resp.Header {
 			responseHeaders += fmt.Sprintf("    %s: %s\n", header, resp.Header.Get(header))
 		}
-		return fmt.Errorf("HTTP %s\n%s\n%s", resp.Status, responseHeaders, content)
+		return fmt.Errorf("HTTP Error.  HTTP %s\n%s\nbody: %s", resp.Status, responseHeaders, content)
 	}
 
 	body, err := io.ReadAll(resp.Body)
