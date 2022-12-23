@@ -487,6 +487,7 @@ func TestParseSpaceResponse(t *testing.T) {
 	require.Len(trove.Spaces, 1)
 	space := trove.Spaces["1BdxYypQzBgxX"]
 	assert.Equal(space.Title, "dreary weather 🌧️☔🌬️")
+	assert.Equal(space.CreatedById, UserID(1356335022815539201))
 	assert.Equal(int64(1665884387263), space.CreatedAt.Time.Unix())
 	assert.Equal(int64(1665884388222), space.StartedAt.Time.Unix())
 	assert.Equal(int64(1665887491804), space.EndedAt.Time.Unix())

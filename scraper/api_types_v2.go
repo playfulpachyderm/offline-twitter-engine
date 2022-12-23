@@ -519,6 +519,7 @@ func (r SpaceResponse) ToTweetTrove() TweetTrove {
 
 	space.Title = data.Metadata.Title
 	space.State = data.Metadata.State
+	space.CreatedById = UserID(data.Metadata.CreatorResults.Result.ID)
 	space.CreatedAt = TimestampFromUnix(data.Metadata.CreatedAt)
 	space.StartedAt = TimestampFromUnix(data.Metadata.StartedAt)
 	space.EndedAt = TimestampFromUnix(data.Metadata.EndedAt)
@@ -541,7 +542,7 @@ func (r SpaceResponse) ToTweetTrove() TweetTrove {
 	if err != nil {
 		panic(err)
 	}
-	creator.ID = UserID(data.Metadata.CreatorResults.Result.ID)
+	creator.ID = space.CreatedById
 	ret.Users[creator.ID] = creator
 
 	return ret
