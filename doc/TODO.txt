@@ -4,7 +4,7 @@ User profile images and banner images => extract to table.  Add `is_downloaded` 
 TODO update-all
 
 TODO fetch-older-tweets:
-get tweets older than 3200 ago
+- get tweets older than 3200 ago
 
 TODO: downloading-modes
 - Could compose the following:
@@ -23,7 +23,7 @@ Conversation threads with two or more consecutive tombstones don't get scraped c
 - e.g.: https://twitter.com/hatecoleslaw/status/1429584549701357568
 - Hard mode: https://twitter.com/masforshort/status/1482000048447705090
 
-Video size reduction:
+TODO video-bitrates
 - add "bitrate" and "available bitrates" fields
 - option to upgrade or downgrade video quality
 
@@ -52,3 +52,6 @@ TODO bash-completions
 
 TODO implement-custom-unmarshal
 - the parsing might be excessively complex, and it doesn't correctly catch failures.  Might be good to just implement the Unmarshal interface instead
+
+TODO twitter-spaces
+- add `is_details_available` flag

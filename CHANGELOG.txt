@@ -97,3 +97,13 @@ v0.1.7
 
 - Add support for multiple videos as well as videos and images in the same tweet
 - Restructure media file storage into sub-directories to improve performance when retrieving them
+
+v0.1.8
+------
+
+- Add proper support for fetching Spaces (with full detail)
+- Add checking for DMCA takedowns of video content
+- Add index for fetching tweet threads (index `in_reply_to_id`)
+- Add indexes to tweet content types to improve fetching performance (index `tweet_id`)
+- BUGFIX: can now fetch retweets with "visibility results"
+- BUGFIX: search changed how cursors work at end-of-feed
