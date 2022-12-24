@@ -61,6 +61,8 @@ create table tweets (rowid integer primary key,
     foreign key(user_id) references users(id)
     foreign key(space_id) references spaces(id)
 );
+create index if not exists index_tweets_in_reply_to_id on tweets (in_reply_to_id);
+
 
 create table retweets(rowid integer primary key,
     retweet_id integer not null unique,
@@ -91,6 +93,7 @@ create table urls (rowid integer primary key,
     unique (tweet_id, text)
     foreign key(tweet_id) references tweets(id)
 );
+create index if not exists index_urls_tweet_id on urls (tweet_id);
 
 create table polls (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
@@ -113,6 +116,7 @@ create table polls (rowid integer primary key,
 
     foreign key(tweet_id) references tweets(id)
 );
+create index if not exists index_polls_tweet_id on polls (tweet_id);
 
 create table spaces(rowid integer primary key,
     id text unique not null,
@@ -152,6 +156,7 @@ create table images (rowid integer primary key,
 
     foreign key(tweet_id) references tweets(id)
 );
+create index if not exists index_images_tweet_id on images (tweet_id);
 
 create table videos (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
@@ -170,6 +175,7 @@ create table videos (rowid integer primary key,
 
     foreign key(tweet_id) references tweets(id)
 );
+create index if not exists index_videos_tweet_id on videos (tweet_id);
 
 create table hashtags (rowid integer primary key,
     tweet_id integer not null,

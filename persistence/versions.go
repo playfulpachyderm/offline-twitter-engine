@@ -8,7 +8,7 @@ import (
 	"offline_twitter/terminal_utils"
 )
 
-const ENGINE_DATABASE_VERSION = 13
+const ENGINE_DATABASE_VERSION = 14
 
 type VersionMismatchError struct {
 	EngineVersion   int
@@ -75,6 +75,11 @@ var MIGRATIONS = []string{
 	);
 	alter table tweets add column space_id text references spaces(id)`,
 	`alter table videos add column is_blocked_by_dmca boolean not null default 0`,
+	`create index if not exists index_tweets_in_reply_to_id on tweets (in_reply_to_id);
+		create index if not exists index_urls_tweet_id on urls (tweet_id);
+		create index if not exists index_polls_tweet_id on polls (tweet_id);
+		create index if not exists index_images_tweet_id on images (tweet_id);
+		create index if not exists index_videos_tweet_id on videos (tweet_id);`,
 }
 
 /**
