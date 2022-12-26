@@ -50,71 +50,44 @@ func (api *API) LogIn(username string, password string) {
 	// TODO authentication: Log in and save the authentication token(s), set `IsAuthenticated = true`
 	loginURL := "https://twitter.com/i/api/1.1/onboarding/task.json"
 
+	// Format username and password safely as JSON (escape quotes, etc)
+	json_username, err := json.Marshal(username)
+	if err != nil {
+		panic(err)
+	}
+	json_password, err := json.Marshal(password)
+	if err != nil {
+		panic(err)
+	}
+
+	login_bodies := []string{
+		`{"flow_token":"%s", "subtask_inputs": [{"subtask_id": "LoginJsInstrumentationSubtask", "js_instrumentation": {"response": "{\"rf\":{\"a560cdc18ff70ce7662311eac0f2441dd3d3ed27c354f082f587e7a30d1a7d5f\":72,\"a8e890b5fec154e7af62d8f529fbec5942dfdd7ad41597245b71a3fbdc9a180d\":176,\"a3c24597ad4c862773c74b9194e675e96a7607708f6bbd0babcfdf8b109ed86d\":-161,\"af9847e2cd4e9a0ca23853da4b46bf00a2e801f98dc819ee0dd6ecc1032273fa\":-8},\"s\":\"hOai7h2KQi4RBGKSYLUhH0Y0fBm5KHIJgxD5AmNKtwP7N8gpVuAqP8o9n2FpCnNeR1d6XbB0QWkGAHiXkKao5PhaeXEZgPJU1neLcVgTnGuFzpjDnGutCUgYaxNiwUPfDX0eQkgr_q7GWmbB7yyYPt32dqSd5yt-KCpSt7MOG4aFmGf11xWE4MTpXfkefbnX4CwZeEFKQQYzJptOvmUWa7qI0A69BSOs7HZ_4Wry2TwB9k03Q_S-MDZAZ3yB_L7WoosVVb1e84YWgaLWWzqhz4C77jDy6isT8EKSWKWnVctsIcaqM_wMV8AiYa5lr0_WkN5TwK9h0vDOTS1obOZuhAAAAYTZan_3\"}", "link": "next_link"}}]}`,
+		`{"flow_token":"%s","subtask_inputs":[{"subtask_id":"LoginEnterUserIdentifierSSO","settings_list":{"setting_responses":[{"key":"user_identifier","response_data":{"text_data":{"result":` + string(json_username) + `}}}],"link":"next_link"}}]}`,
+		`{"flow_token":"%s","subtask_inputs":[{"subtask_id":"LoginEnterPassword","enter_password":{"password":` + string(json_password) + `,"link":"next_link"}}]}`,
+		`{"flow_token":"%s","subtask_inputs":[{"subtask_id":"AccountDuplicationCheck","check_logged_in_account":{"link":"AccountDuplicationCheck_false"}}]}`,
+	}
+
 	result := make(map[string]interface{})
-	err := api.do_http_POST(loginURL+"?flow_name=login", "", &result)
+	err = api.do_http_POST(loginURL+"?flow_name=login", "", &result)
 	if err != nil {
 		panic(err)
 	}
 
-	flow_token, is_ok := result["flow_token"]
-	if !is_ok {
-		panic("No flow token.")
-	}
-	flow_token_string := flow_token.(string)
-
-	fmt.Println(flow_token.(string))
-
-	login_body := `{"flow_token":"` + flow_token_string + `", "subtask_inputs": [{"subtask_id": "LoginJsInstrumentationSubtask", "js_instrumentation": {"response": "{\"rf\":{\"a560cdc18ff70ce7662311eac0f2441dd3d3ed27c354f082f587e7a30d1a7d5f\":72,\"a8e890b5fec154e7af62d8f529fbec5942dfdd7ad41597245b71a3fbdc9a180d\":176,\"a3c24597ad4c862773c74b9194e675e96a7607708f6bbd0babcfdf8b109ed86d\":-161,\"af9847e2cd4e9a0ca23853da4b46bf00a2e801f98dc819ee0dd6ecc1032273fa\":-8},\"s\":\"hOai7h2KQi4RBGKSYLUhH0Y0fBm5KHIJgxD5AmNKtwP7N8gpVuAqP8o9n2FpCnNeR1d6XbB0QWkGAHiXkKao5PhaeXEZgPJU1neLcVgTnGuFzpjDnGutCUgYaxNiwUPfDX0eQkgr_q7GWmbB7yyYPt32dqSd5yt-KCpSt7MOG4aFmGf11xWE4MTpXfkefbnX4CwZeEFKQQYzJptOvmUWa7qI0A69BSOs7HZ_4Wry2TwB9k03Q_S-MDZAZ3yB_L7WoosVVb1e84YWgaLWWzqhz4C77jDy6isT8EKSWKWnVctsIcaqM_wMV8AiYa5lr0_WkN5TwK9h0vDOTS1obOZuhAAAAYTZan_3\"}", "link": "next_link"}}]}`
-
-	err = api.do_http_POST(loginURL, login_body, &result)
-	if err != nil {
-		fmt.Printf("%#v\n", api.Client.Jar)
-		panic(err)
-	}
-
-	flow_token, is_ok = result["flow_token"]
-	if !is_ok {
-		panic("No flow token.")
-	}
-	flow_token_string = flow_token.(string)
-
-	fmt.Println(flow_token_string)
-
-	login_body = `{"flow_token":"` + flow_token_string + `","subtask_inputs":[{"subtask_id":"LoginEnterUserIdentifierSSO","settings_list":{"setting_responses":[{"key":"user_identifier","response_data":{"text_data":{"result":"` + username + `"}}}],"link":"next_link"}}]}`
-
-	err = api.do_http_POST(loginURL, login_body, &result)
-	if err != nil {
-		panic(err)
-	}
-
-	flow_token, is_ok = result["flow_token"]
-	if !is_ok {
-		panic("No flow token.")
-	}
-	flow_token_string = flow_token.(string)
-
-	fmt.Println(flow_token_string)
-
-	login_body = `{"flow_token":"` + flow_token_string + `","subtask_inputs":[{"subtask_id":"LoginEnterPassword","enter_password":{"password":"` + password + `","link":"next_link"}}]}`
-
-	err = api.do_http_POST(loginURL, login_body, &result)
-	if err != nil {
-		panic(err)
-	}
-
-	flow_token, is_ok = result["flow_token"]
-	if !is_ok {
-		panic("No flow token.")
-	}
-	flow_token_string = flow_token.(string)
-
-	fmt.Println(flow_token_string)
-
-	login_body = `{"flow_token":"` + flow_token_string + `","subtask_inputs":[{"subtask_id":"AccountDuplicationCheck","check_logged_in_account":{"link":"AccountDuplicationCheck_false"}}]}`
-
-	err = api.do_http_POST(loginURL, login_body, &result)
-	if err != nil {
-		panic(err)
+	for _, body := range login_bodies {
+		flow_token, is_ok := result["flow_token"]
+		if !is_ok {
+			panic("No flow token.")
+		}
+		flow_token_string, is_ok := flow_token.(string)
+		if !is_ok {
+			panic("Flow token couldn't be turned into a string")
+		}
+		fmt.Println(flow_token_string)
+		err = api.do_http_POST(loginURL, fmt.Sprintf(body, flow_token_string), &result)
+		if err != nil {
+			fmt.Printf("%#v\n", api.Client.Jar)
+			panic(err)
+		}
 	}
 
 	dummyURL, err := url.Parse(loginURL)
