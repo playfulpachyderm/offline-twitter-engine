@@ -24,6 +24,25 @@ type API struct {
 	CSRFToken           string
 }
 
+func (api API) add_authentication_headers(req *http.Request) {
+	// Params for every request
+	req.Header.Set("Authorization", "Bearer "+BEARER_TOKEN)
+	req.Header.Set("x-twitter-client-language", "en")
+
+	if api.IsAuthenticated {
+		if api.CSRFToken == "" {
+			panic("No CSRF token set!")
+		}
+		req.Header.Set("x-csrf-token", api.CSRFToken)
+	} else {
+		// Not authenticated; use guest token
+		if api.GuestToken == "" {
+			panic("No guest token set!")
+		}
+		req.Header.Set("X-Guest-Token", api.GuestToken)
+	}
+}
+
 func NewGuestSession() API {
 	guestAPIString, err := GetGuestToken()
 	if err != nil {
@@ -38,16 +57,15 @@ func NewGuestSession() API {
 		IsAuthenticated:     false,
 		GuestToken:          guestAPIString,
 		AuthenticationToken: "",
-		Client:              http.Client{
-								Timeout: 10 * time.Second,
-								Jar: jar,
-							 },
-		CSRFToken:           "",
+		Client: http.Client{
+			Timeout: 10 * time.Second,
+			Jar:     jar,
+		},
+		CSRFToken: "",
 	}
 }
 
 func (api *API) LogIn(username string, password string) {
-	// TODO authentication: Log in and save the authentication token(s), set `IsAuthenticated = true`
 	loginURL := "https://twitter.com/i/api/1.1/onboarding/task.json"
 
 	// Format username and password safely as JSON (escape quotes, etc)
@@ -115,20 +133,9 @@ func (api *API) do_http_POST(url string, body string, result interface{}) error 
 		return fmt.Errorf("Error initializing HTTP POST request:\n  %w", err)
 	}
 
-	// Params for every request
-	req.Header.Set("Authorization", "Bearer "+BEARER_TOKEN)
-	req.Header.Set("x-twitter-client-language", "en")
 	req.Header.Set("content-type", "application/json")
 
-	if api.IsAuthenticated {
-		// TODO authentication: add authentication headers/params
-	} else {
-		// Not authenticated; use guest token
-		if api.GuestToken == "" {
-			panic("No guest token set!")
-		}
-		req.Header.Set("X-Guest-Token", api.GuestToken)
-	}
+	api.add_authentication_headers(req)
 
 	resp, err := api.Client.Do(req)
 	if err != nil {
@@ -175,23 +182,7 @@ func (api API) do_http(url string, cursor string, result interface{}) error {
 		req.URL.RawQuery = query.Encode()
 	}
 
-	// Params for every request
-	req.Header.Set("Authorization", "Bearer "+BEARER_TOKEN)
-	req.Header.Set("x-twitter-client-language", "en")
-
-	if api.IsAuthenticated {
-		// TODO authentication: add authentication headers/params
-		if api.CSRFToken == "" {
-			panic("No CSRF token set!")
-		}
-		req.Header.Set("x-csrf-token", api.CSRFToken)
-	} else {
-		// Not authenticated; use guest token
-		if api.GuestToken == "" {
-			panic("No guest token set!")
-		}
-		req.Header.Set("X-Guest-Token", api.GuestToken)
-	}
+	api.add_authentication_headers(req)
 
 	resp, err := api.Client.Do(req)
 	if err != nil {
