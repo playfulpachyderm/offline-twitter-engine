@@ -8,7 +8,7 @@ import (
 	"offline_twitter/terminal_utils"
 )
 
-const ENGINE_DATABASE_VERSION = 15
+const ENGINE_DATABASE_VERSION = 16
 
 type VersionMismatchError struct {
 	EngineVersion   int
@@ -87,7 +87,7 @@ var MIGRATIONS = []string{
 		alter table spaces add column started_at integer;
 		alter table spaces add column ended_at integer;
 		alter table spaces add column updated_at integer;
-		alter table spaces add column is_available_for_replay boolean not null;
+		alter table spaces add column is_available_for_replay boolean not null default 0;
 		alter table spaces add column replay_watch_count integer;
 		alter table spaces add column live_listeners_count integer;
 		alter table spaces add column is_details_fetched boolean not null default 0;
@@ -96,6 +96,7 @@ var MIGRATIONS = []string{
 		    space_id not null,
 		    foreign key(space_id) references spaces(id)
 		);`,
+	`create index if not exists index_tweets_user_id on tweets (user_id);`,
 }
 
 /**

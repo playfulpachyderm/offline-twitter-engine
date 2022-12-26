@@ -62,6 +62,7 @@ create table tweets (rowid integer primary key,
     foreign key(space_id) references spaces(id)
 );
 create index if not exists index_tweets_in_reply_to_id on tweets (in_reply_to_id);
+create index if not exists index_tweets_user_id        on tweets (user_id);
 
 
 create table retweets(rowid integer primary key,
