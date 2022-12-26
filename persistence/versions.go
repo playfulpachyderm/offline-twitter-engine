@@ -81,12 +81,12 @@ var MIGRATIONS = []string{
 		create index if not exists index_images_tweet_id on images (tweet_id);
 		create index if not exists index_videos_tweet_id on videos (tweet_id);`,
 	`alter table spaces add column created_by_id integer references users(id);
-		alter table spaces add column state text not null;
-		alter table spaces add column title text not null;
-		alter table spaces add column created_at integer not null;
-		alter table spaces add column started_at integer not null;
-		alter table spaces add column ended_at integer not null;
-		alter table spaces add column updated_at integer not null;
+		alter table spaces add column state text not null default "";
+		alter table spaces add column title text not null default "";
+		alter table spaces add column created_at integer;
+		alter table spaces add column started_at integer;
+		alter table spaces add column ended_at integer;
+		alter table spaces add column updated_at integer;
 		alter table spaces add column is_available_for_replay boolean not null;
 		alter table spaces add column replay_watch_count integer;
 		alter table spaces add column live_listeners_count integer;
