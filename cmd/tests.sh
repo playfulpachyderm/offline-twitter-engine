@@ -144,9 +144,9 @@ test "$(sqlite3 twitter.db "select choice1_votes, choice2_votes, choice3_votes, 
 
 
 # Fetch a tweet with a Twitter Space
-tw fetch_tweet https://twitter.com/pompilivs/status/1497647006445146113
+tw fetch_tweet https://twitter.com/lndian_Bronson/status/1569875562784608256
 test $(sqlite3 twitter.db "select count(*) from spaces") = "1"
-test $(sqlite3 twitter.db "select space_id from tweets where id = 1497647006445146113") = "1dRJZlRNZDzKB"
+test $(sqlite3 twitter.db "select space_id from tweets where id = 1569875562784608256") = "1dRJZMzeDpNGB"
 
 # Download a full thread
 test ! -e profile_images/default_profile.png
