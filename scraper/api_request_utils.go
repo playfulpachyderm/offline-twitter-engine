@@ -24,6 +24,53 @@ type API struct {
 	CSRFToken       string
 }
 
+type api_outstruct struct {
+	Cookies         []*http.Cookie
+	UserHandle      UserHandle
+	IsAuthenticated bool
+	GuestToken      string
+	CSRFToken       string
+}
+
+var TWITTER_BASE_URL = url.URL{Scheme: "https", Host: "twitter.com"}
+
+func (api API) MarshalJSON() ([]byte, error) {
+	result, err := json.Marshal(api_outstruct{
+		Cookies:         api.Client.Jar.Cookies(&TWITTER_BASE_URL),
+		UserHandle:      api.UserHandle,
+		IsAuthenticated: api.IsAuthenticated,
+		GuestToken:      api.GuestToken,
+		CSRFToken:       api.CSRFToken,
+	})
+	if err != nil {
+		return result, fmt.Errorf("Unable to JSONify the api:\n  %w", err)
+	}
+	return result, nil
+}
+
+func (api *API) UnmarshalJSON(data []byte) error {
+	var in_struct api_outstruct
+	err := json.Unmarshal(data, &in_struct)
+	if err != nil {
+		return fmt.Errorf("Unable to unmarshal:\n  %w", err)
+	}
+	cookie_jar, err := cookiejar.New(nil)
+	if err != nil {
+		panic(err)
+	}
+	cookie_jar.SetCookies(&TWITTER_BASE_URL, in_struct.Cookies)
+	api.IsAuthenticated = in_struct.IsAuthenticated
+	api.GuestToken = in_struct.GuestToken
+	api.UserHandle = in_struct.UserHandle
+
+	api.Client = http.Client{
+		Timeout: 10 * time.Second,
+		Jar:     cookie_jar,
+	}
+	api.CSRFToken = in_struct.CSRFToken
+	return nil
+}
+
 func (api API) add_authentication_headers(req *http.Request) {
 	// Params for every request
 	req.Header.Set("Authorization", "Bearer "+BEARER_TOKEN)
