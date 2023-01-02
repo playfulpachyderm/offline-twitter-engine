@@ -17,11 +17,11 @@ const API_CONVERSATION_BASE_PATH = "https://twitter.com/i/api/2/timeline/convers
 const API_USER_TIMELINE_BASE_PATH = "https://api.twitter.com/2/timeline/profile/"
 
 type API struct {
-	IsAuthenticated     bool
-	GuestToken          string
-	AuthenticationToken string
-	Client              http.Client
-	CSRFToken           string
+	UserHandle      UserHandle
+	IsAuthenticated bool
+	GuestToken      string
+	Client          http.Client
+	CSRFToken       string
 }
 
 func (api API) add_authentication_headers(req *http.Request) {
@@ -54,9 +54,8 @@ func NewGuestSession() API {
 		panic(err)
 	}
 	return API{
-		IsAuthenticated:     false,
-		GuestToken:          guestAPIString,
-		AuthenticationToken: "",
+		IsAuthenticated: false,
+		GuestToken:      guestAPIString,
 		Client: http.Client{
 			Timeout: 10 * time.Second,
 			Jar:     jar,
@@ -107,6 +106,28 @@ func (api *API) LogIn(username string, password string) {
 			panic(err)
 		}
 	}
+
+	type final_result_struct struct {
+		Subtasks []struct {
+			OpenAccount struct {
+				User struct {
+					Name       string
+					ScreenName string `json:"screen_name"`
+				}
+			} `json:"open_account"`
+		}
+	}
+	bytes, err := json.Marshal(result)
+	if err != nil {
+		panic(err)
+	}
+	var final_result final_result_struct
+	err = json.Unmarshal(bytes, &final_result)
+	if err != nil {
+		panic(err)
+	}
+
+	api.UserHandle = UserHandle(final_result.Subtasks[0].OpenAccount.User.ScreenName)
 
 	dummyURL, err := url.Parse(loginURL)
 	if err != nil {
