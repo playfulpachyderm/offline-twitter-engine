@@ -14,7 +14,6 @@ import (
 
 // Save and load an API session; it should come back the same
 func TestSaveAndLoadAuthenticatedSession(t *testing.T) {
-
 	profile_path := "test_profiles/TestSession"
 	profile := create_or_load_profile(profile_path)
 
@@ -40,5 +39,4 @@ func TestSaveAndLoadAuthenticatedSession(t *testing.T) {
 	if diff := deep.Equal(api, new_api); diff != nil {
 		t.Error(diff)
 	}
-
 }

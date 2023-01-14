@@ -12,7 +12,7 @@ func (p Profile) SaveSession(api scraper.API) {
 		panic(err)
 	}
 
-	os.WriteFile(p.ProfileDir+"/"+string(api.UserHandle+".session"), data, os.FileMode(0644))
+	err = os.WriteFile(p.ProfileDir+"/"+string(api.UserHandle+".session"), data, os.FileMode(0644))
 	if err != nil {
 		panic(err)
 	}
