@@ -24,8 +24,6 @@ func TestSaveAndLoadAuthenticatedSession(t *testing.T) {
 	}
 
 	api := scraper.API{
-		// TODO session-saving
-		// - Fill out some fields here like Cookies and CSRFToken and UserHandle
 		UserHandle:      "testUser",
 		IsAuthenticated: true,
 		Client: http.Client{
