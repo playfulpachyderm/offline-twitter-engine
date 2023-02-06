@@ -100,10 +100,10 @@ test $(find videos -mindepth 2 | wc -l) = "$((initial_videos_count + 1))"
 
 # Fetch a tweet with 2 gifs
 initial_videos_count=$(find videos -mindepth 2 | wc -l)
-test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1580185800968327168 and is_gif = 1") = "0"
-tw fetch_tweet https://twitter.com/emo_garfield420/status/1580185800968327168
+test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1582197943511023616 and is_gif = 1") = "0"
+tw fetch_tweet 1582197943511023616
 test $(find videos -mindepth 2 | wc -l) = "$((initial_videos_count + 2))"
-test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1580185800968327168 and is_gif = 1") = "2"
+test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1582197943511023616 and is_gif = 1") = "2"
 
 # Fetch a tweet with 2 videos
 test $(sqlite3 twitter.db "select count(*) from videos where tweet_id = 1591025378143129601 and is_gif = 0") = "0"
@@ -304,6 +304,7 @@ tw login offline_twatter S1pKIW#eRT016iA@OFcK
 test -f Offline_Twatter.session
 test "$(jq .UserHandle Offline_Twatter.session)" = "\"Offline_Twatter\""
 test "$(jq .IsAuthenticated Offline_Twatter.session)" = "true"
+jq .CSRFToken Offline_Twatter.session | grep -P '"\w+"'
 
 
 # TODO: Maybe this file should be broken up into multiple test scripts
