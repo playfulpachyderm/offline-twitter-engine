@@ -99,7 +99,6 @@ func main() {
 	}
 
 	switch operation {
-
 	case "create_profile":
 		create_profile(target)
 	case "fetch_user":
@@ -136,7 +135,6 @@ func main() {
 // - password: twitter account password
 
 func login(username string, password string) {
-
 	api := scraper.NewGuestSession()
 	api.LogIn(username, password)
 
