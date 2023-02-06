@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"offline_twitter/scraper"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func (p Profile) SaveSession(api scraper.API) {
@@ -12,6 +14,7 @@ func (p Profile) SaveSession(api scraper.API) {
 		panic(err)
 	}
 
+	log.Debug("Profile Dir: " + p.ProfileDir)
 	err = os.WriteFile(p.ProfileDir+"/"+string(api.UserHandle+".session"), data, os.FileMode(0644))
 	if err != nil {
 		panic(err)

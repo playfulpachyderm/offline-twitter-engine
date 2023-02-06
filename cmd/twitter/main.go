@@ -86,11 +86,20 @@ func main() {
 	}
 
 	profile, err = persistence.LoadProfile(*profile_dir)
+
 	if err != nil {
 		die(fmt.Sprintf("Could not load profile: %s", err.Error()), true, 2)
 	}
 
+	if len(args) == 3 && args[0] == "login" {
+		username := args[1]
+		password := args[2]
+
+		login(username, password)
+	}
+
 	switch operation {
+
 	case "create_profile":
 		create_profile(target)
 	case "fetch_user":
@@ -118,6 +127,21 @@ func main() {
 	default:
 		die(fmt.Sprintf("Invalid operation: %s", operation), true, 3)
 	}
+}
+
+// Log into twitter
+//
+// args:
+// - username: twitter username or email address
+// - password: twitter account password
+
+func login(username string, password string) {
+
+	api := scraper.NewGuestSession()
+	api.LogIn(username, password)
+
+	profile.SaveSession(api)
+	happy_exit("Logged in as " + string(api.UserHandle))
 }
 
 /**

@@ -299,6 +299,14 @@ test "$(sqlite3 twitter.db "select count(*) from users where is_followed = 1")" 
 tw unfollow cernovich
 test "$(sqlite3 twitter.db "select count(*) from users where is_followed = 1")" = "0"
 
+# Testing login
+tw login offline_twatter S1pKIW#eRT016iA@OFcK
+test -f Offline_Twatter.session
+test "$(jq .UserHandle Offline_Twatter.session)" = "\"Offline_Twatter\""
+test "$(jq .IsAuthenticated Offline_Twatter.session)" = "true"
+
+
 # TODO: Maybe this file should be broken up into multiple test scripts
 
 echo -e "\033[32mAll tests passed.  Finished successfully.\033[0m"
+

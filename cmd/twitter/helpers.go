@@ -36,6 +36,7 @@ func die(text string, display_help bool, exit_code int) {
 func happy_exit(text string) {
 	fmt.Printf(terminal_utils.COLOR_GREEN + text + terminal_utils.COLOR_RESET + "\n")
 	fmt.Printf(terminal_utils.COLOR_GREEN + "Exiting successfully." + terminal_utils.COLOR_RESET + "\n")
+	os.Exit(0)
 }
 
 /**
