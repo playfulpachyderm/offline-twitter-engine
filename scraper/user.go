@@ -156,8 +156,7 @@ func ParseSingleUser(apiUser APIUser) (ret User, err error) {
 
 // Calls API#GetUser and returns the parsed result
 func GetUser(handle UserHandle) (User, error) {
-	api := NewGuestSession()
-	apiUser, err := api.GetUser(handle)
+	apiUser, err := the_api.GetUser(handle)
 	if apiUser.ScreenName == "" {
 		apiUser.ScreenName = string(handle)
 	}

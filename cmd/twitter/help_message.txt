@@ -1,4 +1,4 @@
-Usage: twitter [--profile <profile_dir>] [<flags>] <operation> <TARGET>
+Usage: twitter [--profile <profile_dir>] [--session <session_name>] [<flags>] <operation> <TARGET>
 This application downloads tweets from twitter and saves them in a SQLite database.
 
 <profile_dir>:
@@ -6,10 +6,28 @@ This application downloads tweets from twitter and saves them in a SQLite databa
     By default, will use the current working directory.
     Ignored if <operation> is "create_profile".
 
+<session_name>:
+    Optional.  Only needed when making authenticated requests.
+    If specified, the named session file (this value, appended with ".session" extension) will be used
+    when making API requests.
+
 <operation>:
     create_profile
           <TARGET> is the directory to create.  It must not exist already.
           <profile_dir> will be ignored if provided.
+
+    login
+          <TARGET> is the username or email to log in as.
+          An optional second target can be provided which will be used as the password; if not, a password
+          prompt (non-echoing) will be given so you can enter the password.
+          On success, the `login` operation will create (or overwrite) a ".session" file with the user
+          handle of the user it corresponds to, which contains session tokens and cookies allowing you to
+          make subsequent requests as that user.
+          For example, `twitter login offline_twatter` will prompt for a password, then attempt to log in as
+          @offline_twatter, and if successful, a file `Offline_Twatter.session` will be created.
+          It may be converted to uppercase (offline_twatter => Offline_Twatter) if that's the canonical
+          capitalization that twitter uses, even though handles are case insensitive.
+
 
     fetch_user
     download_user_content

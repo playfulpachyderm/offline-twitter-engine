@@ -24,6 +24,18 @@ type API struct {
 	CSRFToken       string
 }
 
+// Use a global API variable since it is needed in so many utility functions (e.g.,
+// tweet_trove.FillSpaceDetails, tweet_trove.FetchTombstoneUsers, etc.); this avoids having
+// to inject it everywhere.
+//
+// Should be set by the caller (main program) depending on the session file used.
+var the_api API
+
+// Initializer for the global api variable
+func InitApi(newApi API) {
+	the_api = newApi
+}
+
 type api_outstruct struct {
 	Cookies         []*http.Cookie
 	UserHandle      UserHandle

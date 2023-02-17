@@ -300,12 +300,21 @@ tw unfollow cernovich
 test "$(sqlite3 twitter.db "select count(*) from users where is_followed = 1")" = "0"
 
 # Testing login
+# TODO authentication: use an environment var for the password
 tw login offline_twatter S1pKIW#eRT016iA@OFcK
 test -f Offline_Twatter.session
 test "$(jq .UserHandle Offline_Twatter.session)" = "\"Offline_Twatter\""
 test "$(jq .IsAuthenticated Offline_Twatter.session)" = "true"
 jq .CSRFToken Offline_Twatter.session | grep -P '"\w+"'
 
+# When not logged in, age-restricted tweet should fail to fetch
+tw fetch_user PandasAndVidya
+tw fetch_tweet_only https://twitter.com/PandasAndVidya/status/1562714727968428032 || true  # This one is expected to fail
+test "$(sqlite3 twitter.db "select count(*) from tweets where id = 156271472796842803")" == "0"
+
+# Fetch an age-restricted tweet while logged in
+tw --session Offline_Twatter fetch_tweet_only https://twitter.com/PandasAndVidya/status/1562714727968428032
+test "$(sqlite3 twitter.db "select count(*) from tweets where id = 156271472796842803")" == "0"
 
 # TODO: Maybe this file should be broken up into multiple test scripts
 

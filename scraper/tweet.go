@@ -212,8 +212,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
  * returns: the single Tweet
  */
 func GetTweet(id TweetID) (Tweet, error) {
-	api := NewGuestSession()
-	tweet_response, err := api.GetTweet(id, "")
+	tweet_response, err := the_api.GetTweet(id, "")
 	if err != nil {
 		return Tweet{}, fmt.Errorf("Error in API call:\n  %w", err)
 	}
@@ -240,15 +239,14 @@ func GetTweet(id TweetID) (Tweet, error) {
  * returns: the tweet, list of its replies and context, and users associated with those replies
  */
 func GetTweetFull(id TweetID) (trove TweetTrove, err error) {
-	api := NewGuestSession()
-	tweet_response, err := api.GetTweet(id, "")
+	tweet_response, err := the_api.GetTweet(id, "")
 	if err != nil {
 		err = fmt.Errorf("Error getting tweet: %d\n  %w", id, err)
 		return
 	}
 	if len(tweet_response.GlobalObjects.Tweets) < DEFAULT_MAX_REPLIES_EAGER_LOAD &&
 		tweet_response.GetCursor() != "" {
-		err = api.GetMoreReplies(id, &tweet_response, DEFAULT_MAX_REPLIES_EAGER_LOAD)
+		err = the_api.GetMoreReplies(id, &tweet_response, DEFAULT_MAX_REPLIES_EAGER_LOAD)
 		if err != nil {
 			err = fmt.Errorf("Error getting more tweet replies: %d\n  %w", id, err)
 			return

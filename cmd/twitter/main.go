@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/term"
+	"os"
+	"syscall"
 
 	"offline_twitter/persistence"
 	"offline_twitter/scraper"
@@ -27,6 +28,8 @@ func main() {
 
 	show_version_flag := flag.Bool("version", false, "")
 	flag.BoolVar(show_version_flag, "v", false, "")
+
+	session_name := flag.String("session", "", "Name of session file to use")
 
 	how_many := flag.Int("n", 50, "")
 	flag.IntVar(how_many, "number", 50, "")
@@ -86,21 +89,34 @@ func main() {
 	}
 
 	profile, err = persistence.LoadProfile(*profile_dir)
-
 	if err != nil {
 		die(fmt.Sprintf("Could not load profile: %s", err.Error()), true, 2)
 	}
 
-	if len(args) == 3 && args[0] == "login" {
-		username := args[1]
-		password := args[2]
-
-		login(username, password)
+	if *session_name != "" {
+		scraper.InitApi(profile.LoadSession(scraper.UserHandle(*session_name)))
+		// fmt.Printf("Operating as user: @%s\n", scraper.the_api.UserHandle)
+	} else {
+		scraper.InitApi(scraper.NewGuestSession())
 	}
 
 	switch operation {
 	case "create_profile":
 		create_profile(target)
+	case "login":
+		var password string
+		if len(args) == 2 {
+			fmt.Printf("Password for @%s: ", target)
+			bytes_password, err := term.ReadPassword(int(syscall.Stdin))
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println()
+			password = string(bytes_password)
+		} else {
+			password = args[2]
+		}
+		login(target, password)
 	case "fetch_user":
 		fetch_user(scraper.UserHandle(target))
 	case "download_user_content":
@@ -135,6 +151,7 @@ func main() {
 // - password: twitter account password
 
 func login(username string, password string) {
+	// Skip the scraper.the_api variable, just use a local one since no scraping is happening
 	api := scraper.NewGuestSession()
 	api.LogIn(username, password)
 
