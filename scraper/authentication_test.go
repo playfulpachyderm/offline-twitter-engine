@@ -15,28 +15,6 @@ import (
 	. "offline_twitter/scraper"
 )
 
-// TODO authentication: this has to be removed and replaced with an integration test once the feature is stable-ish
-func TestAuthentication(t *testing.T) {
-	assert := assert.New(t)
-	//require := require.New(t)
-
-	username := "offline_twatter"
-	password := "S1pKIW#eRT016iA@OFcK"
-
-	api := NewGuestSession()
-	api.LogIn(username, password)
-
-	assert.True(api.IsAuthenticated)
-	assert.NotEqual(api.CSRFToken, "")
-	assert.Equal(api.UserHandle, UserHandle("Offline_Twatter"))
-
-	// response, err := api.GetLikesFor(1458284524761075714, "")
-	// require.NoError(err)
-	// trove, err := response.ToTweetTrove()
-	// require.NoError(err)
-	// assert.True(len(trove.Tweets) > 0)
-}
-
 // An API object should serialize and then deserialize to give the same session state from before.
 func TestJsonifyApi(t *testing.T) {
 	assert := assert.New(t)
