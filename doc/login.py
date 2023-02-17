@@ -5,7 +5,7 @@ Utility script for testing twitter login workflow
 # pylint: disable=invalid-name
 
 import requests
-
+import os
 
 guest_token_response = requests.post("https://api.twitter.com/1.1/guest/activate.json", headers={"Authorization": "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"})
 assert guest_token_response.status_code == 200, f"HTTP Response code {guest_token_response.status_code}"
@@ -20,7 +20,9 @@ headers = {
 login_curl = "https://twitter.com/i/api/1.1/onboarding/task.json"
 
 username = "offline_twatter"
-password = "S1pKIW#eRT016iA@OFcK"
+password = os.env.get("OFFLINE_TWATTER_PASSWD")
+if not password:
+    print("No password provided!  Please set OFFLINE_TWATTER_PASSWD environment variable and try again.")
 
 response = requests.post(login_curl, headers=headers, params={"flow_name": "login"})
 assert response.status_code == 200, f"HTTP Response code {response.status_code}{response.json()}"

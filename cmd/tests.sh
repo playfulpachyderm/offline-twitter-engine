@@ -5,9 +5,6 @@ set -x
 
 PS4='+(${BASH_SOURCE}:${LINENO}): '
 
-env
-
-
 FAKE_VERSION="1.100.3489"
 ./compile.sh $FAKE_VERSION
 
