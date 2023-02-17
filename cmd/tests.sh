@@ -5,6 +5,9 @@ set -x
 
 PS4='+(${BASH_SOURCE}:${LINENO}): '
 
+env
+
+
 FAKE_VERSION="1.100.3489"
 ./compile.sh $FAKE_VERSION
 
@@ -300,8 +303,7 @@ tw unfollow cernovich
 test "$(sqlite3 twitter.db "select count(*) from users where is_followed = 1")" = "0"
 
 # Testing login
-# TODO authentication: use an environment var for the password
-tw login offline_twatter S1pKIW#eRT016iA@OFcK
+tw login offline_twatter "$OFFLINE_TWATTER_PASSWD"
 test -f Offline_Twatter.session
 test "$(jq .UserHandle Offline_Twatter.session)" = "\"Offline_Twatter\""
 test "$(jq .IsAuthenticated Offline_Twatter.session)" = "true"

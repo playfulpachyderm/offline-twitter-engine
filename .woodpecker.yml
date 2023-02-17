@@ -16,6 +16,8 @@ pipeline:
 
   integration_test:
     image: offline-twitter/go
+    secrets:
+      - offline_twatter_passwd
     commands:
       - cd cmd
       - ./tests.sh
