@@ -107,3 +107,9 @@ v0.1.8
 - Add indexes to tweet content types to improve fetching performance (index `tweet_id`)
 - BUGFIX: can now fetch retweets with "visibility results"
 - BUGFIX: search changed how cursors work at end-of-feed
+
+v0.2.0
+------
+
+- Add index on tweets user_id column to accelerate loading of user feeds
+- Implement login and authenticated requests!

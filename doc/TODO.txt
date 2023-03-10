@@ -55,3 +55,18 @@ TODO implement-custom-unmarshal
 
 TODO twitter-spaces
 - add `is_details_available` flag
+
+TODO authenticated-requests
+- likes tab
+- media tab
+- quote-tweets
+- notifications
+
+TODO post-tweets
+- post tweet
+- liking / replying to / quoting / retweeting a tweet
+
+TODO fetch-DMs
+
+TODO spaces-timestamps-millis
+- spaces timestamps are in milliseconds.  Need to be converted to seconds

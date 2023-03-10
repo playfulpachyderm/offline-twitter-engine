@@ -5,6 +5,10 @@ set -x
 
 PS4='+(${BASH_SOURCE}:${LINENO}): '
 
+if [[ -z "$OFFLINE_TWATTER_PASSWD" ]]; then
+    echo "OFFLINE_TWATTER_PASSWD not set!  Exiting."
+    exit 1
+fi
 FAKE_VERSION="1.100.3489"
 ./compile.sh $FAKE_VERSION
 

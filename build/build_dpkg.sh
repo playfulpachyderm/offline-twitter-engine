@@ -25,7 +25,7 @@ mkdir dpkg_tmp/DEBIAN
 echo "Package: offline-twitter-engine
 Version: $1
 Architecture: all
-Maintainer: me@playfulpachyderm.com
+Maintainer: alex@playfulpachyderm.com
 Installed-Size: 7998
 Depends:
 Section: web
