@@ -188,7 +188,12 @@ func (api *API) LogIn(username string, password string) {
 
 	api.UserHandle = UserHandle(final_result.Subtasks[0].OpenAccount.User.ScreenName)
 
-	dummyURL, err := url.Parse(loginURL)
+	api.update_csrf_token()
+	api.IsAuthenticated = true
+}
+
+func (api *API) update_csrf_token() {
+	dummyURL, err := url.Parse("https://twitter.com/i/api/1.1/onboarding/task.json")
 	if err != nil {
 		panic(err)
 	}
@@ -196,16 +201,12 @@ func (api *API) LogIn(username string, password string) {
 	for _, cookie := range api.Client.Jar.Cookies(dummyURL) {
 		if cookie.Name == "ct0" {
 			api.CSRFToken = cookie.Value
+			return
 		}
 	}
 
-	if api.CSRFToken == "" {
-		panic("No CSRF Token Found")
-	}
-
-	api.IsAuthenticated = true
+	panic("No CSRF Token Found")
 }
-
 func (api *API) do_http_POST(url string, body string, result interface{}) error {
 	req, err := http.NewRequest("POST", url, strings.NewReader(body))
 	if err != nil {
@@ -248,7 +249,7 @@ func (api *API) do_http_POST(url string, body string, result interface{}) error 
 	return nil
 }
 
-func (api API) do_http(url string, cursor string, result interface{}) error {
+func (api *API) do_http(url string, cursor string, result interface{}) error {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return fmt.Errorf("Error initializing HTTP GET request:\n  %w", err)
@@ -290,6 +291,11 @@ func (api API) do_http(url string, cursor string, result interface{}) error {
 	err = json.Unmarshal(body, result)
 	if err != nil {
 		return fmt.Errorf("Error parsing API response:\n  %w", err)
+	}
+
+	if api.IsAuthenticated {
+		// New request has been made, so the cookie will be changed; update the csrf to match
+		api.update_csrf_token()
 	}
 	return nil
 }

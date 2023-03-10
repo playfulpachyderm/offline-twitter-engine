@@ -409,7 +409,7 @@ func get_graphql_user_timeline_url(user_id UserID, cursor string) string {
 /**
  * Get a User feed using the new GraphQL twitter api
  */
-func (api API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response, error) {
+func (api *API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response, error) {
 	url, err := url.Parse(get_graphql_user_timeline_url(user_id, cursor))
 	if err != nil {
 		panic(err)
@@ -435,7 +435,7 @@ func (api API) GetLikesFor(user_id UserID, cursor string) (APIV2Response, error)
  * - response: an "out" parameter; the APIV2Response that tweets, RTs and users will be appended to
  * - min_tweets: the desired minimum amount of tweets to get
  */
-func (api API) GetMoreTweetsFromGraphqlFeed(user_id UserID, response *APIV2Response, min_tweets int) error {
+func (api *API) GetMoreTweetsFromGraphqlFeed(user_id UserID, response *APIV2Response, min_tweets int) error {
 	// TODO user-feed-infinite-fetch: what if you reach the end of the user's timeline?  Might loop
 	// forever getting no new tweets
 	last_response := response
