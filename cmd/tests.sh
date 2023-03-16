@@ -319,6 +319,9 @@ test "$(sqlite3 twitter.db "select count(*) from tweets where id = 1562714727968
 tw --session Offline_Twatter fetch_tweet_only https://twitter.com/PandasAndVidya/status/1562714727968428032
 test "$(sqlite3 twitter.db "select count(*) from tweets where id = 156271472796842803")" == "0"
 
+# Test that you can pass a session with the `.session` file extension too
+tw --session Offline_Twatter.session list_followed > /dev/null  # Dummy operation
+
 # TODO: Maybe this file should be broken up into multiple test scripts
 
 echo -e "\033[32mAll tests passed.  Finished successfully.\033[0m"

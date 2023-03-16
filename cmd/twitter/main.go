@@ -6,6 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/term"
 	"os"
+	"strings"
 	"syscall"
 
 	"offline_twitter/persistence"
@@ -94,6 +95,10 @@ func main() {
 	}
 
 	if *session_name != "" {
+		if strings.HasSuffix(*session_name, ".session") {
+			// Lop off the ".session" suffix (allows using `--session asdf.session` which lets you tab-autocomplete at command line)
+			*session_name = (*session_name)[:len(*session_name)-8]
+		}
 		scraper.InitApi(profile.LoadSession(scraper.UserHandle(*session_name)))
 		// fmt.Printf("Operating as user: @%s\n", scraper.the_api.UserHandle)
 	} else {
