@@ -206,41 +206,47 @@ create index if not exists index_likes_tweet_id on likes (tweet_id);
 create table fake_user_sequence(latest_fake_id integer not null);
 insert into fake_user_sequence values(0x4000000000000000);
 
-create table conversations (rowid integer primary key,
-    conversation_id text unique not null check(typeof(id) = 'text'),
+create table chat_room (rowid integer primary key,
+    id text unique not null,
     type text not null,
-    sort_event_id int,
-    sort_timestamp int,
-    foreign key(participants) references users(id)
-    nsfw boolean not null,
-    notifications_disabled boolean not null,
-    mention_notifications_disabled boolean not null,
-    last_read_event_id int not null unique,
-    read_only boolean not null,
-    trusted boolean not null,
-    low_quality boolean not null,
-    muted boolean not null,
-)
-
-create table messages (rowid integer primary key,
-    id integer unique not null check(typeof(id) = 'integer'),
-    time integer not null,
-    request_id integer not null,
-    foreign key(conversation_id) references conversations(id)
-    foreign key(recipient_id) references users(id)
-    foreign key(sender_id) references users(id)
-    text text not null
-    foreign key(message_reactions) references message_reactions(id)
+    last_messaged_at integer not null,
+    is_nsfw boolean not null
 );
 
-create table message_reactions (rowid integer primary key,
+create table chat_room_participants(rowid integer primary key,
+    chat_room_id text not null,
+    user_id integer not null,
+    last_read_event_id integer not null,
+    is_chat_settings_valid boolean not null default 0,
+    is_notifications_disabled boolean not null,
+    is_mention_notifications_disabled boolean not null,
+    is_read_only boolean not null,
+    is_trusted boolean not null,
+    is_muted boolean not null,
+    status text not null,
+    unique(chat_room_id, user_id)
+);
+
+create table chat_messages (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
-    time integer not null,
+    conversation_id text not null,
+    sender_id integer not null,
+    sent_at integer not null,
+    request_id text not null,
+    text text not null,
     foreign key(conversation_id) references conversations(id)
-    foreign key(message_id) references messages(id)
-    reaction_key text not null,
     foreign key(sender_id) references users(id)
 )
+
+create table chat_message_reactions (rowid integer primary key,
+    id integer unique not null check(typeof(id) = 'integer'),
+    message_id integer not null,
+    sender_id integer not null,
+    sent_at integer not null,
+    emoji text not null check (length(emoji) = 1),
+    foreign key(message_id) references messages(id)
+    foreign key(sender_id) references users(id)
+);
 
 create table database_version(rowid integer primary key,
     version_number integer not null unique
