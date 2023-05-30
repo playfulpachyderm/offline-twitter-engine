@@ -53,3 +53,22 @@ curl \
     -H "Authorization: Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA" \
     -H "X-Guest-Token: 1591520847784706050" \
     "https://twitter.com/i/api/graphql/Ha9BKBF0uAz9d4-lz0jnYA/AudioSpaceById?variables=%7B%22id%22%3A%221BdxYypQzBgxX%22%2C%22isMetatagsQuery%22%3Afalse%2C%22withSuperFollowsUserFields%22%3Atrue%2C%22withDownvotePerspective%22%3Afalse%2C%22withReactionsMetadata%22%3Afalse%2C%22withReactionsPerspective%22%3Afalse%2C%22withSuperFollowsTweetFields%22%3Atrue%2C%22withReplays%22%3Atrue%7D&features=%7B%22spaces_2022_h2_clipping%22%3Atrue%2C%22spaces_2022_h2_spaces_communities%22%3Atrue%2C%22responsive_web_twitter_blue_verified_badge_is_enabled%22%3Atrue%2C%22verified_phone_label_enabled%22%3Afalse%2C%22tweetypie_unmention_optimization_enabled%22%3Atrue%2C%22responsive_web_uc_gql_enabled%22%3Atrue%2C%22vibe_api_enabled%22%3Atrue%2C%22responsive_web_edit_tweet_api_enabled%22%3Atrue%2C%22graphql_is_translatable_rweb_tweet_is_translatable_enabled%22%3Atrue%2C%22standardized_nudges_misinfo%22%3Atrue%2C%22tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled%22%3Afalse%2C%22responsive_web_graphql_timeline_navigation_enabled%22%3Atrue%2C%22interactive_text_enabled%22%3Atrue%2C%22responsive_web_text_conversations_enabled%22%3Afalse%2C%22responsive_web_enhance_cards_enabled%22%3Atrue%7D"
+
+
+#
+# send a message
+curl 'https://twitter.com/i/api/1.1/dm/new2.json?ext=mediaColor%2CaltText%2CmediaStats%2ChighlightedLabel%2ChasNftAvatar%2CvoiceInfo%2CbirdwatchPivot%2Cenrichments%2CsuperFollowMetadata%2CunmentionInfo%2CeditControl%2Cvibe&include_ext_alt_text=true&include_ext_limited_action_results=false&include_reply_count=1&tweet_mode=extended&include_ext_views=true&include_groups=true&include_inbox_timelines=true&include_ext_media_color=true&supports_reactions=true' \
+  -H 'authorization: Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA' \
+  --data-raw '{"conversation_id":"1458284524761075714-1648469647187124225","recipient_ids":false,"request_id":"e9795640-fe77-11ed-8430-3b5d1c154555","text":"ignore this","cards_platform":"Web-12","include_cards":1,"include_quote_count":true,"dm_users":false}' \
+  --compressed ;
+
+# 
+# Fetch snapshot of messages
+curl 'https://twitter.com/i/api/1.1/dm/conversation/1458284524761075714-1648469647187124225.json?max_id=1663307019661574149&context=FETCH_DM_CONVERSATION_HISTORY&include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&include_ext_has_nft_avatar=1&include_ext_is_blue_verified=1&include_ext_verified_type=1&include_ext_profile_image_shape=1&skip_status=1&dm_secret_conversations_enabled=false&krs_registration_enabled=true&cards_platform=Web-12&include_cards=1&include_ext_alt_text=true&include_ext_limited_action_results=false&include_quote_count=true&include_reply_count=1&tweet_mode=extended&include_ext_views=true&dm_users=false&include_groups=true&include_inbox_timelines=true&include_ext_media_color=true&supports_reactions=true&include_conversation_info=true&ext=mediaColor%2CaltText%2CmediaStats%2ChighlightedLabel%2ChasNftAvatar%2CvoiceInfo%2CbirdwatchPivot%2Cenrichments%2CsuperFollowMetadata%2CunmentionInfo%2CeditControl%2Cvibe' \
+-H 'authorization: Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA' \
+-H 'cookie: kdt=uiBKvHgG2m5hFLQc8ZU8XsWOWM25MqaMKJJEb3oE; lang=en; lv-uid=AAAAEICX4yaMhNgtfux4BknjQW7rGOkl2l0_MGnFIKDnNIRlbQn9Ji-kab-WgufG; dnt=1; auth_multi="1590450335315021824:c018f82b02685aaefee2be4ce1b18c35eaee483b"; auth_token=3dd34d00d684eea1645df3dafd0c728464bc284c; guest_id=v1%3A168539432661461192; ct0=ba56cf7397b4a071f491b73e60c643829e55f37a26537ba34e96dba5419ad9a9b9f4dba81a19a4a4a0468c6bebc004e0d08a41fc90b06568c6c1712ede38ffb0d919c0c39bc695ceb4a2dc8190cf3936; twid=u%3D1648469647187124225;"' \
+-H 'x-client-uuid: d195047c-6532-40a3-b494-957f4fd2ab3d' \
+-H 'x-twitter-active-user: yes' \
+-H 'x-twitter-auth-type: OAuth2Session' \
+-H 'x-twitter-client-language: en' \
+--compressed
