@@ -206,6 +206,42 @@ create index if not exists index_likes_tweet_id on likes (tweet_id);
 create table fake_user_sequence(latest_fake_id integer not null);
 insert into fake_user_sequence values(0x4000000000000000);
 
+create table conversations (rowid integer primary key,
+    conversation_id text unique not null check(typeof(id) = 'text'),
+    type text not null,
+    sort_event_id int,
+    sort_timestamp int,
+    foreign key(participants) references users(id)
+    nsfw boolean not null,
+    notifications_disabled boolean not null,
+    mention_notifications_disabled boolean not null,
+    last_read_event_id int not null unique,
+    read_only boolean not null,
+    trusted boolean not null,
+    low_quality boolean not null,
+    muted boolean not null,
+)
+
+create table messages (rowid integer primary key,
+    id integer unique not null check(typeof(id) = 'integer'),
+    time integer not null,
+    request_id integer not null,
+    foreign key(conversation_id) references conversations(id)
+    foreign key(recipient_id) references users(id)
+    foreign key(sender_id) references users(id)
+    text text not null
+    foreign key(message_reactions) references message_reactions(id)
+);
+
+create table message_reactions (rowid integer primary key,
+    id integer unique not null check(typeof(id) = 'integer'),
+    time integer not null,
+    foreign key(conversation_id) references conversations(id)
+    foreign key(message_id) references messages(id)
+    reaction_key text not null,
+    foreign key(sender_id) references users(id)
+)
+
 create table database_version(rowid integer primary key,
     version_number integer not null unique
 );
