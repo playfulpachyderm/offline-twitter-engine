@@ -20,7 +20,7 @@ headers = {
 login_curl = "https://twitter.com/i/api/1.1/onboarding/task.json"
 
 username = "offline_twatter"
-password = os.env.get("OFFLINE_TWATTER_PASSWD")
+password = os.environ.get("OFFLINE_TWATTER_PASSWD")
 if not password:
     print("No password provided!  Please set OFFLINE_TWATTER_PASSWD environment variable and try again.")
 
@@ -122,9 +122,17 @@ likes_url = 'https://twitter.com/i/api/graphql/2Z6LYO4UTM4BnWjaNCod6g/Likes?vari
 
 feed_url = "https://twitter.com/i/api/graphql/CwLU7qTfeu0doqhSr6tW4A/UserTweetsAndReplies?variables=%7B%22userId%22%3A%221458284524761075714%22%2C%22count%22%3A40%2C%22includePromotedContent%22%3Afalse%2C%22withCommunity%22%3Atrue%2C%22withSuperFollowsUserFields%22%3Atrue%2C%22withBirdwatchPivots%22%3Afalse%2C%22withDownvotePerspective%22%3Afalse%2C%22withReactionsMetadata%22%3Afalse%2C%22withReactionsPerspective%22%3Afalse%2C%22withSuperFollowsTweetFields%22%3Atrue%2C%22withVoice%22%3Atrue%2C%22withV2Timeline%22%3Afalse%2C%22__fs_interactive_text%22%3Afalse%2C%22__fs_dont_mention_me_view_api_enabled%22%3Afalse%7D"
 
-likes_response = requests.get(feed_url, headers=likes_headers, cookies=cookie_dict)
-assert likes_response.status_code == 200, f"HTTP Response code {likes_response.status_code}: {likes_response.text}"
+#likes_response = requests.get(feed_url, headers=likes_headers, cookies=cookie_dict)
+#assert likes_response.status_code == 200, f"HTTP Response code {likes_response.status_code}: {likes_response.text}"
 
 
-print(likes_response)
-print(likes_response.json())
+#print(likes_response)
+#print(likes_response.json())
+
+dm_url = "https://twitter.com/i/api/1.1/dm/inbox_initial_state.json?nsfw_filtering_enabled=false&filter_low_quality=true&include_quality=all&include_profile_interstitial_type=1&include_blocking=1&include_blocked_by=1&include_followed_by=1&include_want_retweets=1&include_mute_edge=1&include_can_dm=1&include_can_media_tag=1&include_ext_has_nft_avatar=1&include_ext_is_blue_verified=1&include_ext_verified_type=1&include_ext_profile_image_shape=1&skip_status=1&dm_secret_conversations_enabled=false&krs_registration_enabled=true&cards_platform=Web-12&include_cards=1&include_ext_alt_text=true&include_ext_limited_action_results=false&include_quote_count=true&include_reply_count=1&tweet_mode=extended&include_ext_views=true&dm_users=true&include_groups=true&include_inbox_timelines=true&include_ext_media_color=true&supports_reactions=true&include_ext_edit_control=true&ext=mediaColor%2CaltText%2CmediaStats%2ChighlightedLabel%2ChasNftAvatar%2CvoiceInfo%2CbirdwatchPivot%2Cenrichments%2CsuperFollowMetadata%2CunmentionInfo%2CeditControl%2Cvibe"
+
+dm_response = requests.get(dm_url, headers=likes_headers.copy(), cookies=cookie_dict)
+assert dm_response.status_code == 200, f"HTTP Response code {dm_response.status_code}: {dm_response.text}"
+
+print(dm_response)
+print(dm_response.json())
