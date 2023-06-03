@@ -51,3 +51,6 @@ pipeline:
       - ./build_dpkg.sh $version
       - scp offline-twitter-engine_$${version}_all.deb aptrepo@apt.playfulpachyderm.com:/apt-repo/test-repo
       - ssh aptrepo@apt.playfulpachyderm.com "cd ~/test-repo && ./update.sh"
+
+depends_on:
+  - build-docker
