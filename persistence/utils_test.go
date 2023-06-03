@@ -166,8 +166,8 @@ func create_stable_tweet() scraper.Tweet {
 		Images: []scraper.Image{
 			create_image_from_id(-1),
 		},
-		Mentions: []scraper.UserHandle{},
-		Hashtags: []string{},
+		Mentions: scraper.CommaSeparatedList{},
+		Hashtags: scraper.CommaSeparatedList{},
 		Polls: []scraper.Poll{
 			create_poll_from_id(-1),
 		},
@@ -257,9 +257,9 @@ func create_dummy_tweet() scraper.Tweet {
 		Videos:         []scraper.Video{vid},
 		Urls:           []scraper.Url{url1, url2},
 		Images:         []scraper.Image{img1, img2},
-		Mentions:       []scraper.UserHandle{"mention1", "mention2"},
-		ReplyMentions:  []scraper.UserHandle{"replymention1", "replymention2"},
-		Hashtags:       []string{"hash1", "hash2"},
+		Mentions:       scraper.CommaSeparatedList{"mention1", "mention2"},
+		ReplyMentions:  scraper.CommaSeparatedList{"replymention1", "replymention2"},
+		Hashtags:       scraper.CommaSeparatedList{"hash1", "hash2"},
 		Polls:          []scraper.Poll{poll},
 		Spaces:         []scraper.Space{space},
 		SpaceID:        space_id,
@@ -278,9 +278,9 @@ func create_dummy_tombstone() scraper.Tweet {
 		UserID:        -1,
 		TombstoneType: "deleted",
 		IsStub:        true,
-		Mentions:      []scraper.UserHandle{},
-		ReplyMentions: []scraper.UserHandle{},
-		Hashtags:      []string{},
+		Mentions:      scraper.CommaSeparatedList{},
+		ReplyMentions: scraper.CommaSeparatedList{},
+		Hashtags:      scraper.CommaSeparatedList{},
 		Spaces:        []scraper.Space{},
 	}
 }

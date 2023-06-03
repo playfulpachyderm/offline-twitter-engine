@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"database/sql/driver"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"strings"
@@ -9,44 +10,64 @@ import (
 	"offline_twitter/terminal_utils"
 )
 
-const DEFAULT_MAX_REPLIES_EAGER_LOAD = 50
 
 type TweetID int64
 
+type CommaSeparatedList []string
+
+func (l *CommaSeparatedList) Scan(src interface{}) error {
+	*l = CommaSeparatedList{}
+	switch src.(type) {
+	case string:
+		for _, v := range strings.Split(src.(string), ",") {
+			if v != "" {
+				*l = append(*l, v)
+			}
+		}
+	default:
+		panic("Should be a string")
+	}
+	return nil
+}
+func (l CommaSeparatedList) Value() (driver.Value, error) {
+	return strings.Join(l, ","), nil
+}
+
 type Tweet struct {
-	ID             TweetID
-	UserID         UserID
+	ID             TweetID    `db:"id"`
+	UserID         UserID     `db:"user_id"`
 	UserHandle     UserHandle // For processing tombstones
 	User           *User
-	Text           string
-	PostedAt       Timestamp
-	NumLikes       int
-	NumRetweets    int
-	NumReplies     int
-	NumQuoteTweets int
-	InReplyToID    TweetID
-	QuotedTweetID  TweetID
+	Text           string    `db:"text"`
+	IsExpandable   bool      `db:"is_expandable"`
+	PostedAt       Timestamp `db:"posted_at"`
+	NumLikes       int       `db:"num_likes"`
+	NumRetweets    int       `db:"num_retweets"`
+	NumReplies     int       `db:"num_replies"`
+	NumQuoteTweets int       `db:"num_quote_tweets"`
+	InReplyToID    TweetID   `db:"in_reply_to_id"`
+	QuotedTweetID  TweetID   `db:"quoted_tweet_id"`
 
 	Images        []Image
 	Videos        []Video
-	Mentions      []UserHandle
-	ReplyMentions []UserHandle
-	Hashtags      []string
 	Urls          []Url
 	Polls         []Poll
+	Mentions      CommaSeparatedList `db:"mentions"`
+	ReplyMentions CommaSeparatedList `db:"reply_mentions"`
+	Hashtags      CommaSeparatedList `db:"hashtags"`
 
 	// TODO get-rid-of-spaces: Might be good to get rid of `Spaces`.  Only used in APIv1 I think.
 	// A first-step would be to delete the Spaces after pulling them out of a Tweet into the Trove
 	// in ParseTweetResponse.  Then they will only be getting saved once rather than twice.
 	Spaces  []Space
-	SpaceID SpaceID
+	SpaceID SpaceID `db:"space_id"`
 
-	TombstoneType string
-	IsStub        bool
+	TombstoneType string `db:"tombstone_type"`
+	IsStub        bool   `db:"is_stub"`
 
-	IsContentDownloaded   bool
-	IsConversationScraped bool
-	LastScrapedAt         Timestamp
+	IsContentDownloaded   bool      `db:"is_content_downloaded"`
+	IsConversationScraped bool      `db:"is_conversation_scraped"`
+	LastScrapedAt         Timestamp `db:"last_scraped_at"`
 }
 
 func (t Tweet) String() string {
@@ -150,14 +171,14 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 
 	// Process `@` mentions and reply-mentions
 	for _, mention := range apiTweet.Entities.Mentions {
-		ret.Mentions = append(ret.Mentions, UserHandle(mention.UserName))
+		ret.Mentions = append(ret.Mentions, mention.UserName)
 	}
 	for _, mention := range strings.Split(apiTweet.Entities.ReplyMentions, " ") {
 		if mention != "" {
 			if mention[0] != '@' {
 				panic(fmt.Errorf("Unknown ReplyMention value %q:\n  %w", apiTweet.Entities.ReplyMentions, EXTERNAL_API_ERROR))
 			}
-			ret.ReplyMentions = append(ret.ReplyMentions, UserHandle(mention[1:]))
+			ret.ReplyMentions = append(ret.ReplyMentions, mention[1:])
 		}
 	}
 

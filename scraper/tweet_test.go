@@ -35,7 +35,7 @@ func TestParseSingleTweet(t *testing.T) {
 	assert.Equal("The fact that @michaelmalice new book ‘The Anarchist Handbook’ is just absolutely destroying on the charts is the "+
 		"largest white pill I’ve swallowed in years.", tweet.Text)
 	assert.Len(tweet.Mentions, 1)
-	assert.Contains(tweet.Mentions, UserHandle("michaelmalice"))
+	assert.Contains(tweet.Mentions, "michaelmalice")
 	assert.Empty(tweet.Urls)
 	assert.Equal(int64(1621639105), tweet.PostedAt.Unix())
 	assert.Zero(tweet.QuotedTweetID)
@@ -179,7 +179,7 @@ func TestTweetWithLotsOfReplyMentions(t *testing.T) {
 	tweet := load_tweet_from_file("test_responses/single_tweets/tweet_with_at_mentions_in_front.json")
 	assert.Len(tweet.ReplyMentions, 4)
 
-	for i, v := range []UserHandle{"rob_mose", "primalpoly", "jmasseypoet", "SpaceX"} {
+	for i, v := range []string{"rob_mose", "primalpoly", "jmasseypoet", "SpaceX"} {
 		assert.Equal(v, tweet.ReplyMentions[i])
 	}
 }

@@ -125,7 +125,7 @@ func TestAPIV2ParseTweetWithQuotedTweet(t *testing.T) {
 	assert.Equal(TweetID(1485689207435710464), quoted_tweet.InReplyToID)
 	assert.Equal(TweetID(0), quoted_tweet.QuotedTweetID)
 	assert.Equal(1, len(quoted_tweet.ReplyMentions))
-	assert.Contains(quoted_tweet.ReplyMentions, UserHandle("michaelmalice"))
+	assert.Contains(quoted_tweet.ReplyMentions, "michaelmalice")
 	assert.Equal(1, quoted_tweet.NumReplies)
 	assert.Equal(12, quoted_tweet.NumLikes)
 

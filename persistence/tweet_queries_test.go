@@ -77,6 +77,10 @@ func TestNoWorseningTweet(t *testing.T) {
 	tweet.IsConversationScraped = true
 	tweet.LastScrapedAt = scraper.TimestampFromUnix(1000)
 	tweet.Text = "Yes text"
+	tweet.NumLikes = 10
+	tweet.NumRetweets = 11
+	tweet.NumQuoteTweets = 12
+	tweet.NumReplies = 13
 
 	// Save the tweet
 	err := profile.SaveTweet(tweet)
@@ -90,6 +94,10 @@ func TestNoWorseningTweet(t *testing.T) {
 	tweet.Text = ""
 	err = profile.SaveTweet(tweet)
 	require.NoError(err)
+	tweet.NumLikes = 0
+	tweet.NumRetweets = 0
+	tweet.NumQuoteTweets = 0
+	tweet.NumReplies = 0
 
 	// Reload the tweet
 	new_tweet, err := profile.GetTweetById(tweet.ID)
@@ -100,6 +108,10 @@ func TestNoWorseningTweet(t *testing.T) {
 	assert.True(new_tweet.IsConversationScraped, "Should have preserved is-conversation-scraped status")
 	assert.Equal(int64(1000), new_tweet.LastScrapedAt.Unix(), "Should have preserved last-scraped-at time")
 	assert.Equal(new_tweet.Text, "Yes text", "Text should not get clobbered if it becomes unavailable")
+	assert.Equal(10, new_tweet.NumLikes)
+	assert.Equal(11, new_tweet.NumRetweets)
+	assert.Equal(12, new_tweet.NumQuoteTweets)
+	assert.Equal(13, new_tweet.NumReplies)
 }
 
 /**
