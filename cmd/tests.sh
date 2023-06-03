@@ -319,7 +319,7 @@ tw --session Offline_Twatter.session list_followed > /dev/null  # Dummy operatio
 
 
 # Test search
-tw --session Offline_Twatter -n 1 search "from:michaelmalice constitution"  # TODO: remove `-n 1` once the authenticated cursor bug is fixed
+tw --session Offline_Twatter search "from:michaelmalice constitution"
 test $(sqlite3 twitter.db "select count(*) from tweets where user_id = 44067298 and text like '%constitution%'") -gt "30"  # Not sure exactly how many
 
 

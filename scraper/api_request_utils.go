@@ -396,7 +396,7 @@ func (api API) GetSpace(id SpaceID) (SpaceResponse, error) {
 	return result, err
 }
 
-func (api API) GetTweet(id TweetID, cursor string) (TweetResponse, error) {
+func (api *API) GetTweet(id TweetID, cursor string) (TweetResponse, error) {
 	url, err := url.Parse(fmt.Sprintf("%s%d.json", API_CONVERSATION_BASE_PATH, id))
 	if err != nil {
 		panic(err)
@@ -414,7 +414,7 @@ func (api API) GetTweet(id TweetID, cursor string) (TweetResponse, error) {
 }
 
 // Resend the request to get more replies if necessary
-func (api API) GetMoreReplies(tweet_id TweetID, response *TweetResponse, max_replies int) error {
+func (api *API) GetMoreReplies(tweet_id TweetID, response *TweetResponse, max_replies int) error {
 	last_response := response
 	for last_response.GetCursor() != "" && len(response.GlobalObjects.Tweets) < max_replies {
 		fresh_response, err := api.GetTweet(tweet_id, last_response.GetCursor())
@@ -466,7 +466,7 @@ func (api API) GetUser(handle UserHandle) (APIUser, error) {
 	return result.ConvertToAPIUser(), err
 }
 
-func (api API) Search(query string, cursor string) (TweetResponse, error) {
+func (api *API) Search(query string, cursor string) (TweetResponse, error) {
 	url, err := url.Parse("https://twitter.com/i/api/2/search/adaptive.json")
 	if err != nil {
 		panic(err)
@@ -487,7 +487,7 @@ func (api API) Search(query string, cursor string) (TweetResponse, error) {
 	return result, err
 }
 
-func (api API) GetMoreTweetsFromSearch(query string, response *TweetResponse, max_results int) error {
+func (api *API) GetMoreTweetsFromSearch(query string, response *TweetResponse, max_results int) error {
 	last_response := response
 	for last_response.GetCursor() != "" && len(response.GlobalObjects.Tweets) < max_results {
 		fresh_response, err := api.Search(query, last_response.GetCursor())
