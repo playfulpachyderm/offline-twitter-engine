@@ -238,15 +238,15 @@ func GetTweet(id TweetID) (Tweet, error) {
  *
  * returns: the tweet, list of its replies and context, and users associated with those replies
  */
-func GetTweetFull(id TweetID) (trove TweetTrove, err error) {
+func GetTweetFull(id TweetID, how_many int) (trove TweetTrove, err error) {
 	tweet_response, err := the_api.GetTweet(id, "")
 	if err != nil {
 		err = fmt.Errorf("Error getting tweet: %d\n  %w", id, err)
 		return
 	}
-	if len(tweet_response.GlobalObjects.Tweets) < DEFAULT_MAX_REPLIES_EAGER_LOAD &&
+	if len(tweet_response.GlobalObjects.Tweets) < how_many &&
 		tweet_response.GetCursor() != "" {
-		err = the_api.GetMoreReplies(id, &tweet_response, DEFAULT_MAX_REPLIES_EAGER_LOAD)
+		err = the_api.GetMoreReplies(id, &tweet_response, how_many)
 		if err != nil {
 			err = fmt.Errorf("Error getting more tweet replies: %d\n  %w", id, err)
 			return

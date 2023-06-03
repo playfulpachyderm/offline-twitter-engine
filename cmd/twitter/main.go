@@ -129,7 +129,7 @@ func main() {
 	case "fetch_tweet_only":
 		fetch_tweet_only(target)
 	case "fetch_tweet":
-		fetch_tweet_conversation(target)
+		fetch_tweet_conversation(target, *how_many)
 	case "get_user_tweets":
 		fetch_user_feed(target, *how_many)
 	case "get_user_tweets_all":
@@ -137,7 +137,7 @@ func main() {
 	case "download_tweet_content":
 		download_tweet_content(target)
 	case "search":
-		search(target)
+		search(target, *how_many)
 	case "follow":
 		follow_user(target, true)
 	case "unfollow":
@@ -230,13 +230,13 @@ func fetch_tweet_only(tweet_identifier string) {
  * args:
  * - tweet_url: e.g., "https://twitter.com/michaelmalice/status/1395882872729477131"
  */
-func fetch_tweet_conversation(tweet_identifier string) {
+func fetch_tweet_conversation(tweet_identifier string, how_many int) {
 	tweet_id, err := extract_id_from(tweet_identifier)
 	if err != nil {
 		die(err.Error(), false, -1)
 	}
 
-	trove, err := scraper.GetTweetFull(tweet_id)
+	trove, err := scraper.GetTweetFull(tweet_id, how_many)
 	if err != nil {
 		die(err.Error(), false, -1)
 	}
@@ -293,8 +293,8 @@ func download_user_content(handle scraper.UserHandle) {
 	}
 }
 
-func search(query string) {
-	trove, err := scraper.Search(query, 1000)
+func search(query string, how_many int) {
+	trove, err := scraper.Search(query, how_many)
 	if err != nil {
 		die(fmt.Sprintf("Error scraping search results: %s", err.Error()), false, -100)
 	}

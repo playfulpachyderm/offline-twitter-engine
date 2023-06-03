@@ -270,11 +270,6 @@ test $(sqlite3 twitter.db "select is_id_fake from users where handle = '_selfopt
 test $(sqlite3 twitter.db "select count(*) from tweets where user_id = (select id from users where handle = '_selfoptimizer')") = 1
 
 
-# Test search
-tw search "from:michaelmalice constitution"
-test $(sqlite3 twitter.db "select count(*) from tweets where user_id = 44067298 and text like '%constitution%'") -gt "30"  # Not sure exactly how many
-
-
 # Test fetching a banned user
 rm profile_images/default_profile.png
 tw fetch_user nancytracker
@@ -321,6 +316,12 @@ test "$(sqlite3 twitter.db "select count(*) from tweets where id = 1562714727968
 
 # Test that you can pass a session with the `.session` file extension too
 tw --session Offline_Twatter.session list_followed > /dev/null  # Dummy operation
+
+
+# Test search
+tw --session Offline_Twatter -n 1 search "from:michaelmalice constitution"  # TODO: remove `-n 1` once the authenticated cursor bug is fixed
+test $(sqlite3 twitter.db "select count(*) from tweets where user_id = 44067298 and text like '%constitution%'") -gt "30"  # Not sure exactly how many
+
 
 # TODO: Maybe this file should be broken up into multiple test scripts
 
