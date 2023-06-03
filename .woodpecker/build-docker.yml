@@ -7,3 +7,5 @@ pipeline:
     commands:
       - cd .woodpecker/docker
       - docker build -f go.dockerfile -t test-image .
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
