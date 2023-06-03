@@ -25,7 +25,10 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
         insert into tweets (id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id,
                             quoted_tweet_id, mentions, reply_mentions, hashtags, space_id, tombstone_type, is_stub, is_content_downloaded,
                             is_conversation_scraped, last_scraped_at)
-        values (:id, :user_id, :text, :posted_at, :num_likes, :num_retweets, :num_replies, :num_quote_tweets, :in_reply_to_id, :quoted_tweet_id, :mentions, :reply_mentions, :hashtags, nullif(:space_id, ''), (select rowid from tombstone_types where short_name=:tombstone_type), :is_stub, :is_content_downloaded, :is_conversation_scraped, :last_scraped_at)
+        values (:id, :user_id, :text, :posted_at, :num_likes, :num_retweets, :num_replies, :num_quote_tweets, :in_reply_to_id,
+                :quoted_tweet_id, :mentions, :reply_mentions, :hashtags, nullif(:space_id, ''),
+                (select rowid from tombstone_types where short_name=:tombstone_type), :is_stub, :is_content_downloaded,
+                :is_conversation_scraped, :last_scraped_at)
             on conflict do update
            set text=(case
                      when is_stub then
@@ -115,8 +118,8 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
 	var t scraper.Tweet
 	err := db.Get(&t, `
         select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
-               mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id, ifnull(tombstone_types.short_name, "") tombstone_type, is_stub,
-               is_content_downloaded, is_conversation_scraped, last_scraped_at
+               mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id, ifnull(tombstone_types.short_name, "") tombstone_type,
+               is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at
           from tweets left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
          where id = ?
     `, id)

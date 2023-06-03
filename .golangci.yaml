@@ -341,13 +341,34 @@ linters-settings:
 
 
   depguard:
-    list-type: blacklist
-    include-go-root: true
-    packages:
-      - io/ioutil
-    packages-with-error-message:
-      # specify an error message to output when a blacklisted package is used
-      - io/ioutil: "replace with the matching functions from `io` or `os` packages"
+    # Rules to apply.
+    #
+    # Variables:
+    # - File Variables
+    #   you can still use and exclamation mark ! in front of a variable to say not to use it.
+    #   Example !$test will match any file that is not a go test file.
+    #
+    #   `$all` - matches all go files
+    #   `$test` - matches all go test files
+    #
+    # - Package Variables
+    #
+    #  `$gostd` - matches all of go's standard library (Pulled from `GOROOT`)
+    #
+    # Default: no rules.
+    rules:
+      # Name of a rule.
+      main:
+        # List of allowed packages.
+        # allow:
+        #   - $gostd
+        #   - $all
+        # Packages that are not allowed where the value is a suggestion.
+        deny:
+          - pkg: io/ioutil
+            desc: "replace with the matching functions from `io` or `os` packages"
+          - pkg: "github.com/pkg/errors"
+            desc: Should be replaced by standard lib errors package
 
 #   ifshort:
 #     # Maximum length of variable declaration measured in number of lines, after which linter won't suggest using short syntax.

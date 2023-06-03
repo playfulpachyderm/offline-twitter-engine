@@ -17,9 +17,9 @@ type CommaSeparatedList []string
 
 func (l *CommaSeparatedList) Scan(src interface{}) error {
 	*l = CommaSeparatedList{}
-	switch src.(type) {
+	switch src := src.(type) {
 	case string:
-		for _, v := range strings.Split(src.(string), ",") {
+		for _, v := range strings.Split(src, ",") {
 			if v != "" {
 				*l = append(*l, v)
 			}
