@@ -6,6 +6,6 @@ pipeline:
     image: docker
     commands:
       - cd .woodpecker/docker
-      - docker build -f go.dockerfile -t test-image .
+      - docker build -f go.dockerfile -t offline-twitter/go .
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
