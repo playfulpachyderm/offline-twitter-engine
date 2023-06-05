@@ -10,7 +10,6 @@ import (
 	"offline_twitter/terminal_utils"
 )
 
-
 type TweetID int64
 
 type CommaSeparatedList []string
