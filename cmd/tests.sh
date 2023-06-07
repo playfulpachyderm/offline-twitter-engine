@@ -256,12 +256,23 @@ test $(find link_preview_images | wc -l) = $initial_link_preview_images_count  #
 # test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454521424144654344") = 0  # TODO this guy got banned
 # test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454522147750260742") = 1
 
+
 # Test updating a tombstone (e.g., the QT-ing user is blocked but acct is not priv)
 tw fetch_tweet https://twitter.com/michaelmalice/status/1479540552081326085
 test "$(sqlite3 twitter.db "select tombstone_type, text from tweets where id = 1479540319410696192")" = "4|"
 
 tw fetch_tweet_only 1479540319410696192  # Should remove the tombstone type and update the text
 test "$(sqlite3 twitter.db "select tombstone_type, text from tweets where id = 1479540319410696192")" = "|Eyyy! Look! Another one on my block list! Well done @michaelmalice, you silck person."
+
+
+# Test no-clobbering of num_likes/num_retweets etc when a tweet gets deleted/tombstoned
+tw fetch_tweet 1489428890783461377  # Quoted tweet
+test "$(sqlite3 twitter.db "select tombstone_type from tweets where id = 1489428890783461377")" = ""  # Should not be tombstoned
+test "$(sqlite3 twitter.db "select num_likes from tweets where id = 1489428890783461377")" -gt "50"  # Should have some likes
+initial_vals=$(sqlite3 twitter.db "select num_likes, num_retweets, num_replies, num_quote_tweets from tweets where id = 1489428890783461377")
+tw fetch_tweet 1489432246452985857  # Quoting tweet
+test "$(sqlite3 twitter.db "select tombstone_type from tweets where id = 1489428890783461377")" -gt "0"  # Should be hidden
+test "$(sqlite3 twitter.db "select num_likes, num_retweets, num_replies, num_quote_tweets from tweets where id = 1489428890783461377")" = "$initial_vals"
 
 
 # Test a tweet thread with a deleted account; should generate a user with a fake ID
