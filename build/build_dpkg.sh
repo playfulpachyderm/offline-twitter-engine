@@ -26,7 +26,7 @@ echo "Package: offline-twitter-engine
 Version: $1
 Architecture: all
 Maintainer: alex@playfulpachyderm.com
-Installed-Size: 7998
+Installed-Size: `du -k dpkg_tmp | tail -n 1 | cut -f 1`
 Depends:
 Section: web
 Priority: optional

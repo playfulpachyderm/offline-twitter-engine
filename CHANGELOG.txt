@@ -113,3 +113,11 @@ v0.2.0
 
 - Add index on tweets user_id column to accelerate loading of user feeds
 - Implement login and authenticated requests!
+
+v0.2.1
+------
+
+- BUGFIX: fix cursors being broken in authenticated sessions
+- BUGFIX: fix stats for likes, RTs, etc. getting erased if a tweet gets deleted or hidden
+- BUGFIX: `fetch_tweet` and `search` subcommands no longer ignore the `-n [number]` flag
+- No longer require ".session" extension for the `--session` flag, can just specify as the user handle

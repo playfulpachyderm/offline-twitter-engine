@@ -70,3 +70,18 @@ TODO fetch-DMs
 
 TODO spaces-timestamps-millis
 - spaces timestamps are in milliseconds.  Need to be converted to seconds
+
+TODO fix-spaces-participants-duplicates
+- It is creating a new copy of the participants every time it gets scraped again
+
+TODO scrape-spaces-participants-admin
+- distinguish whether someone was an admin in the space or not
+
+TODO authenticated-not-fetching-images
+- Images in tweets don't fetch when you're authenticated
+
+TODO tweets-with-italics
+- https://twitter.com/exit_org/status/1656813511572443141
+
+TODO authenticated-only-request-warning
+- warn when attempting to run requests which require authentication without a session active
