@@ -207,6 +207,7 @@ func (api *API) update_csrf_token() {
 
 	panic("No CSRF Token Found")
 }
+
 func (api *API) do_http_POST(url string, body string, result interface{}) error {
 	req, err := http.NewRequest("POST", url, strings.NewReader(body))
 	if err != nil {
@@ -385,18 +386,6 @@ func (api API) GetMoreTweetsFromFeed(user_id UserID, response *TweetResponse, mi
 		fmt.Printf("Have %d tweets, and %d users so far\n", len(response.GlobalObjects.Tweets), len(response.GlobalObjects.Users))
 	}
 	return nil
-}
-
-func (api API) GetSpace(id SpaceID) (SpaceResponse, error) {
-	// TODO: break up this URL into params so it's readable
-	url, err := url.Parse("https://twitter.com/i/api/graphql/Ha9BKBF0uAz9d4-lz0jnYA/AudioSpaceById?variables=%7B%22id%22%3A%22" + string(id) + "%22%2C%22isMetatagsQuery%22%3Afalse%2C%22withSuperFollowsUserFields%22%3Atrue%2C%22withDownvotePerspective%22%3Afalse%2C%22withReactionsMetadata%22%3Afalse%2C%22withReactionsPerspective%22%3Afalse%2C%22withSuperFollowsTweetFields%22%3Atrue%2C%22withReplays%22%3Atrue%7D&features=%7B%22spaces_2022_h2_clipping%22%3Atrue%2C%22spaces_2022_h2_spaces_communities%22%3Atrue%2C%22responsive_web_twitter_blue_verified_badge_is_enabled%22%3Atrue%2C%22verified_phone_label_enabled%22%3Afalse%2C%22tweetypie_unmention_optimization_enabled%22%3Atrue%2C%22responsive_web_uc_gql_enabled%22%3Atrue%2C%22vibe_api_enabled%22%3Atrue%2C%22responsive_web_edit_tweet_api_enabled%22%3Atrue%2C%22graphql_is_translatable_rweb_tweet_is_translatable_enabled%22%3Atrue%2C%22standardized_nudges_misinfo%22%3Atrue%2C%22tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled%22%3Afalse%2C%22responsive_web_graphql_timeline_navigation_enabled%22%3Atrue%2C%22interactive_text_enabled%22%3Atrue%2C%22responsive_web_text_conversations_enabled%22%3Afalse%2C%22responsive_web_enhance_cards_enabled%22%3Atrue%7D") //nolint:lll  // It's a URL, come on
-	if err != nil {
-		panic(err)
-	}
-
-	var result SpaceResponse
-	err = api.do_http(url.String(), "", &result)
-	return result, err
 }
 
 func (api *API) GetTweet(id TweetID, cursor string) (TweetResponse, error) {
