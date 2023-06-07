@@ -120,4 +120,4 @@ v0.2.1
 - BUGFIX: fix cursors being broken in authenticated sessions
 - BUGFIX: fix stats for likes, RTs, etc. getting erased if a tweet gets deleted or hidden
 - BUGFIX: `fetch_tweet` and `search` subcommands no longer ignore the `-n [number]` flag
-- No longer require ".session" extension for the `--session` flag, can just specify as the user handle
+- ".session" extension for the `--session` flag is now optional, allowing tab-autocompletion
