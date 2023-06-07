@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"strings"
@@ -313,20 +314,47 @@ func (api_v2_tweet APIV2Tweet) ToTweetTrove() TweetTrove {
 	return ret
 }
 
+type ItemContent struct {
+	EntryType    string      `json:"entryType"` // TODO: Assert this is always empty; looks like a typo
+	ItemType     string      `json:"itemType"`
+	TweetResults APIV2Result `json:"tweet_results"`
+}
+
+// Wraps InnerAPIV2Entry to implement `json.Unmarshal`.  Does the normal unmarshal but also saves the original JSON.
 type APIV2Entry struct {
+	InnerAPIV2Entry
+	OriginalJSON string
+}
+type InnerAPIV2Entry struct {
 	EntryID   string `json:"entryId"`
 	SortIndex int64  `json:"sortIndex,string"`
 	Content   struct {
-		ItemContent struct {
-			EntryType    string      `json:"entryType"`
-			TweetResults APIV2Result `json:"tweet_results"`
-		} `json:"itemContent"`
+		ItemContent ItemContent `json:"itemContent"`
 
 		// Cursors
 		EntryType  string `json:"entryType"`
 		Value      string `json:"value"`
 		CursorType string `json:"cursorType"`
 	} `json:"content"`
+}
+
+func (e *APIV2Entry) UnmarshalJSON(data []byte) error {
+	err := json.Unmarshal(data, &e.InnerAPIV2Entry)
+	if err != nil {
+		return fmt.Errorf("Error parsing json APIV2Entry:\n  %w", err)
+	}
+	e.OriginalJSON = string(data)
+	return nil
+}
+
+func (e APIV2Entry) ToTweetTrove(ignore_null_entries bool) TweetTrove {
+	defer func() {
+		if obj := recover(); obj != nil {
+			log.Warn(fmt.Sprintf("Panic while decoding entry: %s\n", e.OriginalJSON))
+			panic(obj)
+		}
+	}()
+	return e.Content.ItemContent.TweetResults.ToTweetTrove(ignore_null_entries)
 }
 
 type APIV2Instruction struct {
@@ -390,13 +418,11 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 			continue
 		}
 
-		result := entry.Content.ItemContent.TweetResults
-
-		main_trove := result.ToTweetTrove(true)
+		main_trove := entry.ToTweetTrove(true)
 		ret.MergeWith(main_trove)
 	}
 
-	return ret, nil
+	return ret, nil // TODO: This doesn't need to return an error, it's always nil
 }
 
 func get_graphql_user_timeline_url(user_id UserID, cursor string) string {

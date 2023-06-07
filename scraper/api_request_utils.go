@@ -268,6 +268,9 @@ func (api *API) do_http(url string, cursor string, result interface{}) error {
 		return fmt.Errorf("Error executing HTTP request:\n  %w", err)
 	}
 	defer resp.Body.Close()
+	for header := range req.Header {
+		log.Debug(fmt.Sprintf("    %s: %s\n", header, req.Header.Get(header)))
+	}
 
 	if resp.StatusCode != 200 && resp.StatusCode != 403 {
 		content, err := io.ReadAll(resp.Body)

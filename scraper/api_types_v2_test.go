@@ -618,8 +618,15 @@ func TestAPIV2GetMainInstructionFromFeed(t *testing.T) {
 
 	assert.Equal(len(feed.GetMainInstruction().Entries), 41)
 
+	// Check that they have OriginalJSON filled out
+	for _, entry := range feed.GetMainInstruction().Entries {
+		assert.True(len(entry.OriginalJSON) > 0)
+	}
+
 	// Test that this is a writable version
-	feed.GetMainInstruction().Entries = append(feed.GetMainInstruction().Entries, APIV2Entry{EntryID: "asdf"})
+	feed.GetMainInstruction().Entries = append(feed.GetMainInstruction().Entries, APIV2Entry{
+		InnerAPIV2Entry: InnerAPIV2Entry{EntryID: "asdf"},
+	})
 	assert.Equal(len(feed.GetMainInstruction().Entries), 42)
 	assert.Equal(feed.GetMainInstruction().Entries[41].EntryID, "asdf")
 }
