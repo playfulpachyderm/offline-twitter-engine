@@ -27,6 +27,7 @@ func TestJsonifyApi(t *testing.T) {
 		{Name: "name2", Value: "name2", HttpOnly: true},
 	})
 	api := API{
+		UserID:          UserID(1423),
 		UserHandle:      UserHandle("userhandle"),
 		IsAuthenticated: true,
 		GuestToken:      "guest token",

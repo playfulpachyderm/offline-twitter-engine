@@ -18,6 +18,7 @@ const API_USER_TIMELINE_BASE_PATH = "https://api.twitter.com/2/timeline/profile/
 
 type API struct {
 	UserHandle      UserHandle
+	UserID          UserID
 	IsAuthenticated bool
 	GuestToken      string
 	Client          http.Client
@@ -38,6 +39,7 @@ func InitApi(newApi API) {
 
 type api_outstruct struct {
 	Cookies         []*http.Cookie
+	UserID          UserID
 	UserHandle      UserHandle
 	IsAuthenticated bool
 	GuestToken      string
@@ -49,6 +51,7 @@ var TWITTER_BASE_URL = url.URL{Scheme: "https", Host: "twitter.com"}
 func (api API) MarshalJSON() ([]byte, error) {
 	result, err := json.Marshal(api_outstruct{
 		Cookies:         api.Client.Jar.Cookies(&TWITTER_BASE_URL),
+		UserID:          api.UserID,
 		UserHandle:      api.UserHandle,
 		IsAuthenticated: api.IsAuthenticated,
 		GuestToken:      api.GuestToken,
@@ -73,6 +76,7 @@ func (api *API) UnmarshalJSON(data []byte) error {
 	cookie_jar.SetCookies(&TWITTER_BASE_URL, in_struct.Cookies)
 	api.IsAuthenticated = in_struct.IsAuthenticated
 	api.GuestToken = in_struct.GuestToken
+	api.UserID = in_struct.UserID
 	api.UserHandle = in_struct.UserHandle
 
 	api.Client = http.Client{
@@ -170,6 +174,7 @@ func (api *API) LogIn(username string, password string) {
 		Subtasks []struct {
 			OpenAccount struct {
 				User struct {
+					ID         int
 					Name       string
 					ScreenName string `json:"screen_name"`
 				}
@@ -186,6 +191,7 @@ func (api *API) LogIn(username string, password string) {
 		panic(err)
 	}
 
+	api.UserID = UserID(final_result.Subtasks[0].OpenAccount.User.ID)
 	api.UserHandle = UserHandle(final_result.Subtasks[0].OpenAccount.User.ScreenName)
 
 	api.update_csrf_token()
