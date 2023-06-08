@@ -121,3 +121,9 @@ v0.2.1
 - BUGFIX: fix stats for likes, RTs, etc. getting erased if a tweet gets deleted or hidden
 - BUGFIX: `fetch_tweet` and `search` subcommands no longer ignore the `-n [number]` flag
 - ".session" extension for the `--session` flag is now optional, allowing tab-autocompletion
+
+v0.2.2
+------
+
+- Add support for Expandable (i.e., "Show more") tweets
+- Fix an issue with half the tweets on user feeds not getting fetched while logged in
