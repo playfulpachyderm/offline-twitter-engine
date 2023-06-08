@@ -176,6 +176,7 @@ type APITweet struct {
 	UserHandle    string
 	Card          APICard `json:"card"`
 	TombstoneText string
+	IsExpandable  bool
 }
 
 func (t *APITweet) NormalizeContent() {

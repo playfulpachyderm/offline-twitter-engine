@@ -151,6 +151,15 @@ type _Result struct {
 	Core               *APIV2UserResult `json:"core"`
 	Card               APIV2Card        `json:"card"`
 	QuotedStatusResult *APIV2Result     `json:"quoted_status_result"`
+	NoteTweet          struct {
+		IsExpandable     bool `json:"is_expandable"`
+		NoteTweetResults struct {
+			Result struct {
+				ID   string `json:"id"`
+				Text string `json:"text"`
+			} `json:"result"`
+		} `json:"note_tweet_results"`
+	} `json:"note_tweet"`
 }
 
 type APIV2Result struct {
@@ -177,6 +186,14 @@ func (api_result APIV2Result) ToTweetTrove(ignore_null_entries bool) TweetTrove 
 		api_result.Result._Result = api_result.Result.Tweet
 	}
 
+	// Handle expandable tweets
+	if api_result.Result.NoteTweet.IsExpandable {
+		api_result.Result.Legacy.FullText = api_result.Result.NoteTweet.NoteTweetResults.Result.Text
+		api_result.Result.Legacy.DisplayTextRange = []int{} // Override the "display text"
+		api_result.Result.Legacy.IsExpandable = true
+	}
+
+	// Process the tweet itself
 	main_tweet_trove := api_result.Result.Legacy.ToTweetTrove()
 	ret.MergeWith(main_tweet_trove)
 

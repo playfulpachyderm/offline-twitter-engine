@@ -75,6 +75,7 @@ func TestNoWorseningTweet(t *testing.T) {
 	tweet.IsContentDownloaded = true
 	tweet.IsStub = false
 	tweet.IsConversationScraped = true
+	tweet.IsExpandable = true
 	tweet.LastScrapedAt = scraper.TimestampFromUnix(1000)
 	tweet.Text = "Yes text"
 	tweet.NumLikes = 10
@@ -90,6 +91,7 @@ func TestNoWorseningTweet(t *testing.T) {
 	tweet.IsContentDownloaded = false
 	tweet.IsStub = true
 	tweet.IsConversationScraped = false
+	tweet.IsExpandable = false
 	tweet.LastScrapedAt = scraper.TimestampFromUnix(500)
 	tweet.Text = ""
 	err = profile.SaveTweet(tweet)
@@ -106,6 +108,7 @@ func TestNoWorseningTweet(t *testing.T) {
 	assert.False(new_tweet.IsStub, "Should have preserved non-stub status")
 	assert.True(new_tweet.IsContentDownloaded, "Should have preserved is-content-downloaded status")
 	assert.True(new_tweet.IsConversationScraped, "Should have preserved is-conversation-scraped status")
+	assert.True(new_tweet.IsExpandable)
 	assert.Equal(int64(1000), new_tweet.LastScrapedAt.Unix(), "Should have preserved last-scraped-at time")
 	assert.Equal(new_tweet.Text, "Yes text", "Text should not get clobbered if it becomes unavailable")
 	assert.Equal(10, new_tweet.NumLikes)
@@ -147,6 +150,36 @@ func TestUntombstoningTweet(t *testing.T) {
 	assert.False(new_tweet.IsStub, "Should no longer be a stub after re-scrape")
 	assert.Equal(new_tweet.TombstoneType, "", "Tweet shouldn't be a tombstone anymore")
 	assert.Equal(new_tweet.Text, "Some text", "Should have created the text")
+}
+
+// The tweet is an expanding tweet, but was saved before expanding tweets were implemented
+func TestUpgradingExpandingTweet(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	profile_path := "test_profiles/TestTweetQueries"
+	profile := create_or_load_profile(profile_path)
+
+	tweet := create_dummy_tweet()
+	tweet.IsExpandable = false
+	tweet.Text = "Some long but cut-off text..."
+
+	// Save the tweet
+	err := profile.SaveTweet(tweet)
+	require.NoError(err)
+
+	// Now that we have expanding tweets
+	tweet.IsExpandable = true
+	tweet.Text = "Some long but cut-off text, but now it no longer is cut off!"
+	err = profile.SaveTweet(tweet)
+	require.NoError(err)
+
+	// Reload the tweet
+	new_tweet, err := profile.GetTweetById(tweet.ID)
+	require.NoError(err)
+
+	assert.True(new_tweet.IsExpandable, "Should now be is_expanding after re-scrape")
+	assert.Equal(new_tweet.Text, "Some long but cut-off text, but now it no longer is cut off!", "Should have extended the text")
 }
 
 /**

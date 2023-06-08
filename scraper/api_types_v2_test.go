@@ -637,6 +637,23 @@ func TestRetweetWithVisibilityResults(t *testing.T) {
 	assert.Equal(rt.TweetID, TweetID(1595973736833892356))
 }
 
+func TestExpandableTweet(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/expandable_tweet.json")
+	require.NoError(err)
+	var tweet_result APIV2Result
+	err = json.Unmarshal(data, &tweet_result)
+	require.NoError(err)
+
+	trove := tweet_result.ToTweetTrove(true)
+	main_tweet, is_ok := trove.Tweets[TweetID(1649600354747572225)]
+	require.True(is_ok)
+
+	assert.True(main_tweet.IsExpandable)
+	assert.Equal(main_tweet.Text, "This entire millenial media era has come and gone. Where are the lindy articles from all these websites? The ideas? \n\nIt was just a decade and a half of nothing. \n\na complete waste of time. \n\nAnd it ends with the blue checks being stripped. \n\nA fitting ending to a time not worth saving") //nolint:lll // It's a string
+}
+
 // In a user feed, an "entry" can contain multiple tweets when making authenticated requests.
 // They should parse out as all the tweets.
 func TestEntryWithConversationThread(t *testing.T) {

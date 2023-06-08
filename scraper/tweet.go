@@ -114,6 +114,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	ret.UserID = UserID(apiTweet.UserID)
 	ret.UserHandle = UserHandle(apiTweet.UserHandle)
 	ret.Text = apiTweet.FullText
+	ret.IsExpandable = apiTweet.IsExpandable
 
 	// Process "posted-at" date and time
 	if apiTweet.TombstoneText == "" { // Skip time parsing for tombstones
