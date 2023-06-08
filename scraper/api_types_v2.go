@@ -315,7 +315,6 @@ func (api_v2_tweet APIV2Tweet) ToTweetTrove() TweetTrove {
 }
 
 type ItemContent struct {
-	EntryType    string      `json:"entryType"` // TODO: Assert this is always empty; looks like a typo
 	ItemType     string      `json:"itemType"`
 	TweetResults APIV2Result `json:"tweet_results"`
 }
