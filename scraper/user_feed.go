@@ -29,7 +29,7 @@ func GetUserFeedFor(user_id UserID, min_tweets int) (trove TweetTrove, err error
 		}
 	}
 
-	return ParseTweetResponse(tweet_response)
+	return tweet_response.ToTweetTrove()
 }
 
 func GetUserFeedGraphqlFor(user_id UserID, min_tweets int) (trove TweetTrove, err error) {

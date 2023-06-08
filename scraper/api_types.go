@@ -458,6 +458,38 @@ func (t *TweetResponse) IsEndOfFeed() bool {
 	return true
 }
 
+func (t *TweetResponse) ToTweetTrove() (TweetTrove, error) {
+	ret := NewTweetTrove()
+
+	for _, single_tweet := range t.GlobalObjects.Tweets {
+		if single_tweet.RetweetedStatusIDStr == "" {
+			new_tweet, err := ParseSingleTweet(single_tweet)
+			if err != nil {
+				return ret, err
+			}
+			ret.Tweets[new_tweet.ID] = new_tweet
+			for _, space := range new_tweet.Spaces {
+				ret.Spaces[space.ID] = space
+			}
+		} else {
+			new_retweet, err := ParseSingleRetweet(single_tweet)
+			if err != nil {
+				return ret, err
+			}
+			ret.Retweets[new_retweet.RetweetID] = new_retweet
+		}
+	}
+
+	for _, user := range t.GlobalObjects.Users {
+		new_user, err := ParseSingleUser(user)
+		if err != nil {
+			return ret, err
+		}
+		ret.Users[new_user.ID] = new_user
+	}
+	return ret, nil
+}
+
 func idstr_to_int(idstr string) int64 {
 	id, err := strconv.Atoi(idstr)
 	if err != nil {

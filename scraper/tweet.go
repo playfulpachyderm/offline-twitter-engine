@@ -55,9 +55,9 @@ type Tweet struct {
 	ReplyMentions CommaSeparatedList `db:"reply_mentions"`
 	Hashtags      CommaSeparatedList `db:"hashtags"`
 
-	// TODO get-rid-of-spaces: Might be good to get rid of `Spaces`.  Only used in APIv1 I think.
+	// TODO get-rid-of-redundant-spaces: Might be good to get rid of `Spaces`.  Only used in APIv1 I think.
 	// A first-step would be to delete the Spaces after pulling them out of a Tweet into the Trove
-	// in ParseTweetResponse.  Then they will only be getting saved once rather than twice.
+	// in ToTweetTrove.  Then they will only be getting saved once rather than twice.
 	Spaces  []Space
 	SpaceID SpaceID `db:"space_id"`
 
@@ -273,10 +273,10 @@ func GetTweetFull(id TweetID, how_many int) (trove TweetTrove, err error) {
 		}
 	}
 
-	// This has to be called BEFORE ParseTweetResponse, because it modifies the TweetResponse (adds tombstone tweets to its tweets list)
+	// This has to be called BEFORE ToTweetTrove, because it modifies the TweetResponse (adds tombstone tweets to its tweets list)
 	tombstoned_users := tweet_response.HandleTombstones()
 
-	trove, err = ParseTweetResponse(tweet_response)
+	trove, err = tweet_response.ToTweetTrove()
 	if err != nil {
 		panic(err)
 	}
@@ -300,44 +300,4 @@ func GetTweetFull(id TweetID, how_many int) (trove TweetTrove, err error) {
 	trove.Tweets[id] = tweet
 
 	return
-}
-
-/**
- * Parse an API response object into a list of tweets, retweets and users
- *
- * args:
- * - resp: the response from the API
- *
- * returns: a list of tweets, retweets and users in that response object
- */
-func ParseTweetResponse(resp TweetResponse) (TweetTrove, error) {
-	trove := NewTweetTrove()
-
-	for _, single_tweet := range resp.GlobalObjects.Tweets {
-		if single_tweet.RetweetedStatusIDStr == "" {
-			new_tweet, err := ParseSingleTweet(single_tweet)
-			if err != nil {
-				return trove, err
-			}
-			trove.Tweets[new_tweet.ID] = new_tweet
-			for _, space := range new_tweet.Spaces {
-				trove.Spaces[space.ID] = space
-			}
-		} else {
-			new_retweet, err := ParseSingleRetweet(single_tweet)
-			if err != nil {
-				return trove, err
-			}
-			trove.Retweets[new_retweet.RetweetID] = new_retweet
-		}
-	}
-
-	for _, user := range resp.GlobalObjects.Users {
-		new_user, err := ParseSingleUser(user)
-		if err != nil {
-			return trove, err
-		}
-		trove.Users[new_user.ID] = new_user
-	}
-	return trove, nil
 }

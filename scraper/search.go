@@ -32,7 +32,7 @@ func Search(query string, min_results int) (trove TweetTrove, err error) {
 		}
 	}
 
-	trove, err = ParseTweetResponse(tweet_response)
+	trove, err = tweet_response.ToTweetTrove()
 	if err != nil {
 		err = fmt.Errorf("Error parsing the tweet trove for search query %q:\n  %w", query, err)
 		return

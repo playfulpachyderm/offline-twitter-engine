@@ -227,7 +227,7 @@ func TestParseTweetResponse(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_resp)
 	require.NoError(t, err)
 
-	trove, err := ParseTweetResponse(tweet_resp)
+	trove, err := tweet_resp.ToTweetTrove()
 	require.NoError(t, err)
 
 	assert.Len(trove.Tweets, 29-3)
