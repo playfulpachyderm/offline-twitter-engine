@@ -384,15 +384,23 @@ func (e APIV2Entry) ToTweetTrove(ignore_null_entries bool) TweetTrove {
 	} else if e.Content.EntryType == "TimelineTimelineModule" {
 		ret := NewTweetTrove()
 
-		// If it's a "Who To Follow", ignore it (return empty tweet trove)
-		if !strings.HasPrefix(e.EntryID, "homeConversation-") {
-			log.Warn("Skipping entry with EntryID " + e.EntryID)
-			return ret
+		switch strings.Split(e.EntryID, "-")[0] {
+		case "homeConversation":
+			// Process it
+			for _, item := range e.Content.Items {
+				ret.MergeWith(item.Item.ItemContent.TweetResults.ToTweetTrove(ignore_null_entries))
+			}
+
+		case "whoToFollow":
+		case "TopicsModule":
+			// Ignore "Who to follow" and "Topics" modules.
+			// TODO: maybe we can capture these eventually
+			log.Debug(fmt.Sprintf("Skipping %s entry", e.EntryID))
+
+		default:
+			log.Warn("TimelineTimelineModule with unknown EntryID: " + e.EntryID)
 		}
 
-		for _, item := range e.Content.Items {
-			ret.MergeWith(item.Item.ItemContent.TweetResults.ToTweetTrove(ignore_null_entries))
-		}
 		return ret
 	} else if e.Content.EntryType == "TimelineTimelineItem" {
 		return e.Content.ItemContent.TweetResults.ToTweetTrove(ignore_null_entries)
