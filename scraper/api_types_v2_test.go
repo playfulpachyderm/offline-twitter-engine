@@ -636,3 +636,30 @@ func TestRetweetWithVisibilityResults(t *testing.T) {
 	require.True(is_ok)
 	assert.Equal(rt.TweetID, TweetID(1595973736833892356))
 }
+
+// In a user feed, an "entry" can contain multiple tweets when making authenticated requests.
+// They should parse out as all the tweets.
+func TestEntryWithConversationThread(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/home_conversation_entry.json")
+	require.NoError(err)
+	var entry_result APIV2Entry
+	err = json.Unmarshal(data, &entry_result)
+	require.NoError(err)
+
+	trove := entry_result.ToTweetTrove(true)
+
+	assert.Len(trove.Tweets, 4) // 3 tweets in the thread plus the quoted tweet
+	t1, is_ok := trove.Tweets[1624966566264680448]
+	assert.True(is_ok)
+	assert.Equal(TweetID(1624953636253208578), t1.QuotedTweetID)
+	assert.Equal(13, t1.NumLikes)
+
+	_, is_ok = trove.Tweets[1624953636253208578] // Quoted tweet
+	assert.True(is_ok)
+	_, is_ok = trove.Tweets[1624989022589427712] // Tweet 2
+	assert.True(is_ok)
+	_, is_ok = trove.Tweets[1624990170670850053] // Tweet 3
+	assert.True(is_ok)
+}

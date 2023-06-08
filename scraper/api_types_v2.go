@@ -330,6 +330,14 @@ type InnerAPIV2Entry struct {
 	Content   struct {
 		ItemContent ItemContent `json:"itemContent"`
 
+		Items []struct {
+			EntryId     string
+			Dispensable bool
+			Item        struct {
+				ItemContent ItemContent `json:"itemContent"`
+			}
+		}
+
 		// Cursors
 		EntryType  string `json:"entryType"`
 		Value      string `json:"value"`
@@ -353,7 +361,26 @@ func (e APIV2Entry) ToTweetTrove(ignore_null_entries bool) TweetTrove {
 			panic(obj)
 		}
 	}()
-	return e.Content.ItemContent.TweetResults.ToTweetTrove(ignore_null_entries)
+	if e.Content.EntryType == "TimelineTimelineCursor" {
+		// Ignore cursor entries
+		return NewTweetTrove()
+	} else if e.Content.EntryType == "TimelineTimelineModule" {
+		ret := NewTweetTrove()
+
+		// If it's a "Who To Follow", ignore it (return empty tweet trove)
+		if !strings.HasPrefix(e.EntryID, "homeConversation-") {
+			log.Warn("Skipping entry with EntryID " + e.EntryID)
+			return ret
+		}
+
+		for _, item := range e.Content.Items {
+			ret.MergeWith(item.Item.ItemContent.TweetResults.ToTweetTrove(ignore_null_entries))
+		}
+		return ret
+	} else if e.Content.EntryType == "TimelineTimelineItem" {
+		return e.Content.ItemContent.TweetResults.ToTweetTrove(ignore_null_entries)
+	}
+	panic("Unknown EntryType: " + e.Content.EntryType)
 }
 
 type APIV2Instruction struct {
@@ -413,10 +440,6 @@ func (api_response APIV2Response) IsEmpty() bool {
 func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 	ret := NewTweetTrove()
 	for _, entry := range api_response.GetMainInstruction().Entries { // TODO: the second Instruction is the pinned tweet
-		if !strings.HasPrefix(entry.EntryID, "tweet-") {
-			continue
-		}
-
 		main_trove := entry.ToTweetTrove(true)
 		ret.MergeWith(main_trove)
 	}
