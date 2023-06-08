@@ -248,7 +248,7 @@ func TestParseTweetResponseWithTombstones(t *testing.T) {
 	extra_users := tweet_resp.HandleTombstones()
 	assert.Len(extra_users, 1)
 
-	trove, err := ParseTweetResponse(tweet_resp)
+	trove, err := tweet_resp.ToTweetTrove()
 	require.NoError(t, err)
 
 	assert.Len(trove.Tweets, 2)
