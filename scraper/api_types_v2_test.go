@@ -680,3 +680,25 @@ func TestEntryWithConversationThread(t *testing.T) {
 	_, is_ok = trove.Tweets[1624990170670850053] // Tweet 3
 	assert.True(is_ok)
 }
+
+// On a Tweet Detail page, there's a thread of replies, and then it says "Show more..." underneath
+// to extend the conversation.  This is different from the "Show more..." button to load more
+// replies to the original tweet!
+func TestConversationThreadEntryWithShowMoreButton(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/conversation_thread_entry_with_show_more_button.json")
+	require.NoError(err)
+	var entry_result APIV2Entry
+	err = json.Unmarshal(data, &entry_result)
+	require.NoError(err)
+
+	trove := entry_result.ToTweetTrove(true)
+
+	assert.Len(trove.Tweets, 1)
+	t1, is_ok := trove.Tweets[1649803385485377536]
+	assert.True(is_ok)
+	assert.Equal(TweetID(1649600354747572225), t1.InReplyToID)
+
+	assert.Len(trove.Users, 1)
+}

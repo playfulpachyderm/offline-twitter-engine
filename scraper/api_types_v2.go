@@ -334,6 +334,10 @@ func (api_v2_tweet APIV2Tweet) ToTweetTrove() TweetTrove {
 type ItemContent struct {
 	ItemType     string      `json:"itemType"`
 	TweetResults APIV2Result `json:"tweet_results"`
+
+	// Cursors (conversation view format)
+	CursorType string `json:"cursorType"`
+	Value      string `json:"value"`
 }
 
 // Wraps InnerAPIV2Entry to implement `json.Unmarshal`.  Does the normal unmarshal but also saves the original JSON.
@@ -355,7 +359,7 @@ type InnerAPIV2Entry struct {
 			}
 		}
 
-		// Cursors
+		// Cursors (user feed format)
 		EntryType  string `json:"entryType"`
 		Value      string `json:"value"`
 		CursorType string `json:"cursorType"`
@@ -378,22 +382,29 @@ func (e APIV2Entry) ToTweetTrove(ignore_null_entries bool) TweetTrove {
 			panic(obj)
 		}
 	}()
-	if e.Content.EntryType == "TimelineTimelineCursor" {
-		// Ignore cursor entries
+	if e.Content.EntryType == "TimelineTimelineCursor" || e.Content.ItemContent.ItemType == "TimelineTimelineCursor" {
+		// Ignore cursor entries.
+		// - e.Content.EntryType -> User Feed itself
+		// - e.Content.ItemContent.ItemType -> conversation thread in a user feed
 		return NewTweetTrove()
 	} else if e.Content.EntryType == "TimelineTimelineModule" {
 		ret := NewTweetTrove()
 
 		switch strings.Split(e.EntryID, "-")[0] {
-		case "homeConversation":
-			// Process it
+		case "homeConversation", "conversationthread":
+			// Process it.
+			// - "homeConversation": conversation thread on a user feed
+			// - "conversationthread": conversation thread in the replies under a TweetDetail view
 			for _, item := range e.Content.Items {
+				if item.Item.ItemContent.ItemType == "TimelineTimelineCursor" {
+					// "Show More" replies button in a thread on Tweet Detail page
+					continue
+				}
 				ret.MergeWith(item.Item.ItemContent.TweetResults.ToTweetTrove(ignore_null_entries))
 			}
 
-		case "whoToFollow":
-		case "TopicsModule":
-			// Ignore "Who to follow" and "Topics" modules.
+		case "whoToFollow", "TopicsModule", "tweetdetailrelatedtweets":
+			// Ignore "Who to follow", "Topics" and "Related Tweets" modules.
 			// TODO: maybe we can capture these eventually
 			log.Debug(fmt.Sprintf("Skipping %s entry", e.EntryID))
 
@@ -424,6 +435,9 @@ type APIV2Response struct {
 				} `json:"timeline"`
 			} `json:"result"`
 		} `json:"user"`
+		ThreadedConversationWithInjectionsV2 struct {
+			Instructions []APIV2Instruction `json:"instructions"`
+		} `json:"threaded_conversation_with_injections_v2"`
 	} `json:"data"`
 }
 
@@ -434,17 +448,28 @@ func (api_response APIV2Response) GetMainInstruction() *APIV2Instruction {
 			return &instructions[i]
 		}
 	}
+	instructions = api_response.Data.ThreadedConversationWithInjectionsV2.Instructions
+	for i := range instructions {
+		if instructions[i].Type == "TimelineAddEntries" {
+			return &instructions[i]
+		}
+	}
 	panic("No 'TimelineAddEntries' found")
 }
 
 func (api_response APIV2Response) GetCursorBottom() string {
-	entries := api_response.GetMainInstruction().Entries
-	last_entry := entries[len(entries)-1]
-	if last_entry.Content.CursorType != "Bottom" {
-		panic("No bottom cursor found")
-	}
+	for _, entry := range api_response.GetMainInstruction().Entries {
+		// For a user feed:
+		if entry.Content.CursorType == "Bottom" {
+			return entry.Content.Value
+		}
 
-	return last_entry.Content.Value
+		// For a Tweet Detail page:
+		if entry.Content.ItemContent.CursorType == "Bottom" {
+			return entry.Content.ItemContent.Value
+		}
+	}
+	return ""
 }
 
 /**
