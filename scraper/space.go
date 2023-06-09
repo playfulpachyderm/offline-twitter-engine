@@ -16,8 +16,8 @@ type Space struct {
 	EndedAt              Timestamp `db:"ended_at"`
 	UpdatedAt            Timestamp
 	IsAvailableForReplay bool
-	ReplayWatchCount     int64
-	LiveListenersCount   int64
+	ReplayWatchCount     int
+	LiveListenersCount   int
 	ParticipantIds       []UserID
 
 	CreatedById UserID

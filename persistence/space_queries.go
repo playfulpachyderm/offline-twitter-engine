@@ -28,6 +28,7 @@ func (p Profile) SaveSpace(s scraper.Space) error {
 		       state=case when :state != "" then :state else state end,
 		       title=case when :is_details_fetched then :title else title end,
 		       updated_at=max(:updated_at, updated_at),
+		       ended_at=max(:ended_at, ended_at),
 		       is_available_for_replay=:is_available_for_replay,
 		       replay_watch_count=:replay_watch_count,
 		       live_listeners_count=max(:live_listeners_count, live_listeners_count),

@@ -307,7 +307,7 @@ func create_space_from_id(id int) scraper.Space {
 	return scraper.Space{
 		ID:             scraper.SpaceID(fmt.Sprintf("some_id_%d", id)),
 		ShortUrl:       fmt.Sprintf("short_url_%d", id),
-		State:          "Ended",
+		State:          "Running",
 		Title:          "Some Title",
 		CreatedAt:      scraper.TimestampFromUnix(1000),
 		StartedAt:      scraper.TimestampFromUnix(2000),

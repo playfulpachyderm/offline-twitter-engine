@@ -33,8 +33,8 @@ func TestParseSpaceResponse(t *testing.T) {
 	assert.Equal(int64(1665887491804), space.EndedAt.Time.Unix())
 	assert.Equal(int64(1665887492705), space.UpdatedAt.Time.Unix())
 	assert.False(space.IsAvailableForReplay)
-	assert.Equal(int64(4), space.ReplayWatchCount)
-	assert.Equal(int64(1), space.LiveListenersCount)
+	assert.Equal(4, space.ReplayWatchCount)
+	assert.Equal(1, space.LiveListenersCount)
 
 	assert.True(space.IsDetailsFetched)
 

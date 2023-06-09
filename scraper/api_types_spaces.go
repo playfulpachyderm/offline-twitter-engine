@@ -23,8 +23,8 @@ type SpaceResponse struct {
 				IsSpaceAvailableForReplay   bool   `json:"is_space_available_for_replay"`
 				IsSpaceAvailableForClipping bool   `json:"is_space_available_for_clipping"`
 				ConversationControls        int64  `json:"conversation_controls"`
-				TotalReplayWatched          int64  `json:"total_replay_watched"`
-				TotalLiveListeners          int64  `json:"total_live_listeners"`
+				TotalReplayWatched          int    `json:"total_replay_watched"`
+				TotalLiveListeners          int    `json:"total_live_listeners"`
 				CreatorResults              struct {
 					Result struct {
 						ID     int64   `json:"rest_id,string"`
