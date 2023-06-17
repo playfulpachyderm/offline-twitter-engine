@@ -2,12 +2,15 @@ package scraper
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 )
+
+var ErrorIsTombstone = errors.New("tweet is a tombstone")
 
 type CardValue struct {
 	Type        string `json:"type"`
@@ -169,13 +172,14 @@ type APIV2Result struct {
 	} `json:"result"`
 }
 
-func (api_result APIV2Result) ToTweetTrove(ignore_null_entries bool) TweetTrove {
+func (api_result APIV2Result) ToTweetTrove() (TweetTrove, error) {
 	ret := NewTweetTrove()
 
 	// Start by checking if this is a null entry in a feed
-	if api_result.Result.Tombstone != nil && ignore_null_entries {
-		// TODO: this is becoming really spaghetti.  Why do we need a separate execution path for this?
-		return ret
+	if api_result.Result.Tombstone != nil {
+		// Returning an error indicates the parent (APIV2Entry) has to parse it as a tombstone.
+		// The tweet ID isn't available to the APIV2Result, but it is to the APIV2Entry.
+		return ret, ErrorIsTombstone
 	}
 
 	if api_result.Result.Legacy.ID == 0 && api_result.Result.Tweet.Legacy.ID != 0 {
@@ -207,25 +211,42 @@ func (api_result APIV2Result) ToTweetTrove(ignore_null_entries bool) TweetTrove 
 	// Handle quoted tweet
 	if api_result.Result.QuotedStatusResult != nil {
 		quoted_api_result := api_result.Result.QuotedStatusResult
+		quoted_trove, err := quoted_api_result.ToTweetTrove()
 
-		// Quoted tweets might be tombstones!
-		if quoted_api_result.Result.Tombstone != nil {
-			tombstoned_tweet := &quoted_api_result.Result.Legacy.APITweet
-			var ok bool
-			tombstoned_tweet.TombstoneText, ok = tombstone_types[quoted_api_result.Result.Tombstone.Text.Text]
-			if !ok {
+		// Quoted tombstones can be handled here since we already have the ID and user handle
+		if errors.Is(err, ErrorIsTombstone) {
+			tombstoned_tweet := quoted_api_result.Result.Legacy.APITweet
+
+			// Capture the tombstone text
+			var is_ok bool
+			tombstoned_tweet.TombstoneText, is_ok = tombstone_types[quoted_api_result.Result.Tombstone.Text.Text]
+			if !is_ok {
 				panic(fmt.Errorf("Unknown tombstone text %q:\n  %w", quoted_api_result.Result.Tombstone.Text.Text, EXTERNAL_API_ERROR))
 			}
+
+			// Capture the tombstone ID
 			tombstoned_tweet.ID = int64(int_or_panic(api_result.Result.Legacy.APITweet.QuotedStatusIDStr))
+
+			// Capture the tombstone's user handle
 			handle, err := ParseHandleFromTweetUrl(api_result.Result.Legacy.APITweet.QuotedStatusPermalink.ExpandedURL)
 			if err != nil {
 				panic(err)
 			}
 			tombstoned_tweet.UserHandle = string(handle)
+
+			// Parse the tombstone into a Tweet and add it to the trove
+			parsed_tombstone_tweet, err := ParseSingleTweet(tombstoned_tweet)
+			if err != nil {
+				panic(err)
+			}
+			ret.Tweets[parsed_tombstone_tweet.ID] = parsed_tombstone_tweet
+
+			// Add the user as a tombstoned user to be fetched later
 			ret.TombstoneUsers = append(ret.TombstoneUsers, handle)
+		} else if err != nil {
+			panic(err)
 		}
 
-		quoted_trove := quoted_api_result.ToTweetTrove(false)
 		ret.MergeWith(quoted_trove)
 	}
 
@@ -235,8 +256,8 @@ func (api_result APIV2Result) ToTweetTrove(ignore_null_entries bool) TweetTrove 
 	if api_result.Result.Legacy.RetweetedStatusResult == nil {
 		// We have to filter out retweets.  For some reason, retweets have a copy of the card in both the retweeting
 		// and the retweeted TweetResults; it should only be parsed for the real Tweet, not the Retweet
-		main_tweet, ok := ret.Tweets[TweetID(api_result.Result.Legacy.ID)]
-		if !ok {
+		main_tweet, is_ok := ret.Tweets[TweetID(api_result.Result.Legacy.ID)]
+		if !is_ok {
 			panic(fmt.Errorf("Tweet trove didn't contain its own tweet with ID %d:\n  %w", api_result.Result.Legacy.ID, EXTERNAL_API_ERROR))
 		}
 		if api_result.Result.Card.Legacy.Name == "summary_large_image" || api_result.Result.Card.Legacy.Name == "player" {
@@ -284,7 +305,7 @@ func (api_result APIV2Result) ToTweetTrove(ignore_null_entries bool) TweetTrove 
 		}
 	}
 
-	return ret
+	return ret, nil
 }
 
 type APIV2Tweet struct {
@@ -299,11 +320,13 @@ func (api_v2_tweet APIV2Tweet) ToTweetTrove() TweetTrove {
 
 	// If there's a retweet, we ignore the main tweet except for posted_at and retweeting UserID
 	if api_v2_tweet.RetweetedStatusResult != nil {
-		orig_tweet_trove := api_v2_tweet.RetweetedStatusResult.ToTweetTrove(false)
+		orig_tweet_trove, err := api_v2_tweet.RetweetedStatusResult.ToTweetTrove()
+		if err != nil {
+			panic(err)
+		}
 		ret.MergeWith(orig_tweet_trove)
 
 		retweet := Retweet{}
-		var err error
 
 		retweet.RetweetID = TweetID(api_v2_tweet.ID)
 		if api_v2_tweet.RetweetedStatusResult.Result.Legacy.ID == 0 && api_v2_tweet.RetweetedStatusResult.Result.Tweet.Legacy.ID != 0 {
@@ -375,7 +398,7 @@ func (e *APIV2Entry) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (e APIV2Entry) ToTweetTrove(ignore_null_entries bool) TweetTrove {
+func (e APIV2Entry) ToTweetTrove() TweetTrove {
 	defer func() {
 		if obj := recover(); obj != nil {
 			log.Warn(fmt.Sprintf("Panic while decoding entry: %s\n", e.OriginalJSON))
@@ -400,7 +423,11 @@ func (e APIV2Entry) ToTweetTrove(ignore_null_entries bool) TweetTrove {
 					// "Show More" replies button in a thread on Tweet Detail page
 					continue
 				}
-				ret.MergeWith(item.Item.ItemContent.TweetResults.ToTweetTrove(ignore_null_entries))
+				trove, err := item.Item.ItemContent.TweetResults.ToTweetTrove()
+				if err != nil {
+					panic(err)
+				}
+				ret.MergeWith(trove)
 			}
 
 		case "whoToFollow", "TopicsModule", "tweetdetailrelatedtweets":
@@ -414,7 +441,35 @@ func (e APIV2Entry) ToTweetTrove(ignore_null_entries bool) TweetTrove {
 
 		return ret
 	} else if e.Content.EntryType == "TimelineTimelineItem" {
-		return e.Content.ItemContent.TweetResults.ToTweetTrove(ignore_null_entries)
+		ret, err := e.Content.ItemContent.TweetResults.ToTweetTrove()
+
+		if errors.Is(err, ErrorIsTombstone) {
+			// Handle tombstones
+			ret = NewTweetTrove()                                                         // clear the result just in case
+			tombstoned_tweet := e.Content.ItemContent.TweetResults.Result.Legacy.APITweet // Will be empty to start
+
+			// Capture the tombstone text
+			var is_ok bool
+			tombstoned_tweet.TombstoneText, is_ok = tombstone_types[e.Content.ItemContent.TweetResults.Result.Tombstone.Text.Text]
+			if !is_ok {
+				panic(fmt.Errorf(
+					"Unknown tombstone text %q:\n  %w",
+					e.Content.ItemContent.TweetResults.Result.Tombstone.Text.Text,
+					EXTERNAL_API_ERROR,
+				))
+			}
+
+			// Capture the tombstone ID
+			tombstoned_tweet.ID = int64(int_or_panic(strings.Split(e.EntryID, "-")[1]))
+
+			// Parse the tombstone into a Tweet and add it to the trove
+			parsed_tombstone_tweet, err := ParseSingleTweet(tombstoned_tweet)
+			if err != nil {
+				panic(err)
+			}
+			ret.Tweets[parsed_tombstone_tweet.ID] = parsed_tombstone_tweet
+		}
+		return ret
 	}
 	panic("Unknown EntryType: " + e.Content.EntryType)
 }
@@ -489,9 +544,56 @@ func (api_response APIV2Response) IsEmpty() bool {
  */
 func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 	ret := NewTweetTrove()
+
+	// Parse all of the entries
 	for _, entry := range api_response.GetMainInstruction().Entries { // TODO: the second Instruction is the pinned tweet
-		main_trove := entry.ToTweetTrove(true)
+		main_trove := entry.ToTweetTrove()
 		ret.MergeWith(main_trove)
+	}
+
+	// Add in any tombstoned user handles and IDs if possible, by reading from the replies
+	for _, tweet := range ret.Tweets {
+		// Skip if it's not a reply (nothing to add)
+		if tweet.InReplyToID == 0 {
+			continue
+		}
+
+		// Skip if the replied tweet isn't in the result set (e.g., the reply is a quoted tweet)
+		replied_tweet, is_ok := ret.Tweets[tweet.InReplyToID]
+		if !is_ok {
+			continue
+		}
+
+		// Skip if the replied tweet isn't a stub (it's already filled out)
+		if !replied_tweet.IsStub {
+			continue
+		}
+
+		if replied_tweet.ID == 0 {
+			// Not sure if this can happen.  Use a panic to detect if it does so we can analyse
+			// TODO: make a better system to capture "discovery panics" that doesn't involve panicking
+			panic(fmt.Sprintf("Tombstoned tweet has no ID (should be %d)", tweet.InReplyToID))
+		}
+
+		if replied_tweet.UserID == 0 {
+			replied_tweet.UserID = tweet.in_reply_to_user_id
+			if replied_tweet.UserID == 0 { // Still??
+				log.Warn(fmt.Sprintf("Still couldn't find user for replied tweet %d", tweet.InReplyToID))
+				continue
+			}
+		} // replied_tweet.UserID should now be a real UserID
+
+		existing_user, is_ok := ret.Users[replied_tweet.UserID]
+		if !is_ok {
+			existing_user = User{ID: replied_tweet.UserID}
+		}
+		if existing_user.Handle == "" {
+			existing_user.Handle = tweet.in_reply_to_user_handle
+		}
+		ret.Users[replied_tweet.UserID] = existing_user
+		// TODO: add to ret.TombstonedUsers?
+
+		ret.Tweets[replied_tweet.ID] = replied_tweet
 	}
 
 	return ret, nil // TODO: This doesn't need to return an error, it's always nil

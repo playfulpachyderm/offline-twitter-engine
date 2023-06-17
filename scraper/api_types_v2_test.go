@@ -63,7 +63,8 @@ func TestAPIV2ParseTweet(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove(true)
+	trove, err := tweet_result.ToTweetTrove()
+	assert.NoError(err)
 
 	assert.Equal(1, len(trove.Tweets))
 	tweet, ok := trove.Tweets[1485708879174508550]
@@ -111,7 +112,8 @@ func TestAPIV2ParseTweetWithQuotedTweet(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove(true)
+	trove, err := tweet_result.ToTweetTrove()
+	assert.NoError(err)
 
 	// Should be 2 tweets: quote-tweet and quoted-tweet
 	assert.Equal(2, len(trove.Tweets))
@@ -165,7 +167,8 @@ func TestAPIV2ParseRetweet(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove(true)
+	trove, err := tweet_result.ToTweetTrove()
+	assert.NoError(err)
 
 	// Should only be 1 tweet, the retweeted one
 	assert.Equal(1, len(trove.Tweets))
@@ -224,7 +227,8 @@ func TestAPIV2ParseRetweetedQuoteTweet(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove(true)
+	trove, err := tweet_result.ToTweetTrove()
+	assert.NoError(err)
 
 	// Quoted tweet and quoting tweet
 	assert.Equal(2, len(trove.Tweets))
@@ -283,7 +287,8 @@ func TestAPIV2ParseTweetWithQuotedTombstone(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove(true)
+	trove, err := tweet_result.ToTweetTrove()
+	assert.NoError(err)
 
 	assert.Equal(1, len(trove.Users))
 	user, ok := trove.Users[44067298]
@@ -318,7 +323,8 @@ func TestAPIV2ParseTweetWithURL(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove(true)
+	trove, err := tweet_result.ToTweetTrove()
+	assert.NoError(err)
 
 	assert.Equal(1, len(trove.Tweets))
 	tweet, ok := trove.Tweets[1485695695025803264]
@@ -355,7 +361,8 @@ func TestAPIV2ParseTweetWithURLPlayerCard(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove(true)
+	trove, err := tweet_result.ToTweetTrove()
+	assert.NoError(err)
 
 	assert.Equal(1, len(trove.Tweets))
 	tweet, ok := trove.Tweets[1485504913614327808]
@@ -387,7 +394,8 @@ func TestAPIV2ParseTweetWithURLRetweet(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove(true)
+	trove, err := tweet_result.ToTweetTrove()
+	assert.NoError(err)
 
 	assert.Equal(1, len(trove.Tweets))
 	tweet, ok := trove.Tweets[1488605073588559873]
@@ -414,7 +422,8 @@ func TestAPIV2ParseTweetWithPoll(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove(true)
+	trove, err := tweet_result.ToTweetTrove()
+	assert.NoError(err)
 
 	assert.Len(trove.Tweets, 1)
 	tweet, ok := trove.Tweets[1485692111106285571]
@@ -454,7 +463,8 @@ func TestAPIV2ParseTweetWithSpace(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	assert.NoError(err)
 
-	trove := tweet_result.ToTweetTrove(true)
+	trove, err := tweet_result.ToTweetTrove()
+	assert.NoError(err)
 
 	assert.Len(trove.Tweets, 1)
 	tweet, ok := trove.Tweets[1497647006445146113]
@@ -580,25 +590,67 @@ func TestAPIV2GetMainInstructionFromFeed(t *testing.T) {
 	assert.Equal(feed.GetMainInstruction().Entries[41].EntryID, "asdf")
 }
 
-/**
- * Should handle an entry in the feed that's a tombstone by just ignoring it
- * Expectation: random tombstones in the feed with no context should parse as empty TweetTroves.
- *
- * The indication that it's from a feed (i.e., not in a comments thread) is 'ToTweetTrove(true)'.
- * On a reply thread, it would be 'ToTweetTrove(false)'.
- */
 func TestAPIV2TombstoneEntry(t *testing.T) {
 	assert := assert.New(t)
 	data, err := os.ReadFile("test_responses/api_v2/tombstone_tweet.json")
 	require.NoError(t, err)
 
-	var tweet_result APIV2Result
-	err = json.Unmarshal(data, &tweet_result)
+	var entry APIV2Entry
+	err = json.Unmarshal(data, &entry)
 	require.NoError(t, err)
 
-	trove := tweet_result.ToTweetTrove(true) // 'true' indicates to ignore empty entries
-	assert.Len(trove.Tweets, 0)
+	trove := entry.ToTweetTrove()
+	assert.NoError(err)
+	assert.Len(trove.Tweets, 1)
 	assert.Len(trove.Users, 0)
+	assert.Len(trove.Retweets, 0)
+
+	tweet, is_ok := trove.Tweets[1454515503242829830]
+	assert.True(is_ok)
+	assert.Equal(tweet.ID, TweetID(1454515503242829830))
+}
+
+func TestAPIV2ConversationThreadWithTombstones(t *testing.T) {
+	assert := assert.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/conversation_thread_with_tombstones.json")
+	require.NoError(t, err)
+
+	var resp APIV2Response
+	err = json.Unmarshal(data, &resp)
+	require.NoError(t, err)
+
+	trove, err := resp.ToTweetTrove()
+	require.NoError(t, err)
+
+	assert.Len(trove.Tweets, 4)
+	// t1, is_ok := trove.Tweets[1454515503242829830]
+	// assert.True(is_ok)
+	// assert.True(t1.IsStub)
+	// assert.Equal(TweetID(0), t1.InReplyToID)
+	// // TODO: assert associated user is fake
+
+	// t2, is_ok := trove.Tweets[1454521424144654344]
+	// assert.True(is_ok)
+	// assert.True(t2.IsStub)
+	// assert.Equal(TweetID(1454515503242829830), t2.InReplyToID)
+
+	t3, is_ok := trove.Tweets[1454522147750260742]
+	assert.True(is_ok)
+	assert.True(t3.IsStub)
+	// assert.Equal(TweetID(1454521424144654344), t3.InReplyToID)
+	assert.Equal(UserID(1365863538393309184), t3.UserID)
+	t3_user, is_ok := trove.Users[t3.UserID]
+	assert.True(is_ok)
+	assert.Equal(UserHandle("itsbackwereover"), t3_user.Handle)
+
+	t4, is_ok := trove.Tweets[1454526270809726977]
+	assert.True(is_ok)
+	assert.False(t4.IsStub)
+	assert.Equal(TweetID(1454522147750260742), t4.InReplyToID)
+	_, is_ok = trove.Users[t4.UserID]
+	assert.True(is_ok)
+
+	// assert.Len(trove.Users, 4)
 	assert.Len(trove.Retweets, 0)
 }
 
@@ -610,7 +662,8 @@ func TestTweetWithWarning(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	require.NoError(t, err)
 
-	trove := tweet_result.ToTweetTrove(true)
+	trove, err := tweet_result.ToTweetTrove()
+	assert.NoError(err)
 
 	assert.Len(trove.Retweets, 1)
 	assert.Len(trove.Tweets, 2)
@@ -626,7 +679,8 @@ func TestRetweetWithVisibilityResults(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	require.NoError(err)
 
-	trove := tweet_result.ToTweetTrove(true)
+	trove, err := tweet_result.ToTweetTrove()
+	assert.NoError(err)
 
 	assert.Len(trove.Retweets, 1)
 	assert.Len(trove.Tweets, 1)
@@ -646,7 +700,8 @@ func TestExpandableTweet(t *testing.T) {
 	err = json.Unmarshal(data, &tweet_result)
 	require.NoError(err)
 
-	trove := tweet_result.ToTweetTrove(true)
+	trove, err := tweet_result.ToTweetTrove()
+	assert.NoError(err)
 	main_tweet, is_ok := trove.Tweets[TweetID(1649600354747572225)]
 	require.True(is_ok)
 
@@ -665,7 +720,7 @@ func TestEntryWithConversationThread(t *testing.T) {
 	err = json.Unmarshal(data, &entry_result)
 	require.NoError(err)
 
-	trove := entry_result.ToTweetTrove(true)
+	trove := entry_result.ToTweetTrove()
 
 	assert.Len(trove.Tweets, 4) // 3 tweets in the thread plus the quoted tweet
 	t1, is_ok := trove.Tweets[1624966566264680448]
@@ -693,7 +748,7 @@ func TestConversationThreadEntryWithShowMoreButton(t *testing.T) {
 	err = json.Unmarshal(data, &entry_result)
 	require.NoError(err)
 
-	trove := entry_result.ToTweetTrove(true)
+	trove := entry_result.ToTweetTrove()
 
 	assert.Len(trove.Tweets, 1)
 	t1, is_ok := trove.Tweets[1649803385485377536]

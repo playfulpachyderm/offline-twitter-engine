@@ -33,9 +33,8 @@ func (l CommaSeparatedList) Value() (driver.Value, error) {
 }
 
 type Tweet struct {
-	ID             TweetID    `db:"id"`
-	UserID         UserID     `db:"user_id"`
-	UserHandle     UserHandle // For processing tombstones
+	ID             TweetID `db:"id"`
+	UserID         UserID  `db:"user_id"`
 	User           *User
 	Text           string    `db:"text"`
 	IsExpandable   bool      `db:"is_expandable"`
@@ -46,6 +45,11 @@ type Tweet struct {
 	NumQuoteTweets int       `db:"num_quote_tweets"`
 	InReplyToID    TweetID   `db:"in_reply_to_id"`
 	QuotedTweetID  TweetID   `db:"quoted_tweet_id"`
+
+	// For processing tombstones
+	UserHandle              UserHandle
+	in_reply_to_user_handle UserHandle
+	in_reply_to_user_id     UserID
 
 	Images        []Image
 	Videos        []Video
@@ -220,6 +224,10 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	ret.IsStub = !(ret.TombstoneType == "")
 	ret.LastScrapedAt = TimestampFromUnix(0) // Caller will change this for the tweet that was actually scraped
 	ret.IsConversationScraped = false        // Safe due to the "No Worsening" principle
+
+	// Extra data that can help piece together tombstoned tweet info
+	ret.in_reply_to_user_id = UserID(apiTweet.InReplyToUserID)
+	ret.in_reply_to_user_handle = UserHandle(apiTweet.InReplyToScreenName)
 
 	return
 }
