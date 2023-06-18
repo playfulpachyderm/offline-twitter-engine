@@ -557,10 +557,48 @@ func (api_response APIV2Response) IsEmpty() bool {
 func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 	ret := NewTweetTrove()
 
-	// Parse all of the entries
-	for _, entry := range api_response.GetMainInstruction().Entries { // TODO: the second Instruction is the pinned tweet
-		main_trove := entry.ToTweetTrove()
-		ret.MergeWith(main_trove)
+	// Parse all of the entries, and attempt to do tombstone reply-joining as we go
+	for i, entry := range api_response.GetMainInstruction().Entries { // TODO: the second Instruction is the pinned tweet in a User Feed
+		ret.MergeWith(entry.ToTweetTrove())
+
+		// Only do tombstone reply-joining on a Tweet Detail thread (not a User Feed!)
+		if len(api_response.Data.ThreadedConversationWithInjectionsV2.Instructions) == 0 {
+			continue
+		}
+		// Skip the first entry since it doesn't have a parent
+		if i == 0 {
+			continue
+		}
+		// Infer "in_reply_to_id" for tombstoned tweets from the order of entries, if applicable
+		if entry.Content.EntryType != "TimelineTimelineItem" {
+			// Only check back up the parent thread, which will all be "TimelineTimelineItems".
+			// i.e., skip replies
+			// TODO: maybe don't skip replies?
+			continue
+		}
+		entry_type, main_tweet_id := entry.ParseID()
+		if entry_type == "cursor-showmorethreadsprompt" || entry_type == "cursor-bottom" {
+			// Skip cursors
+			// - "cursor-bottom" => load more high-quality replies
+			// - "cursor-showmorethreadsprompt" => "Show additional replies, including those that may contain offensive content"
+			continue
+		}
+		if entry_type != "tweet" {
+			// TODO: discovery panic
+			panic(fmt.Sprintf("Unexpected first part of entry id: %q", entry_type))
+		}
+		main_tweet, is_ok := ret.Tweets[main_tweet_id]
+		if !is_ok {
+			// On a User Feed, the entry ID could also be a Retweet ID, but we should only reply-join on Tweet Detail views.
+			panic(fmt.Sprintf("Entry didn't parse correctly: %q", entry.EntryID))
+		}
+		if !main_tweet.IsStub || main_tweet.InReplyToID != TweetID(0) {
+			// Not a tombstone; ignore
+			continue
+		}
+		_, prev_entry_id := api_response.GetMainInstruction().Entries[i-1].ParseID()
+		main_tweet.InReplyToID = prev_entry_id
+		ret.Tweets[main_tweet_id] = main_tweet
 	}
 
 	// Add in any tombstoned user handles and IDs if possible, by reading from the replies

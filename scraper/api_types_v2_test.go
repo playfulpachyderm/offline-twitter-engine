@@ -597,34 +597,35 @@ func TestAPIV2ConversationThreadWithTombstones(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Len(trove.Tweets, 4)
-	// t1, is_ok := trove.Tweets[1454515503242829830]
-	// assert.True(is_ok)
-	// assert.True(t1.IsStub)
-	// assert.Equal(TweetID(0), t1.InReplyToID)
-	// // TODO: assert associated user is fake
+	t1, is_ok := trove.Tweets[1454515503242829830]
+	assert.True(is_ok)
+	assert.True(t1.IsStub)
+	assert.Equal(TweetID(0), t1.InReplyToID)
+	// TODO: assert associated user is fake
 
-	// t2, is_ok := trove.Tweets[1454521424144654344]
-	// assert.True(is_ok)
-	// assert.True(t2.IsStub)
-	// assert.Equal(TweetID(1454515503242829830), t2.InReplyToID)
+	t2, is_ok := trove.Tweets[1454521424144654344]
+	assert.True(is_ok)
+	assert.True(t2.IsStub)
+	assert.Equal(TweetID(1454515503242829830), t2.InReplyToID)
 
 	t3, is_ok := trove.Tweets[1454522147750260742]
 	assert.True(is_ok)
 	assert.True(t3.IsStub)
-	// assert.Equal(TweetID(1454521424144654344), t3.InReplyToID)
+	assert.Equal(TweetID(1454521424144654344), t3.InReplyToID)
 	assert.Equal(UserID(1365863538393309184), t3.UserID)
 	t3_user, is_ok := trove.Users[t3.UserID]
 	assert.True(is_ok)
+	assert.False(t3_user.IsIdFake)
 	assert.Equal(UserHandle("itsbackwereover"), t3_user.Handle)
 
 	t4, is_ok := trove.Tweets[1454526270809726977]
 	assert.True(is_ok)
 	assert.False(t4.IsStub)
 	assert.Equal(TweetID(1454522147750260742), t4.InReplyToID)
-	_, is_ok = trove.Users[t4.UserID]
+	t4_user, is_ok := trove.Users[t4.UserID]
 	assert.True(is_ok)
+	assert.False(t4_user.IsIdFake)
 
-	// assert.Len(trove.Users, 4)
 	assert.Len(trove.Retweets, 0)
 }
 
