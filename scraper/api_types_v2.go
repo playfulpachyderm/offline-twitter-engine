@@ -398,6 +398,17 @@ func (e *APIV2Entry) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// Parse the entry's "entryId" field to infer the ID of the tweet it contains.
+// The returned TweetID is only valid if the entryID type is "tweet" (i.e., the entryID is like "tweet-12345").
+// Return the entry type and the TweetID.
+func (e *APIV2Entry) ParseID() (string, TweetID) {
+	parts := strings.Split(e.EntryID, "-")
+	if len(parts) < 2 {
+		panic(fmt.Sprintf("Entry id (%s) has %d parts!", e.EntryID, len(parts)))
+	}
+	return strings.Join(parts[0:len(parts)-1], "-"), TweetID(int_or_panic(parts[len(parts)-1]))
+}
+
 func (e APIV2Entry) ToTweetTrove() TweetTrove {
 	defer func() {
 		if obj := recover(); obj != nil {
@@ -460,7 +471,8 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 			}
 
 			// Capture the tombstone ID
-			tombstoned_tweet.ID = int64(int_or_panic(strings.Split(e.EntryID, "-")[1]))
+			_, tombstoned_tweet_id := e.ParseID()
+			tombstoned_tweet.ID = int64(tombstoned_tweet_id)
 
 			// Parse the tombstone into a Tweet and add it to the trove
 			parsed_tombstone_tweet, err := ParseSingleTweet(tombstoned_tweet)
@@ -570,7 +582,8 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 		}
 
 		if replied_tweet.ID == 0 {
-			// Not sure if this can happen.  Use a panic to detect if it does so we can analyse
+			// Not sure if this can happen.  It should get filled out by parsing the entry ID.
+			// Use a panic to detect if it does so we can analyse
 			// TODO: make a better system to capture "discovery panics" that doesn't involve panicking
 			panic(fmt.Sprintf("Tombstoned tweet has no ID (should be %d)", tweet.InReplyToID))
 		}
