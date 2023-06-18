@@ -2,7 +2,6 @@ package scraper_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"testing"
 
@@ -25,9 +24,7 @@ func TestAPIV2ParseUser(t *testing.T) {
 
 	var user_result APIV2UserResult
 	err = json.Unmarshal(data, &user_result)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
+	require.NoError(t, err)
 
 	user := user_result.ToUser()
 
@@ -482,55 +479,36 @@ func TestAPIV2ParseTweetWithSpace(t *testing.T) {
 }
 
 func TestParseAPIV2UserFeed(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
 	data, err := os.ReadFile("test_responses/api_v2/user_feed_apiv2.json")
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(err)
+
 	var feed APIV2Response
 	err = json.Unmarshal(data, &feed)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
+	require.NoError(err)
 
 	tweet_trove, err := feed.ToTweetTrove()
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(err)
 
 	// Check users
 	user := tweet_trove.Users[44067298]
-	if user.ID != 44067298 {
-		t.Errorf("Expected ID %d, got %d", 44067298, user.ID)
-	}
-	if user.DisplayName != "Michael Malice" {
-		t.Errorf("Expected display name %q, got %q", "Michael Malice", user.DisplayName)
-	}
+	assert.Equal(UserID(44067298), user.ID)
+	assert.Equal("Michael Malice", user.DisplayName)
 
 	retweeted_user := tweet_trove.Users[1326229737551912960]
-	if retweeted_user.ID != 1326229737551912960 {
-		t.Errorf("Expected ID %d, got %d", 1326229737551912960, retweeted_user.ID)
-	}
-	if retweeted_user.Handle != "libsoftiktok" {
-		t.Errorf("Expected handle %q, got %q", "libsoftiktok", retweeted_user.Handle)
-	}
+	assert.Equal(UserID(1326229737551912960), retweeted_user.ID)
+	assert.Equal(UserHandle("libsoftiktok"), retweeted_user.Handle)
 
 	quote_tweeted_user := tweet_trove.Users[892155218292617217]
-	if quote_tweeted_user.ID != 892155218292617217 {
-		t.Errorf("Expected ID %d, got %d", 892155218292617217, quote_tweeted_user.ID)
-	}
+	assert.Equal(UserID(892155218292617217), quote_tweeted_user.ID)
 
 	// Check retweets
-	if len(tweet_trove.Retweets) != 2 {
-		t.Errorf("Expected %d retweets but got %d", 2, len(tweet_trove.Retweets))
-	}
+	assert.Len(tweet_trove.Retweets, 2)
 
 	// Test cursor-bottom
 	bottom_cursor := feed.GetCursorBottom()
-	if bottom_cursor != "HBaYgL2Fp/T7nCkAAA==" {
-		t.Errorf("Expected cursor %q, got %q", "HBaYgL2Fp/T7nCkAAA==", bottom_cursor)
-	}
-
-	fmt.Printf("%d Users, %d Tweets, %d Retweets\n", len(tweet_trove.Users), len(tweet_trove.Tweets), len(tweet_trove.Retweets))
+	assert.Equal("HBaYgL2Fp/T7nCkAAA==", bottom_cursor)
 }
 
 /**
@@ -544,9 +522,7 @@ func TestAPIV2FeedIsEmpty(t *testing.T) {
 	}
 	var feed APIV2Response
 	err = json.Unmarshal(data, &feed)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
+	require.NoError(t, err)
 
 	assert.True(feed.IsEmpty())
 
@@ -571,9 +547,7 @@ func TestAPIV2GetMainInstructionFromFeed(t *testing.T) {
 	}
 	var feed APIV2Response
 	err = json.Unmarshal(data, &feed)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
+	require.NoError(t, err)
 
 	assert.Equal(len(feed.GetMainInstruction().Entries), 41)
 

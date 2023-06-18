@@ -4,19 +4,18 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	. "offline_twitter/scraper"
 )
 
 // Makes an HTTP request
 func TestGetGuestToken(t *testing.T) {
 	token, err := GetGuestToken()
-	if err != nil {
-		t.Errorf("%v", err)
-	}
+	require.NoError(t, err)
 
-	if len(token) < 15 {
-		t.Errorf("I don't think this is a token: %q", token)
-	}
+	assert.True(t, len(token) >= 15, "I don't think this is a token: %q", token)
 	fmt.Println(token)
 }
 
