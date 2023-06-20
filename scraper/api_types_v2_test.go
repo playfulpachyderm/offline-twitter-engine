@@ -765,3 +765,23 @@ func TestConversationThreadEntryWithShowMoreButton(t *testing.T) {
 
 	assert.Len(trove.Users, 1)
 }
+
+func TestTweetWithInlineLabel(t *testing.T) {
+	assert := assert.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/response_with_inline_label.json")
+	require.NoError(t, err)
+	var resp APIV2Response
+
+	err = json.Unmarshal(data, &resp)
+	require.NoError(t, err)
+
+	// Test the "Show additional replies, including offensive" cursor
+	assert.Equal("NwAAAPAoHBlWiICz7Y27o4kploCzmY7CyYgphoC-7d65sYgphsCj7cml4ogpjMC4ue3954gpJQYRFRAAAA", resp.GetCursorBottom())
+
+	trove, err := resp.ToTweetTrove()
+	assert.NoError(err)
+
+	assert.Len(trove.Retweets, 0)
+	assert.Len(trove.Tweets, 1)
+	assert.Len(trove.Users, 1)
+}

@@ -421,6 +421,9 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 		// - e.Content.EntryType -> User Feed itself
 		// - e.Content.ItemContent.ItemType -> conversation thread in a user feed
 		return NewTweetTrove()
+	} else if e.Content.ItemContent.ItemType == "TimelineLabel" {
+		// Skip inline "labels" like "More Replies" that appear when you click "show more replies"
+		return NewTweetTrove()
 	} else if e.Content.EntryType == "TimelineTimelineModule" {
 		ret := NewTweetTrove()
 
