@@ -798,3 +798,20 @@ func TestTweetDetailWithShowMoreButton(t *testing.T) {
 	// Test the "Show more replies" cursor
 	assert.Equal("NwAAAPANHBlWhMC--YvZ3a8ugsDS1aGWqbAugIDQ6dCa3xIAYL314NGqsAkA0OGFzYqwLiUEERUOAAA", resp.GetCursorBottom())
 }
+
+func TestConversationThreadWithTombstoneReplies(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/tweet_detail_with_tombstone_replies.json")
+	require.NoError(err)
+	var resp APIV2Response
+	err = json.Unmarshal(data, &resp)
+	require.NoError(err)
+
+	trove, err := resp.ToTweetTrove()
+	require.NoError(err)
+
+	t1, is_ok := trove.Tweets[1433713164546293767] // Main tweet
+	assert.True(is_ok)
+	assert.False(t1.IsStub)
+}

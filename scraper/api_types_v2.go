@@ -438,7 +438,10 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 					continue
 				}
 				trove, err := item.Item.ItemContent.TweetResults.ToTweetTrove()
-				if err != nil {
+				if errors.Is(err, ErrorIsTombstone) {
+					// TODO: do something with tombstones in replies to a Tweet Detail
+					// For now, just ignore tombstones in the replies
+				} else if err != nil {
 					panic(err)
 				}
 				ret.MergeWith(trove)
