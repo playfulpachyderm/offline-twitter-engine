@@ -584,6 +584,30 @@ func TestAPIV2TombstoneEntry(t *testing.T) {
 	assert.Equal(tweet.ID, TweetID(1454515503242829830))
 }
 
+func TestAPIV2UserFeedTombstoneEntry(t *testing.T) {
+	assert := assert.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/user_feed_tombstone_entry.json")
+	require.NoError(t, err)
+
+	var entry APIV2Entry
+	err = json.Unmarshal(data, &entry)
+	require.NoError(t, err)
+
+	trove := entry.ToTweetTrove()
+	assert.NoError(err)
+	// assert.Len(trove.Tweets, 1)
+	// assert.Len(trove.Users, 1)
+	assert.Len(trove.Retweets, 0)
+
+	// tweet, is_ok := trove.Tweets[1670122897912786944]
+	// assert.True(is_ok)
+	// assert.Equal(tweet.ID, TweetID(1670122897912786944))
+	// assert.Equal("age-restricted", tweet.TombstoneType)
+	// assert.NotEqual(UserID(0), tweet.UserID)
+	// user, is_ok := trove.Users[tweet.UserID]
+	// assert.True(user.IsIdFake)
+}
+
 func TestAPIV2ConversationThreadWithTombstones(t *testing.T) {
 	assert := assert.New(t)
 	data, err := os.ReadFile("test_responses/api_v2/conversation_thread_with_tombstones.json")
