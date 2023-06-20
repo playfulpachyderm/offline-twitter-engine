@@ -541,7 +541,12 @@ func (api_response APIV2Response) GetCursorBottom() string {
 		}
 
 		// For a Tweet Detail page:
-		if entry.Content.ItemContent.CursorType == "Bottom" {
+		if entry.Content.ItemContent.CursorType == "Bottom" ||
+			entry.Content.ItemContent.CursorType == "ShowMoreThreadsPrompt" ||
+			entry.Content.ItemContent.CursorType == "ShowMoreThreads" {
+			// "Bottom": normal cursor, auto-loads when it scrolls into view
+			// "ShowMoreThreads": normal cursor, but you have to click it to load more
+			// "ShowMoreThreadsPrompt": show offensive/low quality replies
 			return entry.Content.ItemContent.Value
 		}
 	}

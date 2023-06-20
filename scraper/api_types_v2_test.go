@@ -785,3 +785,16 @@ func TestTweetWithInlineLabel(t *testing.T) {
 	assert.Len(trove.Tweets, 1)
 	assert.Len(trove.Users, 1)
 }
+
+func TestTweetDetailWithShowMoreButton(t *testing.T) {
+	assert := assert.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/tweet_detail_with_show_more_replies_button.json")
+	require.NoError(t, err)
+	var resp APIV2Response
+
+	err = json.Unmarshal(data, &resp)
+	require.NoError(t, err)
+
+	// Test the "Show more replies" cursor
+	assert.Equal("NwAAAPANHBlWhMC--YvZ3a8ugsDS1aGWqbAugIDQ6dCa3xIAYL314NGqsAkA0OGFzYqwLiUEERUOAAA", resp.GetCursorBottom())
+}
