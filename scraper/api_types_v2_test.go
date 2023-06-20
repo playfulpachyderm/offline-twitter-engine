@@ -601,12 +601,21 @@ func TestAPIV2ConversationThreadWithTombstones(t *testing.T) {
 	assert.True(is_ok)
 	assert.True(t1.IsStub)
 	assert.Equal(TweetID(0), t1.InReplyToID)
-	// TODO: assert associated user is fake
+	assert.NotEqual(UserID(0), t1.UserID)
+	t1_user, is_ok := trove.Users[t1.UserID]
+	assert.True(is_ok)
+	assert.True(t1_user.IsIdFake)
+	assert.Equal(UserHandle("<UNKNOWN USER>"), t1_user.Handle)
 
 	t2, is_ok := trove.Tweets[1454521424144654344]
 	assert.True(is_ok)
 	assert.True(t2.IsStub)
 	assert.Equal(TweetID(1454515503242829830), t2.InReplyToID)
+	assert.NotEqual(UserID(0), t2.UserID)
+	t2_user, is_ok := trove.Users[t2.UserID]
+	assert.True(is_ok)
+	assert.True(t2_user.IsIdFake)
+	assert.Equal(UserHandle("<UNKNOWN USER>"), t2_user.Handle)
 
 	t3, is_ok := trove.Tweets[1454522147750260742]
 	assert.True(is_ok)

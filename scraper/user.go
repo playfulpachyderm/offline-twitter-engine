@@ -84,6 +84,24 @@ Joined %s
 	return ret
 }
 
+func GetUnknownUser() User {
+	return User{
+		ID:              UserID(0x4000000000000000), // 2^62
+		DisplayName:     "<Unknown User>",
+		Handle:          UserHandle("<UNKNOWN USER>"),
+		Bio:             "<blank>",
+		FollowersCount:  0,
+		FollowingCount:  0,
+		Location:        "<blank>",
+		Website:         "<blank>",
+		JoinDate:        TimestampFromUnix(0),
+		IsVerified:      false,
+		IsPrivate:       false,
+		IsNeedingFakeID: false,
+		IsIdFake:        true,
+	}
+}
+
 /**
  * Unknown Users with handles are only created by direct GetUser calls (either `twitter fetch_user`
  * subcommand or as part of tombstone user fetching.)

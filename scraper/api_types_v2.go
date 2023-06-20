@@ -454,10 +454,10 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 	} else if e.Content.EntryType == "TimelineTimelineItem" {
 		ret, err := e.Content.ItemContent.TweetResults.ToTweetTrove()
 
+		// Handle tombstones in parent reply thread
 		if errors.Is(err, ErrorIsTombstone) {
-			// Handle tombstones
-			ret = NewTweetTrove()                                                         // clear the result just in case
-			tombstoned_tweet := e.Content.ItemContent.TweetResults.Result.Legacy.APITweet // Will be empty to start
+			ret = NewTweetTrove() // clear the result just in case there is a TweetID(0) in it
+			tombstoned_tweet := APITweet{}
 
 			// Capture the tombstone text
 			var is_ok bool
@@ -480,6 +480,8 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 				panic(err)
 			}
 			ret.Tweets[parsed_tombstone_tweet.ID] = parsed_tombstone_tweet
+		} else if err != nil {
+			panic(err)
 		}
 		return ret
 	}
@@ -626,11 +628,14 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 			panic(fmt.Sprintf("Tombstoned tweet has no ID (should be %d)", tweet.InReplyToID))
 		}
 
+		// Fill out the replied tweet's UserID using this tweet's "in_reply_to_user_id".
+		// If this tweet doesn't have it (i.e., this tweet is also a tombstone), create a fake user instead, and add it to the tweet trove.
 		if replied_tweet.UserID == 0 {
 			replied_tweet.UserID = tweet.in_reply_to_user_id
-			if replied_tweet.UserID == 0 { // Still??
-				log.Warn(fmt.Sprintf("Still couldn't find user for replied tweet %d", tweet.InReplyToID))
-				continue
+			if replied_tweet.UserID == 0 {
+				fake_user := GetUnknownUser()
+				ret.Users[fake_user.ID] = fake_user
+				replied_tweet.UserID = fake_user.ID
 			}
 		} // replied_tweet.UserID should now be a real UserID
 
