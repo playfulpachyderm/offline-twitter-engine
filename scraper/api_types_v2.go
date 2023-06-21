@@ -587,35 +587,38 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 			continue
 		}
 		// Infer "in_reply_to_id" for tombstoned tweets from the order of entries, if applicable
-		if entry.Content.EntryType != "TimelineTimelineItem" {
-			// Only check back up the parent thread, which will all be "TimelineTimelineItems".
-			// i.e., skip replies
-			// TODO: maybe don't skip replies?
-			continue
+		if entry.Content.EntryType == "TimelineTimelineItem" {
+			entry_type, main_tweet_id := entry.ParseID()
+			if entry_type == "cursor-showmorethreadsprompt" || entry_type == "cursor-bottom" || entry_type == "cursor-showmorethreads" {
+				// Skip cursors
+				// - "cursor-bottom" => auto-loads more replies when you scroll it into view
+				// - "cursor-showmorethreadsprompt" => "Show additional replies, including those that may contain offensive content" button
+				// - "cursor-showmorethreads" => "Show more replies" button
+				continue
+			}
+			if entry_type == "label" {
+				// Skip labels / headers
+				continue
+			}
+			if entry_type != "tweet" {
+				// TODO: discovery panic
+				panic(fmt.Sprintf("Unexpected first part of entry id: %q", entry_type))
+			}
+			main_tweet, is_ok := ret.Tweets[main_tweet_id]
+			if !is_ok {
+				// On a User Feed, the entry ID could also be a Retweet ID, but we should only reply-join on Tweet Detail views.
+				panic(fmt.Sprintf("Entry didn't parse correctly: %q", entry.EntryID))
+			}
+			if !main_tweet.IsStub || main_tweet.InReplyToID != TweetID(0) {
+				// Not a tombstone; ignore
+				continue
+			}
+			_, prev_entry_id := api_response.GetMainInstruction().Entries[i-1].ParseID()
+			main_tweet.InReplyToID = prev_entry_id
+			ret.Tweets[main_tweet_id] = main_tweet
+		} else if entry.Content.EntryType == "TimelineTimelineModule" {
+			// TODO: check reply threads for tombstones as well
 		}
-		entry_type, main_tweet_id := entry.ParseID()
-		if entry_type == "cursor-showmorethreadsprompt" || entry_type == "cursor-bottom" {
-			// Skip cursors
-			// - "cursor-bottom" => load more high-quality replies
-			// - "cursor-showmorethreadsprompt" => "Show additional replies, including those that may contain offensive content"
-			continue
-		}
-		if entry_type != "tweet" {
-			// TODO: discovery panic
-			panic(fmt.Sprintf("Unexpected first part of entry id: %q", entry_type))
-		}
-		main_tweet, is_ok := ret.Tweets[main_tweet_id]
-		if !is_ok {
-			// On a User Feed, the entry ID could also be a Retweet ID, but we should only reply-join on Tweet Detail views.
-			panic(fmt.Sprintf("Entry didn't parse correctly: %q", entry.EntryID))
-		}
-		if !main_tweet.IsStub || main_tweet.InReplyToID != TweetID(0) {
-			// Not a tombstone; ignore
-			continue
-		}
-		_, prev_entry_id := api_response.GetMainInstruction().Entries[i-1].ParseID()
-		main_tweet.InReplyToID = prev_entry_id
-		ret.Tweets[main_tweet_id] = main_tweet
 	}
 
 	// Add in any tombstoned user handles and IDs if possible, by reading from the replies
