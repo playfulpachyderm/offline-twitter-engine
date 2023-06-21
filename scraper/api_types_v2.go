@@ -662,7 +662,7 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 			existing_user.Handle = tweet.in_reply_to_user_handle
 		}
 		ret.Users[replied_tweet.UserID] = existing_user
-		// TODO: add to ret.TombstonedUsers?
+		ret.TombstoneUsers = append(ret.TombstoneUsers, existing_user.Handle)
 
 		ret.Tweets[replied_tweet.ID] = replied_tweet
 	}

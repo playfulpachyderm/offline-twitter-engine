@@ -650,6 +650,7 @@ func TestAPIV2ConversationThreadWithTombstones(t *testing.T) {
 	assert.True(is_ok)
 	assert.False(t3_user.IsIdFake)
 	assert.Equal(UserHandle("itsbackwereover"), t3_user.Handle)
+	assert.Contains(trove.TombstoneUsers, UserHandle("itsbackwereover"))
 
 	t4, is_ok := trove.Tweets[1454526270809726977]
 	assert.True(is_ok)
