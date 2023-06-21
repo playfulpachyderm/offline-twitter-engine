@@ -64,9 +64,20 @@ func (t1 *TweetTrove) MergeWith(t2 TweetTrove) {
 func (trove *TweetTrove) FetchTombstoneUsers() {
 	for _, handle := range trove.TombstoneUsers {
 		// Skip fetching if this user is already in the trove
-		_, already_fetched := trove.FindUserByHandle(handle)
+		user, already_fetched := trove.FindUserByHandle(handle)
+
 		if already_fetched {
-			continue
+			// If the user is already fetched and it's an intact user, don't fetch it again
+			if user.JoinDate.Unix() != (Timestamp{}).Unix() {
+				log.Debugf("Skipping %q due to intact user", handle)
+				continue
+			}
+
+			// A user needs a valid handle or ID to fetch it by
+			if user.IsIdFake && user.Handle == "<UNKNOWN USER>" {
+				log.Debugf("Skipping %q due to completely unknown user (not fetchable)", handle)
+				continue
+			}
 		}
 
 		log.Debug("Getting tombstone user: " + handle)
