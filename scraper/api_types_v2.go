@@ -589,8 +589,9 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 		// Infer "in_reply_to_id" for tombstoned tweets from the order of entries, if applicable
 		if entry.Content.EntryType == "TimelineTimelineItem" {
 			entry_type, main_tweet_id := entry.ParseID()
-			if entry_type == "cursor-showmorethreadsprompt" || entry_type == "cursor-bottom" || entry_type == "cursor-showmorethreads" {
+			if entry_type == "cursor-showmorethreadsprompt" || entry_type == "cursor-bottom" || entry_type == "cursor-showmorethreads" || entry_type == "cursor-top" {
 				// Skip cursors
+				// - "cursor-top" => So far, the only top-cursor type there is
 				// - "cursor-bottom" => auto-loads more replies when you scroll it into view
 				// - "cursor-showmorethreadsprompt" => "Show additional replies, including those that may contain offensive content" button
 				// - "cursor-showmorethreads" => "Show more replies" button
@@ -609,8 +610,8 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 				// On a User Feed, the entry ID could also be a Retweet ID, but we should only reply-join on Tweet Detail views.
 				panic(fmt.Sprintf("Entry didn't parse correctly: %q", entry.EntryID))
 			}
-			if !main_tweet.IsStub || main_tweet.InReplyToID != TweetID(0) {
-				// Not a tombstone; ignore
+			if main_tweet.InReplyToID != TweetID(0) {
+				// Already has an InReplyToID, so doesn't need to be joined using positional inference
 				continue
 			}
 			_, prev_entry_id := api_response.GetMainInstruction().Entries[i-1].ParseID()

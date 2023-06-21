@@ -816,3 +816,31 @@ func TestConversationThreadWithTombstoneReplies(t *testing.T) {
 	assert.True(is_ok)
 	assert.False(t1.IsStub)
 }
+
+func TestTweetDetailWithUnjoinedNontombstoneTweet(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/tweet_detail_with_unjoined_nontombstone_tweet.json")
+	require.NoError(err)
+	var resp APIV2Response
+	err = json.Unmarshal(data, &resp)
+	require.NoError(err)
+
+	trove, err := resp.ToTweetTrove()
+	require.NoError(err)
+
+	assert.Len(trove.Tweets, 3)
+	t1, is_ok := trove.Tweets[1481999034328006662]
+	assert.True(is_ok)
+	assert.True(t1.IsStub)
+
+	t2, is_ok := trove.Tweets[1481999536918831107]
+	assert.True(is_ok)
+	assert.True(t2.IsStub)
+	assert.Equal(t1.ID, t2.InReplyToID)
+
+	t3, is_ok := trove.Tweets[1482000048447705090] // Main tweet
+	assert.True(is_ok)
+	assert.False(t3.IsStub)
+	assert.Equal(t2.ID, t3.InReplyToID)
+}
