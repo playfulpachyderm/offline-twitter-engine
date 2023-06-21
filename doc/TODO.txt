@@ -18,21 +18,9 @@ TODO broadcast-cards
 panic: Unknown card type: 3691233323:periscope_broadcast
 panic: Unknown card type: 745291183405076480:broadcast
 
-TODO consecutive-tombstones
-Conversation threads with two or more consecutive tombstones don't get scraped correctly
-- e.g.: https://twitter.com/hatecoleslaw/status/1429584549701357568
-- Hard mode: https://twitter.com/masforshort/status/1482000048447705090
-
 TODO video-bitrates
 - add "bitrate" and "available bitrates" fields
 - option to upgrade or downgrade video quality
-
-TODO: Problem tweets
-- https://twitter.com/CovfefeAnon/status/1427693931047837702: parent thread not loading (possible GUI problem)
-- "account no longer exists" tombstone not being collected => https://twitter.com/michaelmalice/status/1461031030278742020
-- tweet with warning label not getting scraped right: https://twitter.com/michaelmalice/status/1493324611999748098
-- fails to produce any result for the first tweet in the thread => https://twitter.com/CovfefeAnon/status/1498877082838962181
-- twitter fetch_tweet 1517683230421528576 => panic: ScreenName is empty!
 
 TODO: videos-view-count
 - videos don't parse properly in APIv2
@@ -42,16 +30,15 @@ TODO: APIv2-pinned-tweets
 
 TODO video-not-downloading: https://twitter.com/JustinPulitzer/status/1496709662602932224
 
-TODO sqlx
-- increase coverage (not sure why this is done partially)
+TODO use-sqlx
+- Users
+- Images, Videos, Urls, Polls
+- Retweets
 
 TODO get-user-tweets-user-doesn't-exist
 
 TODO bash-completions
 - Should have bash completions.
-
-TODO implement-custom-unmarshal
-- the parsing might be excessively complex, and it doesn't correctly catch failures.  Might be good to just implement the Unmarshal interface instead
 
 TODO twitter-spaces
 - add `is_details_available` flag
@@ -74,8 +61,12 @@ TODO spaces-timestamps-millis
 TODO fix-spaces-participants-duplicates
 - It is creating a new copy of the participants every time it gets scraped again
 
-TODO scrape-spaces-participants-admin
+TODO spaces-fetch-participants-info
+- some user information is available in a Spaces result.  Right now we just render them as null users (handle = "", id = 0) if they're not fetched already
 - distinguish whether someone was an admin in the space or not
+
+TODO spaces-fetch-sharings
+- you can fetch the stuff that was posted in the jumbotron
 
 TODO authenticated-not-fetching-images
 - Images in tweets don't fetch when you're authenticated
@@ -88,3 +79,13 @@ TODO authenticated-only-request-warning
 
 TODO expanding-tweet-integration-test
 - Add an integration test for expanding tweets
+
+TODO unknown-user-upgrading
+- if an unknown user (created to satisfy SQLite integrity check on user_id foreign key) has user details fetched, the "Join Date" and other zero-value fields should update with the new value
+
+TODO apiv2-tombstones
+- on Tweet Detail:
+  - tombstones in replies to the focused tweet
+- on User Feed:
+  - tombstones (e.g, "Age restricted") that show up as top-level entries
+    - keep in mind that these might be retweets; the entry-id is the RetweetID, not the TweetID

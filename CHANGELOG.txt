@@ -127,3 +127,10 @@ v0.2.2
 
 - Add support for Expandable (i.e., "Show more") tweets
 - Fix an issue with half the tweets on user feeds not getting fetched while logged in
+
+v0.3.0
+------
+
+- Now use APIv2 for Tweet Detail pages as well as user feeds.
+- BUGFIX: fix a lot of bugs that were unfixable using the old API
+- BUGFIX: fix spaces not updating ended_at time
