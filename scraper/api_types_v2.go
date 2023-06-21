@@ -589,7 +589,10 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 		// Infer "in_reply_to_id" for tombstoned tweets from the order of entries, if applicable
 		if entry.Content.EntryType == "TimelineTimelineItem" {
 			entry_type, main_tweet_id := entry.ParseID()
-			if entry_type == "cursor-showmorethreadsprompt" || entry_type == "cursor-bottom" || entry_type == "cursor-showmorethreads" || entry_type == "cursor-top" {
+			if entry_type == "cursor-showmorethreadsprompt" ||
+				entry_type == "cursor-bottom" ||
+				entry_type == "cursor-showmorethreads" ||
+				entry_type == "cursor-top" {
 				// Skip cursors
 				// - "cursor-top" => So far, the only top-cursor type there is
 				// - "cursor-bottom" => auto-loads more replies when you scroll it into view
@@ -617,9 +620,10 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 			_, prev_entry_id := api_response.GetMainInstruction().Entries[i-1].ParseID()
 			main_tweet.InReplyToID = prev_entry_id
 			ret.Tweets[main_tweet_id] = main_tweet
-		} else if entry.Content.EntryType == "TimelineTimelineModule" {
-			// TODO: check reply threads for tombstones as well
 		}
+		// else if entry.Content.EntryType == "TimelineTimelineModule" {
+		// 	// TODO: check reply threads for tombstones as well
+		// }
 	}
 
 	// Add in any tombstoned user handles and IDs if possible, by reading from the replies
@@ -686,10 +690,7 @@ func get_tweet_detail_url(tweet_id TweetID, cursor string) string {
 	if cursor != "" {
 		maybe_cursor = "%22cursor%22%3A%22" + url.QueryEscape(cursor) + "%22%2C"
 	}
-	return "https://twitter.com/i/api/graphql/tPRAv4UnqM9dOgDWggph7Q/TweetDetail?variables=%7B%22focalTweetId%22%3A%22" + fmt.Sprint(tweet_id) + "%22%2C" + maybe_cursor + "%22with_rux_injections%22%3Afalse%2C%22includePromotedContent%22%3Atrue%2C%22withCommunity%22%3Atrue%2C%22withQuickPromoteEligibilityTweetFields%22%3Atrue%2C%22withBirdwatchNotes%22%3Atrue%2C%22withVoice%22%3Atrue%2C%22withV2Timeline%22%3Atrue%7D&features=%7B%22rweb_lists_timeline_redesign_enabled%22%3Atrue%2C%22responsive_web_graphql_exclude_directive_enabled%22%3Atrue%2C%22verified_phone_label_enabled%22%3Afalse%2C%22creator_subscriptions_tweet_preview_api_enabled%22%3Atrue%2C%22responsive_web_graphql_timeline_navigation_enabled%22%3Atrue%2C%22responsive_web_graphql_skip_user_profile_image_extensions_enabled%22%3Afalse%2C%22tweetypie_unmention_optimization_enabled%22%3Atrue%2C%22responsive_web_edit_tweet_api_enabled%22%3Atrue%2C%22graphql_is_translatable_rweb_tweet_is_translatable_enabled%22%3Atrue%2C%22view_counts_everywhere_api_enabled%22%3Atrue%2C%22longform_notetweets_consumption_enabled%22%3Atrue%2C%22tweet_awards_web_tipping_enabled%22%3Afalse%2C%22freedom_of_speech_not_reach_fetch_enabled%22%3Atrue%2C%22standardized_nudges_misinfo%22%3Atrue%2C%22tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled%22%3Afalse%2C%22longform_notetweets_rich_text_read_enabled%22%3Atrue%2C%22longform_notetweets_inline_media_enabled%22%3Afalse%2C%22responsive_web_enhance_cards_enabled%22%3Afalse%7D"
-	// Request URL: "https://twitter.com/i/api/graphql/Pn68XRZwyV9ClrAEmK8rrQ/TweetDetail?variables=%7B%22focalTweetId%22%3A%221649600354747572225
-	// "%22%2C%22cursor%22%3A%22WwAAAPANHBmWgICz2dr56OQtgICw7cSjr-UtkICw1fzkyBIA8BK-0YTco-UtioC-0ePcx-QthICw-aSBz-QtgoC-1fffiuUkAPAHya3Ty-QtgMCz6cS-lOUtJQISFQQAAA%22%2C%22referrer%22%3A%22tweet
-	// "%22%2C%22with_rux_injections%22%3Afalse%2C%22includePromotedContent%22%3Atrue%2C%22withCommunity%22%3Atrue%2C%22withQuickPromoteEligibilityTweetFields%22%3Atrue%2C%22withBirdwatchNotes%22%3Atrue%2C%22withVoice%22%3Atrue%2C%22withV2Timeline%22%3Atrue%7D&features=%7B%22rweb_lists_timeline_redesign_enabled%22%3Atrue%2C%22responsive_web_graphql_exclude_directive_enabled%22%3Atrue%2C%22verified_phone_label_enabled%22%3Afalse%2C%22creator_subscriptions_tweet_preview_api_enabled%22%3Atrue%2C%22responsive_web_graphql_timeline_navigation_enabled%22%3Atrue%2C%22responsive_web_graphql_skip_user_profile_image_extensions_enabled%22%3Afalse%2C%22tweetypie_unmention_optimization_enabled%22%3Atrue%2C%22responsive_web_edit_tweet_api_enabled%22%3Atrue%2C%22graphql_is_translatable_rweb_tweet_is_translatable_enabled%22%3Atrue%2C%22view_counts_everywhere_api_enabled%22%3Atrue%2C%22longform_notetweets_consumption_enabled%22%3Atrue%2C%22tweet_awards_web_tipping_enabled%22%3Afalse%2C%22freedom_of_speech_not_reach_fetch_enabled%22%3Atrue%2C%22standardized_nudges_misinfo%22%3Atrue%2C%22tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled%22%3Afalse%2C%22longform_notetweets_rich_text_read_enabled%22%3Atrue%2C%22longform_notetweets_inline_media_enabled%22%3Afalse%2C%22responsive_web_enhance_cards_enabled%22%3Afalse%7D
+	return "https://twitter.com/i/api/graphql/tPRAv4UnqM9dOgDWggph7Q/TweetDetail?variables=%7B%22focalTweetId%22%3A%22" + fmt.Sprint(tweet_id) + "%22%2C" + maybe_cursor + "%22with_rux_injections%22%3Afalse%2C%22includePromotedContent%22%3Atrue%2C%22withCommunity%22%3Atrue%2C%22withQuickPromoteEligibilityTweetFields%22%3Atrue%2C%22withBirdwatchNotes%22%3Atrue%2C%22withVoice%22%3Atrue%2C%22withV2Timeline%22%3Atrue%7D&features=%7B%22rweb_lists_timeline_redesign_enabled%22%3Atrue%2C%22responsive_web_graphql_exclude_directive_enabled%22%3Atrue%2C%22verified_phone_label_enabled%22%3Afalse%2C%22creator_subscriptions_tweet_preview_api_enabled%22%3Atrue%2C%22responsive_web_graphql_timeline_navigation_enabled%22%3Atrue%2C%22responsive_web_graphql_skip_user_profile_image_extensions_enabled%22%3Afalse%2C%22tweetypie_unmention_optimization_enabled%22%3Atrue%2C%22responsive_web_edit_tweet_api_enabled%22%3Atrue%2C%22graphql_is_translatable_rweb_tweet_is_translatable_enabled%22%3Atrue%2C%22view_counts_everywhere_api_enabled%22%3Atrue%2C%22longform_notetweets_consumption_enabled%22%3Atrue%2C%22tweet_awards_web_tipping_enabled%22%3Afalse%2C%22freedom_of_speech_not_reach_fetch_enabled%22%3Atrue%2C%22standardized_nudges_misinfo%22%3Atrue%2C%22tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled%22%3Afalse%2C%22longform_notetweets_rich_text_read_enabled%22%3Atrue%2C%22longform_notetweets_inline_media_enabled%22%3Afalse%2C%22responsive_web_enhance_cards_enabled%22%3Afalse%7D" //nolint:lll  // It's a URL, come on
 }
 
 /**
