@@ -236,7 +236,8 @@ func fetch_tweet_conversation(tweet_identifier string, how_many int) {
 		die(err.Error(), false, -1)
 	}
 
-	trove, err := scraper.GetTweetFull(tweet_id, how_many)
+	//trove, err := scraper.GetTweetFull(tweet_id, how_many)
+	trove, err := scraper.GetTweetFullAPIV2(tweet_id, how_many)
 	if err != nil {
 		die(err.Error(), false, -1)
 	}

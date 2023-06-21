@@ -255,15 +255,25 @@ test $(find link_preview_images | wc -l) = $initial_link_preview_images_count  #
 
 
 # Test a tweet thread with tombstones
-# tw fetch_tweet https://twitter.com/CovfefeAnon/status/1454526270809726977
-# test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454515503242829830") = 1
-# test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454521424144654344") = 0  # TODO this guy got banned
-# test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454522147750260742") = 1
+tw fetch_tweet https://twitter.com/CovfefeAnon/status/1454526270809726977
+test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454515503242829830") = 1
+test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454521424144654344") = 1
+test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454522147750260742") = 1
+test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454526270809726977") = 0
+# Check that it downloaded the fetchable user's profile image
+test $(find profile_images/itsbackwereover_profile* | wc -l) -ne 0
+
+
+# Test an expanding ("Show more") tweet
+tw fetch_tweet https://twitter.com/PaulSkallas/status/1649600354747572225
+test $(sqlite3 twitter.db "select is_expandable from tweets where id = 1649600354747572225") = 1
+test $(sqlite3 twitter.db "select length(text) from tweets where id = 1649600354747572225") -gt 280
+test "$(sqlite3 twitter.db "select text from tweets where id = 1649600354747572225" | tail -n 1)" = "A fitting ending to a time not worth saving"
 
 
 # Test updating a tombstone (e.g., the QT-ing user is blocked but acct is not priv)
 tw fetch_tweet https://twitter.com/michaelmalice/status/1479540552081326085
-test "$(sqlite3 twitter.db "select tombstone_type, text from tweets where id = 1479540319410696192")" = "4|"
+test "$(sqlite3 twitter.db "select tombstone_type, text from tweets where id = 1479540319410696192")" = "3|"
 
 tw fetch_tweet_only 1479540319410696192  # Should remove the tombstone type and update the text
 test "$(sqlite3 twitter.db "select tombstone_type, text from tweets where id = 1479540319410696192")" = "|Eyyy! Look! Another one on my block list! Well done @michaelmalice, you silck person."
