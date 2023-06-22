@@ -74,7 +74,7 @@ func TestParseAPIDMConversation(t *testing.T) {
 
 	assert.Len(chat_room.Participants, 2)
 
-	p1 := chat_room.Participants[0]
+	p1 := chat_room.Participants[1458284524761075714]
 	assert.Equal(UserID(1458284524761075714), p1.UserID)
 	assert.Equal(DMMessageID(1665936253483614212), p1.LastReadEventID)
 	assert.True(p1.IsChatSettingsValid)
@@ -84,7 +84,7 @@ func TestParseAPIDMConversation(t *testing.T) {
 	assert.False(p1.IsMuted)
 	assert.Equal("AT_END", p1.Status)
 
-	p2 := chat_room.Participants[1]
+	p2 := chat_room.Participants[1488963321701171204]
 	assert.Equal(UserID(1488963321701171204), p2.UserID)
 	assert.Equal(DMMessageID(1663623062195957773), p2.LastReadEventID)
 	assert.False(p2.IsChatSettingsValid)
