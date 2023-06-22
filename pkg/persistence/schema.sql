@@ -206,7 +206,7 @@ create index if not exists index_likes_tweet_id on likes (tweet_id);
 create table fake_user_sequence(latest_fake_id integer not null);
 insert into fake_user_sequence values(0x4000000000000000);
 
-create table chat_room (rowid integer primary key,
+create table chat_rooms (rowid integer primary key,
     id text unique not null,
     type text not null,
     last_messaged_at integer not null,
@@ -229,14 +229,16 @@ create table chat_room_participants(rowid integer primary key,
 
 create table chat_messages (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
-    conversation_id text not null,
+    chat_room_id text not null,
     sender_id integer not null,
     sent_at integer not null,
     request_id text not null,
+    in_reply_to_id integer,
     text text not null,
-    foreign key(conversation_id) references conversations(id)
+    foreign key(chat_room_id) references chat_rooms(id)
     foreign key(sender_id) references users(id)
-)
+    foreign key(in_reply_to_id) references chat_messages(id)
+);
 
 create table chat_message_reactions (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
