@@ -99,13 +99,15 @@ func (p Profile) SaveChatMessage(m scraper.DMMessage) error {
 		return fmt.Errorf("Error saving message: %#v\n  %w", m, err)
 	}
 
-	_, err = p.DB.NamedExec(`
-		insert into chat_message_reactions (id, message_id, sender_id, sent_at, emoji)
-		values (:id, :message_id, :sender_id, :sent_at, :emoji)
-		`, m.Reactions,
-	)
-	if err != nil {
-		return fmt.Errorf("Error saving message reactions: %#v\n  %w", m, err)
+	for _, reacc := range m.Reactions {
+		_, err = p.DB.NamedExec(`
+			insert into chat_message_reactions (id, message_id, sender_id, sent_at, emoji)
+			values (:id, :message_id, :sender_id, :sent_at, :emoji)
+			`, reacc,
+		)
+		if err != nil {
+			return fmt.Errorf("Error saving message reaction (message %d, reacc %d): %#v\n  %w", m.ID, reacc.ID, m, err)
+		}
 	}
 	return nil
 }
@@ -113,6 +115,7 @@ func (p Profile) SaveChatMessage(m scraper.DMMessage) error {
 func (p Profile) GetChatMessage(id scraper.DMMessageID) (ret scraper.DMMessage, err error) {
 	err = p.DB.Get(&ret, `
 		select id, chat_room_id, sender_id, sent_at, request_id, text, in_reply_to_id
+		  from chat_messages
 		 where id = ?
 		`, id,
 	)
@@ -120,7 +123,8 @@ func (p Profile) GetChatMessage(id scraper.DMMessageID) (ret scraper.DMMessage, 
 		return ret, fmt.Errorf("Error getting chat message (%d):\n  %w", id, err)
 	}
 
-	err = p.DB.Select(&ret.Reactions, `
+	reaccs := []scraper.DMReaction{}
+	err = p.DB.Select(&reaccs, `
 		select id, message_id, sender_id, sent_at, emoji
 		  from chat_message_reactions
 		 where message_id = ?
@@ -128,6 +132,10 @@ func (p Profile) GetChatMessage(id scraper.DMMessageID) (ret scraper.DMMessage, 
 	)
 	if err != nil {
 		return ret, fmt.Errorf("Error getting reactions to chat message (%d):\n  %w", id, err)
+	}
+	ret.Reactions = make(map[scraper.UserID]scraper.DMReaction)
+	for _, r := range reaccs {
+		ret.Reactions[r.SenderID] = r
 	}
 	return ret, nil
 }

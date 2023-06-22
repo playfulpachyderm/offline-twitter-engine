@@ -45,7 +45,8 @@ func TestParseAPIDMMessageWithReaction(t *testing.T) {
 	assert.Equal(message.ID, DMMessageID(1663623062195957773))
 	require.Len(t, message.Reactions, 1)
 
-	reacc := message.Reactions[0]
+	reacc, is_ok := message.Reactions[UserID(1458284524761075714)]
+	require.True(t, is_ok)
 	assert.Equal(reacc.ID, DMMessageID(1665914315742781440))
 	assert.Equal(reacc.SentAt, TimestampFromUnix(1686019898732))
 	assert.Equal(reacc.DMMessageID, DMMessageID(1663623062195957773))

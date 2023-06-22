@@ -99,3 +99,22 @@ func TestModifyChatParticipant(t *testing.T) {
 		t.Error(diff)
 	}
 }
+
+func TestSaveAndLoadChatMessage(t *testing.T) {
+	require := require.New(t)
+	profile_path := "test_profiles/TestDMs"
+	profile := create_or_load_profile(profile_path)
+
+	// Save it
+	message := create_dummy_chat_message()
+	err := profile.SaveChatMessage(message)
+	require.NoError(err)
+
+	// Reload it
+	new_message, err := profile.GetChatMessage(message.ID)
+	require.NoError(err)
+
+	if diff := deep.Equal(message, new_message); diff != nil {
+		t.Error(diff)
+	}
+}
