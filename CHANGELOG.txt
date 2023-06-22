@@ -134,3 +134,8 @@ v0.3.0
 - Now use APIv2 for Tweet Detail pages as well as user feeds.
 - BUGFIX: fix a lot of bugs that were unfixable using the old API
 - BUGFIX: fix spaces not updating ended_at time
+
+v0.3.1
+------
+
+- HOTFIX: it looks like Twitter changed the label for a timeline module from "homeConversation" to "profile-conversation"!
