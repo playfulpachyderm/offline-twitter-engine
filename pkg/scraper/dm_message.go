@@ -27,7 +27,7 @@ type DMMessage struct {
 	RequestID    string       `db:"request_id"`
 	Text         string       `db:"text"`
 	InReplyToID  DMMessageID  `db:"in_reply_to_id"`
-	Reactions    []DMReaction
+	Reactions    map[UserID]DMReaction
 }
 
 func ParseAPIDMMessage(message APIDMMessage) DMMessage {
@@ -40,11 +40,11 @@ func ParseAPIDMMessage(message APIDMMessage) DMMessage {
 
 	ret.InReplyToID = DMMessageID(message.MessageData.ReplyData.ID) // Will be "0" if not a reply
 
-	ret.Reactions = []DMReaction{}
+	ret.Reactions = make(map[UserID]DMReaction)
 	for _, api_reacc := range message.MessageReactions {
 		reacc := ParseAPIDMReaction(api_reacc)
 		reacc.DMMessageID = ret.ID
-		ret.Reactions = append(ret.Reactions, reacc)
+		ret.Reactions[reacc.SenderID] = reacc
 	}
 	return ret
 }

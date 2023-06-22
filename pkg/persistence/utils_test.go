@@ -354,3 +354,25 @@ func create_dummy_chat_room() scraper.DMChatRoom {
 		},
 	}
 }
+
+func create_dummy_chat_message() scraper.DMMessage {
+	rand.Seed(time.Now().UnixNano())
+	id := scraper.DMMessageID(rand.Int())
+	return scraper.DMMessage{
+		ID:           id,
+		DMChatRoomID: create_stable_chat_room().ID,
+		SenderID:     create_stable_user().ID,
+		SentAt:       scraper.TimestampFromUnix(50000),
+		RequestID:    "fwjefkj",
+		Text:         fmt.Sprintf("This is message #%d", id),
+		Reactions: map[scraper.UserID]scraper.DMReaction{
+			scraper.UserID(-1): {
+				ID:          id + 1,
+				DMMessageID: id,
+				SenderID:    scraper.UserID(-1),
+				SentAt:      scraper.TimestampFromUnix(51000),
+				Emoji:       "🤔",
+			},
+		},
+	}
+}

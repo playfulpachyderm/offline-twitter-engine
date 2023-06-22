@@ -237,7 +237,6 @@ create table chat_messages (rowid integer primary key,
     text text not null,
     foreign key(chat_room_id) references chat_rooms(id)
     foreign key(sender_id) references users(id)
-    foreign key(in_reply_to_id) references chat_messages(id)
 );
 
 create table chat_message_reactions (rowid integer primary key,
@@ -246,7 +245,7 @@ create table chat_message_reactions (rowid integer primary key,
     sender_id integer not null,
     sent_at integer not null,
     emoji text not null check (length(emoji) = 1),
-    foreign key(message_id) references messages(id)
+    foreign key(message_id) references chat_messages(id)
     foreign key(sender_id) references users(id)
 );
 
