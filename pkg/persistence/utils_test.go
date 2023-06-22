@@ -29,6 +29,10 @@ func create_or_load_profile(profile_path string) persistence.Profile {
 			panic(err)
 		}
 		err = profile.SaveRetweet(create_stable_retweet())
+		if err != nil {
+			panic(err)
+		}
+		err = profile.SaveChatRoom(create_stable_chat_room())
 	} else {
 		profile, err = persistence.LoadProfile(profile_path)
 	}
@@ -297,5 +301,56 @@ func create_dummy_like() scraper.Like {
 		TweetID: create_stable_tweet().ID,
 		UserID:  create_stable_user().ID,
 		SortID:  scraper.LikeSortID(12345),
+	}
+}
+
+func create_stable_chat_room() scraper.DMChatRoom {
+	id := scraper.DMChatRoomID("some chat room ID")
+
+	return scraper.DMChatRoom{
+		ID:             id,
+		Type:           "ONE_ON_ONE",
+		LastMessagedAt: scraper.TimestampFromUnix(123),
+		IsNSFW:         false,
+		Participants: map[scraper.UserID]scraper.DMChatParticipant{
+			scraper.UserID(-1): {
+				DMChatRoomID:                   id,
+				UserID:                         scraper.UserID(-1),
+				LastReadEventID:                scraper.DMMessageID(0),
+				IsChatSettingsValid:            true,
+				IsNotificationsDisabled:        false,
+				IsMentionNotificationsDisabled: false,
+				IsReadOnly:                     false,
+				IsTrusted:                      true,
+				IsMuted:                        false,
+				Status:                         "some status",
+			},
+		},
+	}
+}
+
+func create_dummy_chat_room() scraper.DMChatRoom {
+	rand.Seed(time.Now().UnixNano())
+	id := scraper.DMChatRoomID(fmt.Sprintf("Chat Room #%d", rand.Int()))
+
+	return scraper.DMChatRoom{
+		ID:             id,
+		Type:           "ONE_ON_ONE",
+		LastMessagedAt: scraper.TimestampFromUnix(10000),
+		IsNSFW:         false,
+		Participants: map[scraper.UserID]scraper.DMChatParticipant{
+			scraper.UserID(-1): {
+				DMChatRoomID:                   id,
+				UserID:                         scraper.UserID(-1),
+				LastReadEventID:                scraper.DMMessageID(0),
+				IsChatSettingsValid:            true,
+				IsNotificationsDisabled:        false,
+				IsMentionNotificationsDisabled: false,
+				IsReadOnly:                     false,
+				IsTrusted:                      true,
+				IsMuted:                        false,
+				Status:                         "some status",
+			},
+		},
 	}
 }
