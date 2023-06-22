@@ -22,7 +22,7 @@ type DMChatRoom struct {
 	LastMessagedAt Timestamp    `db:"last_messaged_at"`
 	IsNSFW         bool         `db:"is_nsfw"`
 
-	Participants []DMChatParticipant
+	Participants map[UserID]DMChatParticipant
 }
 
 func ParseAPIDMChatRoom(api_room APIDMConversation) DMChatRoom {
@@ -32,7 +32,7 @@ func ParseAPIDMChatRoom(api_room APIDMConversation) DMChatRoom {
 	ret.LastMessagedAt = TimestampFromUnix(int64(api_room.SortTimestamp))
 	ret.IsNSFW = api_room.NSFW
 
-	ret.Participants = []DMChatParticipant{}
+	ret.Participants = make(map[UserID]DMChatParticipant)
 	for _, api_participant := range api_room.Participants {
 		participant := DMChatParticipant{}
 		participant.UserID = UserID(api_participant.UserID)
@@ -48,7 +48,7 @@ func ParseAPIDMChatRoom(api_room APIDMConversation) DMChatRoom {
 			participant.Status = api_room.Status
 			participant.IsChatSettingsValid = true
 		}
-		ret.Participants = append(ret.Participants, participant)
+		ret.Participants[participant.UserID] = participant
 	}
 	return ret
 }
