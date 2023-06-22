@@ -745,6 +745,28 @@ func TestEntryWithConversationThread(t *testing.T) {
 	assert.True(is_ok)
 }
 
+func TestProfileConversationEntry(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/user_feed_profile_conversation_module_entry.json")
+	require.NoError(err)
+	var entry_result APIV2Entry
+	err = json.Unmarshal(data, &entry_result)
+	require.NoError(err)
+
+	trove := entry_result.ToTweetTrove()
+
+	assert.Len(trove.Tweets, 2)
+	_, is_ok := trove.Tweets[1671870056953790465]
+	assert.True(is_ok)
+	_, is_ok = trove.Users[593289567]
+	assert.True(is_ok)
+	_, is_ok = trove.Tweets[1671918780044435456]
+	assert.True(is_ok)
+	_, is_ok = trove.Users[358545917]
+	assert.True(is_ok)
+}
+
 // On a Tweet Detail page, there's a thread of replies, and then it says "Show more..." underneath
 // to extend the conversation.  This is different from the "Show more..." button to load more
 // replies to the original tweet!

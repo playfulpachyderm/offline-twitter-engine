@@ -427,10 +427,11 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 	} else if e.Content.EntryType == "TimelineTimelineModule" {
 		ret := NewTweetTrove()
 
-		switch strings.Split(e.EntryID, "-")[0] {
-		case "homeConversation", "conversationthread":
+		parts := strings.Split(e.EntryID, "-")
+		if parts[0] == "homeConversation" || parts[0] == "conversationthread" || strings.Join(parts[0:2], "-") == "profile-conversation" {
 			// Process it.
-			// - "homeConversation": conversation thread on a user feed
+			// - "profile-conversation": conversation thread on a user feed
+			// - "homeConversation": This looks like it got changed to "profile-conversation"
 			// - "conversationthread": conversation thread in the replies under a TweetDetail view
 			for _, item := range e.Content.Items {
 				if item.Item.ItemContent.ItemType == "TimelineTimelineCursor" {
@@ -446,13 +447,11 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 				}
 				ret.MergeWith(trove)
 			}
-
-		case "whoToFollow", "TopicsModule", "tweetdetailrelatedtweets":
+		} else if parts[0] == "whoToFollow" || parts[0] == "TopicsModule" || parts[0] == "tweetdetailrelatedtweets" {
 			// Ignore "Who to follow", "Topics" and "Related Tweets" modules.
 			// TODO: maybe we can capture these eventually
 			log.Debug(fmt.Sprintf("Skipping %s entry", e.EntryID))
-
-		default:
+		} else {
 			log.Warn("TimelineTimelineModule with unknown EntryID: " + e.EntryID)
 		}
 
