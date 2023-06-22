@@ -1,33 +1,31 @@
 package scraper
 
-import "fmt"
-
 type DMChatRoomID string
 
 type DMChatParticipant struct {
-	UserID          UserID
-	DMChatRoomID    DMChatRoomID
-	LastReadEventID DMMessageID
+	DMChatRoomID    DMChatRoomID `db:"chat_room_id"`
+	UserID          UserID       `db:"user_id"`
+	LastReadEventID DMMessageID  `db:"last_read_event_id"`
 
-	IsChatSettingsValid     bool
-	IsNotificationsDisabled bool
-	IsReadOnly              bool
-	IsTrusted               bool
-	IsMuted                 bool
-	Status                  string
+	IsChatSettingsValid            bool   `db:"is_chat_settings_valid"`
+	IsNotificationsDisabled        bool   `db:"is_notifications_disabled"`
+	IsMentionNotificationsDisabled bool   `db:"is_mention_notifications_disabled"`
+	IsReadOnly                     bool   `db:"is_read_only"`
+	IsTrusted                      bool   `db:"is_trusted"`
+	IsMuted                        bool   `db:"is_muted"`
+	Status                         string `db:"status"`
 }
 
 type DMChatRoom struct {
-	ID             DMChatRoomID
-	Type           string
-	LastMessagedAt Timestamp
-	IsNSFW         bool
+	ID             DMChatRoomID `db:"id"`
+	Type           string       `db:"type"`
+	LastMessagedAt Timestamp    `db:"last_messaged_at"`
+	IsNSFW         bool         `db:"is_nsfw"`
 
 	Participants []DMChatParticipant
 }
 
 func ParseAPIDMChatRoom(api_room APIDMConversation) DMChatRoom {
-	fmt.Printf("%#v\n", api_room)
 	ret := DMChatRoom{}
 	ret.ID = DMChatRoomID(api_room.ConversationID)
 	ret.Type = api_room.Type
