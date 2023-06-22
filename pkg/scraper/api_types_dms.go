@@ -55,3 +55,24 @@ type APIInbox struct {
 type APIDMResponse struct {
 	InboxInitialState APIInbox `json:"inbox_initial_state"`
 }
+
+func (r APIDMResponse) ToDMTrove() DMTrove {
+	ret := NewDMTrove()
+	for _, entry := range r.InboxInitialState.Entries {
+		result := ParseAPIDMMessage(entry.Message)
+		ret.Messages[result.ID] = result
+		// TODO: parse Tweet attachments
+	}
+	for _, room := range r.InboxInitialState.Conversations {
+		result := ParseAPIDMChatRoom(room)
+		ret.Rooms[result.ID] = result
+	}
+	for _, u := range r.InboxInitialState.Users {
+		result, err := ParseSingleUser(u)
+		if err != nil {
+			panic(err)
+		}
+		ret.TweetTrove.Users[result.ID] = result
+	}
+	return ret
+}

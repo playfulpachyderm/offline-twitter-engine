@@ -57,9 +57,8 @@ func TestParseAPIDMMessageWithReaction(t *testing.T) {
 func TestParseAPIDMConversation(t *testing.T) {
 	assert := assert.New(t)
 	data, err := os.ReadFile("test_responses/dms/dm_chat_room.json")
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
+
 	var api_room APIDMConversation
 	err = json.Unmarshal(data, &api_room)
 	require.NoError(t, err)
@@ -89,4 +88,31 @@ func TestParseAPIDMConversation(t *testing.T) {
 	assert.Equal(UserID(1488963321701171204), p2.UserID)
 	assert.Equal(DMMessageID(1663623062195957773), p2.LastReadEventID)
 	assert.False(p2.IsChatSettingsValid)
+}
+
+func TestParseInbox(t *testing.T) {
+	assert := assert.New(t)
+	data, err := os.ReadFile("test_responses/dms/inbox.json")
+	require.NoError(t, err)
+
+	var inbox APIDMResponse
+	err = json.Unmarshal(data, &inbox)
+	require.NoError(t, err)
+
+	trove := inbox.ToDMTrove()
+
+	for _, id := range []DMMessageID{1663623062195957773, 1663623203644751885, 1665922180176044037, 1665936253483614212} {
+		m, is_ok := trove.Messages[id]
+		assert.True(is_ok, "Message with ID %d not in the trove!")
+		assert.Equal(m.ID, id)
+	}
+	for _, id := range []UserID{1458284524761075714, 1488963321701171204} {
+		u, is_ok := trove.TweetTrove.Users[id]
+		assert.True(is_ok, "User with ID %d not in the trove!")
+		assert.Equal(u.ID, id)
+	}
+	room_id := DMChatRoomID("1458284524761075714-1488963321701171204")
+	room, is_ok := trove.Rooms[room_id]
+	assert.True(is_ok)
+	assert.Equal(room.ID, room_id)
 }
