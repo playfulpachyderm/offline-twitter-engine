@@ -119,3 +119,34 @@ func TestSaveAndLoadChatMessage(t *testing.T) {
 	err = profile.SaveChatMessage(message)
 	require.NoError(err)
 }
+
+func TestAddReactionToChatMessage(t *testing.T) {
+	require := require.New(t)
+	profile_path := "test_profiles/TestDMs"
+	profile := create_or_load_profile(profile_path)
+	message := create_dummy_chat_message()
+
+	// Save it
+	err := profile.SaveChatMessage(message)
+	require.NoError(err)
+
+	// Add a reaction
+	new_user := create_dummy_user()
+	message.Reactions[new_user.ID] = scraper.DMReaction{
+		ID:          scraper.DMMessageID(message.ID + 10),
+		DMMessageID: message.ID,
+		SenderID:    new_user.ID,
+		SentAt:      scraper.TimestampFromUnix(51000),
+		Emoji:       "🅱",
+	}
+	require.NoError(profile.SaveUser(&new_user))
+	require.NoError(profile.SaveChatMessage(message))
+
+	// Reload it
+	new_message, err := profile.GetChatMessage(message.ID)
+	require.NoError(err)
+
+	if diff := deep.Equal(message, new_message); diff != nil {
+		t.Error(diff)
+	}
+}
