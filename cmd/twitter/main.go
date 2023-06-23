@@ -75,8 +75,8 @@ func main() {
 	log.SetLevel(logging_level)
 
 	if len(args) < 2 {
-		if len(args) == 1 && (args[0] == "list_followed" || args[0] == "webserver" ||
-			args[0] == "fetch_timeline" || args[0] == "fetch_timeline_for_you") {
+		if len(args) == 1 && (args[0] == "list_followed" || args[0] == "webserver" || args[0] == "fetch_timeline" ||
+		                      args[0] == "fetch_timeline_for_you" || args[0] == "fetch_inbox") {
 			// Doesn't need a target, so create a fake second arg
 			args = append(args, "")
 		} else {
@@ -159,6 +159,8 @@ func main() {
 		unlike_tweet(target)
 	case "webserver":
 		start_webserver(*addr)
+	case "fetch_inbox":
+		fetch_inbox()
 	default:
 		die(fmt.Sprintf("Invalid operation: %s", operation), true, 3)
 	}
@@ -251,7 +253,6 @@ func fetch_tweet_conversation(tweet_identifier string, how_many int) {
 		die(err.Error(), false, -1)
 	}
 
-	//trove, err := scraper.GetTweetFull(tweet_id, how_many)
 	trove, err := scraper.GetTweetFullAPIV2(tweet_id, how_many)
 	if err != nil {
 		die(err.Error(), false, -1)
@@ -395,4 +396,10 @@ func list_followed() {
 func start_webserver(addr string) {
 	app := webserver.NewApp(profile)
 	app.Run(addr)
+}
+
+func fetch_inbox() {
+	trove := scraper.GetInbox()
+	profile.SaveDMTrove(trove)
+	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)))
 }

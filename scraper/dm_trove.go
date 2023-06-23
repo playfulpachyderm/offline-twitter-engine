@@ -1,5 +1,9 @@
 package scraper
 
+import (
+	log "github.com/sirupsen/logrus"
+)
+
 type DMTrove struct {
 	Rooms      map[DMChatRoomID]DMChatRoom
 	Messages   map[DMMessageID]DMMessage
@@ -22,4 +26,15 @@ func (t1 *DMTrove) MergeWith(t2 DMTrove) {
 		t1.Messages[id] = val
 	}
 	t1.TweetTrove.MergeWith(t2.TweetTrove)
+}
+
+func GetInbox() DMTrove {
+	if !the_api.IsAuthenticated {
+		log.Fatalf("Fetching DMs can only be done when authenticated.  Please provide `--session [user]`")
+	}
+	dm_response, err := the_api.GetDMInbox()
+	if err != nil {
+		panic(err)
+	}
+	return dm_response.ToDMTrove()
 }
