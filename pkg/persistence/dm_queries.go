@@ -93,6 +93,7 @@ func (p Profile) SaveChatMessage(m scraper.DMMessage) error {
 	_, err := p.DB.NamedExec(`
 		insert into chat_messages (id, chat_room_id, sender_id, sent_at, request_id, in_reply_to_id, text)
 		values (:id, :chat_room_id, :sender_id, :sent_at, :request_id, :in_reply_to_id, :text)
+		on conflict do nothing
 		`, m,
 	)
 	if err != nil {
@@ -100,13 +101,15 @@ func (p Profile) SaveChatMessage(m scraper.DMMessage) error {
 	}
 
 	for _, reacc := range m.Reactions {
+		fmt.Println(reacc)
 		_, err = p.DB.NamedExec(`
 			insert into chat_message_reactions (id, message_id, sender_id, sent_at, emoji)
 			values (:id, :message_id, :sender_id, :sent_at, :emoji)
+			on conflict do nothing
 			`, reacc,
 		)
 		if err != nil {
-			return fmt.Errorf("Error saving message reaction (message %d, reacc %d): %#v\n  %w", m.ID, reacc.ID, m, err)
+			return fmt.Errorf("Error saving message reaction (message %d, reacc %d): %#v\n  %w", m.ID, reacc.ID, reacc, err)
 		}
 	}
 	return nil
