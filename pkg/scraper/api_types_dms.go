@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"net/url"
+	"strings"
 )
 
 type APIDMReaction struct {
@@ -119,7 +120,20 @@ func (api *API) GetDMInbox() (APIDMResponse, error) {
 	query.Add("include_ext_media_color", "true")
 	query.Add("supports_reactions", "true")
 	query.Add("include_ext_edit_control", "true")
-	query.Add("ext", "mediaColor,altText,mediaStats,highlightedLabel,hasNftAvatar,voiceInfo,birdwatchPivot,enrichments,superFollowMetadata,unmentionInfo,editControl,vibe")
+	query.Add("ext", strings.Join([]string{
+		"mediaColor",
+		"altText",
+		"mediaStats",
+		"highlightedLabel",
+		"hasNftAvatar",
+		"voiceInfo",
+		"birdwatchPivot",
+		"enrichments",
+		"superFollowMetadata",
+		"unmentionInfo",
+		"editControl",
+		"vibe",
+	}, ","))
 	url.RawQuery = query.Encode()
 
 	var result APIDMResponse
