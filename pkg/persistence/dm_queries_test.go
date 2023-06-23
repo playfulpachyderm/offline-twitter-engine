@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	// "math/rand"
-	// "time"
-
 	"github.com/go-test/deep"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -104,9 +101,9 @@ func TestSaveAndLoadChatMessage(t *testing.T) {
 	require := require.New(t)
 	profile_path := "test_profiles/TestDMs"
 	profile := create_or_load_profile(profile_path)
+	message := create_dummy_chat_message()
 
 	// Save it
-	message := create_dummy_chat_message()
 	err := profile.SaveChatMessage(message)
 	require.NoError(err)
 
@@ -117,4 +114,8 @@ func TestSaveAndLoadChatMessage(t *testing.T) {
 	if diff := deep.Equal(message, new_message); diff != nil {
 		t.Error(diff)
 	}
+
+	// Scraping the same message again shouldn't break
+	err = profile.SaveChatMessage(message)
+	require.NoError(err)
 }
