@@ -678,18 +678,62 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 }
 
 func get_graphql_user_timeline_url(user_id UserID, cursor string) string {
-	if cursor != "" {
-		return "https://twitter.com/i/api/graphql/CwLU7qTfeu0doqhSr6tW4A/UserTweetsAndReplies?variables=%7B%22userId%22%3A%22" + fmt.Sprint(user_id) + "%22%2C%22count%22%3A40%2C%22cursor%22%3A%22" + url.QueryEscape(cursor) + "%22%2C%22includePromotedContent%22%3Atrue%2C%22withCommunity%22%3Atrue%2C%22withSuperFollowsUserFields%22%3Atrue%2C%22withBirdwatchPivots%22%3Afalse%2C%22withDownvotePerspective%22%3Afalse%2C%22withReactionsMetadata%22%3Afalse%2C%22withReactionsPerspective%22%3Afalse%2C%22withSuperFollowsTweetFields%22%3Atrue%2C%22withVoice%22%3Atrue%2C%22withV2Timeline%22%3Afalse%2C%22__fs_interactive_text%22%3Afalse%2C%22__fs_responsive_web_uc_gql_enabled%22%3Afalse%2C%22__fs_dont_mention_me_view_api_enabled%22%3Afalse%7D" //nolint:lll  // It's a URL, come on
-	}
-	return "https://twitter.com/i/api/graphql/CwLU7qTfeu0doqhSr6tW4A/UserTweetsAndReplies?variables=%7B%22userId%22%3A%22" + fmt.Sprint(user_id) + "%22%2C%22count%22%3A40%2C%22includePromotedContent%22%3Afalse%2C%22withCommunity%22%3Atrue%2C%22withSuperFollowsUserFields%22%3Atrue%2C%22withBirdwatchPivots%22%3Afalse%2C%22withDownvotePerspective%22%3Afalse%2C%22withReactionsMetadata%22%3Afalse%2C%22withReactionsPerspective%22%3Afalse%2C%22withSuperFollowsTweetFields%22%3Atrue%2C%22withVoice%22%3Atrue%2C%22withV2Timeline%22%3Afalse%2C%22__fs_interactive_text%22%3Afalse%2C%22__fs_dont_mention_me_view_api_enabled%22%3Afalse%7D" //nolint:lll  // It's a URL, come on
+	return GraphqlURL{
+		BaseUrl: "https://twitter.com/i/api/graphql/CwLU7qTfeu0doqhSr6tW4A/UserTweetsAndReplies",
+		Variables: GraphqlVariables{
+			UserID:                      user_id,
+			Count:                       40,
+			Cursor:                      cursor,
+			IncludePromotedContent:      false,
+			WithCommunity:               true,
+			WithSuperFollowsUserFields:  true,
+			WithBirdwatchPivots:         false,
+			WithDownvotePerspective:     false,
+			WithReactionsMetadata:       false,
+			WithReactionsPerspective:    false,
+			WithSuperFollowsTweetFields: true,
+			WithBirdwatchNotes:          false,
+			WithVoice:                   true,
+			WithV2Timeline:              false,
+		},
+	}.String()
 }
 
 func get_tweet_detail_url(tweet_id TweetID, cursor string) string {
-	maybe_cursor := ""
-	if cursor != "" {
-		maybe_cursor = "%22cursor%22%3A%22" + url.QueryEscape(cursor) + "%22%2C"
-	}
-	return "https://twitter.com/i/api/graphql/tPRAv4UnqM9dOgDWggph7Q/TweetDetail?variables=%7B%22focalTweetId%22%3A%22" + fmt.Sprint(tweet_id) + "%22%2C" + maybe_cursor + "%22with_rux_injections%22%3Afalse%2C%22includePromotedContent%22%3Atrue%2C%22withCommunity%22%3Atrue%2C%22withQuickPromoteEligibilityTweetFields%22%3Atrue%2C%22withBirdwatchNotes%22%3Atrue%2C%22withVoice%22%3Atrue%2C%22withV2Timeline%22%3Atrue%7D&features=%7B%22rweb_lists_timeline_redesign_enabled%22%3Atrue%2C%22responsive_web_graphql_exclude_directive_enabled%22%3Atrue%2C%22verified_phone_label_enabled%22%3Afalse%2C%22creator_subscriptions_tweet_preview_api_enabled%22%3Atrue%2C%22responsive_web_graphql_timeline_navigation_enabled%22%3Atrue%2C%22responsive_web_graphql_skip_user_profile_image_extensions_enabled%22%3Afalse%2C%22tweetypie_unmention_optimization_enabled%22%3Atrue%2C%22responsive_web_edit_tweet_api_enabled%22%3Atrue%2C%22graphql_is_translatable_rweb_tweet_is_translatable_enabled%22%3Atrue%2C%22view_counts_everywhere_api_enabled%22%3Atrue%2C%22longform_notetweets_consumption_enabled%22%3Atrue%2C%22tweet_awards_web_tipping_enabled%22%3Afalse%2C%22freedom_of_speech_not_reach_fetch_enabled%22%3Atrue%2C%22standardized_nudges_misinfo%22%3Atrue%2C%22tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled%22%3Afalse%2C%22longform_notetweets_rich_text_read_enabled%22%3Atrue%2C%22longform_notetweets_inline_media_enabled%22%3Afalse%2C%22responsive_web_enhance_cards_enabled%22%3Afalse%7D" //nolint:lll  // It's a URL, come on
+	return GraphqlURL{
+		BaseUrl: "https://twitter.com/i/api/graphql/tPRAv4UnqM9dOgDWggph7Q/TweetDetail",
+		Variables: GraphqlVariables{
+			FocalTweetID:                           tweet_id,
+			Cursor:                                 cursor,
+			WithRuxInjections:                      false,
+			IncludePromotedContent:                 true, // TODO: false
+			WithCommunity:                          true,
+			WithQuickPromoteEligibilityTweetFields: true,
+			WithBirdwatchNotes:                     true,
+			WithVoice:                              true,
+			WithV2Timeline:                         true,
+		},
+		Features: GraphqlFeatures{
+			RWebListsTimelineRedesignEnabled:                               true,
+			ResponsiveWebGraphqlExcludeDirectiveEnabled:                    true,
+			VerifiedPhoneLabelEnabled:                                      false,
+			CreatorSubscriptionsTweetPreviewApiEnabled:                     true,
+			ResponsiveWebGraphqlTimelineNavigationEnabled:                  true,
+			ResponsiveWebGraphqlSkipUserProfileImageExtensionsEnabled:      false,
+			TweetypieUnmentionOptimizationEnabled:                          true,
+			ResponsiveWebEditTweetApiEnabled:                               true,
+			GraphqlIsTranslatableRWebTweetIsTranslatableEnabled:            true,
+			ViewCountsEverywhereApiEnabled:                                 true,
+			LongformNotetweetsConsumptionEnabled:                           true,
+			TweetAwardsWebTippingEnabled:                                   false,
+			FreedomOfSpeechNotReachFetchEnabled:                            true,
+			StandardizedNudgesMisinfo:                                      true,
+			TweetWithVisibilityResultsPreferGqlLimitedActionsPolicyEnabled: false,
+			LongformNotetweetsRichTextReadEnabled:                          true,
+			LongformNotetweetsInlineMediaEnabled:                           false,
+			ResponsiveWebEnhanceCardsEnabled:                               false,
+		},
+	}.String()
 }
 
 /**
