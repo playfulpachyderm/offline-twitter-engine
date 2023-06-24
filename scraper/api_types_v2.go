@@ -677,8 +677,9 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 	return ret, nil // TODO: This doesn't need to return an error, it's always nil
 }
 
-func get_graphql_user_timeline_url(user_id UserID, cursor string) string {
-	return GraphqlURL{
+// Get a User feed using the new GraphQL twitter api
+func (api *API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response, error) {
+	url, err := url.Parse(GraphqlURL{
 		BaseUrl: "https://twitter.com/i/api/graphql/CwLU7qTfeu0doqhSr6tW4A/UserTweetsAndReplies",
 		Variables: GraphqlVariables{
 			UserID:                      user_id,
@@ -696,51 +697,7 @@ func get_graphql_user_timeline_url(user_id UserID, cursor string) string {
 			WithVoice:                   true,
 			WithV2Timeline:              false,
 		},
-	}.String()
-}
-
-func get_tweet_detail_url(tweet_id TweetID, cursor string) string {
-	return GraphqlURL{
-		BaseUrl: "https://twitter.com/i/api/graphql/tPRAv4UnqM9dOgDWggph7Q/TweetDetail",
-		Variables: GraphqlVariables{
-			FocalTweetID:                           tweet_id,
-			Cursor:                                 cursor,
-			WithRuxInjections:                      false,
-			IncludePromotedContent:                 true, // TODO: false
-			WithCommunity:                          true,
-			WithQuickPromoteEligibilityTweetFields: true,
-			WithBirdwatchNotes:                     true,
-			WithVoice:                              true,
-			WithV2Timeline:                         true,
-		},
-		Features: GraphqlFeatures{
-			RWebListsTimelineRedesignEnabled:                               true,
-			ResponsiveWebGraphqlExcludeDirectiveEnabled:                    true,
-			VerifiedPhoneLabelEnabled:                                      false,
-			CreatorSubscriptionsTweetPreviewApiEnabled:                     true,
-			ResponsiveWebGraphqlTimelineNavigationEnabled:                  true,
-			ResponsiveWebGraphqlSkipUserProfileImageExtensionsEnabled:      false,
-			TweetypieUnmentionOptimizationEnabled:                          true,
-			ResponsiveWebEditTweetApiEnabled:                               true,
-			GraphqlIsTranslatableRWebTweetIsTranslatableEnabled:            true,
-			ViewCountsEverywhereApiEnabled:                                 true,
-			LongformNotetweetsConsumptionEnabled:                           true,
-			TweetAwardsWebTippingEnabled:                                   false,
-			FreedomOfSpeechNotReachFetchEnabled:                            true,
-			StandardizedNudgesMisinfo:                                      true,
-			TweetWithVisibilityResultsPreferGqlLimitedActionsPolicyEnabled: false,
-			LongformNotetweetsRichTextReadEnabled:                          true,
-			LongformNotetweetsInlineMediaEnabled:                           false,
-			ResponsiveWebEnhanceCardsEnabled:                               false,
-		},
-	}.String()
-}
-
-/**
- * Get a User feed using the new GraphQL twitter api
- */
-func (api *API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response, error) {
-	url, err := url.Parse(get_graphql_user_timeline_url(user_id, cursor))
+	}.String())
 	if err != nil {
 		panic(err)
 	}
@@ -797,7 +754,40 @@ func (api *API) GetMoreTweetsFromGraphqlFeed(user_id UserID, response *APIV2Resp
 }
 
 func (api *API) GetTweetDetail(tweet_id TweetID, cursor string) (APIV2Response, error) {
-	url, err := url.Parse(get_tweet_detail_url(tweet_id, cursor))
+	url, err := url.Parse(GraphqlURL{
+		BaseUrl: "https://twitter.com/i/api/graphql/tPRAv4UnqM9dOgDWggph7Q/TweetDetail",
+		Variables: GraphqlVariables{
+			FocalTweetID:                           tweet_id,
+			Cursor:                                 cursor,
+			WithRuxInjections:                      false,
+			IncludePromotedContent:                 false,
+			WithCommunity:                          true,
+			WithQuickPromoteEligibilityTweetFields: true,
+			WithBirdwatchNotes:                     true,
+			WithVoice:                              true,
+			WithV2Timeline:                         true,
+		},
+		Features: GraphqlFeatures{
+			RWebListsTimelineRedesignEnabled:                               true,
+			ResponsiveWebGraphqlExcludeDirectiveEnabled:                    true,
+			VerifiedPhoneLabelEnabled:                                      false,
+			CreatorSubscriptionsTweetPreviewApiEnabled:                     true,
+			ResponsiveWebGraphqlTimelineNavigationEnabled:                  true,
+			ResponsiveWebGraphqlSkipUserProfileImageExtensionsEnabled:      false,
+			TweetypieUnmentionOptimizationEnabled:                          true,
+			ResponsiveWebEditTweetApiEnabled:                               true,
+			GraphqlIsTranslatableRWebTweetIsTranslatableEnabled:            true,
+			ViewCountsEverywhereApiEnabled:                                 true,
+			LongformNotetweetsConsumptionEnabled:                           true,
+			TweetAwardsWebTippingEnabled:                                   false,
+			FreedomOfSpeechNotReachFetchEnabled:                            true,
+			StandardizedNudgesMisinfo:                                      true,
+			TweetWithVisibilityResultsPreferGqlLimitedActionsPolicyEnabled: false,
+			LongformNotetweetsRichTextReadEnabled:                          true,
+			LongformNotetweetsInlineMediaEnabled:                           false,
+			ResponsiveWebEnhanceCardsEnabled:                               false,
+		},
+	}.String())
 	if err != nil {
 		panic(err)
 	}
