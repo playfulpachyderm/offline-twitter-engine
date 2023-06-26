@@ -134,6 +134,8 @@ func main() {
 		fetch_user_feed(target, *how_many)
 	case "get_user_tweets_all":
 		fetch_user_feed(target, 999999999)
+	case "get_user_likes":
+		get_user_likes(target, *how_many)
 	case "download_tweet_content":
 		download_tweet_content(target)
 	case "search":
@@ -263,6 +265,21 @@ func fetch_user_feed(handle string, how_many int) {
 	}
 
 	trove, err := scraper.GetUserFeedGraphqlFor(user.ID, how_many)
+	if err != nil {
+		die(fmt.Sprintf("Error scraping feed: %s\n  %s", handle, err.Error()), false, -2)
+	}
+	profile.SaveTweetTrove(trove)
+
+	happy_exit(fmt.Sprintf("Saved %d tweets, %d retweets and %d users", len(trove.Tweets), len(trove.Retweets), len(trove.Users)))
+}
+
+func get_user_likes(handle string, how_many int) {
+	user, err := profile.GetUserByHandle(scraper.UserHandle(handle))
+	if err != nil {
+		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
+	}
+
+	trove, err := scraper.GetUserLikes(user.ID, "") // TODO: how_many
 	if err != nil {
 		die(fmt.Sprintf("Error scraping feed: %s\n  %s", handle, err.Error()), false, -2)
 	}

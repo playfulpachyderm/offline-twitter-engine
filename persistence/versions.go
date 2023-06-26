@@ -108,6 +108,14 @@ var MIGRATIONS = []string{
 		drop table space_participants;
 		alter table space_participants_uniq rename to space_participants;
 		vacuum;`,
+	`create table likes(rowid integer primary key,
+			sort_order integer unique not null,
+			user_id integer not null,
+			tweet_id integer not null,
+			unique(user_id, tweet_id)
+			foreign key(user_id) references users(id)
+			foreign key(tweet_id) references tweets(id)
+		);`,
 }
 var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
 

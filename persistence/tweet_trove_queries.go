@@ -71,4 +71,11 @@ func (p Profile) SaveTweetTrove(trove TweetTrove) {
 			panic(fmt.Errorf("Error saving retweet with ID %d from user ID %d:\n  %w", r.RetweetID, r.RetweetedByID, err))
 		}
 	}
+
+	for _, l := range trove.Likes {
+		err := p.SaveLike(l)
+		if err != nil {
+			panic(fmt.Errorf("Error saving Like: %#v\n  %w", l, err))
+		}
+	}
 }

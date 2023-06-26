@@ -52,7 +52,7 @@ type GraphqlFeatures struct {
 	ResponsiveWebUcGqlEnabled                                      bool `json:"responsive_web_uc_gql_enabled,omitempty"`
 	VibeApiEnabled                                                 bool `json:"vibe_api_enabled,omitempty"`
 	InteractiveTextEnabled                                         bool `json:"interactive_text_enabled,omitempty"`
-	ResponsiveWebTextConversationsEnabled                          bool `json:"responsive_web_text_conversations_enabled,omitempty"`
+	ResponsiveWebTextConversationsEnabled                          bool `json:"responsive_web_text_conversations_enabled"`
 }
 
 type GraphqlURL struct {

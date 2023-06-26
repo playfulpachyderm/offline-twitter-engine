@@ -348,6 +348,13 @@ tw --session Offline_Twatter search "from:michaelmalice constitution"
 test $(sqlite3 twitter.db "select count(*) from tweets where user_id = 44067298 and text like '%constitution%'") -gt "30"  # Not sure exactly how many
 
 
+# Test fetching user Likes
+tw fetch_user Offline_Twatter  # TODO: why doesn't this work when authenticated?
+tw --session Offline_Twatter get_user_likes Offline_Twatter
+test $(sqlite3 twitter.db "select count(*) from likes") = "2"
+test $(sqlite3 twitter.db "select count(*) from likes where tweet_id = 1671902735250124802") = "1"
+
+
 # Test liking and unliking
 tw --session Offline_Twatter like_tweet https://twitter.com/elonmusk/status/1589023388676554753
 tw --session Offline_Twatter unlike_tweet https://twitter.com/elonmusk/status/1589023388676554753
