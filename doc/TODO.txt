@@ -3,9 +3,6 @@ User profile images and banner images => extract to table.  Add `is_downloaded` 
 
 TODO update-all
 
-TODO fetch-older-tweets:
-- get tweets older than 3200 ago
-
 TODO: downloading-modes
 - Could compose the following:
 	- Primary user's top-level tweets and threads
@@ -44,14 +41,15 @@ TODO twitter-spaces
 - add `is_details_available` flag
 
 TODO authenticated-requests
-- likes tab
 - media tab
 - quote-tweets
 - notifications
 
 TODO post-tweets
-- post tweet
-- liking / replying to / quoting / retweeting a tweet
+- post tweets
+  - reply to a tweet
+  - quote-tweet a tweet
+- retweet a tweet
 
 TODO fetch-DMs
 
@@ -76,9 +74,6 @@ TODO tweets-with-italics
 
 TODO authenticated-only-request-warning
 - warn when attempting to run requests which require authentication without a session active
-
-TODO expanding-tweet-integration-test
-- Add an integration test for expanding tweets
 
 TODO unknown-user-upgrading
 - if an unknown user (created to satisfy SQLite integrity check on user_id foreign key) has user details fetched, the "Join Date" and other zero-value fields should update with the new value
