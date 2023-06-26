@@ -218,6 +218,12 @@ func (api *API) do_http_POST(url string, body string, result interface{}) error 
 
 	api.add_authentication_headers(req)
 
+	log.Debug(fmt.Sprintf("POST: %s\n", req.URL.String()))
+	for header := range req.Header {
+		log.Debug(fmt.Sprintf("    %s: %s\n", header, req.Header.Get(header)))
+	}
+	log.Debug("    " + body)
+
 	resp, err := api.Client.Do(req)
 	if err != nil {
 		return fmt.Errorf("Error executing HTTP POST request:\n  %w", err)

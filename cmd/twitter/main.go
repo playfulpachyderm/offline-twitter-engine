@@ -144,6 +144,10 @@ func main() {
 		follow_user(target, false)
 	case "list_followed":
 		list_followed()
+	case "like_tweet":
+		like_tweet(target)
+	case "unlike_tweet":
+		unlike_tweet(target)
 	default:
 		die(fmt.Sprintf("Invalid operation: %s", operation), true, 3)
 	}
@@ -316,6 +320,30 @@ func follow_user(handle string, is_followed bool) {
 	} else {
 		happy_exit("Unfollowed user: " + handle)
 	}
+}
+
+func unlike_tweet(tweet_identifier string) {
+	tweet_id, err := extract_id_from(tweet_identifier)
+	if err != nil {
+		die(err.Error(), false, -1)
+	}
+	err = scraper.UnlikeTweet(tweet_id)
+	if err != nil {
+		die(err.Error(), false, -10)
+	}
+	happy_exit("Unliked the tweet.")
+}
+
+func like_tweet(tweet_identifier string) {
+	tweet_id, err := extract_id_from(tweet_identifier)
+	if err != nil {
+		die(err.Error(), false, -1)
+	}
+	err = scraper.LikeTweet(tweet_id)
+	if err != nil {
+		die(err.Error(), false, -10)
+	}
+	happy_exit("Liked the tweet.")
 }
 
 func list_followed() {

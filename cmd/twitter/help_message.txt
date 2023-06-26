@@ -60,7 +60,12 @@ This application downloads tweets from twitter and saves them in a SQLite databa
 
     search
           <TARGET> is the search query.  Should be wrapped in quotes if it has spaces.
+          (Requires authentication)
 
+    like_tweet
+    unlike_tweet
+          "Like" or un-"like" the tweet indicated by <TARGET>.
+          (Requires authentication)
 <flags>:
     -h, --help
           Print this message, then exit.
