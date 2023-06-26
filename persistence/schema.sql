@@ -192,5 +192,14 @@ create table database_version(rowid integer primary key,
     version_number integer not null unique
 );
 
+create table likes(rowid integer primary key,
+    sort_order integer unique not null,
+    user_id integer not null,
+    tweet_id integer not null,
+    unique(user_id, tweet_id)
+    foreign key(user_id) references users(id)
+    foreign key(tweet_id) references tweets(id)
+);
+
 create table fake_user_sequence(latest_fake_id integer not null);
 insert into fake_user_sequence values(0x4000000000000000);

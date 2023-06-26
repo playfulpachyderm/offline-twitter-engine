@@ -317,3 +317,11 @@ func create_space_from_id(id int) scraper.Space {
 		ParticipantIds: []scraper.UserID{-1},
 	}
 }
+
+func create_dummy_like() scraper.Like {
+	return scraper.Like{
+		TweetID: create_stable_tweet().ID,
+		UserID:  create_stable_user().ID,
+		SortID:  scraper.LikeSortID(12345),
+	}
+}
