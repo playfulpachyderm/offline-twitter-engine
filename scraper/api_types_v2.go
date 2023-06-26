@@ -506,6 +506,11 @@ type APIV2Response struct {
 	Data struct {
 		User struct {
 			Result struct {
+				TimelineV2 struct { // "Likes" feed calls this "timeline_v2" for some reason
+					Timeline struct {
+						Instructions []APIV2Instruction `json:"instructions"`
+					} `json:"timeline"`
+				} `json:"timeline_v2"`
 				Timeline struct {
 					Timeline struct {
 						Instructions []APIV2Instruction `json:"instructions"`
@@ -521,6 +526,12 @@ type APIV2Response struct {
 
 func (api_response APIV2Response) GetMainInstruction() *APIV2Instruction {
 	instructions := api_response.Data.User.Result.Timeline.Timeline.Instructions
+	for i := range instructions {
+		if instructions[i].Type == "TimelineAddEntries" {
+			return &instructions[i]
+		}
+	}
+	instructions = api_response.Data.User.Result.TimelineV2.Timeline.Instructions
 	for i := range instructions {
 		if instructions[i].Type == "TimelineAddEntries" {
 			return &instructions[i]
@@ -675,6 +686,39 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 	}
 
 	return ret, nil // TODO: This doesn't need to return an error, it's always nil
+}
+
+func (r APIV2Response) ToTweetTroveAsLikes() (TweetTrove, error) {
+	ret, err := r.ToTweetTrove()
+	if err != nil {
+		return ret, err
+	}
+
+	// Post-process tweets as Likes
+	for _, entry := range r.GetMainInstruction().Entries {
+		// Skip cursors
+		if entry.Content.EntryType == "TimelineTimelineCursor" {
+			continue
+		}
+		// Assume it's not a TimelineModule or a Tombstone
+		if entry.Content.EntryType != "TimelineTimelineItem" {
+			panic(fmt.Sprintf("Unknown Like entry type: %s", entry.Content.EntryType))
+		}
+		if entry.Content.ItemContent.ItemType == "TimelineTombstone" {
+			panic(fmt.Sprintf("Liked tweet is a tombstone: %#v", entry))
+		}
+
+		// Generate a "Like" from the entry
+		tweet, is_ok := ret.Tweets[TweetID(entry.Content.ItemContent.TweetResults.Result._Result.ID)]
+		if !is_ok {
+			panic(entry)
+		}
+		ret.Likes[LikeSortID(entry.SortIndex)] = Like{
+			SortID:  LikeSortID(entry.SortIndex),
+			TweetID: tweet.ID,
+		}
+	}
+	return ret, err
 }
 
 // Get a User feed using the new GraphQL twitter api

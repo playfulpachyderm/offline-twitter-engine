@@ -866,3 +866,23 @@ func TestTweetDetailWithUnjoinedNontombstoneTweet(t *testing.T) {
 	assert.False(t3.IsStub)
 	assert.Equal(t2.ID, t3.InReplyToID)
 }
+
+func TestParseResultAsLikes(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/likes_feed.json")
+	require.NoError(err)
+	var response_result APIV2Response
+	err = json.Unmarshal(data, &response_result)
+	require.NoError(err)
+
+	trove, err := response_result.ToTweetTroveAsLikes()
+	require.NoError(err)
+
+	assert.Len(trove.Retweets, 0)
+	assert.True(len(trove.Likes) == 20)
+	for _, l := range trove.Likes {
+		_, is_ok := trove.Tweets[l.TweetID]
+		assert.True(is_ok, "Like (%#v) didn't have its Tweet in the trove", l)
+	}
+}
