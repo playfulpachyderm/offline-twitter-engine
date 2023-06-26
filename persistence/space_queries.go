@@ -44,7 +44,7 @@ func (p Profile) SaveSpace(s scraper.Space) error {
 	}
 	if len(space_participants) > 0 {
 		_, err = p.DB.NamedExec(`
-			insert into space_participants (user_id, space_id) values (:user_id, :space_id)
+			insert or replace into space_participants (user_id, space_id) values (:user_id, :space_id)
 		`, space_participants)
 		if err != nil {
 			return fmt.Errorf("Error saving participants (space ID %q, participants: %#v):\n  %w", s.ID, space_participants, err)

@@ -8,8 +8,6 @@ import (
 	"offline_twitter/terminal_utils"
 )
 
-const ENGINE_DATABASE_VERSION = 17
-
 type VersionMismatchError struct {
 	EngineVersion   int
 	DatabaseVersion int
@@ -23,10 +21,7 @@ Please upgrade this application to a newer version to use this profile.  Or down
 	)
 }
 
-/**
- * The Nth entry is the migration that moves you from version N to version N+1.
- * `len(MIGRATIONS)` should always equal `ENGINE_DATABASE_VERSION`.
- */
+// The Nth entry is the migration that moves you from version N to version N+1.
 var MIGRATIONS = []string{
 	`create table polls (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
@@ -98,12 +93,26 @@ var MIGRATIONS = []string{
 		);`,
 	`create index if not exists index_tweets_user_id on tweets (user_id);`,
 	`alter table tweets add column is_expandable bool not null default 0;`,
-}
+	`create table space_participants_uniq(rowid integer primary key,
+			user_id integer not null,
+			space_id not null,
 
-/**
- * This should only get called on a newly created Profile.
- * Subsequent updates should change the number, not insert a new row.
- */
+			unique(user_id, space_id)
+			foreign key(space_id) references spaces(id)
+			-- No foreign key for users, since they may not be downloaded yet and I don't want to
+			-- download every user who joins a space
+		);
+
+		insert or replace into space_participants_uniq(rowid, user_id, space_id) select rowid, user_id, space_id from space_participants;
+
+		drop table space_participants;
+		alter table space_participants_uniq rename to space_participants;
+		vacuum;`,
+}
+var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
+
+// This should only get called on a newly created Profile.
+// Subsequent updates should change the number, not insert a new row.
 func InitializeDatabaseVersion(db *sql.DB) {
 	db.MustExec("insert into database_version (version_number) values (?)", ENGINE_DATABASE_VERSION)
 }
@@ -142,9 +151,7 @@ func (p Profile) check_and_update_version() error {
 	return nil
 }
 
-/**
- * Run all the migrations from version X to version Y, and update the `database_version` table's `version_number`
- */
+// Run all the migrations from version X to version Y, and update the `database_version` table's `version_number`
 func (p Profile) UpgradeFromXToY(x int, y int) error {
 	for i := x; i < y; i++ {
 		fmt.Printf(terminal_utils.COLOR_CYAN)

@@ -142,6 +142,7 @@ create table space_participants(rowid integer primary key,
     user_id integer not null,
     space_id not null,
 
+    unique(user_id, space_id)
     foreign key(space_id) references spaces(id)
     -- No foreign key for users, since they may not be downloaded yet and I don't want to
     -- download every user who joins a space
