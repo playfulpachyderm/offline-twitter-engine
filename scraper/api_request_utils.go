@@ -174,7 +174,7 @@ func (api *API) LogIn(username string, password string) {
 		Subtasks []struct {
 			OpenAccount struct {
 				User struct {
-					ID         int
+					ID         int `json:"id_str,string"`
 					Name       string
 					ScreenName string `json:"screen_name"`
 				}

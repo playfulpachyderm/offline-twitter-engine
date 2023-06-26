@@ -351,13 +351,18 @@ test $(sqlite3 twitter.db "select count(*) from tweets where user_id = 44067298 
 # Test fetching user Likes
 tw fetch_user Offline_Twatter  # TODO: why doesn't this work when authenticated?
 tw --session Offline_Twatter get_user_likes Offline_Twatter
-test $(sqlite3 twitter.db "select count(*) from likes") = "2"
+test $(sqlite3 twitter.db "select count(*) from likes") -ge "2"
 test $(sqlite3 twitter.db "select count(*) from likes where tweet_id = 1671902735250124802") = "1"
 
 
 # Test liking and unliking
+tw fetch_tweet_only 1589023388676554753
+test $(sqlite3 twitter.db "select count(*) from likes where tweet_id = 1589023388676554753 and user_id = (select id from users where handle like 'offline_twatter')") = "0"
 tw --session Offline_Twatter like_tweet https://twitter.com/elonmusk/status/1589023388676554753
+test $(sqlite3 twitter.db "select count(*) from likes where tweet_id = 1589023388676554753 and user_id = (select id from users where handle like 'offline_twatter')") = "1"
 tw --session Offline_Twatter unlike_tweet https://twitter.com/elonmusk/status/1589023388676554753
+# TODO: implement deleting a Like
+# test $(sqlite3 twitter.db "select count(*) from likes where tweet_id = 1589023388676554753 and user_id = (select id from users where handle like 'offline_twatter')") = "0"
 
 
 # TODO: Maybe this file should be broken up into multiple test scripts

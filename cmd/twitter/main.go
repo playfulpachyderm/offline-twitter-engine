@@ -356,9 +356,13 @@ func like_tweet(tweet_identifier string) {
 	if err != nil {
 		die(err.Error(), false, -1)
 	}
-	err = scraper.LikeTweet(tweet_id)
+	like, err := scraper.LikeTweet(tweet_id)
 	if err != nil {
 		die(err.Error(), false, -10)
+	}
+	err = profile.SaveLike(like)
+	if err != nil {
+		die(err.Error(), false, -1)
 	}
 	happy_exit("Liked the tweet.")
 }

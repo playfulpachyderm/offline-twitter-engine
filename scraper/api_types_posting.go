@@ -11,7 +11,7 @@ import (
 var AlreadyLikedThisTweet error = errors.New("already liked this tweet")
 var HaventLikedThisTweet error = errors.New("Haven't liked this tweet")
 
-func (api API) LikeTweet(id TweetID) error {
+func (api API) LikeTweet(id TweetID) (Like, error) {
 	type LikeResponse struct {
 		Data struct {
 			FavoriteTweet string `json:"favorite_tweet"`
@@ -30,17 +30,21 @@ func (api API) LikeTweet(id TweetID) error {
 		&result,
 	)
 	if err != nil {
-		return fmt.Errorf("Error executing the HTTP POST request:\n  %w", err)
+		return Like{}, fmt.Errorf("Error executing the HTTP POST request:\n  %w", err)
 	}
 	if len(result.Errors) > 0 {
 		if strings.Contains(result.Errors[0].Message, "has already favorited tweet") {
-			return AlreadyLikedThisTweet
+			return Like{}, AlreadyLikedThisTweet
 		}
 	}
 	if result.Data.FavoriteTweet != "Done" {
 		panic(fmt.Sprintf("Dunno why but it failed with value %q", result.Data.FavoriteTweet))
 	}
-	return nil
+	return Like{
+		UserID:  api.UserID,
+		TweetID: id,
+		SortID:  -1,
+	}, nil
 }
 
 func (api API) UnlikeTweet(id TweetID) error {
@@ -75,7 +79,7 @@ func (api API) UnlikeTweet(id TweetID) error {
 	return nil
 }
 
-func LikeTweet(id TweetID) error {
+func LikeTweet(id TweetID) (Like, error) {
 	if !the_api.IsAuthenticated {
 		log.Fatalf("Must be authenticated!")
 	}
