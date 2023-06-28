@@ -8,23 +8,22 @@ import (
 )
 
 type Url struct {
-	TweetID TweetID
+	TweetID            TweetID `db:"tweet_id"`
+	Domain             string  `db:"domain"`
+	Text               string  `db:"text"`
+	ShortText          string  `db:"short_text"`
+	Title              string  `db:"title"`
+	Description        string  `db:"description"`
+	ThumbnailWidth     int     `db:"thumbnail_width"`
+	ThumbnailHeight    int     `db:"thumbnail_height"`
+	ThumbnailRemoteUrl string  `db:"thumbnail_remote_url"`
+	ThumbnailLocalPath string  `db:"thumbnail_local_path"`
+	CreatorID          UserID  `db:"creator_id"`
+	SiteID             UserID  `db:"site_id"`
 
-	Domain             string
-	Text               string
-	ShortText          string
-	Title              string
-	Description        string
-	ThumbnailWidth     int
-	ThumbnailHeight    int
-	ThumbnailRemoteUrl string
-	ThumbnailLocalPath string
-	CreatorID          UserID
-	SiteID             UserID
-
-	HasCard             bool
-	HasThumbnail        bool
-	IsContentDownloaded bool
+	HasCard             bool `db:"has_card"`
+	HasThumbnail        bool `db:"has_thumbnail"`
+	IsContentDownloaded bool `db:"is_content_downloaded"`
 }
 
 func ParseAPIUrlCard(apiCard APICard) Url {

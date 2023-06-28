@@ -12,21 +12,21 @@ type VideoID int64
 // from someone else).
 
 type Video struct {
-	ID            VideoID
-	TweetID       TweetID
-	Width         int
-	Height        int
-	RemoteURL     string
-	LocalFilename string
+	ID            VideoID `db:"id"`
+	TweetID       TweetID `db:"tweet_id"`
+	Width         int     `db:"width"`
+	Height        int     `db:"height"`
+	RemoteURL     string  `db:"remote_url"`
+	LocalFilename string  `db:"local_filename"`
 
-	ThumbnailRemoteUrl string
+	ThumbnailRemoteUrl string `db:"thumbnail_remote_url"`
 	ThumbnailLocalPath string `db:"thumbnail_local_filename"`
-	Duration           int    // milliseconds
-	ViewCount          int
+	Duration           int    `db:"duration"` // milliseconds
+	ViewCount          int    `db:"view_count"`
 
-	IsDownloaded    bool
-	IsBlockedByDMCA bool
-	IsGif           bool
+	IsDownloaded    bool `db:"is_downloaded"`
+	IsBlockedByDMCA bool `db:"is_blocked_by_dmca"`
+	IsGif           bool `db:"is_gif"`
 }
 
 func get_filename(remote_url string) string {

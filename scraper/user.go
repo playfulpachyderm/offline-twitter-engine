@@ -23,31 +23,31 @@ func JoinArrayOfHandles(handles []UserHandle) string {
 }
 
 type User struct {
-	ID                    UserID
-	DisplayName           string
-	Handle                UserHandle
-	Bio                   string
-	FollowingCount        int
-	FollowersCount        int
-	Location              string
-	Website               string
-	JoinDate              Timestamp
-	IsPrivate             bool
-	IsVerified            bool
-	IsBanned              bool
-	IsDeleted             bool
-	ProfileImageUrl       string
-	ProfileImageLocalPath string
-	BannerImageUrl        string
-	BannerImageLocalPath  string
+	ID                    UserID     `db:"id"`
+	DisplayName           string     `db:"display_name"`
+	Handle                UserHandle `db:"handle"`
+	Bio                   string     `db:"bio"`
+	FollowingCount        int        `db:"following_count"`
+	FollowersCount        int        `db:"followers_count"`
+	Location              string     `db:"location"`
+	Website               string     `db:"website"`
+	JoinDate              Timestamp  `db:"join_date"`
+	IsPrivate             bool       `db:"is_private"`
+	IsVerified            bool       `db:"is_verified"`
+	IsBanned              bool       `db:"is_banned"`
+	IsDeleted             bool       `db:"is_deleted"`
+	ProfileImageUrl       string     `db:"profile_image_url"`
+	ProfileImageLocalPath string     `db:"profile_image_local_path"`
+	BannerImageUrl        string     `db:"banner_image_url"`
+	BannerImageLocalPath  string     `db:"banner_image_local_path"`
 
-	PinnedTweetID TweetID
+	PinnedTweetID TweetID `db:"pinned_tweet_id"`
 	PinnedTweet   *Tweet
 
-	IsFollowed          bool
-	IsContentDownloaded bool
+	IsFollowed          bool `db:"is_followed"`
+	IsContentDownloaded bool `db:"is_content_downloaded"`
 	IsNeedingFakeID     bool
-	IsIdFake            bool
+	IsIdFake            bool `db:"is_id_fake"`
 }
 
 func (u User) String() string {

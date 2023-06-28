@@ -9,21 +9,21 @@ import (
 type PollID int64
 
 type Poll struct {
-	ID         PollID
-	TweetID    TweetID
-	NumChoices int
+	ID         PollID  `db:"id"`
+	TweetID    TweetID `db:"tweet_id"`
+	NumChoices int     `db:"num_choices"`
 
-	Choice1       string
-	Choice1_Votes int
-	Choice2       string
-	Choice2_Votes int
-	Choice3       string
-	Choice3_Votes int
-	Choice4       string
-	Choice4_Votes int
+	Choice1       string `db:"choice1"`
+	Choice1_Votes int    `db:"choice1_votes"`
+	Choice2       string `db:"choice2"`
+	Choice2_Votes int    `db:"choice2_votes"`
+	Choice3       string `db:"choice3"`
+	Choice3_Votes int    `db:"choice3_votes"`
+	Choice4       string `db:"choice4"`
+	Choice4_Votes int    `db:"choice4_votes"`
 
-	VotingDuration int // In seconds
-	VotingEndsAt   Timestamp
+	VotingDuration int       `db:"voting_duration"` // In seconds
+	VotingEndsAt   Timestamp `db:"voting_ends_at"`
 
 	LastUpdatedAt Timestamp `db:"last_scraped_at"`
 }

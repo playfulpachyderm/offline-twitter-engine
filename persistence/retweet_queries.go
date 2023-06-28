@@ -10,12 +10,12 @@ import (
  * Save a Retweet.  Do nothing if it already exists, because none of its parameters are modifiable.
  */
 func (p Profile) SaveRetweet(r scraper.Retweet) error {
-	_, err := p.DB.Exec(`
+	_, err := p.DB.NamedExec(`
 			insert into retweets (retweet_id, tweet_id, retweeted_by, retweeted_at)
-			values (?, ?, ?, ?)
+			values (:retweet_id, :tweet_id, :retweeted_by, :retweeted_at)
 			    on conflict do nothing
 		`,
-		r.RetweetID, r.TweetID, r.RetweetedByID, r.RetweetedAt.Unix(),
+		r,
 	)
 	if err != nil {
 		return fmt.Errorf("Error executing SaveRetweet(%#v):\n  %w", r, err)

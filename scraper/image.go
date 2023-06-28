@@ -7,13 +7,13 @@ import (
 type ImageID int64
 
 type Image struct {
-	ID            ImageID
-	TweetID       TweetID
-	Width         int
-	Height        int
-	RemoteURL     string
-	LocalFilename string
-	IsDownloaded  bool
+	ID            ImageID `db:"id"`
+	TweetID       TweetID `db:"tweet_id"`
+	Width         int     `db:"width"`
+	Height        int     `db:"height"`
+	RemoteURL     string  `db:"remote_url"`
+	LocalFilename string  `db:"local_filename"`
+	IsDownloaded  bool    `db:"is_downloaded"`
 }
 
 func ParseAPIMedia(apiMedia APIMedia) Image {

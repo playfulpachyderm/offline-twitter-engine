@@ -13,14 +13,13 @@ import (
  * - img: the Image to save
  */
 func (p Profile) SaveImage(img scraper.Image) error {
-	_, err := p.DB.Exec(`
+	_, err := p.DB.NamedExec(`
 		insert into images (id, tweet_id, width, height, remote_url, local_filename, is_downloaded)
-		            values (?, ?, ?, ?, ?, ?, ?)
+		            values (:id, :tweet_id, :width, :height, :remote_url, :local_filename, :is_downloaded)
 		       on conflict do update
-		               set is_downloaded=(is_downloaded or ?)
+		               set is_downloaded=(is_downloaded or :is_downloaded)
 		`,
-		img.ID, img.TweetID, img.Width, img.Height, img.RemoteURL, img.LocalFilename, img.IsDownloaded,
-		img.IsDownloaded,
+		img,
 	)
 	if err != nil {
 		return fmt.Errorf("Error saving image (tweet ID %d):\n  %w", img.TweetID, err)
@@ -35,19 +34,17 @@ func (p Profile) SaveImage(img scraper.Image) error {
  * - img: the Video to save
  */
 func (p Profile) SaveVideo(vid scraper.Video) error {
-	_, err := p.DB.Exec(`
+	_, err := p.DB.NamedExec(`
 		insert into videos (id, tweet_id, width, height, remote_url, local_filename, thumbnail_remote_url, thumbnail_local_filename,
 		                    duration, view_count, is_downloaded, is_blocked_by_dmca, is_gif)
-		            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		            values (:id, :tweet_id, :width, :height, :remote_url, :local_filename, :thumbnail_remote_url, :thumbnail_local_filename,
+                            :duration, :view_count, :is_downloaded, :is_blocked_by_dmca, :is_gif)
 		       on conflict do update
-		               set is_downloaded=(is_downloaded or ?),
-		                   view_count=max(view_count, ?),
-						   is_blocked_by_dmca = ?
+		               set is_downloaded=(is_downloaded or :is_downloaded),
+		                   view_count=max(view_count, :view_count),
+						   is_blocked_by_dmca = :is_blocked_by_dmca
 		`,
-		vid.ID, vid.TweetID, vid.Width, vid.Height, vid.RemoteURL, vid.LocalFilename, vid.ThumbnailRemoteUrl, vid.ThumbnailLocalPath,
-		vid.Duration, vid.ViewCount, vid.IsDownloaded, vid.IsBlockedByDMCA, vid.IsGif,
-
-		vid.IsDownloaded, vid.ViewCount, vid.IsBlockedByDMCA,
+		vid,
 	)
 	if err != nil {
 		return fmt.Errorf("Error saving video (tweet ID %d):\n  %w", vid.TweetID, err)
@@ -59,17 +56,16 @@ func (p Profile) SaveVideo(vid scraper.Video) error {
  * Save an Url
  */
 func (p Profile) SaveUrl(url scraper.Url) error {
-	_, err := p.DB.Exec(`
+	_, err := p.DB.NamedExec(`
 		insert into urls (tweet_id, domain, text, short_text, title, description, creator_id, site_id, thumbnail_width, thumbnail_height,
 		                  thumbnail_remote_url, thumbnail_local_path, has_card, has_thumbnail, is_content_downloaded)
-		          values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		          values (:tweet_id, :domain, :text, :short_text, :title, :description, :creator_id, :site_id, :thumbnail_width,
+                          :thumbnail_height, :thumbnail_remote_url, :thumbnail_local_path, :has_card, :has_thumbnail, :is_content_downloaded
+                         )
 		     on conflict do update
-		             set is_content_downloaded=(is_content_downloaded or ?)
+		             set is_content_downloaded=(is_content_downloaded or :is_content_downloaded)
 		`,
-		url.TweetID, url.Domain, url.Text, url.ShortText, url.Title, url.Description, url.CreatorID, url.SiteID, url.ThumbnailWidth,
-		url.ThumbnailHeight, url.ThumbnailRemoteUrl, url.ThumbnailLocalPath, url.HasCard, url.HasThumbnail, url.IsContentDownloaded,
-
-		url.IsContentDownloaded,
+		url,
 	)
 	if err != nil {
 		return fmt.Errorf("Error saving Url (tweet ID %d):\n  %w", url.TweetID, err)
@@ -81,21 +77,19 @@ func (p Profile) SaveUrl(url scraper.Url) error {
  * Save a Poll
  */
 func (p Profile) SavePoll(poll scraper.Poll) error {
-	_, err := p.DB.Exec(`
+	_, err := p.DB.NamedExec(`
 		insert into polls (id, tweet_id, num_choices, choice1, choice1_votes, choice2, choice2_votes, choice3, choice3_votes, choice4,
 		                   choice4_votes, voting_duration, voting_ends_at, last_scraped_at)
-		           values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		           values (:id, :tweet_id, :num_choices, :choice1, :choice1_votes, :choice2, :choice2_votes, :choice3, :choice3_votes,
+                           :choice4, :choice4_votes, :voting_duration, :voting_ends_at, :last_scraped_at)
 		      on conflict do update
-		              set choice1_votes=?,
-		                  choice2_votes=?,
-		                  choice3_votes=?,
-		                  choice4_votes=?,
-		                  last_scraped_at=?
+		              set choice1_votes=:choice1_votes,
+		                  choice2_votes=:choice2_votes,
+		                  choice3_votes=:choice3_votes,
+		                  choice4_votes=:choice4_votes,
+		                  last_scraped_at=:last_scraped_at
 		`,
-		poll.ID, poll.TweetID, poll.NumChoices, poll.Choice1, poll.Choice1_Votes, poll.Choice2, poll.Choice2_Votes, poll.Choice3,
-		poll.Choice3_Votes, poll.Choice4, poll.Choice4_Votes, poll.VotingDuration, poll.VotingEndsAt, poll.LastUpdatedAt,
-
-		poll.Choice1_Votes, poll.Choice2_Votes, poll.Choice3_Votes, poll.Choice4_Votes, poll.LastUpdatedAt,
+		poll,
 	)
 	if err != nil {
 		return fmt.Errorf("Error saving Poll (tweet ID %d):\n  %w", poll.TweetID, err)

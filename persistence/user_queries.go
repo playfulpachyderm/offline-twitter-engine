@@ -33,35 +33,32 @@ func (p Profile) SaveUser(u *scraper.User) error {
 		}
 	}
 
-	_, err := p.DB.Exec(`
+	_, err := p.DB.NamedExec(`
         insert into users (id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private,
                            is_verified, is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path,
                            pinned_tweet_id, is_content_downloaded, is_id_fake)
-        values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        values (:id, :display_name, :handle, :bio, :following_count, :followers_count, :location, :website, :join_date, :is_private,
+                :is_verified, :is_banned, :profile_image_url, :profile_image_local_path, :banner_image_url, :banner_image_local_path,
+                :pinned_tweet_id, :is_content_downloaded, :is_id_fake)
             on conflict do update
-           set handle=?,
-               bio=?,
-               display_name=?,
-               following_count=?,
-               followers_count=?,
-               location=?,
-               website=?,
-               is_private=?,
-               is_verified=?,
-               is_banned=?,
-               profile_image_url=?,
-               profile_image_local_path=?,
-               banner_image_url=?,
-               banner_image_local_path=?,
-               pinned_tweet_id=?,
-               is_content_downloaded=(is_content_downloaded or ?)
+           set handle=:handle,
+               bio=:bio,
+               display_name=:display_name,
+               following_count=:following_count,
+               followers_count=:followers_count,
+               location=:location,
+               website=:website,
+               is_private=:is_private,
+               is_verified=:is_verified,
+               is_banned=:is_banned,
+               profile_image_url=:profile_image_url,
+               profile_image_local_path=:profile_image_local_path,
+               banner_image_url=:banner_image_url,
+               banner_image_local_path=:banner_image_local_path,
+               pinned_tweet_id=:pinned_tweet_id,
+               is_content_downloaded=(is_content_downloaded or :is_content_downloaded)
         `,
-		u.ID, u.DisplayName, u.Handle, u.Bio, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.JoinDate, u.IsPrivate,
-		u.IsVerified, u.IsBanned, u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID,
-		u.IsContentDownloaded, u.IsIdFake,
-
-		u.Handle, u.Bio, u.DisplayName, u.FollowingCount, u.FollowersCount, u.Location, u.Website, u.IsPrivate, u.IsVerified, u.IsBanned,
-		u.ProfileImageUrl, u.ProfileImageLocalPath, u.BannerImageUrl, u.BannerImageLocalPath, u.PinnedTweetID, u.IsContentDownloaded,
+		u,
 	)
 	if err != nil {
 		return fmt.Errorf("Error executing SaveUser(%s):\n  %w", u.Handle, err)
