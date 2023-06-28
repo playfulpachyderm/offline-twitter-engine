@@ -94,7 +94,36 @@ func (r SpaceResponse) ToTweetTrove() TweetTrove {
 
 func (api API) GetSpace(id SpaceID) (SpaceResponse, error) {
 	// TODO: break up this URL into params so it's readable
-	url, err := url.Parse("https://twitter.com/i/api/graphql/Ha9BKBF0uAz9d4-lz0jnYA/AudioSpaceById?variables=%7B%22id%22%3A%22" + string(id) + "%22%2C%22isMetatagsQuery%22%3Afalse%2C%22withSuperFollowsUserFields%22%3Atrue%2C%22withDownvotePerspective%22%3Afalse%2C%22withReactionsMetadata%22%3Afalse%2C%22withReactionsPerspective%22%3Afalse%2C%22withSuperFollowsTweetFields%22%3Atrue%2C%22withReplays%22%3Atrue%7D&features=%7B%22spaces_2022_h2_clipping%22%3Atrue%2C%22spaces_2022_h2_spaces_communities%22%3Atrue%2C%22responsive_web_twitter_blue_verified_badge_is_enabled%22%3Atrue%2C%22verified_phone_label_enabled%22%3Afalse%2C%22tweetypie_unmention_optimization_enabled%22%3Atrue%2C%22responsive_web_uc_gql_enabled%22%3Atrue%2C%22vibe_api_enabled%22%3Atrue%2C%22responsive_web_edit_tweet_api_enabled%22%3Atrue%2C%22graphql_is_translatable_rweb_tweet_is_translatable_enabled%22%3Atrue%2C%22standardized_nudges_misinfo%22%3Atrue%2C%22tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled%22%3Afalse%2C%22responsive_web_graphql_timeline_navigation_enabled%22%3Atrue%2C%22interactive_text_enabled%22%3Atrue%2C%22responsive_web_text_conversations_enabled%22%3Afalse%2C%22responsive_web_enhance_cards_enabled%22%3Atrue%7D") //nolint:lll  // It's a URL, come on
+	url, err := url.Parse(GraphqlURL{
+		BaseUrl: "https://twitter.com/i/api/graphql/Ha9BKBF0uAz9d4-lz0jnYA/AudioSpaceById",
+		Variables: GraphqlVariables{
+			ID:                          id,
+			IsMetatagsQuery:             false,
+			WithSuperFollowsUserFields:  true,
+			WithDownvotePerspective:     false,
+			WithReactionsMetadata:       false,
+			WithReactionsPerspective:    false,
+			WithSuperFollowsTweetFields: true,
+			WithReplays:                 true,
+		},
+		Features: GraphqlFeatures{
+			Spaces2022H2Clipping:                                           true,
+			Spaces2022H2SpacesCommunities:                                  true,
+			ResponsiveWebTwitterBlueVerifiedBadgeIsEnabled:                 true,
+			VerifiedPhoneLabelEnabled:                                      false,
+			TweetypieUnmentionOptimizationEnabled:                          true,
+			ResponsiveWebUcGqlEnabled:                                      true,
+			VibeApiEnabled:                                                 true,
+			ResponsiveWebEditTweetApiEnabled:                               true,
+			GraphqlIsTranslatableRWebTweetIsTranslatableEnabled:            true,
+			StandardizedNudgesMisinfo:                                      true,
+			TweetWithVisibilityResultsPreferGqlLimitedActionsPolicyEnabled: false,
+			ResponsiveWebGraphqlTimelineNavigationEnabled:                  true,
+			InteractiveTextEnabled:                                         true,
+			ResponsiveWebTextConversationsEnabled:                          false,
+			ResponsiveWebEnhanceCardsEnabled:                               true,
+		},
+	}.String())
 	if err != nil {
 		panic(err)
 	}

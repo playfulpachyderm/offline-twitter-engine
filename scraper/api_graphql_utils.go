@@ -26,6 +26,11 @@ type GraphqlVariables struct {
 	FSInteractiveText                      bool    `json:"__fs_interactive_text,omitempty"`
 	FSResponsiveWebUCGqlEnabled            bool    `json:"__fs_responsive_web_uc_gql_enabled,omitempty"`
 	FSDontMentionMeViewApiEnabled          bool    `json:"__fs_dont_mention_me_view_api_enabled,omitempty"`
+
+	// Spaces
+	ID              SpaceID `json:"id"`
+	IsMetatagsQuery bool    `json:"isMetatagsQuery"`
+	WithReplays     bool    `json:"withReplays"`
 }
 
 type GraphqlFeatures struct {
@@ -53,6 +58,10 @@ type GraphqlFeatures struct {
 	VibeApiEnabled                                                 bool `json:"vibe_api_enabled,omitempty"`
 	InteractiveTextEnabled                                         bool `json:"interactive_text_enabled,omitempty"`
 	ResponsiveWebTextConversationsEnabled                          bool `json:"responsive_web_text_conversations_enabled"`
+
+	// Spaces
+	Spaces2022H2Clipping          bool `json:"spaces_2022_h2_clipping,omitempty"`
+	Spaces2022H2SpacesCommunities bool `json:"spaces_2022_h2_spaces_communities,omitempty"`
 }
 
 type GraphqlURL struct {
