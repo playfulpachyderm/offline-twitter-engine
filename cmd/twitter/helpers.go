@@ -6,8 +6,8 @@ import (
 	"os"
 	"strconv"
 
-	"offline_twitter/scraper"
-	"offline_twitter/terminal_utils"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/terminal_utils"
 )
 
 /**

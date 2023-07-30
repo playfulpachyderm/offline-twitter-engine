@@ -1,4 +1,4 @@
-module offline_twitter
+module gitlab.com/offline-twitter/twitter_offline_engine
 
 go 1.16
 

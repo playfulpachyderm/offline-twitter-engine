@@ -9,8 +9,8 @@ import (
 	"strings"
 	"syscall"
 
-	"offline_twitter/persistence"
-	"offline_twitter/scraper"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 /**
