@@ -11,7 +11,7 @@ pipeline:
   test:
     image: offline-twitter/go
     commands:
-      - mkdir persistence/test_profiles
+      - mkdir pkg/persistence/test_profiles
       - go test -bench=. -cover ./...
 
   integration_test:
