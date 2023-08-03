@@ -28,8 +28,8 @@ func (p Profile) fill_content(trove *TweetTrove) {
 	}
 	if len(quoted_ids) > 0 {
 		var quoted_tweets []Tweet
-		err := p.DB.Select(&quoted_tweets,
-		    `select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
+		err := p.DB.Select(&quoted_tweets, `
+		     select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
 		            mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id,
 		            ifnull(tombstone_types.short_name, "") tombstone_type, is_expandable,
 		            is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at
