@@ -66,6 +66,10 @@ This application downloads tweets from twitter and saves them in a SQLite databa
     unlike_tweet
           "Like" or un-"like" the tweet indicated by <TARGET>.
           (Requires authentication)
+
+    webserver
+          Start a webserver that serves a web UI to browse the tweet archive
+
 <flags>:
     -h, --help
           Print this message, then exit.

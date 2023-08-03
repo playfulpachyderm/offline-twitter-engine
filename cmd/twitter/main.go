@@ -9,6 +9,7 @@ import (
 	"strings"
 	"syscall"
 
+	"gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
@@ -31,6 +32,7 @@ func main() {
 	flag.BoolVar(show_version_flag, "v", false, "")
 
 	session_name := flag.String("session", "", "Name of session file to use")
+	addr := flag.String("addr", ":1488", "port to listen on") // Random port that's probably not in use
 
 	how_many := flag.Int("n", 50, "")
 	flag.IntVar(how_many, "number", 50, "")
@@ -73,7 +75,7 @@ func main() {
 	log.SetLevel(logging_level)
 
 	if len(args) < 2 {
-		if len(args) == 1 && args[0] == "list_followed" {
+		if len(args) == 1 && (args[0] == "list_followed" || args[0] == "webserver") {
 			// "list_followed" doesn't need a target, so create a fake second arg
 			args = append(args, "")
 		} else {
@@ -150,6 +152,8 @@ func main() {
 		like_tweet(target)
 	case "unlike_tweet":
 		unlike_tweet(target)
+	case "webserver":
+		start_webserver(*addr)
 	default:
 		die(fmt.Sprintf("Invalid operation: %s", operation), true, 3)
 	}
@@ -371,4 +375,9 @@ func list_followed() {
 	for _, handle := range profile.GetAllFollowedUsers() {
 		fmt.Println(handle)
 	}
+}
+
+func start_webserver(addr string) {
+	app := webserver.NewApp(profile)
+	app.Run(addr)
 }
