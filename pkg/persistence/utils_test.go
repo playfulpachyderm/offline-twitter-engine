@@ -9,9 +9,7 @@ import (
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-/**
- * Load a test profile, or create it if it doesn't exist.
- */
+// Load a test profile, or create it if it doesn't exist.
 func create_or_load_profile(profile_path string) persistence.Profile {
 	var profile persistence.Profile
 	var err error
@@ -40,9 +38,7 @@ func create_or_load_profile(profile_path string) persistence.Profile {
 	return profile
 }
 
-/**
- * Create a stable user with a fixed ID and handle
- */
+// Create a stable user with a fixed ID and handle
 func create_stable_user() scraper.User {
 	return scraper.User{
 		ID:                    scraper.UserID(-1),
@@ -64,9 +60,7 @@ func create_stable_user() scraper.User {
 	}
 }
 
-/**
- * Create a semi-stable Image based on the given ID
- */
+// Create a semi-stable Image based on the given ID
 func create_image_from_id(id int) scraper.Image {
 	filename := fmt.Sprintf("image%d.jpg", id)
 	return scraper.Image{
@@ -80,9 +74,7 @@ func create_image_from_id(id int) scraper.Image {
 	}
 }
 
-/**
- * Create a semi-stable Video based on the given ID
- */
+// Create a semi-stable Video based on the given ID
 func create_video_from_id(id int) scraper.Video {
 	filename := fmt.Sprintf("video%d.jpg", id)
 	return scraper.Video{
@@ -101,9 +93,7 @@ func create_video_from_id(id int) scraper.Video {
 	}
 }
 
-/**
- * Create a semi-stable Url based on the given ID
- */
+// Create a semi-stable Url based on the given ID
 func create_url_from_id(id int) scraper.Url {
 	s := fmt.Sprint(id)
 	return scraper.Url{
@@ -124,9 +114,7 @@ func create_url_from_id(id int) scraper.Url {
 	}
 }
 
-/**
- * Create a semi-stable Poll based on the given ID
- */
+// Create a semi-stable Poll based on the given ID
 func create_poll_from_id(id int) scraper.Poll {
 	s := fmt.Sprint(id)
 	return scraper.Poll{
@@ -143,9 +131,7 @@ func create_poll_from_id(id int) scraper.Poll {
 	}
 }
 
-/**
- * Create a stable tweet with a fixed ID and content
- */
+// Create a stable tweet with a fixed ID and content
 func create_stable_tweet() scraper.Tweet {
 	tweet_id := scraper.TweetID(-1)
 	return scraper.Tweet{
@@ -180,9 +166,7 @@ func create_stable_tweet() scraper.Tweet {
 	}
 }
 
-/**
- * Create a stable retweet with a fixed ID and parameters
- */
+// Create a stable retweet with a fixed ID and parameters
 func create_stable_retweet() scraper.Retweet {
 	retweet_id := scraper.TweetID(-1)
 	return scraper.Retweet{
@@ -193,9 +177,7 @@ func create_stable_retweet() scraper.Retweet {
 	}
 }
 
-/**
- * Create a new user with a random ID and handle
- */
+// Create a new user with a random ID and handle
 func create_dummy_user() scraper.User {
 	rand.Seed(time.Now().UnixNano())
 	userID := rand.Int()
@@ -220,9 +202,7 @@ func create_dummy_user() scraper.User {
 	}
 }
 
-/**
- * Create a new tweet with a random ID and content
- */
+// Create a new tweet with a random ID and content
 func create_dummy_tweet() scraper.Tweet {
 	rand.Seed(time.Now().UnixNano())
 	tweet_id := scraper.TweetID(rand.Int())
@@ -266,9 +246,7 @@ func create_dummy_tweet() scraper.Tweet {
 	}
 }
 
-/**
- * Create a random tombstone
- */
+// Create a random tombstone
 func create_dummy_tombstone() scraper.Tweet {
 	rand.Seed(time.Now().UnixNano())
 	tweet_id := scraper.TweetID(rand.Int())
@@ -285,9 +263,7 @@ func create_dummy_tombstone() scraper.Tweet {
 	}
 }
 
-/**
- * Create a new retweet with a random ID for a given TweetID
- */
+// Create a new retweet with a random ID for a given TweetID
 func create_dummy_retweet(tweet_id scraper.TweetID) scraper.Retweet {
 	rand.Seed(time.Now().UnixNano())
 	retweet_id := scraper.TweetID(rand.Int())
@@ -300,9 +276,7 @@ func create_dummy_retweet(tweet_id scraper.TweetID) scraper.Retweet {
 	}
 }
 
-/**
- * Create a semi-stable Space given an ID
- */
+// Create a semi-stable Space given an ID
 func create_space_from_id(id int) scraper.Space {
 	return scraper.Space{
 		ID:             scraper.SpaceID(fmt.Sprintf("some_id_%d", id)),

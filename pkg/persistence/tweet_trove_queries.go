@@ -6,10 +6,8 @@ import (
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-/**
- * Convenience function that saves all the objects in a TweetTrove.
- * Panics if anything goes wrong.
- */
+// Convenience function that saves all the objects in a TweetTrove.
+// Panics if anything goes wrong.
 func (p Profile) SaveTweetTrove(trove TweetTrove) {
 	for i, u := range trove.Users {
 		err := p.SaveUser(&u)

@@ -9,9 +9,7 @@ import (
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-/**
- * Some types to spy on a MediaDownloader
- */
+// Some types to spy on a MediaDownloader
 type SpyResult struct {
 	url     string
 	outpath string
@@ -63,9 +61,7 @@ func test_all_downloaded(tweet scraper.Tweet, yes_or_no bool, t *testing.T) {
 	}
 }
 
-/**
- * Downloading a Tweet's contents should mark the Tweet as downloaded
- */
+// Downloading a Tweet's contents should mark the Tweet as downloaded
 func TestDownloadTweetContent(t *testing.T) {
 	profile_path := "test_profiles/TestMediaQueries"
 	profile := create_or_load_profile(profile_path)
@@ -92,9 +88,7 @@ func TestDownloadTweetContent(t *testing.T) {
 	test_all_downloaded(new_tweet, true, t)
 }
 
-/**
- * Downloading a User's contents should mark the User as downloaded
- */
+// Downloading a User's contents should mark the User as downloaded
 func TestDownloadUserContent(t *testing.T) {
 	assert := assert.New(t)
 	profile_path := "test_profiles/TestMediaQueries"
@@ -134,9 +128,7 @@ func TestDownloadUserContent(t *testing.T) {
 	assert.True(new_user.IsContentDownloaded)
 }
 
-/**
- * Should download the right stuff if User has no banner image and default profile image
- */
+// Should download the right stuff if User has no banner image and default profile image
 func TestDownloadDefaultUserContent(t *testing.T) {
 	assert := assert.New(t)
 	profile_path := "test_profiles/TestMediaQueries"

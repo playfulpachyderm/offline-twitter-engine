@@ -11,7 +11,7 @@ import (
 
 var (
 	ErrEndOfFeed = errors.New("end of feed")
-	ErrNotInDB = errors.New("not in database")
+	ErrNotInDB   = errors.New("not in database")
 )
 
 func (p Profile) fill_content(trove *TweetTrove) {

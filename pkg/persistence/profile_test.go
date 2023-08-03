@@ -24,9 +24,7 @@ func file_exists(path string) bool {
 	}
 }
 
-/**
- * Should refuse to create a Profile if the target already exists (i.e., is a file or directory).
- */
+// Should refuse to create a Profile if the target already exists (i.e., is a file or directory).
 func TestNewProfileInvalidPath(t *testing.T) {
 	require := require.New(t)
 	gibberish_path := "test_profiles/fjlwrefuvaaw23efwm"
@@ -43,9 +41,7 @@ func TestNewProfileInvalidPath(t *testing.T) {
 	assert.ErrorIs(t, err, persistence.ErrTargetAlreadyExists)
 }
 
-/**
- * Should correctly create a new Profile
- */
+// Should correctly create a new Profile
 func TestNewProfile(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
@@ -90,9 +86,7 @@ func TestNewProfile(t *testing.T) {
 	assert.Equal(persistence.ENGINE_DATABASE_VERSION, version)
 }
 
-/**
- * Should correctly load the Profile
- */
+// Should correctly load the Profile
 func TestLoadProfile(t *testing.T) {
 	require := require.New(t)
 
@@ -111,9 +105,7 @@ func TestLoadProfile(t *testing.T) {
 	assert.Equal(t, profile_path, profile.ProfileDir)
 }
 
-/**
- * Test the ToSnakeCase implementation
- */
+// Test the ToSnakeCase implementation
 func TestSnakeCase(t *testing.T) {
 	assert := assert.New(t)
 

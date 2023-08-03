@@ -25,16 +25,14 @@ type Profile struct {
 
 var ErrTargetAlreadyExists = fmt.Errorf("Target already exists")
 
-/**
- * Create a new profile in the given location.
- * Fails if target location already exists (i.e., is a file or directory).
- *
- * args:
- * - target_dir: location to create the new profile directory
- *
- * returns:
- * - the newly created Profile
- */
+// Create a new profile in the given location.
+// Fails if target location already exists (i.e., is a file or directory).
+//
+// args:
+// - target_dir: location to create the new profile directory
+//
+// returns:
+// - the newly created Profile
 func NewProfile(target_dir string) (Profile, error) {
 	if file_exists(target_dir) {
 		return Profile{}, fmt.Errorf("Could not create target %q:\n  %w", target_dir, ErrTargetAlreadyExists)
@@ -112,15 +110,13 @@ func NewProfile(target_dir string) (Profile, error) {
 	return Profile{target_dir, settings, db}, nil
 }
 
-/**
- * Loads the profile at the given location.  Fails if the given directory is not a Profile.
- *
- * args:
- * - profile_dir: location to check for the profile
- *
- * returns:
- * - the loaded Profile
- */
+// Loads the profile at the given location.  Fails if the given directory is not a Profile.
+//
+// args:
+// - profile_dir: location to check for the profile
+//
+// returns:
+// - the loaded Profile
 func LoadProfile(profile_dir string) (Profile, error) {
 	settings_file := path.Join(profile_dir, "settings.yaml")
 	sqlite_file := path.Join(profile_dir, "twitter.db")

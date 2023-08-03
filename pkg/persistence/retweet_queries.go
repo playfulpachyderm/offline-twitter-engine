@@ -6,9 +6,7 @@ import (
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-/**
- * Save a Retweet.  Do nothing if it already exists, because none of its parameters are modifiable.
- */
+// Save a Retweet.  Do nothing if it already exists, because none of its parameters are modifiable.
 func (p Profile) SaveRetweet(r scraper.Retweet) error {
 	_, err := p.DB.NamedExec(`
 			insert into retweets (retweet_id, tweet_id, retweeted_by, retweeted_at)
@@ -23,9 +21,7 @@ func (p Profile) SaveRetweet(r scraper.Retweet) error {
 	return nil
 }
 
-/**
- * Retrieve a Retweet by ID
- */
+// Retrieve a Retweet by ID
 func (p Profile) GetRetweetById(id scraper.TweetID) (scraper.Retweet, error) {
 	var r scraper.Retweet
 	err := p.DB.Get(&r, `

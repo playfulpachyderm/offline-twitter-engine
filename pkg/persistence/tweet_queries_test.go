@@ -11,9 +11,7 @@ import (
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-/**
- * Create a Tweet, save it, reload it, and make sure it comes back the same
- */
+// Create a Tweet, save it, reload it, and make sure it comes back the same
 func TestSaveAndLoadTweet(t *testing.T) {
 	profile_path := "test_profiles/TestTweetQueries"
 	profile := create_or_load_profile(profile_path)
@@ -34,9 +32,7 @@ func TestSaveAndLoadTweet(t *testing.T) {
 	}
 }
 
-/**
- * Same as above, but with a tombstone
- */
+// Same as above, but with a tombstone
 func TestSaveAndLoadTombstone(t *testing.T) {
 	profile_path := "test_profiles/TestTweetQueries"
 	profile := create_or_load_profile(profile_path)
@@ -56,14 +52,12 @@ func TestSaveAndLoadTombstone(t *testing.T) {
 	}
 }
 
-/**
- * Saving a tweet that already exists shouldn't reduce its backed-up status.
- * i.e., content which is already saved shouldn't be marked un-saved if it's removed from Twitter.
- * After all, that's the whole point of archiving.
- *
- * - is_stub should only go from "yes" to "no"
- * - is_content_downloaded should only go from "no" to "yes"
- */
+// Saving a tweet that already exists shouldn't reduce its backed-up status.
+// i.e., content which is already saved shouldn't be marked un-saved if it's removed from Twitter.
+// After all, that's the whole point of archiving.
+//
+// - is_stub should only go from "yes" to "no"
+// - is_content_downloaded should only go from "no" to "yes"
 func TestNoWorseningTweet(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
@@ -117,9 +111,7 @@ func TestNoWorseningTweet(t *testing.T) {
 	assert.Equal(13, new_tweet.NumReplies)
 }
 
-/**
- * The tweet was a tombstone and is now available; it should be updated
- */
+// The tweet was a tombstone and is now available; it should be updated
 func TestUntombstoningTweet(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
@@ -182,10 +174,8 @@ func TestUpgradingExpandingTweet(t *testing.T) {
 	assert.Equal(new_tweet.Text, "Some long but cut-off text, but now it no longer is cut off!", "Should have extended the text")
 }
 
-/**
- * The "unavailable" tombstone type is not reliable, you should be able to update away from it but
- * not toward it
- */
+// The "unavailable" tombstone type is not reliable, you should be able to update away from it but
+// not toward it
 func TestChangingTombstoningTweet(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
@@ -273,9 +263,7 @@ func TestModifyTweet(t *testing.T) {
 	assert.Equal(new_tweet.TombstoneType, "deleted")
 }
 
-/**
- * Should correctly report whether the User exists in the database
- */
+// Should correctly report whether the User exists in the database
 func TestIsTweetInDatabase(t *testing.T) {
 	require := require.New(t)
 	profile_path := "test_profiles/TestTweetQueries"
@@ -293,9 +281,7 @@ func TestIsTweetInDatabase(t *testing.T) {
 	assert.True(t, exists)
 }
 
-/**
- * Should correctly populate the `User` field on a Tweet
- */
+// Should correctly populate the `User` field on a Tweet
 func TestLoadUserForTweet(t *testing.T) {
 	require := require.New(t)
 	profile_path := "test_profiles/TestTweetQueries"
@@ -313,9 +299,7 @@ func TestLoadUserForTweet(t *testing.T) {
 	require.NotNil(tweet.User, "Did not load a user.  It is still nil.")
 }
 
-/**
- * Test all the combinations for whether a tweet needs its content downloaded
- */
+// Test all the combinations for whether a tweet needs its content downloaded
 func TestCheckTweetContentDownloadNeeded(t *testing.T) {
 	assert := assert.New(t)
 	profile_path := "test_profiles/TestTweetQueries"

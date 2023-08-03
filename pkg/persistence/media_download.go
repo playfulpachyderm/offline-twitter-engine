@@ -21,13 +21,11 @@ type DefaultDownloader struct{}
 
 var ErrorDMCA error = errors.New("video is DMCAed, unable to download (HTTP 403 Forbidden)")
 
-/**
- * Download a file over HTTP and save it.
- *
- * args:
- * - url: the remote file to download
- * - outpath: the path on disk to save it to
- */
+// Download a file over HTTP and save it.
+//
+// args:
+// - url: the remote file to download
+// - outpath: the path on disk to save it to
 func (d DefaultDownloader) Curl(url string, outpath string) error {
 	println(url)
 	resp, err := http.Get(url)
@@ -81,9 +79,7 @@ func (d DefaultDownloader) Curl(url string, outpath string) error {
 	return nil
 }
 
-/**
- * Downloads an Image, and if successful, marks it as downloaded in the DB
- */
+// Downloads an Image, and if successful, marks it as downloaded in the DB
 func (p Profile) download_tweet_image(img *scraper.Image, downloader MediaDownloader) error {
 	outfile := path.Join(p.ProfileDir, "images", img.LocalFilename)
 	err := downloader.Curl(img.RemoteURL, outfile)
@@ -94,9 +90,7 @@ func (p Profile) download_tweet_image(img *scraper.Image, downloader MediaDownlo
 	return p.SaveImage(*img)
 }
 
-/**
- * Downloads a Video and its thumbnail, and if successful, marks it as downloaded in the DB
- */
+// Downloads a Video and its thumbnail, and if successful, marks it as downloaded in the DB
 func (p Profile) download_tweet_video(v *scraper.Video, downloader MediaDownloader) error {
 	// Download the video
 	outfile := path.Join(p.ProfileDir, "videos", v.LocalFilename)
@@ -122,9 +116,7 @@ func (p Profile) download_tweet_video(v *scraper.Video, downloader MediaDownload
 	return p.SaveVideo(*v)
 }
 
-/**
- * Downloads an URL thumbnail image, and if successful, marks it as downloaded in the DB
- */
+// Downloads an URL thumbnail image, and if successful, marks it as downloaded in the DB
 func (p Profile) download_link_thumbnail(url *scraper.Url, downloader MediaDownloader) error {
 	if url.HasCard && url.HasThumbnail {
 		outfile := path.Join(p.ProfileDir, "link_preview_images", url.ThumbnailLocalPath)
@@ -137,18 +129,13 @@ func (p Profile) download_link_thumbnail(url *scraper.Url, downloader MediaDownl
 	return p.SaveUrl(*url)
 }
 
-/**
- * Download a tweet's video and picture content.
- *
- * Wraps the `DownloadTweetContentWithInjector` method with the default (i.e., real) downloader.
- */
+// Download a tweet's video and picture content.
+// Wraps the `DownloadTweetContentWithInjector` method with the default (i.e., real) downloader.
 func (p Profile) DownloadTweetContentFor(t *scraper.Tweet) error {
 	return p.DownloadTweetContentWithInjector(t, DefaultDownloader{})
 }
 
-/**
- * Enable injecting a custom MediaDownloader (i.e., for testing)
- */
+// Enable injecting a custom MediaDownloader (i.e., for testing)
 func (p Profile) DownloadTweetContentWithInjector(t *scraper.Tweet, downloader MediaDownloader) error {
 	// Check if content needs to be downloaded; if not, just return
 	if !p.CheckTweetContentDownloadNeeded(*t) {
@@ -179,16 +166,12 @@ func (p Profile) DownloadTweetContentWithInjector(t *scraper.Tweet, downloader M
 	return p.SaveTweet(*t)
 }
 
-/**
- * Download a user's banner and profile images
- */
+// Download a user's banner and profile images
 func (p Profile) DownloadUserContentFor(u *scraper.User) error {
 	return p.DownloadUserContentWithInjector(u, DefaultDownloader{})
 }
 
-/**
- * Enable injecting a custom MediaDownloader (i.e., for testing)
- */
+// Enable injecting a custom MediaDownloader (i.e., for testing)
 func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader MediaDownloader) error {
 	if !p.CheckUserContentDownloadNeeded(*u) {
 		return nil
@@ -226,11 +209,9 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
 	return p.SaveUser(u)
 }
 
-/**
- * Download a User's tiny profile image, if it hasn't been downloaded yet.
- * If it has been downloaded, do nothing.
- * If this user should have a big profile picture, defer to the regular `DownloadUserContentFor` method.
- */
+// Download a User's tiny profile image, if it hasn't been downloaded yet.
+// If it has been downloaded, do nothing.
+// If this user should have a big profile picture, defer to the regular `DownloadUserContentFor` method.
 func (p Profile) DownloadUserProfileImageTiny(u *scraper.User) error {
 	if p.IsFollowing(*u) {
 		return p.DownloadUserContentFor(u)

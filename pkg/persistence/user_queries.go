@@ -9,13 +9,11 @@ import (
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-/**
- * Save the given User to the database.
- * If the User is already in the database, it will update most of its attributes (follower count, etc)
- *
- * args:
- * - u: the User
- */
+// Save the given User to the database.
+// If the User is already in the database, it will update most of its attributes (follower count, etc)
+//
+// args:
+// - u: the User
 func (p Profile) SaveUser(u *scraper.User) error {
 	if u.IsNeedingFakeID {
 		err := p.DB.QueryRow("select id from users where lower(handle) = lower(?)", u.Handle).Scan(&u.ID)
@@ -67,15 +65,13 @@ func (p Profile) SaveUser(u *scraper.User) error {
 	return nil
 }
 
-/**
- * Check if the database has a User with the given user handle.
- *
- * args:
- * - handle: the user handle to search for
- *
- * returns:
- * - true if there is such a User in the database, false otherwise
- */
+// Check if the database has a User with the given user handle.
+//
+// args:
+// - handle: the user handle to search for
+//
+// returns:
+// - true if there is such a User in the database, false otherwise
 func (p Profile) UserExists(handle scraper.UserHandle) bool {
 	db := p.DB
 
@@ -91,15 +87,13 @@ func (p Profile) UserExists(handle scraper.UserHandle) bool {
 	return true
 }
 
-/**
- * Retrieve a User from the database, by handle.
- *
- * args:
- * - handle: the user handle to search for
- *
- * returns:
- * - the User, if it exists
- */
+// Retrieve a User from the database, by handle.
+//
+// args:
+// - handle: the user handle to search for
+//
+// returns:
+// - the User, if it exists
 func (p Profile) GetUserByHandle(handle scraper.UserHandle) (scraper.User, error) {
 	db := p.DB
 
@@ -118,15 +112,13 @@ func (p Profile) GetUserByHandle(handle scraper.UserHandle) (scraper.User, error
 	return ret, nil
 }
 
-/**
- * Retrieve a User from the database, by user ID.
- *
- * args:
- * - id: the user ID to search for
- *
- * returns:
- * - the User, if it exists
- */
+// Retrieve a User from the database, by user ID.
+//
+// args:
+// - id: the user ID to search for
+//
+// returns:
+// - the User, if it exists
 func (p Profile) GetUserByID(id scraper.UserID) (scraper.User, error) {
 	db := p.DB
 
@@ -148,20 +140,18 @@ func (p Profile) GetUserByID(id scraper.UserID) (scraper.User, error) {
 	return ret, nil
 }
 
-/**
- * Returns `true` if content download is needed, `false` otherwise
- *
- * If the user is banned, returns false because downloading will be impossible.
- *
- * If:
- * - the user isn't in the DB at all (first time scraping), OR
- * - `is_content_downloaded` is false in the DB, OR
- * - the banner / profile image URL has changed from what the DB has
- * then it needs to be downloaded.
- *
- * The `user` object will always have `is_content_downloaded` = false on every scrape.  This is
- * why the No Worsening Principle is needed.
- */
+// Returns `true` if content download is needed, `false` otherwise
+//
+// If the user is banned, returns false because downloading will be impossible.
+//
+// If:
+// - the user isn't in the DB at all (first time scraping), OR
+// - `is_content_downloaded` is false in the DB, OR
+// - the banner / profile image URL has changed from what the DB has
+// then it needs to be downloaded.
+//
+// The `user` object will always have `is_content_downloaded` = false on every scrape.  This is
+// why the No Worsening Principle is needed.
 func (p Profile) CheckUserContentDownloadNeeded(user scraper.User) bool {
 	row := p.DB.QueryRow(`select is_content_downloaded, profile_image_url, banner_image_url from users where id = ?`, user.ID)
 
@@ -189,9 +179,7 @@ func (p Profile) CheckUserContentDownloadNeeded(user scraper.User) bool {
 	return !file_exists(profile_path)
 }
 
-/**
- * Follow / unfollow a user.  Update the given User object's IsFollowed field.
- */
+// Follow / unfollow a user.  Update the given User object's IsFollowed field.
 func (p Profile) SetUserFollowed(user *scraper.User, is_followed bool) {
 	result, err := p.DB.Exec("update users set is_followed = ? where id = ?", is_followed, user.ID)
 	if err != nil {
@@ -254,16 +242,12 @@ func (p Profile) IsFollowing(user scraper.User) bool {
 	return ret
 }
 
-/**
- * Utility function to compute the path to save banner image to
- */
+// Utility function to compute the path to save banner image to
 func (p Profile) get_banner_image_output_path(u scraper.User) string {
 	return path.Join(p.ProfileDir, "profile_images", u.BannerImageLocalPath)
 }
 
-/**
- * Utility function to compute the path to save profile image to
- */
+// Utility function to compute the path to save profile image to
 func (p Profile) get_profile_image_output_path(u scraper.User) string {
 	if u.ProfileImageUrl == "" {
 		return path.Join(p.ProfileDir, "profile_images", path.Base(scraper.DEFAULT_PROFILE_IMAGE_URL))

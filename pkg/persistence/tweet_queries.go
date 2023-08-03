@@ -5,11 +5,10 @@ import (
 	"errors"
 	"fmt"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-
-func (p Profile) SaveTweet(t scraper.Tweet) error {
+func (p Profile) SaveTweet(t Tweet) error {
 	db := p.DB
 
 	tx := db.MustBegin()
@@ -104,7 +103,7 @@ func (p Profile) SaveTweet(t scraper.Tweet) error {
 	return nil
 }
 
-func (p Profile) IsTweetInDatabase(id scraper.TweetID) bool {
+func (p Profile) IsTweetInDatabase(id TweetID) bool {
 	db := p.DB
 
 	var dummy string
@@ -119,10 +118,10 @@ func (p Profile) IsTweetInDatabase(id scraper.TweetID) bool {
 	return true
 }
 
-func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
+func (p Profile) GetTweetById(id TweetID) (Tweet, error) {
 	db := p.DB
 
-	var t scraper.Tweet
+	var t Tweet
 	err := db.Get(&t, `
         select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
                mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id, ifnull(tombstone_types.short_name, "") tombstone_type,
@@ -133,10 +132,10 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
     `, id)
 
 	if err != nil {
-		return scraper.Tweet{}, fmt.Errorf("Error executing GetTweetByID(%d):\n  %w", id, err)
+		return Tweet{}, fmt.Errorf("Error executing GetTweetByID(%d):\n  %w", id, err)
 	}
 
-	t.Spaces = []scraper.Space{}
+	t.Spaces = []Space{}
 	if t.SpaceID != "" {
 		space, err := p.GetSpaceById(t.SpaceID)
 		if err != nil {
@@ -172,10 +171,8 @@ func (p Profile) GetTweetById(id scraper.TweetID) (scraper.Tweet, error) {
 	return t, nil
 }
 
-/**
- * Populate the `User` field on a tweet with an actual User
- */
-func (p Profile) LoadUserFor(t *scraper.Tweet) error {
+// Populate the `User` field on a tweet with an actual User
+func (p Profile) LoadUserFor(t *Tweet) error {
 	if t.User != nil {
 		// Already there, no need to load it
 		return nil
@@ -189,10 +186,8 @@ func (p Profile) LoadUserFor(t *scraper.Tweet) error {
 	return nil
 }
 
-/**
- * Return `false` if the tweet is in the DB and has had its content downloaded, `false` otherwise
- */
-func (p Profile) CheckTweetContentDownloadNeeded(tweet scraper.Tweet) bool {
+// Return `false` if the tweet is in the DB and has had its content downloaded, `false` otherwise
+func (p Profile) CheckTweetContentDownloadNeeded(tweet Tweet) bool {
 	row := p.DB.QueryRow(`select is_content_downloaded from tweets where id = ?`, tweet.ID)
 
 	var is_content_downloaded bool

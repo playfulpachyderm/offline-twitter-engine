@@ -6,12 +6,10 @@ import (
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-/**
- * Save an Image
- *
- * args:
- * - img: the Image to save
- */
+// Save an Image
+//
+// args:
+// - img: the Image to save
 func (p Profile) SaveImage(img scraper.Image) error {
 	_, err := p.DB.NamedExec(`
 		insert into images (id, tweet_id, width, height, remote_url, local_filename, is_downloaded)
@@ -27,12 +25,10 @@ func (p Profile) SaveImage(img scraper.Image) error {
 	return nil
 }
 
-/**
- * Save a Video
- *
- * args:
- * - img: the Video to save
- */
+// Save a Video
+//
+// args:
+// - img: the Video to save
 func (p Profile) SaveVideo(vid scraper.Video) error {
 	_, err := p.DB.NamedExec(`
 		insert into videos (id, tweet_id, width, height, remote_url, local_filename, thumbnail_remote_url, thumbnail_local_filename,
@@ -52,9 +48,7 @@ func (p Profile) SaveVideo(vid scraper.Video) error {
 	return nil
 }
 
-/**
- * Save an Url
- */
+// Save an Url
 func (p Profile) SaveUrl(url scraper.Url) error {
 	_, err := p.DB.NamedExec(`
 		insert into urls (tweet_id, domain, text, short_text, title, description, creator_id, site_id, thumbnail_width, thumbnail_height,
@@ -73,9 +67,7 @@ func (p Profile) SaveUrl(url scraper.Url) error {
 	return nil
 }
 
-/**
- * Save a Poll
- */
+// Save a Poll
 func (p Profile) SavePoll(poll scraper.Poll) error {
 	_, err := p.DB.NamedExec(`
 		insert into polls (id, tweet_id, num_choices, choice1, choice1_votes, choice2, choice2_votes, choice3, choice3_votes, choice4,
@@ -97,9 +89,7 @@ func (p Profile) SavePoll(poll scraper.Poll) error {
 	return nil
 }
 
-/**
- * Get the list of images for a tweet
- */
+// Get the list of images for a tweet
 func (p Profile) GetImagesForTweet(t scraper.Tweet) (imgs []scraper.Image, err error) {
 	err = p.DB.Select(&imgs,
 		"select id, tweet_id, width, height, remote_url, local_filename, is_downloaded from images where tweet_id=?",
@@ -107,9 +97,7 @@ func (p Profile) GetImagesForTweet(t scraper.Tweet) (imgs []scraper.Image, err e
 	return
 }
 
-/**
- * Get the list of videos for a tweet
- */
+// Get the list of videos for a tweet
 func (p Profile) GetVideosForTweet(t scraper.Tweet) (vids []scraper.Video, err error) {
 	err = p.DB.Select(&vids, `
 		select id, tweet_id, width, height, remote_url, local_filename, thumbnail_remote_url, thumbnail_local_filename, duration,
@@ -120,9 +108,7 @@ func (p Profile) GetVideosForTweet(t scraper.Tweet) (vids []scraper.Video, err e
 	return
 }
 
-/**
- * Get the list of Urls for a Tweet
- */
+// Get the list of Urls for a Tweet
 func (p Profile) GetUrlsForTweet(t scraper.Tweet) (urls []scraper.Url, err error) {
 	err = p.DB.Select(&urls, `
 		select tweet_id, domain, text, short_text, title, description, creator_id, site_id, thumbnail_width, thumbnail_height,
@@ -134,9 +120,7 @@ func (p Profile) GetUrlsForTweet(t scraper.Tweet) (urls []scraper.Url, err error
 	return
 }
 
-/**
- * Get the list of Polls for a Tweet
- */
+// Get the list of Polls for a Tweet
 func (p Profile) GetPollsForTweet(t scraper.Tweet) (polls []scraper.Poll, err error) {
 	err = p.DB.Select(&polls, `
 		select id, tweet_id, num_choices, choice1, choice1_votes, choice2, choice2_votes, choice3, choice3_votes, choice4, choice4_votes,

@@ -124,7 +124,7 @@ func TestTweetDetailWithReplies(t *testing.T) {
 		1413650853081276421,
 		1413772782358433792,
 		1413773185296650241,
-	}{
+	} {
 		_, is_ok := tweet_detail.Tweets[id]
 		assert.True(is_ok)
 	}
@@ -135,7 +135,7 @@ func TestTweetDetailWithReplies(t *testing.T) {
 		1372116552942764034,
 		1067869346775646208,
 		1304281147074064385,
-	}{
+	} {
 		_, is_ok := tweet_detail.Users[id]
 		assert.True(is_ok)
 	}
@@ -174,7 +174,7 @@ func TestTweetDetailWithParents(t *testing.T) {
 		1413646595493568516,
 		1413772782358433792,
 		1413773185296650241,
-	}{
+	} {
 		_, is_ok := tweet_detail.Tweets[id]
 		assert.True(is_ok)
 	}

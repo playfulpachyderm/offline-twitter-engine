@@ -14,9 +14,7 @@ import (
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-/**
- * Create a user, save it, reload it, and make sure it comes back the same
- */
+// Create a user, save it, reload it, and make sure it comes back the same
 func TestSaveAndLoadUser(t *testing.T) {
 	require := require.New(t)
 	profile_path := "test_profiles/TestUserQueries"
@@ -44,9 +42,6 @@ func TestSaveAndLoadUser(t *testing.T) {
 	}
 }
 
-/**
- *
- */
 func TestModifyUser(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
@@ -117,9 +112,7 @@ func TestHandleIsCaseInsensitive(t *testing.T) {
 	}
 }
 
-/**
- * Should correctly report whether the user exists in the database
- */
+// Should correctly report whether the user exists in the database
 func TestUserExists(t *testing.T) {
 	require := require.New(t)
 	profile_path := "test_profiles/TestUserQueries"
@@ -137,9 +130,7 @@ func TestUserExists(t *testing.T) {
 	require.True(exists)
 }
 
-/**
- * Test scenarios relating to user content downloading
- */
+// Test scenarios relating to user content downloading
 func TestCheckUserContentDownloadNeeded(t *testing.T) {
 	assert := assert.New(t)
 	profile_path := "test_profiles/TestUserQueries"
@@ -177,14 +168,12 @@ func TestCheckUserContentDownloadNeeded(t *testing.T) {
 	assert.True(profile.CheckUserContentDownloadNeeded(user))
 }
 
-/**
- * Make sure following works
- *
- * - users are unfollowed by default
- * - following a user makes it save as is_followed
- * - using regular save method doesn't un-follow
- * - unfollowing a user makes it save as no longer is_followed
- */
+// Make sure following works
+//
+// - users are unfollowed by default
+// - following a user makes it save as is_followed
+// - using regular save method doesn't un-follow
+// - unfollowing a user makes it save as no longer is_followed
 func TestFollowUnfollowUser(t *testing.T) {
 	assert := assert.New(t)
 
@@ -222,9 +211,7 @@ func TestFollowUnfollowUser(t *testing.T) {
 	assert.False(user_reloaded.IsFollowed)
 }
 
-/**
- * Should correctly report whether a User is followed or not, according to the DB (not the in-memory objects)
- */
+// Should correctly report whether a User is followed or not, according to the DB (not the in-memory objects)
 func TestIsFollowingUser(t *testing.T) {
 	assert := assert.New(t)
 
@@ -256,10 +243,8 @@ func TestIsFollowingUser(t *testing.T) {
 	assert.False(profile.IsFollowing(user))
 }
 
-/**
- * Should create a new Unknown User from the given handle.
- * The Unknown User should work consistently with other Users.
- */
+// Should create a new Unknown User from the given handle.
+// The Unknown User should work consistently with other Users.
 func TestCreateUnknownUserWithHandle(t *testing.T) {
 	assert := assert.New(t)
 
@@ -287,9 +272,7 @@ func TestCreateUnknownUserWithHandle(t *testing.T) {
 	assert.Equal(next_id+2, profile.NextFakeUserID())
 }
 
-/**
- * Should update the unknown User's UserID with the correct ID if it already exists
- */
+// Should update the unknown User's UserID with the correct ID if it already exists
 func TestCreateUnknownUserWithHandleThatAlreadyExists(t *testing.T) {
 	assert := assert.New(t)
 

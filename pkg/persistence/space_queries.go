@@ -12,9 +12,7 @@ type SpaceParticipant struct {
 	SpaceID scraper.SpaceID `db:"space_id"`
 }
 
-/**
- * Save a Space
- */
+// Save a Space
 func (p Profile) SaveSpace(s scraper.Space) error {
 	_, err := p.DB.NamedExec(`
 		insert into spaces (id, created_by_id, short_url, state, title, created_at, started_at, ended_at, updated_at,
@@ -53,9 +51,7 @@ func (p Profile) SaveSpace(s scraper.Space) error {
 	return nil
 }
 
-/**
- * Get a Space by ID
- */
+// Get a Space by ID
 func (p Profile) GetSpaceById(id scraper.SpaceID) (space scraper.Space, err error) {
 	err = p.DB.Get(&space,
 		`select id, created_by_id, short_url, state, title, created_at, started_at, ended_at, updated_at, is_available_for_replay,

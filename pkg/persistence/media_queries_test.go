@@ -12,9 +12,7 @@ import (
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-/**
- * Create an Image, save it, reload it, and make sure it comes back the same
- */
+// Create an Image, save it, reload it, and make sure it comes back the same
 func TestSaveAndLoadImage(t *testing.T) {
 	require := require.New(t)
 	profile_path := "test_profiles/TestMediaQueries"
@@ -47,9 +45,7 @@ func TestSaveAndLoadImage(t *testing.T) {
 	}
 }
 
-/**
- * Change an Image, save the changes, reload it, and check if it comes back the same
- */
+// Change an Image, save the changes, reload it, and check if it comes back the same
 func TestModifyImage(t *testing.T) {
 	require := require.New(t)
 	profile_path := "test_profiles/TestMediaQueries"
@@ -78,9 +74,7 @@ func TestModifyImage(t *testing.T) {
 	}
 }
 
-/**
- * Create an Video, save it, reload it, and make sure it comes back the same
- */
+// Create an Video, save it, reload it, and make sure it comes back the same
 func TestSaveAndLoadVideo(t *testing.T) {
 	require := require.New(t)
 	profile_path := "test_profiles/TestMediaQueries"
@@ -116,9 +110,7 @@ func TestSaveAndLoadVideo(t *testing.T) {
 	}
 }
 
-/**
- * Change an Video, save the changes, reload it, and check if it comes back the same
- */
+// Change an Video, save the changes, reload it, and check if it comes back the same
 func TestModifyVideo(t *testing.T) {
 	require := require.New(t)
 	profile_path := "test_profiles/TestMediaQueries"
@@ -148,9 +140,7 @@ func TestModifyVideo(t *testing.T) {
 	}
 }
 
-/**
- * Create an Url, save it, reload it, and make sure it comes back the same
- */
+// Create an Url, save it, reload it, and make sure it comes back the same
 func TestSaveAndLoadUrl(t *testing.T) {
 	require := require.New(t)
 	profile_path := "test_profiles/TestMediaQueries"
@@ -184,9 +174,7 @@ func TestSaveAndLoadUrl(t *testing.T) {
 	}
 }
 
-/**
- * Change an Url, save the changes, reload it, and check if it comes back the same
- */
+// Change an Url, save the changes, reload it, and check if it comes back the same
 func TestModifyUrl(t *testing.T) {
 	require := require.New(t)
 	profile_path := "test_profiles/TestMediaQueries"
@@ -215,9 +203,7 @@ func TestModifyUrl(t *testing.T) {
 	}
 }
 
-/**
- * Create a Poll, save it, reload it, and make sure it comes back the same
- */
+// Create a Poll, save it, reload it, and make sure it comes back the same
 func TestSaveAndLoadPoll(t *testing.T) {
 	require := require.New(t)
 	profile_path := "test_profiles/TestMediaQueries"
@@ -249,9 +235,7 @@ func TestSaveAndLoadPoll(t *testing.T) {
 	}
 }
 
-/**
- * Change an Poll, save the changes, reload it, and check if it comes back the same
- */
+// Change an Poll, save the changes, reload it, and check if it comes back the same
 func TestModifyPoll(t *testing.T) {
 	require := require.New(t)
 	profile_path := "test_profiles/TestMediaQueries"

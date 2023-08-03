@@ -24,51 +24,51 @@ Please upgrade this application to a newer version to use this profile.  Or down
 // The Nth entry is the migration that moves you from version N to version N+1.
 var MIGRATIONS = []string{
 	`create table polls (rowid integer primary key,
-    id integer unique not null check(typeof(id) = 'integer'),
-    tweet_id integer not null,
-    num_choices integer not null,
+		    id integer unique not null check(typeof(id) = 'integer'),
+		    tweet_id integer not null,
+		    num_choices integer not null,
 
-    choice1 text,
-    choice1_votes integer,
-    choice2 text,
-    choice2_votes integer,
-    choice3 text,
-    choice3_votes integer,
-    choice4 text,
-    choice4_votes integer,
+		    choice1 text,
+		    choice1_votes integer,
+		    choice2 text,
+		    choice2_votes integer,
+		    choice3 text,
+		    choice3_votes integer,
+		    choice4 text,
+		    choice4_votes integer,
 
-    voting_duration integer not null,  -- in seconds
-    voting_ends_at integer not null,
+		    voting_duration integer not null,  -- in seconds
+		    voting_ends_at integer not null,
 
-    last_scraped_at integer not null,
+		    last_scraped_at integer not null,
 
-    foreign key(tweet_id) references tweets(id)
-	);`,
+		    foreign key(tweet_id) references tweets(id)
+		);`,
 	`alter table tweets add column is_conversation_scraped boolean default 0;
-	alter table tweets add column last_scraped_at integer not null default 0`,
+		alter table tweets add column last_scraped_at integer not null default 0`,
 	`update tombstone_types set tombstone_text = 'This Tweet is from a suspended account' where rowid = 2;
-	insert into tombstone_types (rowid, short_name, tombstone_text)
-	                     values (5, 'violated', 'This Tweet violated the Twitter Rules'),
-	                            (6, 'no longer exists', 'This Tweet is from an account that no longer exists')`,
+		insert into tombstone_types (rowid, short_name, tombstone_text)
+		                     values (5, 'violated', 'This Tweet violated the Twitter Rules'),
+		                            (6, 'no longer exists', 'This Tweet is from an account that no longer exists')`,
 	`alter table videos add column thumbnail_remote_url text not null default "missing";
-	alter table videos add column thumbnail_local_filename text not null default "missing"`,
+		alter table videos add column thumbnail_local_filename text not null default "missing"`,
 	`alter table videos add column duration integer not null default 0;
-	alter table videos add column view_count integer not null default 0`,
+		alter table videos add column view_count integer not null default 0`,
 	`alter table users add column is_banned boolean default 0`,
 	`alter table urls add column short_text text not null default ""`,
 	`insert into tombstone_types (rowid, short_name, tombstone_text) values (7, 'age-restricted', 'Age-restricted adult content. '
-	|| 'This content might not be appropriate for people under 18 years old. To view this media, you’ll need to log in to Twitter')`,
+		|| 'This content might not be appropriate for people under 18 years old. To view this media, you’ll need to log in to Twitter')`,
 	`alter table users add column is_followed boolean default 0`,
 	`create table fake_user_sequence(latest_fake_id integer not null);
-	insert into fake_user_sequence values(0x4000000000000000);
-	alter table users add column is_id_fake boolean default 0;`,
+		insert into fake_user_sequence values(0x4000000000000000);
+		alter table users add column is_id_fake boolean default 0;`,
 	`delete from urls where rowid in (select urls.rowid from tweets join urls on tweets.id = urls.tweet_id where urls.text like
-	'https://twitter.com/%/status/' || tweets.quoted_tweet_id || "%")`,
+		'https://twitter.com/%/status/' || tweets.quoted_tweet_id || "%")`,
 	`create table spaces(rowid integer primary key,
-	    id text unique not null,
-	    short_url text not null
-	);
-	alter table tweets add column space_id text references spaces(id)`,
+		    id text unique not null,
+		    short_url text not null
+		);
+		alter table tweets add column space_id text references spaces(id)`,
 	`alter table videos add column is_blocked_by_dmca boolean not null default 0`,
 	`create index if not exists index_tweets_in_reply_to_id on tweets (in_reply_to_id);
 		create index if not exists index_urls_tweet_id on urls (tweet_id);
