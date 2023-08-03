@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"strings"
@@ -10,6 +11,7 @@ import (
 
 var (
 	ErrEndOfFeed = errors.New("end of feed")
+	ErrNotInDB = errors.New("not in database")
 )
 
 func (p Profile) fill_content(trove *TweetTrove) {
@@ -151,6 +153,126 @@ func (p Profile) fill_content(trove *TweetTrove) {
 		t.Polls = append(t.Polls, p)
 		trove.Tweets[t.ID] = t
 	}
+}
+
+// TODO: compound-query-structs
+type TweetDetailView struct {
+	TweetTrove
+	ParentIDs   []TweetID
+	MainTweetID TweetID
+	ReplyChains [][]TweetID
+}
+
+func NewTweetDetailView() TweetDetailView {
+	return TweetDetailView{
+		TweetTrove:  NewTweetTrove(),
+		ParentIDs:   []TweetID{},
+		ReplyChains: [][]TweetID{},
+	}
+}
+
+// Return the given tweet, all its parent tweets, and a list of conversation threads
+func (p Profile) GetTweetDetail(id TweetID) (TweetDetailView, error) {
+	// TODO: compound-query-structs
+	ret := NewTweetDetailView()
+
+	stmt, err := p.DB.Preparex(
+		`select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
+	            mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id, ifnull(tombstone_types.short_name, "") tombstone_type,
+	            is_expandable,
+	            is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at
+	       from tweets
+	  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
+	      where id = ?`)
+	if err != nil {
+		panic(err)
+	}
+
+	// Main tweet
+	var tweet Tweet
+	err = stmt.Get(&tweet, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ret, fmt.Errorf("Tweet ID %d: %w", id, ErrNotInDB)
+		} else {
+			panic(err)
+		}
+	}
+	ret.Tweets[tweet.ID] = tweet
+	ret.MainTweetID = tweet.ID
+
+	// Parent tweets
+	for tweet.InReplyToID != 0 {
+		err := stmt.Get(&tweet, tweet.InReplyToID)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				break
+			} else {
+				panic(err)
+			}
+		}
+		ret.Tweets[tweet.ID] = tweet
+		ret.ParentIDs = append([]TweetID{tweet.ID}, ret.ParentIDs...)
+	}
+
+	// TODO: tweet-detail-thread-chains
+
+	// Replies lvl 1
+	// TODO: this can be done with a recursive Common Table Expression:
+	// - https://www.sqlite.org/lang_with.html#recursive_query_examples
+	var replies []Tweet
+	stmt, err = p.DB.Preparex(
+		`select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
+	            mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id, ifnull(tombstone_types.short_name, "") tombstone_type,
+	            is_expandable,
+	            is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at
+	       from tweets
+	  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
+	      where in_reply_to_id = ?
+	      order by num_likes desc
+	      limit 50`)
+	if err != nil {
+		panic(err)
+	}
+	err = stmt.Select(&replies, id)
+	if err != nil {
+		panic(err)
+	}
+	if len(replies) > 0 {
+		reply_1_ids := []interface{}{}
+		for _, r := range replies {
+			ret.Tweets[r.ID] = r
+			reply_1_ids = append(reply_1_ids, r.ID)
+			ret.ReplyChains = append(ret.ReplyChains, []TweetID{r.ID})
+		}
+		reply2_query := `
+		    select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
+	               mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id, ifnull(tombstone_types.short_name, "") tombstone_type,
+	               is_expandable,
+	               is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at
+	          from tweets
+	     left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
+	         where in_reply_to_id in (` + strings.Repeat("?,", len(reply_1_ids)-1) + `?)
+	         order by num_likes desc
+	         limit 50`
+		err = p.DB.Select(&replies, reply2_query, reply_1_ids...)
+		if err != nil {
+			panic(err)
+		}
+		for _, r := range replies {
+			ret.Tweets[r.ID] = r
+			for i, chain := range ret.ReplyChains {
+				if chain[0] == r.InReplyToID {
+					ret.ReplyChains[i] = append(chain, r.ID)
+					break
+				}
+				// TODO: Log weird situation
+			}
+		}
+	}
+
+	p.fill_content(&ret.TweetTrove)
+	return ret, nil
 }
 
 // TODO: compound-query-structs

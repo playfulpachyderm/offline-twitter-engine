@@ -101,3 +101,94 @@ func TestBuildUserFeedEnd(t *testing.T) {
 	assert.Len(feed.Users, 0)
 	require.Len(feed.Items, 0)
 }
+
+func TestTweetDetailWithReplies(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+
+	tweet_detail, err := profile.GetTweetDetail(TweetID(1413646595493568516))
+	require.NoError(err)
+
+	assert.Len(tweet_detail.Retweets, 0)
+
+	assert.Len(tweet_detail.Tweets, 8)
+	for _, id := range []TweetID{
+		1413646309047767042,
+		1413646595493568516,
+		1413647919215906817,
+		1413657324267311104,
+		1413658466795737091,
+		1413650853081276421,
+		1413772782358433792,
+		1413773185296650241,
+	}{
+		_, is_ok := tweet_detail.Tweets[id]
+		assert.True(is_ok)
+	}
+
+	assert.Len(tweet_detail.Users, 4)
+	for _, id := range []UserID{
+		1032468021485293568,
+		1372116552942764034,
+		1067869346775646208,
+		1304281147074064385,
+	}{
+		_, is_ok := tweet_detail.Users[id]
+		assert.True(is_ok)
+	}
+
+	require.Len(tweet_detail.ParentIDs, 1)
+	assert.Equal(tweet_detail.ParentIDs[0], TweetID(1413646309047767042))
+
+	require.Len(tweet_detail.ReplyChains, 4)
+	assert.Len(tweet_detail.ReplyChains[0], 1)
+	assert.Equal(tweet_detail.ReplyChains[0][0], TweetID(1413647919215906817))
+	assert.Len(tweet_detail.ReplyChains[1], 2)
+	assert.Equal(tweet_detail.ReplyChains[1][0], TweetID(1413657324267311104))
+	assert.Equal(tweet_detail.ReplyChains[1][1], TweetID(1413658466795737091))
+	assert.Len(tweet_detail.ReplyChains[2], 1)
+	assert.Equal(tweet_detail.ReplyChains[2][0], TweetID(1413650853081276421))
+	assert.Len(tweet_detail.ReplyChains[3], 2)
+	assert.Equal(tweet_detail.ReplyChains[3][0], TweetID(1413772782358433792))
+	assert.Equal(tweet_detail.ReplyChains[3][1], TweetID(1413773185296650241))
+}
+
+func TestTweetDetailWithParents(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+
+	tweet_detail, err := profile.GetTweetDetail(TweetID(1413773185296650241))
+	require.NoError(err)
+
+	assert.Len(tweet_detail.Retweets, 0)
+
+	assert.Len(tweet_detail.Tweets, 4)
+	for _, id := range []TweetID{
+		1413646309047767042,
+		1413646595493568516,
+		1413772782358433792,
+		1413773185296650241,
+	}{
+		_, is_ok := tweet_detail.Tweets[id]
+		assert.True(is_ok)
+	}
+
+	assert.Len(tweet_detail.Users, 2)
+	_, is_ok := tweet_detail.Users[1032468021485293568]
+	assert.True(is_ok)
+	_, is_ok = tweet_detail.Users[1372116552942764034]
+	assert.True(is_ok)
+
+	require.Len(tweet_detail.ParentIDs, 3)
+	assert.Equal(tweet_detail.ParentIDs[0], TweetID(1413646309047767042))
+	assert.Equal(tweet_detail.ParentIDs[1], TweetID(1413646595493568516))
+	assert.Equal(tweet_detail.ParentIDs[2], TweetID(1413772782358433792))
+
+	require.Len(tweet_detail.ReplyChains, 0)
+}

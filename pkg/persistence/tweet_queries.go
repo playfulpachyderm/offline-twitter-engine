@@ -8,7 +8,6 @@ import (
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-var ErrNotInDB = errors.New("not in database")
 
 func (p Profile) SaveTweet(t scraper.Tweet) error {
 	db := p.DB
