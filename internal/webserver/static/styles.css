@@ -1,0 +1,54 @@
+:root {
+	--color-twitter-text-gray: #536171;
+}
+
+
+body {
+	margin: 0 30%;
+}
+
+.tweet {
+	padding: 20px;
+
+	outline-color: lightgray;
+	outline-style: solid;
+	outline-width: 1px;
+	border-radius: 20px;
+}
+
+.quoted-tweet {
+	padding: 20px;
+
+	outline-color: lightgray;
+	outline-style: solid;
+	outline-width: 1px;
+	border-radius: 20px;
+}
+
+.profile-banner-image {
+	width: 100%;
+}
+
+.unstyled-link {
+	text-decoration: none;
+	color: inherit;
+	line-height: 0;
+}
+
+
+.author-info {
+	display: flex;
+	align-items: center;
+	padding: 0.5em 0;
+}
+
+.name-and-handle {
+	padding: 0 0.5em;
+}
+
+.display-name {
+	font-weight: bold;
+}
+.handle {
+	color: var(--color-twitter-text-gray);
+}
