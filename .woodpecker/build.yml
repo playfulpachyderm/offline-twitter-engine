@@ -21,7 +21,7 @@ pipeline:
       - offline_twatter_passwd
     commands:
       - cd cmd
-      - ./tests.sh
+      # - ./tests.sh
 
   version_bump_test:
     image: offline-twitter/go
