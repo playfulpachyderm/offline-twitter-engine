@@ -1,7 +1,6 @@
 package persistence
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"strings"
@@ -175,51 +174,42 @@ func NewTweetDetailView() TweetDetailView {
 func (p Profile) GetTweetDetail(id TweetID) (TweetDetailView, error) {
 	// TODO: compound-query-structs
 	ret := NewTweetDetailView()
+	ret.MainTweetID = id
 
-	stmt, err := p.DB.Preparex(
-		`select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
-	            mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id, ifnull(tombstone_types.short_name, "") tombstone_type,
-	            is_expandable,
+	stmt, err := p.DB.Preparex(`
+		   with recursive all_replies(id) as (values(?) union all
+		        select tweets.in_reply_to_id from tweets, all_replies
+		         where tweets.id = all_replies.id and tweets.in_reply_to_id != 0
+		        )
+
+		 select tweets.id id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id,
+		        quoted_tweet_id, mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id,
+		        ifnull(tombstone_types.short_name, "") tombstone_type, is_expandable,
 	            is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at
 	       from tweets
 	  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
-	      where id = ?`)
+	 inner join all_replies on tweets.id = all_replies.id
+	      order by id asc`)
 	if err != nil {
 		panic(err)
 	}
 
-	// Main tweet
-	var tweet Tweet
-	err = stmt.Get(&tweet, id)
+	// Main tweet and parents
+	var thread []Tweet
+	err = stmt.Select(&thread, id)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return ret, fmt.Errorf("Tweet ID %d: %w", id, ErrNotInDB)
-		} else {
-			panic(err)
-		}
+		panic(err)
 	}
-	ret.Tweets[tweet.ID] = tweet
-	ret.MainTweetID = tweet.ID
-
-	// Parent tweets
-	for tweet.InReplyToID != 0 {
-		err := stmt.Get(&tweet, tweet.InReplyToID)
-		if err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
-				break
-			} else {
-				panic(err)
-			}
-		}
+	if len(thread) == 0 {
+		return ret, fmt.Errorf("Tweet ID %d: %w", id, ErrNotInDB)
+	}
+	for _, tweet := range thread {
 		ret.Tweets[tweet.ID] = tweet
-		ret.ParentIDs = append([]TweetID{tweet.ID}, ret.ParentIDs...)
+		if tweet.ID != ret.MainTweetID {
+			ret.ParentIDs = append(ret.ParentIDs, tweet.ID)
+		}
 	}
 
-	// TODO: tweet-detail-thread-chains
-
-	// Replies lvl 1
-	// TODO: this can be done with a recursive Common Table Expression:
-	// - https://www.sqlite.org/lang_with.html#recursive_query_examples
 	var replies []Tweet
 	stmt, err = p.DB.Preparex(
 		`select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
