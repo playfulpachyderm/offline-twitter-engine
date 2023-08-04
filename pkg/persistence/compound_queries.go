@@ -246,15 +246,29 @@ func (p Profile) GetTweetDetail(id TweetID) (TweetDetailView, error) {
 			ret.ReplyChains = append(ret.ReplyChains, []TweetID{r.ID})
 		}
 		reply2_query := `
-		    select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
-	               mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id, ifnull(tombstone_types.short_name, "") tombstone_type,
-	               is_expandable,
-	               is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at
-	          from tweets
-	     left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
-	         where in_reply_to_id in (` + strings.Repeat("?,", len(reply_1_ids)-1) + `?)
-	         order by num_likes desc
-	         limit 50`
+		      with parent_ids(id) as (values ` + strings.Repeat("(?), ", len(reply_1_ids)-1) + `(?)),
+		           all_reply_ids(id, parent_id, num_likes) as (
+		               select tweets.id, tweets.in_reply_to_id, num_likes
+		                 from parent_ids
+		                 left join tweets on tweets.in_reply_to_id = parent_ids.id
+		           ),
+		           top_ids_by_parent(id, parent_id) as (
+		               select id, parent_id outer_parent_id
+		                 from all_reply_ids
+		                where id = (
+		                    select id from all_reply_ids
+		                     where parent_id = outer_parent_id
+		                  order by num_likes desc limit 1
+		                )
+		           )
+
+		    select tweets.id id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id,
+		           quoted_tweet_id, mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id,
+		           ifnull(tombstone_types.short_name, "") tombstone_type, is_expandable,
+		           is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at
+		      from top_ids_by_parent
+		 left join tweets on tweets.id = top_ids_by_parent.id
+		 left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid`
 		err = p.DB.Select(&replies, reply2_query, reply_1_ids...)
 		if err != nil {
 			panic(err)
@@ -262,7 +276,7 @@ func (p Profile) GetTweetDetail(id TweetID) (TweetDetailView, error) {
 		for _, r := range replies {
 			ret.Tweets[r.ID] = r
 			for i, chain := range ret.ReplyChains {
-				if chain[0] == r.InReplyToID {
+				if len(chain) == 1 && chain[0] == r.InReplyToID {
 					ret.ReplyChains[i] = append(chain, r.ID)
 					break
 				}
