@@ -1,23 +1,53 @@
 :root {
 	--color-twitter-text-gray: #536171;
+	--color-twitter-blue: #1b95e0;  /* hsv(203, 87.9, 87,8) */
+	--color-twitter-blue-light: #7cc5f6; /* hsv(204, 49.6, 96.5) */
+	--color-twitter-off-white: #f7f9f9; /* hsv(180, 0.8, 97.6) */
+	--color-twitter-off-white-dark: #dae5e5; /* hsv(180, 4.8, 89.8) */
+	--color-outline-gray: #dcdcdc;
+
+/*
+const QColor COLOR_OUTLINE_GRAY = QColor(220, 220, 220);
+const QColor COLOR_TWITTER_BLUE = QColor(27, 149, 224);
+const QColor COLOR_TWITTER_BLUE_LIGHT = QColor(124,197,246);
+const QColor COLOR_TWITTER_OFF_WHITE = QColor(247,249,249);
+const QColor COLOR_TWITTER_OFF_WHITE_DARK = QColor(218,229,229);
+const QColor COLOR_TWITTER_TEXT_GRAY = QColor(83, 100, 113);
+
+const QColor COLOR_BACKGROUND_GREEN = QColor(40, 205, 50);
+
+const QColor COLOR_RED          = QColor(255, 0, 0);
+
+const QColor COLOR_SPACE_PURPLE = QColor(164, 155, 253);
+const QColor COLOR_SPACE_PURPLE_OUTLINE = QColor(100, 82, 252);
+*/
 }
 
-
+html {
+	/* Force scrollbar, even when it fits on 1 page.  Prevents viewport from resizing -> flickering / stuff moving btw page loads */
+	overflow-y: scroll;
+}
 body {
 	margin: 0 30%;
+    border-color: var(--color-twitter-off-white-dark);
+    border-right-style: solid;
+    border-left-style: solid;
+    border-width: 1px;
+    min-height: 100vh;
+
+    font-family: "Titillium Web";
+}
+main {
+	padding-top: 4em;
 }
 
 .tweet {
-	padding: 20px;
-
-	outline-color: lightgray;
-	outline-style: solid;
-	outline-width: 1px;
-	border-radius: 20px;
+	padding: 0 1.5em;
 }
 
 .quoted-tweet {
-	padding: 20px;
+	padding: 1.3em;
+	margin-top: 1em;
 
 	outline-color: lightgray;
 	outline-style: solid;
@@ -32,14 +62,11 @@ body {
 .unstyled-link {
 	text-decoration: none;
 	color: inherit;
-	line-height: 0;
 }
-
 
 .author-info {
 	display: flex;
 	align-items: center;
-	padding: 0.5em 0;
 }
 
 .name-and-handle {
@@ -51,4 +78,239 @@ body {
 }
 .handle {
 	color: var(--color-twitter-text-gray);
+}
+
+.tweet-header-container {
+	display: flex;
+	align-items: center;
+}
+.reply-mentions-container {
+	display: flex;
+	align-items: center;
+	margin: 0 5em;
+}
+ul.reply-mentions {
+	list-style: none;
+    padding: 0.5em;
+}
+ul.reply-mentions li {
+	display: inline;
+}
+ul.reply-mentions li:after {
+	content: " ⋅";
+}
+ul.reply-mentions li:last-child:after {
+	content: "";
+}
+.replying-to-label {
+	color: var(--color-twitter-text-gray);
+}
+a.mention {
+	text-decoration: none;
+	color: var(--color-twitter-blue);
+}
+
+.tweet-text {
+	display: block;
+	margin-bottom: 0.4em;
+/*	padding-bottom: 0.5em;*/
+}
+.focused-tweet .tweet-text {
+	font-size: 1.4em;
+}
+.focused-tweet .quoted-tweet .tweet-text {
+	font-size: unset;
+}
+
+.thread-parent-tweet:first-child, .focused-tweet:first-child {
+	padding-top: 1em;
+}
+.thread-parent-tweet .vertical-reply-line-container,
+.reply-chain .vertical-reply-line-container {
+	width: 3em;
+	margin-right: 0.5em;
+}
+.thread-parent-tweet .vertical-reply-line,
+.reply-chain > :not(:last-child) .vertical-reply-line {
+	width: 2px;
+	background-color: var(--color-twitter-off-white-dark);
+	flex-grow: 1;
+	margin: auto;
+}
+
+.profile-image {
+	border-radius: 50%;
+	width: 3em;
+	display: inline;
+	border: 1px solid var(--color-outline-gray);
+}
+
+.user-feed-header {
+    border-bottom: 1px solid var(--color-outline-gray);
+}
+.user-feed-header .author-info {
+	font-size: 1.3em;
+	padding: 1em;
+}
+.user-feed-header .profile-image {
+	width: 8em;
+}
+
+.horizontal-container-1 {
+	display: flex;
+	flex-direction: row;
+}
+.vertical-reply-line-container {
+	flex-grow: 0;
+	flex-shrink: 0;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	width: 1em; /* will be overridden by, e.g., parent-thread properties */
+}
+.vertical-container-1 {
+	flex-grow: 1;
+	flex-shrink: 1;
+}
+
+.posted-at-container {
+	flex-grow: 1;
+}
+p.posted-at {
+	float: right;
+	color: var(--color-twitter-text-gray);
+	font-size: 0.875em;
+}
+
+.interactions-bar {
+	display: flex;
+	flex-direction: row;
+	margin: 0.5em 0;
+}
+.interaction-stat {
+	flex-grow: 1;
+	display: flex;
+}
+.interaction-stat span {
+	line-height: 1.5em;
+	padding: 0 0.5em;
+}
+.interactions-bar .dummy {
+	flex-grow: 5;
+}
+
+.focused-tweet {
+	border-bottom: 1px solid var(--color-twitter-off-white-dark);
+	padding-bottom: 0.5em;
+}
+
+
+.reply-chain {
+	margin-top: 1em;
+}
+.reply-chain > :last-child {
+	padding-bottom: 1em;
+	border-bottom: 1px solid var(--color-twitter-off-white-dark);
+}
+.nav-sidebar {
+	display: flex;
+	flex-direction: column;
+    position: fixed;
+    transform: translate(-100%, 0);
+    font-size: 1.4em;
+}
+ul.quick-links {
+	display: flex;
+	flex-direction: column;
+	list-style: none;
+	align-items: flex-start;
+	padding: 0 2em;
+}
+li.quick-link {
+	display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0.5em;
+    margin: 0.2em;
+    border-radius: 100em; /* any large amount, just don't use % because then it makes an ellipse */
+}
+li.quick-link:hover {
+    background-color: var(--color-twitter-blue-light);
+}
+li.quick-link:active {
+    transform: translate(2px, 2px);
+    background-color: var(--color-twitter-blue);
+}
+
+.quick-link span {
+	padding: 0 0.3em;
+}
+
+.followers-count, .following-count {
+	font-weight: bold;
+}
+.followers-label, .following-label {
+	color: var(--color-twitter-text-gray);
+}
+.bio-info-with-icon {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.3em;
+}
+.user-feed-header-info-container {
+	padding: 2em;
+    margin-bottom: 0.1em;
+    border-bottom: 1px solid var(--color-outline-gray);
+}
+.user-feed-tweets .tweet {
+	border-bottom: 1px solid var(--color-twitter-off-white-dark);
+    padding-top: 0.8em;
+    padding-bottom: 0.8em;
+}
+
+.top-bar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 4em;
+    padding: 0.5em 2em;
+    gap: 1em;
+    border: 1px solid var(--color-outline-gray);
+    position: fixed;
+    background-color: white;
+    width: 40%;
+    left: 30%;
+    box-sizing: border-box;
+}
+
+.back-button {
+	flex-grow: 0;
+    border-radius: 50%;
+    border: 2px solid black;
+    width: 2em;
+    position: relative;
+    height: 2em;
+}
+
+img.svg-icon {
+	width: 1.5em;
+}
+
+svg {
+	width: 1.5em;
+}
+.back-button img {
+    color: rgb(239, 243, 244);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.search-bar {
+	flex-grow: 1;
+	font-size: 1em;
+	font-family: "Titillium Web";
+	padding: 0.2em 0.5em;
 }

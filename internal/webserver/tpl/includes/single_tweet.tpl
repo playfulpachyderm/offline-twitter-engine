@@ -3,42 +3,81 @@
   {{$main_tweet := (tweet .)}}
   {{$author := (user $main_tweet.UserID)}}
 
-  {{template "author-info" $author}}
-  <div class="tweet-content">
-    <a href="/tweet/{{$main_tweet.ID}}" style="color: inherit; text-decoration: none" >{{$main_tweet.Text}}</a>
-
-    {{range $main_tweet.Images}}
-      <img src="{{.RemoteURL}}" style="max-width: 45%"/>
+  <div class="tweet-header-container">
+    {{template "author-info" $author}}
+    {{if $main_tweet.ReplyMentions}}
+      <div class="reply-mentions-container">
+        <span class="replying-to-label">Replying to</span>
+        <ul class="reply-mentions">
+          {{range $main_tweet.ReplyMentions}}
+            <li><a class="mention" href="/{{.}}">@{{.}}</a></li>
+          {{end}}
+        </ul>
+      </div>
     {{end}}
+    <div class="posted-at-container">
+      <p class="posted-at">
+        {{$main_tweet.PostedAt.Time.Format "Jan 2, 2006"}}
+        <br/>
+        {{$main_tweet.PostedAt.Time.Format "3:04 pm"}}
+      </p>
+    </div>
+  </div>
+  <div class="horizontal-container-1">
+    <span class="vertical-reply-line-container">
+      <div class="vertical-reply-line">
+      </div>
+    </span>
+    <span class="vertical-container-1">
+      <div class="tweet-content">
+        <a href="/tweet/{{$main_tweet.ID}}" class="unstyled-link tweet-text">
+          {{$main_tweet.Text}}
+        </a>
 
-    {{if $main_tweet.QuotedTweetID}}
-      {{$quoted_tweet := (tweet $main_tweet.QuotedTweetID)}}
-      {{$quoted_author := (user $quoted_tweet.UserID)}}
-      <a href="/tweet/{{$quoted_tweet.ID}}">
-        <div class="quoted-tweet" style="padding: 20px; outline-color: lightgray; outline-style: solid; outline-width: 1px; border-radius: 20px">
-          {{template "author-info" $quoted_author}}
-          <div class="quoted-tweet-content">
-            <p>{{$quoted_tweet.Text}}</p>
-            {{range $quoted_tweet.Images}}
-              <img src="{{.RemoteURL}}" style="max-width: 45%"/>
-            {{end}}
-            <p>{{$quoted_tweet.PostedAt}}</p>
-          </div>
+        {{range $main_tweet.Images}}
+          <img src="/content/images/{{.LocalFilename}}" style="max-width: 45%"/>
+        {{end}}
+
+        {{if $main_tweet.QuotedTweetID}}
+          {{$quoted_tweet := (tweet $main_tweet.QuotedTweetID)}}
+          {{$quoted_author := (user $quoted_tweet.UserID)}}
+          <a href="/tweet/{{$quoted_tweet.ID}}">
+            <div class="quoted-tweet">
+              {{template "author-info" $quoted_author}}
+              <div class="quoted-tweet-content">
+                <a href="/tweet/{{$quoted_tweet.ID}}" class="unstyled-link tweet-text">
+                  {{$quoted_tweet.Text}}
+                </a>
+                {{range $quoted_tweet.Images}}
+                  <img src="{{.RemoteURL}}" style="max-width: 45%"/>
+                {{end}}
+                <p>{{$quoted_tweet.PostedAt.Time.Format "Jan 2, 2006"}}</p>
+              </div>
+            </div>
+          </a>
+        {{end}}
+      </div>
+
+      <div class="interactions-bar">
+<!--         <div class="interaction-stat">
+          {template "quote-tweet-icon"}
+          <span>{{$main_tweet.NumQuoteTweets}}</span>
+        </div> -->
+        <div class="interaction-stat">
+          <img class="svg-icon" src="/static/icons/reply.svg" />
+          <span>{{$main_tweet.NumReplies}}</span>
         </div>
-      </a>
-    {{end}}
-
-    <p>{{$main_tweet.PostedAt}}</p>
-  </div>
-
-  <div class="interactions-bar">
-    <span>{{$main_tweet.NumQuoteTweets}} QTs</span>
-    <span>{{$main_tweet.NumReplies}} replies</span>
-    <span>{{$main_tweet.NumRetweets}} retweets</span>
-    <span>{{$main_tweet.NumLikes}} likes</span>
-  </div>
-  <div class="interaction-buttons">
-
+        <div class="interaction-stat">
+          <img class="svg-icon" src="/static/icons/retweet.svg" />
+          <span>{{$main_tweet.NumRetweets}}</span>
+        </div>
+        <div class="interaction-stat">
+          <img class="svg-icon" src="/static/icons/like.svg" />
+          <span>{{$main_tweet.NumLikes}}</span>
+        </div>
+        <div class="dummy"></div>
+      </div>
+    </span>
   </div>
 </div>
 {{end}}

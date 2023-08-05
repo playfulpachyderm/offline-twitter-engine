@@ -83,6 +83,8 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/static", http.FileServer(http.Dir(get_filepath("static")))).ServeHTTP(w, r)
 	case "tweet":
 		app.TweetDetail(w, r)
+	case "content":
+		http.StripPrefix("/content", http.FileServer(http.Dir(app.Profile.ProfileDir))).ServeHTTP(w, r)
 	default:
 		app.UserFeed(w, r)
 	}
@@ -110,6 +112,7 @@ func (app *Application) Home(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'Home' handler (path: %q)", r.URL.Path)
 	tpl, err := template.ParseFiles(
 		get_filepath("tpl/includes/base.tpl"),
+		get_filepath("tpl/includes/nav_sidebar.tpl"),
 		get_filepath("tpl/home.tpl"),
 	)
 	panic_if(err)

@@ -3,15 +3,21 @@
 
 {{define "main"}}
   {{range .ParentIDs}}
-    {{template "tweet" .}}
+    <div class="thread-parent-tweet">
+      {{template "tweet" .}}
+    </div>
   {{end}}
-  {{template "tweet" .MainTweetID}}
-  <hr />
+  <div class="focused-tweet">
+    {{template "tweet" .MainTweetID}}
+  </div>
 
   {{range .ReplyChains}}
-    {{range .}}
-      {{template "tweet" .}}
-    {{end}}
-    <hr />
+    <div class="reply-chain">
+      {{range .}}
+        <div class="reply-tweet">
+          {{template "tweet" .}}
+        </div>
+      {{end}}
+    </div>
   {{end}}
 {{end}}
