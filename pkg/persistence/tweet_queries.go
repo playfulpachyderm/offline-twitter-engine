@@ -132,7 +132,7 @@ func (p Profile) GetTweetById(id TweetID) (Tweet, error) {
     `, id)
 
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return Tweet{}, fmt.Errorf("GetTweetById %d: %w", id, ErrNotInDB)
 		} else {
 			panic(err)
