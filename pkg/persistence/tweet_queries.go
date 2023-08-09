@@ -132,7 +132,11 @@ func (p Profile) GetTweetById(id TweetID) (Tweet, error) {
     `, id)
 
 	if err != nil {
-		return Tweet{}, fmt.Errorf("Error executing GetTweetByID(%d):\n  %w", id, err)
+		if err == sql.ErrNoRows {
+			return Tweet{}, fmt.Errorf("GetTweetById %d: %w", id, ErrNotInDB)
+		} else {
+			panic(err)
+		}
 	}
 
 	t.Spaces = []Space{}

@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-test/deep"
 
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -325,4 +326,13 @@ func TestCheckTweetContentDownloadNeeded(t *testing.T) {
 
 	// Should no longer need a download
 	assert.False(profile.CheckTweetContentDownloadNeeded(tweet))
+}
+
+func TestLoadMissingTweet(t *testing.T) {
+	profile_path := "test_profiles/TestTweetQueries"
+	profile := create_or_load_profile(profile_path)
+
+	_, err := profile.GetTweetById(scraper.TweetID(6234234)) // Random number
+	require.Error(t, err)
+	assert.ErrorIs(t, err, persistence.ErrNotInDB)
 }
