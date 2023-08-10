@@ -1,5 +1,11 @@
 {{define "nav-sidebar"}}
   <div class="nav-sidebar">
+    <div id="logged-in-user-info">
+      <div class="quick-link" hx-get="/login" hx-trigger="click" hx-target="body" hx-push-url="true">
+        {{template "author-info" active_user}}
+        <img class="svg-icon" src="/static/icons/dotdotdot.svg"  />
+      </div>
+    </div>
     <ul class="quick-links">
       <a class="unstyled-link" href="#">
         <li class="quick-link">
@@ -49,7 +55,7 @@
           <span>Verified</span>
         </li>
       </a>
-      <a class="unstyled-link" href="#">
+      <a class="unstyled-link" href="/{{(active_user).Handle}}">
         <li class="quick-link">
           <img class="svg-icon" src="/static/icons/profile.svg" />
           <span>Profile</span>

@@ -2,12 +2,12 @@ package webserver
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
-	"net/http"
-	"runtime/debug"
-
 	"html/template"
+	"net/http"
 	"path/filepath"
+	"runtime/debug"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
@@ -55,18 +55,40 @@ func (app *Application) buffered_render(w http.ResponseWriter, tpl *template.Tem
 type TweetCollection interface {
 	Tweet(id scraper.TweetID) scraper.Tweet
 	User(id scraper.UserID) scraper.User
+	FocusedTweetID() scraper.TweetID
 }
 
 // Creates a template from the given template file using all the available partials.
 // Calls `app.buffered_render` to render the created template.
-func (app *Application) buffered_render_template_for(w http.ResponseWriter, tpl_file string, data TweetCollection) {
+func (app *Application) buffered_render_tweet_page(w http.ResponseWriter, tpl_file string, data TweetCollection) {
 	partials, err := filepath.Glob(get_filepath("tpl/includes/*.tpl"))
 	panic_if(err)
+	tweet_partials, err := filepath.Glob(get_filepath("tpl/tweet_page_includes/*.tpl"))
+	panic_if(err)
+	partials = append(partials, tweet_partials...)
 
 	tpl, err := template.New("does this matter at all? lol").Funcs(
-		template.FuncMap{"tweet": data.Tweet, "user": data.User},
+		template.FuncMap{"tweet": data.Tweet, "user": data.User, "active_user": app.get_active_user, "focused_tweet_id": data.FocusedTweetID},
 	).ParseFiles(append(partials, get_filepath(tpl_file))...)
 	panic_if(err)
 
 	app.buffered_render(w, tpl, data)
+}
+
+// Creates a template from the given template file using all the available partials.
+// Calls `app.buffered_render` to render the created template.
+func (app *Application) buffered_render_basic_page(w http.ResponseWriter, tpl_file string, data interface{}) {
+	partials, err := filepath.Glob(get_filepath("tpl/includes/*.tpl"))
+	panic_if(err)
+
+	tpl, err := template.New("does this matter at all? lol").Funcs(
+		template.FuncMap{"active_user": app.get_active_user},
+	).ParseFiles(append(partials, get_filepath(tpl_file))...)
+	panic_if(err)
+
+	app.buffered_render(w, tpl, data)
+}
+
+func (app *Application) get_active_user() scraper.User {
+	return app.ActiveUser
 }

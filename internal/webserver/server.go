@@ -1,6 +1,7 @@
 package webserver
 
 import (
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
@@ -14,6 +15,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-playground/form/v4"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
@@ -29,7 +32,9 @@ type Application struct {
 
 	Middlewares []Middleware
 
-	Profile persistence.Profile
+	Profile         persistence.Profile
+	ActiveUser      scraper.User
+	DisableScraping bool
 }
 
 func NewApp(profile persistence.Profile) Application {
@@ -39,8 +44,8 @@ func NewApp(profile persistence.Profile) Application {
 		InfoLog:   log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
 		ErrorLog:  log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
 
-		Profile: profile,
-		// formDecoder: form.NewDecoder(),
+		Profile:    profile,
+		ActiveUser: get_default_user(),
 	}
 	ret.Middlewares = []Middleware{
 		secureHeaders,
@@ -85,6 +90,10 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		app.TweetDetail(w, r)
 	case "content":
 		http.StripPrefix("/content", http.FileServer(http.Dir(app.Profile.ProfileDir))).ServeHTTP(w, r)
+	case "login":
+		app.Login(w, r)
+	case "change-session":
+		app.ChangeSession(w, r)
 	default:
 		app.UserFeed(w, r)
 	}
@@ -110,13 +119,7 @@ func (app *Application) Run(address string) {
 
 func (app *Application) Home(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'Home' handler (path: %q)", r.URL.Path)
-	tpl, err := template.ParseFiles(
-		get_filepath("tpl/includes/base.tpl"),
-		get_filepath("tpl/includes/nav_sidebar.tpl"),
-		get_filepath("tpl/home.tpl"),
-	)
-	panic_if(err)
-	app.buffered_render(w, tpl, nil)
+	app.buffered_render_basic_page(w, "tpl/home.tpl", nil)
 }
 
 type TweetDetailData struct {
@@ -135,6 +138,9 @@ func (t TweetDetailData) Tweet(id scraper.TweetID) scraper.Tweet {
 func (t TweetDetailData) User(id scraper.UserID) scraper.User {
 	return t.Users[id]
 }
+func (t TweetDetailData) FocusedTweetID() scraper.TweetID {
+	return t.MainTweetID
+}
 
 func to_json(t interface{}) string {
 	js, err := json.Marshal(t)
@@ -147,14 +153,43 @@ func to_json(t interface{}) string {
 func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'TweetDetail' handler (path: %q)", r.URL.Path)
 	_, tail := path.Split(r.URL.Path)
-	tweet_id, err := strconv.Atoi(tail)
+	val, err := strconv.Atoi(tail)
 	if err != nil {
 		app.error_400_with_message(w, fmt.Sprintf("Invalid tweet ID: %q", tail))
 		return
 	}
+	tweet_id := scraper.TweetID(val)
 
 	data := NewTweetDetailData()
-	data.MainTweetID = scraper.TweetID(tweet_id)
+	data.MainTweetID = tweet_id
+
+	// Return whether the scrape succeeded (if false, we should 404)
+	try_scrape_tweet := func() bool {
+		if app.DisableScraping {
+			return false
+		}
+		trove, err := scraper.GetTweetFullAPIV2(tweet_id, 50) // TODO: parameterizable
+		if err != nil {
+			app.ErrorLog.Print(err)
+			return false
+		}
+		app.Profile.SaveTweetTrove(trove)
+		return true
+	}
+
+	tweet, err := app.Profile.GetTweetById(tweet_id)
+	if err != nil {
+		if errors.Is(err, persistence.ErrNotInDB) {
+			if !try_scrape_tweet() {
+				app.error_404(w)
+				return
+			}
+		} else {
+			panic(err)
+		}
+	} else if !tweet.IsConversationScraped {
+		try_scrape_tweet() // If it fails, we can still render it (not 404)
+	}
 
 	trove, err := app.Profile.GetTweetDetail(data.MainTweetID)
 	if err != nil {
@@ -168,7 +203,7 @@ func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 	app.InfoLog.Printf(to_json(trove))
 	data.TweetDetailView = trove
 
-	app.buffered_render_template_for(w, "tpl/tweet_detail.tpl", data)
+	app.buffered_render_tweet_page(w, "tpl/tweet_detail.tpl", data)
 }
 
 type UserProfileData struct {
@@ -181,6 +216,9 @@ func (t UserProfileData) Tweet(id scraper.TweetID) scraper.Tweet {
 }
 func (t UserProfileData) User(id scraper.UserID) scraper.User {
 	return t.Users[id]
+}
+func (t UserProfileData) FocusedTweetID() scraper.TweetID {
+	return scraper.TweetID(0)
 }
 
 func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
@@ -195,11 +233,123 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	}
 	feed, err := app.Profile.GetUserFeed(user.ID, 50, scraper.TimestampFromUnix(0))
 	if err != nil {
-		panic(err)
+		if errors.Is(err, persistence.ErrEndOfFeed) {
+			// TODO
+		} else {
+			panic(err)
+		}
 	}
+	feed.Users[user.ID] = user
 
 	data := UserProfileData{Feed: feed, UserID: user.ID}
 	app.InfoLog.Printf(to_json(data))
 
-	app.buffered_render_template_for(w, "tpl/user_feed.tpl", data)
+	app.buffered_render_tweet_page(w, "tpl/user_feed.tpl", data)
+}
+
+type FormErrors map[string]string
+
+type LoginForm struct {
+	Username string `form:"username"`
+	Password string `form:"password"`
+	FormErrors
+}
+
+func (f *LoginForm) Validate() {
+	if f.FormErrors == nil {
+		f.FormErrors = make(FormErrors)
+	}
+	if len(f.Username) == 0 {
+		f.FormErrors["username"] = "cannot be blank"
+	}
+	if len(f.Password) == 0 {
+		f.FormErrors["password"] = "cannot be blank"
+	}
+}
+
+type LoginData struct {
+	LoginForm
+	ExistingSessions []scraper.UserHandle
+}
+
+func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
+	app.traceLog.Printf("'Login' handler (path: %q)", r.URL.Path)
+	var form LoginForm
+	if r.Method == "POST" {
+		err := parse_form(r, &form)
+		if err != nil {
+			app.InfoLog.Print(err.Error())
+			app.error_400_with_message(w, "Invalid form data")
+			return
+		}
+		form.Validate()
+		if len(form.FormErrors) == 0 {
+			api := scraper.NewGuestSession()
+			api.LogIn(form.Username, form.Password)
+			scraper.InitApi(api)
+			app.Profile.SaveSession(api)
+			http.Redirect(w, r, "/login", 303)
+		}
+	}
+	data := LoginData{
+		LoginForm:        form,
+		ExistingSessions: app.Profile.ListSessions(),
+	}
+	app.buffered_render_basic_page(w, "tpl/login.tpl", &data)
+}
+
+func get_default_user() scraper.User {
+	return scraper.User{ID: 0, Handle: "[nobody]", DisplayName: "[Not logged in]", ProfileImageLocalPath: path.Base(scraper.DEFAULT_PROFILE_IMAGE_URL), IsContentDownloaded: true}
+}
+
+func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
+	app.traceLog.Printf("'change-session' handler (path: %q)", r.URL.Path)
+	form := struct {
+		AccountName string `form:"account"`
+	}{}
+	err := parse_form(r, &form)
+	if err != nil {
+		app.error_400_with_message(w, "Invalid form data")
+		return
+	}
+	if form.AccountName == "no account" {
+		// Special value that indicates to use a guest session
+		scraper.InitApi(scraper.NewGuestSession())
+		app.ActiveUser = get_default_user()
+		app.DisableScraping = true // API requests will fail b/c not logged in
+	} else {
+		// Activate the selected session
+		user, err := app.Profile.GetUserByHandle(scraper.UserHandle(form.AccountName))
+		if err != nil {
+			app.error_400_with_message(w, fmt.Sprintf("User not in database: %s", form.AccountName))
+			return
+		}
+		scraper.InitApi(app.Profile.LoadSession(scraper.UserHandle(form.AccountName)))
+		app.ActiveUser = user
+		app.DisableScraping = false
+	}
+
+	tpl, err := template.New("").Funcs(
+		template.FuncMap{"active_user": app.get_active_user},
+	).ParseFiles(
+		get_filepath("tpl/includes/nav_sidebar.tpl"),
+		get_filepath("tpl/includes/author_info.tpl"),
+	)
+	buf := new(bytes.Buffer)
+	err = tpl.ExecuteTemplate(buf, "nav-sidebar", nil)
+	panic_if(err)
+
+	_, err = buf.WriteTo(w)
+	panic_if(err)
+}
+
+var formDecoder = form.NewDecoder()
+
+func parse_form(req *http.Request, result interface{}) error {
+	err := req.ParseForm()
+	if err != nil {
+		return err
+	}
+
+	return formDecoder.Decode(result, req.PostForm)
 }

@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 
 	sql "github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/reflectx"
 	_ "github.com/mattn/go-sqlite3"
 	"gopkg.in/yaml.v2"
+
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 //go:embed schema.sql
@@ -151,4 +154,16 @@ func LoadProfile(profile_dir string) (Profile, error) {
 	err = ret.check_and_update_version()
 
 	return ret, err
+}
+
+func (p Profile) ListSessions() []scraper.UserHandle {
+	result, err := filepath.Glob(path.Join(p.ProfileDir, "*.session"))
+	if err != nil {
+		panic(err)
+	}
+	ret := []scraper.UserHandle{}
+	for _, filename := range result {
+		ret = append(ret, scraper.UserHandle(path.Base(filename[:len(filename)-len(".session")])))
+	}
+	return ret
 }

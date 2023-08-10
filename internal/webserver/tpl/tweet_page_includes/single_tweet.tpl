@@ -1,10 +1,19 @@
 {{define "tweet"}}
-<div class="tweet">
-  {{$main_tweet := (tweet .)}}
-  {{$author := (user $main_tweet.UserID)}}
-
+{{$main_tweet := (tweet .)}}
+{{$author := (user $main_tweet.UserID)}}
+<div class="tweet"
+  {{if (not (eq $main_tweet.ID (focused_tweet_id)))}}
+    hx-post="/tweet/{{$main_tweet.ID}}"
+    hx-trigger="click target::not(.tweet-text)"
+    hx-target="body"
+    hx-swap="outerHTML"
+    hx-push-url="true"
+  {{end}}
+>
   <div class="tweet-header-container">
-    {{template "author-info" $author}}
+    <div class="author-info-container" hx-trigger="click consume">
+      {{template "author-info" $author}}
+    </div>
     {{if $main_tweet.ReplyMentions}}
       <div class="reply-mentions-container">
         <span class="replying-to-label">Replying to</span>
@@ -30,9 +39,9 @@
     </span>
     <span class="vertical-container-1">
       <div class="tweet-content">
-        <a href="/tweet/{{$main_tweet.ID}}" class="unstyled-link tweet-text">
+        <p class="tweet-text">
           {{$main_tweet.Text}}
-        </a>
+        </p>
 
         {{range $main_tweet.Images}}
           <img src="/content/images/{{.LocalFilename}}" style="max-width: 45%"/>

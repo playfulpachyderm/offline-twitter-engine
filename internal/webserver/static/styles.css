@@ -40,9 +40,19 @@ body {
 main {
 	padding-top: 4em;
 }
+input, select {
+	font-family: inherit;
+	font-size: 1em;
+	padding: 0.2em 0.6em;
+	box-sizing: border-box;
+	border-radius: 0.5em;
+}
 
 .tweet {
 	padding: 0 1.5em;
+}
+:not(.focused-tweet) > .tweet {
+	cursor: pointer;
 }
 
 .quoted-tweet {
@@ -67,6 +77,10 @@ main {
 .author-info {
 	display: flex;
 	align-items: center;
+}
+
+.author-info, .tweet-text {
+	cursor: default;
 }
 
 .name-and-handle {
@@ -113,6 +127,7 @@ a.mention {
 .tweet-text {
 	display: block;
 	margin-bottom: 0.4em;
+	margin-top: 0;
 /*	padding-bottom: 0.5em;*/
 }
 .focused-tweet .tweet-text {
@@ -227,18 +242,19 @@ ul.quick-links {
 	align-items: flex-start;
 	padding: 0 2em;
 }
-li.quick-link {
+.quick-link {
 	display: flex;
     flex-direction: row;
     align-items: center;
     padding: 0.5em;
     margin: 0.2em;
     border-radius: 100em; /* any large amount, just don't use % because then it makes an ellipse */
+    cursor: pointer;
 }
-li.quick-link:hover {
+.quick-link:hover {
     background-color: var(--color-twitter-blue-light);
 }
-li.quick-link:active {
+.quick-link:active {
     transform: translate(2px, 2px);
     background-color: var(--color-twitter-blue);
 }
@@ -310,7 +326,55 @@ svg {
 }
 .search-bar {
 	flex-grow: 1;
-	font-size: 1em;
-	font-family: "Titillium Web";
-	padding: 0.2em 0.5em;
+}
+
+.login {
+	width: 60%;
+	margin: 20% auto;
+}
+.login-form input {
+    width: 100%;
+    border-radius: 0.5em;
+
+    padding: 0.5em 0.6em;
+}
+.login-form .error {
+    color: #C0392B;
+    font-weight: bold;
+}
+
+.login-form .error + input {
+    border-color: #C0392B;
+    border-width: 2px;
+}
+
+.field-container {
+	padding: 0.5em 0;
+}
+.submit-container {
+	text-align: right;
+}
+input[type="submit"] {
+	background-color: var(--color-twitter-blue-light);
+    width: 10em;
+    padding: 1em;
+    margin-top: 1em;
+    border-radius: 1em;
+    font-size: 1em;
+    cursor: pointer;
+}
+.change-session-form select {
+	display: block;
+	width: 100%;
+}
+#logged-in-user-info {
+	font-size: 0.8em;
+	margin-top: 1em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.quick-link .author-info {
+	pointer-events: none;
 }
