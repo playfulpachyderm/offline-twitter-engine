@@ -2,7 +2,6 @@ package webserver
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
