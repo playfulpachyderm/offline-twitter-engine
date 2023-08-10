@@ -278,8 +278,8 @@ func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		err := parse_form(r, &form)
 		if err != nil {
-			app.InfoLog.Print(err.Error())
-			app.error_400_with_message(w, "Invalid form data")
+			app.InfoLog.Print("Form error parse: " + err.Error())
+			app.error_400_with_message(w, err.Error())
 			return
 		}
 		form.Validate()
@@ -299,7 +299,13 @@ func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func get_default_user() scraper.User {
-	return scraper.User{ID: 0, Handle: "[nobody]", DisplayName: "[Not logged in]", ProfileImageLocalPath: path.Base(scraper.DEFAULT_PROFILE_IMAGE_URL), IsContentDownloaded: true}
+	return scraper.User{
+		ID:                    0,
+		Handle:                "[nobody]",
+		DisplayName:           "[Not logged in]",
+		ProfileImageLocalPath: path.Base(scraper.DEFAULT_PROFILE_IMAGE_URL),
+		IsContentDownloaded:   true,
+	}
 }
 
 func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
@@ -309,7 +315,8 @@ func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
 	}{}
 	err := parse_form(r, &form)
 	if err != nil {
-		app.error_400_with_message(w, "Invalid form data")
+		app.InfoLog.Print("Form error parse: " + err.Error())
+		app.error_400_with_message(w, err.Error())
 		return
 	}
 	if form.AccountName == "no account" {
@@ -335,6 +342,7 @@ func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
 		get_filepath("tpl/includes/nav_sidebar.tpl"),
 		get_filepath("tpl/includes/author_info.tpl"),
 	)
+	panic_if(err)
 	buf := new(bytes.Buffer)
 	err = tpl.ExecuteTemplate(buf, "nav-sidebar", nil)
 	panic_if(err)
@@ -344,12 +352,19 @@ func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
 }
 
 var formDecoder = form.NewDecoder()
+var (
+	ErrCorruptedFormData   = errors.New("corrupted form data")
+	ErrIncorrectFormParams = errors.New("incorrect form parameters")
+)
 
 func parse_form(req *http.Request, result interface{}) error {
 	err := req.ParseForm()
 	if err != nil {
-		return err
+		return ErrCorruptedFormData
 	}
 
-	return formDecoder.Decode(result, req.PostForm)
+	if err = formDecoder.Decode(result, req.PostForm); err != nil {
+		return ErrIncorrectFormParams
+	}
+	return nil
 }

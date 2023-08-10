@@ -68,7 +68,12 @@ func (app *Application) buffered_render_tweet_page(w http.ResponseWriter, tpl_fi
 	partials = append(partials, tweet_partials...)
 
 	tpl, err := template.New("does this matter at all? lol").Funcs(
-		template.FuncMap{"tweet": data.Tweet, "user": data.User, "active_user": app.get_active_user, "focused_tweet_id": data.FocusedTweetID},
+		template.FuncMap{
+			"tweet":            data.Tweet,
+			"user":             data.User,
+			"active_user":      app.get_active_user,
+			"focused_tweet_id": data.FocusedTweetID,
+		},
 	).ParseFiles(append(partials, get_filepath(tpl_file))...)
 	panic_if(err)
 
