@@ -287,6 +287,7 @@ type FeedItem struct {
 type Feed struct {
 	Items []FeedItem
 	TweetTrove
+	CursorBottom Cursor
 }
 
 func (f Feed) BottomTimestamp() Timestamp {
