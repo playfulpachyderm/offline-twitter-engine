@@ -210,7 +210,6 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
 		ret.Items = append(ret.Items, FeedItem{TweetID: val.Tweet.ID, RetweetID: val.Retweet.RetweetID})
 	}
 
-
 	p.fill_content(&ret.TweetTrove)
 
 	ret.CursorBottom = c
