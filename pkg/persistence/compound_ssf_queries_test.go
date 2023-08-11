@@ -62,6 +62,7 @@ func TestCursorSearchWithRetweets(t *testing.T) {
 	c := persistence.NewCursor()
 	c.PageSize = 3
 	c.RetweetedByUserHandle = "cernovich"
+	c.FilterRetweets = persistence.REQUIRE
 	c.SortOrder = persistence.SORT_ORDER_OLDEST
 
 	feed, err := profile.NextPage(c)
@@ -86,4 +87,46 @@ func TestCursorSearchWithRetweets(t *testing.T) {
 	assert.Len(feed.Items, 0)
 	next_cursor = feed.CursorBottom
 	assert.Equal(next_cursor.CursorPosition, persistence.CURSOR_END)
+}
+
+// Offline Following Timeline
+func TestTimeline(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+
+	c := persistence.NewTimelineCursor()
+	c.PageSize = 5
+
+	feed, err := profile.NextPage(c)
+	require.NoError(err)
+
+	assert.Len(feed.Items, 5)
+	assert.Len(feed.Retweets, 4)
+	assert.Equal(feed.Items[0].RetweetID, TweetID(1490135787144237058))
+	assert.Equal(feed.Items[1].RetweetID, TweetID(1490135787124232222))
+	assert.Equal(feed.Items[2].RetweetID, TweetID(1490119308692766723))
+	assert.Equal(feed.Items[3].RetweetID, TweetID(1490100255987171332))
+	assert.Equal(feed.Items[4].TweetID, TweetID(1453461248142495744))
+
+	next_cursor := feed.CursorBottom
+	assert.Equal(next_cursor.CursorPosition, persistence.CURSOR_MIDDLE)
+	assert.Equal(next_cursor.SortOrder, c.SortOrder)
+	assert.Equal(next_cursor.Keywords, c.Keywords)
+	assert.Equal(next_cursor.PageSize, c.PageSize)
+	assert.Equal(next_cursor.CursorValue, 1635367140)
+
+	next_cursor.CursorValue = 1631935323 // Scroll down a bit, kind of randomly
+	feed, err = profile.NextPage(next_cursor)
+	require.NoError(err)
+
+	assert.Len(feed.Items, 5)
+	assert.Len(feed.Retweets, 1)
+	assert.Equal(feed.Items[0].TweetID, TweetID(1439027915404939265))
+	assert.Equal(feed.Items[1].TweetID, TweetID(1413773185296650241))
+	assert.Equal(feed.Items[2].TweetID, TweetID(1413664406995566593))
+	assert.Equal(feed.Items[3].RetweetID, TweetID(144919526660333333))
+	assert.Equal(feed.Items[4].TweetID, TweetID(1413658466795737091))
 }

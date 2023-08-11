@@ -68,7 +68,7 @@ func (p Profile) fill_content(trove *TweetTrove) {
 	               is_content_downloaded, is_followed
 	          from users
 	         where id in (` + strings.Repeat("?,", len(user_ids)-1) + `?)`
-		fmt.Printf("%s\n", userquery)
+		// fmt.Printf("%s\n", userquery)
 		err := p.DB.Select(&users, userquery, user_ids...)
 		if err != nil {
 			panic(err)
@@ -82,7 +82,7 @@ func (p Profile) fill_content(trove *TweetTrove) {
 	var images []Image
 	imgquery := `
         select id, tweet_id, width, height, remote_url, local_filename, is_downloaded from images where tweet_id in (` + in_clause + `)`
-	fmt.Printf("%s\n", imgquery) // TODO: SQL logger
+	// fmt.Printf("%s\n", imgquery) // TODO: SQL logger
 	err := p.DB.Select(&images, imgquery, tweet_ids...)
 	if err != nil {
 		panic(err)

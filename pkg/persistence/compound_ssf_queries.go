@@ -73,10 +73,23 @@ const (
 	CURSOR_END
 )
 
+// Whether to require, exclude, or indifferent a type of content
+type Filter int
+
+const (
+	// Filter is not used
+	NONE Filter = iota
+	// All results must match the filter
+	REQUIRE
+	// Results must not match the filter
+	EXCLUDE
+)
+
 type CursorResult struct {
 	scraper.Tweet
 	scraper.Retweet
-	Chrono int `db:"chrono"`
+	Chrono   int            `db:"chrono"`
+	ByUserID scraper.UserID `db:"by_user_id"`
 }
 
 type Cursor struct {
@@ -92,10 +105,13 @@ type Cursor struct {
 	RetweetedByUserHandle scraper.UserHandle
 	SinceTimestamp        scraper.Timestamp
 	UntilTimestamp        scraper.Timestamp
-	FilterLinks           bool
-	FilterImages          bool
-	FilterVideos          bool
-	FilterPolls           bool
+	FilterLinks           Filter
+	FilterImages          Filter
+	FilterVideos          Filter
+	FilterPolls           Filter
+	FilterReplies         Filter
+	FilterRetweets        Filter
+	FilterOfflineFollowed Filter
 }
 
 func NewCursor() Cursor {
@@ -108,6 +124,23 @@ func NewCursor() Cursor {
 		CursorValue:    0,
 		SortOrder:      SORT_ORDER_NEWEST,
 		PageSize:       50,
+
+		FilterRetweets: EXCLUDE,
+	}
+}
+
+func NewTimelineCursor() Cursor {
+	return Cursor{
+		Keywords:       []string{},
+		ToUserHandles:  []scraper.UserHandle{},
+		SinceTimestamp: scraper.TimestampFromUnix(0),
+		UntilTimestamp: scraper.TimestampFromUnix(0),
+		CursorPosition: CURSOR_START,
+		CursorValue:    0,
+		SortOrder:      SORT_ORDER_NEWEST,
+		PageSize:       50,
+
+		FilterOfflineFollowed: REQUIRE,
 	}
 }
 
@@ -130,8 +163,10 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
 		where_clauses = append(where_clauses, "reply_mentions like ?")
 		bind_values = append(bind_values, fmt.Sprintf("%%%s%%", to_user))
 	}
-	where_clauses = append(where_clauses, "retweeted_by = coalesce((select id from users where handle like ?), 0)")
-	bind_values = append(bind_values, c.RetweetedByUserHandle)
+	if c.RetweetedByUserHandle != "" {
+		where_clauses = append(where_clauses, "retweeted_by = (select id from users where handle like ?)")
+		bind_values = append(bind_values, c.RetweetedByUserHandle)
+	}
 
 	// Since and until timestamps
 	if c.SinceTimestamp.Unix() != 0 {
@@ -144,17 +179,49 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
 	}
 
 	// Media filters
-	if c.FilterLinks {
+	switch c.FilterLinks {
+	case REQUIRE:
 		where_clauses = append(where_clauses, "exists (select 1 from urls where urls.tweet_id = tweets.id)")
+	case EXCLUDE:
+		where_clauses = append(where_clauses, "not exists (select 1 from urls where urls.tweet_id = tweets.id)")
 	}
-	if c.FilterImages {
+	switch c.FilterImages {
+	case REQUIRE:
 		where_clauses = append(where_clauses, "exists (select 1 from images where images.tweet_id = tweets.id)")
+	case EXCLUDE:
+		where_clauses = append(where_clauses, "not exists (select 1 from images where images.tweet_id = tweets.id)")
 	}
-	if c.FilterVideos {
+	switch c.FilterVideos {
+	case REQUIRE:
 		where_clauses = append(where_clauses, "exists (select 1 from videos where videos.tweet_id = tweets.id)")
+	case EXCLUDE:
+		where_clauses = append(where_clauses, "not exists (select 1 from videos where videos.tweet_id = tweets.id)")
 	}
-	if c.FilterPolls {
+	switch c.FilterPolls {
+	case REQUIRE:
 		where_clauses = append(where_clauses, "exists (select 1 from polls where polls.tweet_id = tweets.id)")
+	case EXCLUDE:
+		where_clauses = append(where_clauses, "not exists (select 1 from polls where polls.tweet_id = tweets.id)")
+	}
+
+	// Filter by lists (e.g., offline-followed)
+	switch c.FilterOfflineFollowed {
+	case REQUIRE:
+		where_clauses = append(where_clauses, "by_user_id in (select id from users where is_followed = 1)")
+	case EXCLUDE:
+		where_clauses = append(where_clauses, "by_user_id not in (select id from users where is_followed = 1)")
+	}
+	switch c.FilterReplies {
+	case REQUIRE:
+		where_clauses = append(where_clauses, "in_reply_to_id != 0")
+	case EXCLUDE:
+		where_clauses = append(where_clauses, "in_reply_to_id = 0")
+	}
+	switch c.FilterRetweets {
+	case REQUIRE:
+		where_clauses = append(where_clauses, "retweet_id != 0")
+	case EXCLUDE:
+		where_clauses = append(where_clauses, "retweet_id = 0")
 	}
 
 	// Pagination
@@ -170,7 +237,7 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
            is_expandable,
            is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at,
            0 tweet_id, 0 retweet_id, 0 retweeted_by, 0 retweeted_at,
-           posted_at chrono
+           posted_at chrono, user_id by_user_id
       from tweets
  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
      ` + where_clause + `
@@ -182,7 +249,7 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
            is_expandable,
            is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at,
            tweet_id, retweet_id, retweeted_by, retweeted_at,
-           retweeted_at chrono
+           retweeted_at chrono, retweeted_by by_user_id
       from retweets
  left join tweets on retweets.tweet_id = tweets.id
  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
@@ -193,6 +260,8 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
 	bind_values = append(bind_values, bind_values...)
 	bind_values = append(bind_values, c.PageSize)
 
+	// fmt.Printf("Query: %s\n", q)
+	// fmt.Printf("Bind values: %#v\n", bind_values)
 	// Run the query
 	var results []CursorResult
 	err := p.DB.Select(&results, q, bind_values...)
@@ -203,6 +272,7 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
 	// Assemble the feed
 	ret := NewFeed()
 	for _, val := range results {
+		// fmt.Printf("\tResult: %#v\n", val)
 		ret.Tweets[val.Tweet.ID] = val.Tweet
 		if val.Retweet.RetweetID != 0 {
 			ret.Retweets[val.Retweet.RetweetID] = val.Retweet
