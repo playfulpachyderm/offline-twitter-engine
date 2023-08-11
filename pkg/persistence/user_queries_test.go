@@ -296,3 +296,15 @@ func TestCreateUnknownUserWithHandleThatAlreadyExists(t *testing.T) {
 	assert.Equal(user.Bio, user_reloaded.Bio)
 	assert.Equal(user.DisplayName, user_reloaded.DisplayName)
 }
+
+func TestSearchUsers(t *testing.T) {
+	assert := assert.New(t)
+
+	profile_path := "../../sample_data/profile"
+	profile := create_or_load_profile(profile_path)
+
+	users := profile.SearchUsers("no")
+	assert.Len(users, 2)
+	assert.Equal(users[0].Handle, scraper.UserHandle("Cernovich"))
+	assert.Equal(users[1].Handle, scraper.UserHandle("CovfefeAnon"))
+}

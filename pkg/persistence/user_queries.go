@@ -32,30 +32,30 @@ func (p Profile) SaveUser(u *scraper.User) error {
 	}
 
 	_, err := p.DB.NamedExec(`
-        insert into users (id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private,
-                           is_verified, is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path,
-                           pinned_tweet_id, is_content_downloaded, is_id_fake)
-        values (:id, :display_name, :handle, :bio, :following_count, :followers_count, :location, :website, :join_date, :is_private,
-                :is_verified, :is_banned, :profile_image_url, :profile_image_local_path, :banner_image_url, :banner_image_local_path,
-                :pinned_tweet_id, :is_content_downloaded, :is_id_fake)
-            on conflict do update
-           set handle=:handle,
-               bio=:bio,
-               display_name=:display_name,
-               following_count=:following_count,
-               followers_count=:followers_count,
-               location=:location,
-               website=:website,
-               is_private=:is_private,
-               is_verified=:is_verified,
-               is_banned=:is_banned,
-               profile_image_url=:profile_image_url,
-               profile_image_local_path=:profile_image_local_path,
-               banner_image_url=:banner_image_url,
-               banner_image_local_path=:banner_image_local_path,
-               pinned_tweet_id=:pinned_tweet_id,
-               is_content_downloaded=(is_content_downloaded or :is_content_downloaded)
-        `,
+	    insert into users (id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private,
+	                       is_verified, is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path,
+	                       pinned_tweet_id, is_content_downloaded, is_id_fake)
+	    values (:id, :display_name, :handle, :bio, :following_count, :followers_count, :location, :website, :join_date, :is_private,
+	            :is_verified, :is_banned, :profile_image_url, :profile_image_local_path, :banner_image_url, :banner_image_local_path,
+	            :pinned_tweet_id, :is_content_downloaded, :is_id_fake)
+	        on conflict do update
+	       set handle=:handle,
+	           bio=:bio,
+	           display_name=:display_name,
+	           following_count=:following_count,
+	           followers_count=:followers_count,
+	           location=:location,
+	           website=:website,
+	           is_private=:is_private,
+	           is_verified=:is_verified,
+	           is_banned=:is_banned,
+	           profile_image_url=:profile_image_url,
+	           profile_image_local_path=:profile_image_local_path,
+	           banner_image_url=:banner_image_url,
+	           banner_image_local_path=:banner_image_local_path,
+	           pinned_tweet_id=:pinned_tweet_id,
+	           is_content_downloaded=(is_content_downloaded or :is_content_downloaded)
+	    `,
 		u,
 	)
 	if err != nil {
@@ -99,12 +99,12 @@ func (p Profile) GetUserByHandle(handle scraper.UserHandle) (scraper.User, error
 
 	var ret scraper.User
 	err := db.Get(&ret, `
-        select id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified,
-               is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path, pinned_tweet_id,
-               is_content_downloaded, is_followed
-          from users
-         where lower(handle) = lower(?)
-    `, handle)
+	    select id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified,
+	           is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path, pinned_tweet_id,
+	           is_content_downloaded, is_followed
+	      from users
+	     where lower(handle) = lower(?)
+	`, handle)
 
 	if errors.Is(err, sql.ErrNoRows) {
 		return ret, ErrNotInDatabase{"User", handle}
@@ -125,12 +125,12 @@ func (p Profile) GetUserByID(id scraper.UserID) (scraper.User, error) {
 	var ret scraper.User
 
 	err := db.Get(&ret, `
-        select id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified,
-               is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path, pinned_tweet_id,
-               is_content_downloaded, is_followed
-          from users
-         where id = ?
-    `, id)
+	    select id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified,
+	           is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path, pinned_tweet_id,
+	           is_content_downloaded, is_followed
+	      from users
+	     where id = ?
+	`, id)
 	if errors.Is(err, sql.ErrNoRows) {
 		return ret, ErrNotInDatabase{"User", id}
 	}
@@ -253,4 +253,23 @@ func (p Profile) get_profile_image_output_path(u scraper.User) string {
 		return path.Join(p.ProfileDir, "profile_images", path.Base(scraper.DEFAULT_PROFILE_IMAGE_URL))
 	}
 	return path.Join(p.ProfileDir, "profile_images", u.ProfileImageLocalPath)
+}
+
+// Do a text search for users
+func (p Profile) SearchUsers(s string) []scraper.User {
+	var ret []scraper.User
+	val := fmt.Sprintf("%%%s%%", s)
+	err := p.DB.Select(&ret, `
+	    select id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified,
+	           is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path, pinned_tweet_id,
+	           is_content_downloaded, is_followed
+	      from users
+	     where handle like ?
+	        or display_name like ?
+	     order by followers_count desc
+	`, val, val)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		panic(err)
+	}
+	return ret
 }
