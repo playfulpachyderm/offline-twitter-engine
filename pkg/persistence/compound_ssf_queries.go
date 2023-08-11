@@ -195,8 +195,6 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
 
 	// Run the query
 	var results []CursorResult
-	fmt.Printf("Query: %s\n", q)
-	fmt.Printf("Args: %#v\n", bind_values)
 	err := p.DB.Select(&results, q, bind_values...)
 	if err != nil {
 		panic(err)
@@ -212,19 +210,18 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
 		ret.Items = append(ret.Items, FeedItem{TweetID: val.Tweet.ID, RetweetID: val.Retweet.RetweetID})
 	}
 
-	// Set the new cursor position
-	last_item := results[len(results)-1]
-	next_cursor_value := c.SortOrder.NextCursorValue(last_item)
 
 	p.fill_content(&ret.TweetTrove)
 
 	ret.CursorBottom = c
-	ret.CursorBottom.CursorValue = next_cursor_value
 
+	// Set the new cursor position and value
 	if len(results) < c.PageSize {
 		ret.CursorBottom.CursorPosition = CURSOR_END
 	} else {
 		ret.CursorBottom.CursorPosition = CURSOR_MIDDLE
+		last_item := results[len(results)-1]
+		ret.CursorBottom.CursorValue = c.SortOrder.NextCursorValue(last_item)
 	}
 
 	return ret, nil
