@@ -18,7 +18,10 @@ func TestBuildUserFeed(t *testing.T) {
 	profile, err := persistence.LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
-	feed, err := profile.GetUserFeed(358545917, 2, TimestampFromUnix(0))
+	c := persistence.NewUserFeedCursor(UserHandle("cernovich"))
+	c.PageSize = 2
+
+	feed, err := profile.NextPage(c)
 	require.NoError(err)
 
 	assert.Len(feed.Retweets, 2)
@@ -45,7 +48,7 @@ func TestBuildUserFeed(t *testing.T) {
 	assert.Equal(feed.Items[1].TweetID, TweetID(1490116725395927042))
 	assert.Equal(feed.Items[1].RetweetID, TweetID(1490119308692766723))
 
-	assert.Equal(feed.BottomTimestamp(), TimestampFromUnix(1644107102))
+	assert.Equal(feed.CursorBottom.CursorValue, 1644107102)
 }
 
 // Should load a feed in the middle (i.e., after some timestamp)
@@ -56,7 +59,11 @@ func TestBuildUserFeedPage2(t *testing.T) {
 	profile, err := persistence.LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
-	feed, err := profile.GetUserFeed(358545917, 2, TimestampFromUnix(1644107102))
+	c := persistence.NewUserFeedCursor(UserHandle("cernovich"))
+	c.PageSize = 2
+	c.CursorPosition = persistence.CURSOR_MIDDLE
+	c.CursorValue = 1644107102
+	feed, err := profile.NextPage(c)
 	require.NoError(err)
 
 	assert.Len(feed.Retweets, 1)
@@ -81,7 +88,7 @@ func TestBuildUserFeedPage2(t *testing.T) {
 	assert.Equal(feed.Items[1].TweetID, TweetID(1453461248142495744))
 	assert.Equal(feed.Items[1].RetweetID, TweetID(0))
 
-	assert.Equal(feed.BottomTimestamp(), TimestampFromUnix(1635367140))
+	assert.Equal(feed.CursorBottom.CursorValue, 1635367140)
 }
 
 // When the end of the feed is reached, an "End of feed" error should be raised
@@ -92,14 +99,19 @@ func TestBuildUserFeedEnd(t *testing.T) {
 	profile, err := persistence.LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
-	feed, err := profile.GetUserFeed(358545917, 2, TimestampFromUnix(1)) // Won't be anything after "1"
-	require.Error(err)
-	require.ErrorIs(err, persistence.ErrEndOfFeed)
+	c := persistence.NewUserFeedCursor(UserHandle("cernovich"))
+	c.PageSize = 2
+	c.CursorPosition = persistence.CURSOR_MIDDLE
+	c.CursorValue = 1 // Won't be anything
+	feed, err := profile.NextPage(c)
+	require.NoError(err)
 
 	assert.Len(feed.Retweets, 0)
 	assert.Len(feed.Tweets, 0)
 	assert.Len(feed.Users, 0)
 	require.Len(feed.Items, 0)
+
+	assert.Equal(feed.CursorBottom.CursorPosition, persistence.CURSOR_END)
 }
 
 func TestTweetDetailWithReplies(t *testing.T) {

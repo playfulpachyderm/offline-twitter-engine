@@ -101,8 +101,9 @@ type Cursor struct {
 	// Search params
 	Keywords              []string
 	FromUserHandle        scraper.UserHandle
-	ToUserHandles         []scraper.UserHandle
 	RetweetedByUserHandle scraper.UserHandle
+	ByUserHandle          scraper.UserHandle
+	ToUserHandles         []scraper.UserHandle
 	SinceTimestamp        scraper.Timestamp
 	UntilTimestamp        scraper.Timestamp
 	FilterLinks           Filter
@@ -114,6 +115,7 @@ type Cursor struct {
 	FilterOfflineFollowed Filter
 }
 
+// Generate a cursor with some reasonable defaults
 func NewCursor() Cursor {
 	return Cursor{
 		Keywords:       []string{},
@@ -129,6 +131,7 @@ func NewCursor() Cursor {
 	}
 }
 
+// Generate a cursor appropriate for fetching the Offline Timeline
 func NewTimelineCursor() Cursor {
 	return Cursor{
 		Keywords:       []string{},
@@ -144,6 +147,22 @@ func NewTimelineCursor() Cursor {
 	}
 }
 
+// Generate a cursor appropriate for fetching a User Feed
+func NewUserFeedCursor(h scraper.UserHandle) Cursor {
+	return Cursor{
+		Keywords:       []string{},
+		ToUserHandles:  []scraper.UserHandle{},
+		SinceTimestamp: scraper.TimestampFromUnix(0),
+		UntilTimestamp: scraper.TimestampFromUnix(0),
+		CursorPosition: CURSOR_START,
+		CursorValue:    0,
+		SortOrder:      SORT_ORDER_NEWEST,
+		PageSize:       50,
+
+		ByUserHandle: h,
+	}
+}
+
 func (p Profile) NextPage(c Cursor) (Feed, error) {
 	where_clauses := []string{}
 	bind_values := []interface{}{}
@@ -154,7 +173,7 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
 		bind_values = append(bind_values, fmt.Sprintf("%%%s%%", kw))
 	}
 
-	// From, to, and RT'd by user handles
+	// From, to, by, and RT'd by user handles
 	if c.FromUserHandle != "" {
 		where_clauses = append(where_clauses, "user_id = (select id from users where handle like ?)")
 		bind_values = append(bind_values, c.FromUserHandle)
@@ -166,6 +185,10 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
 	if c.RetweetedByUserHandle != "" {
 		where_clauses = append(where_clauses, "retweeted_by = (select id from users where handle like ?)")
 		bind_values = append(bind_values, c.RetweetedByUserHandle)
+	}
+	if c.ByUserHandle != "" {
+		where_clauses = append(where_clauses, "by_user_id = (select id from users where handle like ?)")
+		bind_values = append(bind_values, c.ByUserHandle)
 	}
 
 	// Since and until timestamps
