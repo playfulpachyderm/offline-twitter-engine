@@ -3,6 +3,7 @@ module gitlab.com/offline-twitter/twitter_offline_engine
 go 1.16
 
 require (
+	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/andybalholm/cascadia v1.3.2
 	github.com/go-playground/form/v4 v4.2.1
 	github.com/go-test/deep v1.0.7

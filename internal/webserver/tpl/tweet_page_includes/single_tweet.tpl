@@ -40,7 +40,9 @@
     <span class="vertical-container-1">
       <div class="tweet-content">
         <p class="tweet-text">
-          {{$main_tweet.Text}}
+          {{range (split "\n" $main_tweet.Text)}}
+            <p>{{.}}</p>
+          {{end}}
         </p>
 
         {{range $main_tweet.Images}}

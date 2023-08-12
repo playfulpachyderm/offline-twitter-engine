@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"runtime/debug"
 
+	"github.com/Masterminds/sprig/v3"
+
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -67,12 +69,12 @@ func (app *Application) buffered_render_tweet_page(w http.ResponseWriter, tpl_fi
 	partials = append(partials, tweet_partials...)
 
 	tpl, err := template.New("does this matter at all? lol").Funcs(
-		template.FuncMap{
+		func_map(template.FuncMap{
 			"tweet":            data.Tweet,
 			"user":             data.User,
 			"active_user":      app.get_active_user,
 			"focused_tweet_id": data.FocusedTweetID,
-		},
+		}),
 	).ParseFiles(append(partials, get_filepath(tpl_file))...)
 	panic_if(err)
 
@@ -86,7 +88,7 @@ func (app *Application) buffered_render_basic_page(w http.ResponseWriter, tpl_fi
 	panic_if(err)
 
 	tpl, err := template.New("does this matter at all? lol").Funcs(
-		template.FuncMap{"active_user": app.get_active_user},
+		func_map(template.FuncMap{"active_user": app.get_active_user}),
 	).ParseFiles(append(partials, get_filepath(tpl_file))...)
 	panic_if(err)
 
@@ -95,4 +97,13 @@ func (app *Application) buffered_render_basic_page(w http.ResponseWriter, tpl_fi
 
 func (app *Application) get_active_user() scraper.User {
 	return app.ActiveUser
+}
+
+
+func func_map(extras template.FuncMap) template.FuncMap {
+	ret := sprig.FuncMap()
+	for i := range extras {
+		ret[i] = extras[i]
+	}
+	return ret
 }
