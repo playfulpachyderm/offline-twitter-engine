@@ -3,7 +3,7 @@
   <a class="unstyled-link" href="/{{.Handle}}">
     <img
       class="profile-image"
-      src="{{if .IsContentDownloaded}}/content/profile_images/{{.ProfileImageLocalPath}}{{else}}{{.ProfileImageUrl}}{{end}}"
+      src="/content/{{.GetProfileImageLocalPath}}"
     />
   </a>
   <span class="name-and-handle">

@@ -10,6 +10,7 @@ import (
 )
 
 const DEFAULT_PROFILE_IMAGE_URL = "https://abs.twimg.com/sticky/default_profile_images/default_profile.png"
+const DEFAULT_PROFILE_IMAGE = "default_profile.png"
 
 type UserID int64
 type UserHandle string
@@ -243,4 +244,15 @@ func (u User) GetTinyProfileImageLocalPath() string {
 	}
 
 	return string(u.Handle) + "_profile_" + path.Base(u.GetTinyProfileImageUrl())
+}
+
+// Compute a path that will actually contain an image on disk (relative to the Profile)
+// TODO: why there are so many functions that appear to do roughly the same thing?
+func (u User) GetProfileImageLocalPath() string {
+	if u.IsContentDownloaded || u.ProfileImageLocalPath == DEFAULT_PROFILE_IMAGE {
+		return fmt.Sprintf("/profile_images/%s", u.ProfileImageLocalPath)
+	}
+
+	r := regexp.MustCompile(`(\.\w{2,4})$`)
+	return fmt.Sprintf("/profile_images/%s", r.ReplaceAllString(u.ProfileImageLocalPath, "_normal$1"))
 }
