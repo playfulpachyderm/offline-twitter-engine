@@ -1,5 +1,5 @@
 {{define "tweet"}}
-{{$main_tweet := (tweet .)}}
+{{$main_tweet := (tweet .TweetID)}}
 {{$author := (user $main_tweet.UserID)}}
 <div class="tweet"
   {{if (not (eq $main_tweet.ID (focused_tweet_id)))}}
@@ -10,6 +10,17 @@
     hx-push-url="true"
   {{end}}
 >
+  {{if (not (eq .RetweetID 0))}}
+    {{$retweet := (retweet .RetweetID)}}
+    {{$retweet_user := (user $retweet.RetweetedByID)}}
+    <div class="retweet-info-container">
+      <img class="svg-icon" src="/static/icons/retweet.svg" />
+      <span class="retweeted-by-label">Retweeted by</span>
+      <a class="retweeted-by-user" hx-get="/{{$retweet_user.Handle}}" hx-target="body" hx-swap="outerHTML" hx-push-url="true">
+        {{$retweet_user.DisplayName}}
+      </a>
+    </div>
+  {{end}}
   <div class="tweet-header-container">
     <div class="author-info-container" hx-trigger="click consume">
       {{template "author-info" $author}}

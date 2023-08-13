@@ -36,9 +36,7 @@ func (l CommaSeparatedList) Value() (driver.Value, error) {
 }
 
 type Tweet struct {
-	ID             TweetID `db:"id"`
-	UserID         UserID  `db:"user_id"`
-	User           *User
+	ID             TweetID   `db:"id"`
 	Text           string    `db:"text"`
 	IsExpandable   bool      `db:"is_expandable"`
 	PostedAt       Timestamp `db:"posted_at"`
@@ -48,6 +46,9 @@ type Tweet struct {
 	NumQuoteTweets int       `db:"num_quote_tweets"`
 	InReplyToID    TweetID   `db:"in_reply_to_id"`
 	QuotedTweetID  TweetID   `db:"quoted_tweet_id"`
+
+	UserID UserID `db:"user_id"`
+	User   *User  `db:"user"`
 
 	// For processing tombstones
 	UserHandle              UserHandle

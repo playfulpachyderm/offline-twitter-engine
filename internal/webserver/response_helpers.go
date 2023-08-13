@@ -56,6 +56,7 @@ func (app *Application) buffered_render(w http.ResponseWriter, tpl *template.Tem
 type TweetCollection interface {
 	Tweet(id scraper.TweetID) scraper.Tweet
 	User(id scraper.UserID) scraper.User
+	Retweet(id scraper.TweetID) scraper.Retweet
 	FocusedTweetID() scraper.TweetID
 }
 
@@ -72,6 +73,7 @@ func (app *Application) buffered_render_tweet_page(w http.ResponseWriter, tpl_fi
 		func_map(template.FuncMap{
 			"tweet":            data.Tweet,
 			"user":             data.User,
+			"retweet":          data.Retweet,
 			"active_user":      app.get_active_user,
 			"focused_tweet_id": data.FocusedTweetID,
 		}),

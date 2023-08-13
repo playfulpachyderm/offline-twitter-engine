@@ -138,6 +138,9 @@ func (t TweetDetailData) Tweet(id scraper.TweetID) scraper.Tweet {
 func (t TweetDetailData) User(id scraper.UserID) scraper.User {
 	return t.Users[id]
 }
+func (t TweetDetailData) Retweet(id scraper.TweetID) scraper.Retweet {
+	return t.Retweets[id]
+}
 func (t TweetDetailData) FocusedTweetID() scraper.TweetID {
 	return t.MainTweetID
 }
@@ -217,6 +220,10 @@ func (t UserProfileData) Tweet(id scraper.TweetID) scraper.Tweet {
 func (t UserProfileData) User(id scraper.UserID) scraper.User {
 	return t.Users[id]
 }
+func (t UserProfileData) Retweet(id scraper.TweetID) scraper.Retweet {
+	return t.Retweets[id]
+}
+
 func (t UserProfileData) FocusedTweetID() scraper.TweetID {
 	return scraper.TweetID(0)
 }

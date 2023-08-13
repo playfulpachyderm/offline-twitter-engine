@@ -385,3 +385,17 @@ input[type="submit"] {
 .quick-link .author-info {
     pointer-events: none;
 }
+.retweet-info-container {
+    margin-left: 3.5em;
+    display: flex;
+    align-items: center;
+    opacity: 0.8;
+}
+.retweet-info-container .svg-icon {
+    width: 1.2em; /* override default from .svg-icon of 1.5em */
+    opacity: 0.6;
+    margin-right: 0.3em;
+}
+.retweeted-by-label {
+    margin: 0 0.2em;
+}
