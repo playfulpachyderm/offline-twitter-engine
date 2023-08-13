@@ -15,11 +15,11 @@
       {{template "author-info" $author}}
     </div>
     {{if $main_tweet.ReplyMentions}}
-      <div class="reply-mentions-container">
-        <span class="replying-to-label">Replying to</span>
+      <div class="reply-mentions-container" hx-trigger="click consume">
+        <span class="replying-to-label">Replying&nbsp;to</span>
         <ul class="reply-mentions">
           {{range $main_tweet.ReplyMentions}}
-            <li><a class="mention" href="/{{.}}">@{{.}}</a></li>
+            <li><a class="entity" href="/{{.}}">@{{.}}</a></li>
           {{end}}
         </ul>
       </div>
@@ -32,18 +32,18 @@
       </p>
     </div>
   </div>
-  <div class="horizontal-container-1">
+  <div class="row">
     <span class="vertical-reply-line-container">
       <div class="vertical-reply-line">
       </div>
     </span>
     <span class="vertical-container-1">
       <div class="tweet-content">
-        <p class="tweet-text">
-          {{range (split "\n" $main_tweet.Text)}}
-            <p>{{.}}</p>
-          {{end}}
-        </p>
+        {{range (split "\n" $main_tweet.Text)}}
+          <p class="tweet-text">
+            {{.}}
+          </p>
+        {{end}}
 
         {{range $main_tweet.Images}}
           <img src="/content/images/{{.LocalFilename}}" style="max-width: 45%"/>

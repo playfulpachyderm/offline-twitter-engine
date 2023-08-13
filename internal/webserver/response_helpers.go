@@ -99,7 +99,6 @@ func (app *Application) get_active_user() scraper.User {
 	return app.ActiveUser
 }
 
-
 func func_map(extras template.FuncMap) template.FuncMap {
 	ret := sprig.FuncMap()
 	for i := range extras {

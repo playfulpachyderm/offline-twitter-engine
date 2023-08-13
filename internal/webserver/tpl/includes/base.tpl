@@ -11,9 +11,9 @@
     </head>
     <body>
       <div class="top-bar">
-        <div class="back-button">
+        <a onclick="window.history.back()" class="back-button quick-link">
           <img class="svg-icon" src="/static/icons/back.svg" />
-        </div>
+        </a>
         <input class="search-bar" placeholder="Search" type="text" />
       </div>
       {{template "nav-sidebar"}}

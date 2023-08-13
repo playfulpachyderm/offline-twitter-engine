@@ -55,12 +55,14 @@
           <span>Verified</span>
         </li>
       </a>
-      <a class="unstyled-link" href="/{{(active_user).Handle}}">
-        <li class="quick-link">
-          <img class="svg-icon" src="/static/icons/profile.svg" />
-          <span>Profile</span>
-        </li>
-      </a>
+      {{if (not (eq (active_user).Handle "[nobody]"))}}
+        <a class="unstyled-link" href="/{{(active_user).Handle}}">
+          <li class="quick-link">
+            <img class="svg-icon" src="/static/icons/profile.svg" />
+            <span>Profile</span>
+          </li>
+        </a>
+      {{end}}
       <a class="unstyled-link" href="#">
         <li class="quick-link">
           <img class="svg-icon" src="/static/icons/more.svg" />
