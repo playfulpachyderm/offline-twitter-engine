@@ -45,7 +45,7 @@
 
   <div class="user-feed-tweets">
     {{range .Items}}
-      {{template "tweet" .TweetID}}
+      {{template "tweet" .}}
     {{end}}
   </div>
 {{end}}
