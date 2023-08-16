@@ -1,12 +1,10 @@
 package webserver
 
 import (
-	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -342,20 +340,7 @@ func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
 		app.ActiveUser = user
 		app.DisableScraping = false
 	}
-
-	tpl, err := template.New("").Funcs(
-		template.FuncMap{"active_user": app.get_active_user},
-	).ParseFiles(
-		get_filepath("tpl/includes/nav_sidebar.tpl"),
-		get_filepath("tpl/includes/author_info.tpl"),
-	)
-	panic_if(err)
-	buf := new(bytes.Buffer)
-	err = tpl.ExecuteTemplate(buf, "nav-sidebar", nil)
-	panic_if(err)
-
-	_, err = buf.WriteTo(w)
-	panic_if(err)
+	app.buffered_render_basic_htmx(w, "nav-sidebar", nil)
 }
 
 var formDecoder = form.NewDecoder()

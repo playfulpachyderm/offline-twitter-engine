@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"io"
 	"net/http"
 	"path/filepath"
 	"runtime/debug"
@@ -40,19 +41,6 @@ func (app *Application) error_500(w http.ResponseWriter, err error) {
 	http.Error(w, "Server error :(", 500)
 }
 
-// Render the given template using a bytes.Buffer.  This avoids the possibility of failing partway
-// through the rendering, and sending an imcomplete response with "Bad Request" or "Server Error" at the end.
-func (app *Application) buffered_render(w http.ResponseWriter, tpl *template.Template, data interface{}) {
-	// The template to render is always "base".  The choice of which template files to parse into the
-	// template affects what the contents of "main" (inside of "base") will be
-	buf := new(bytes.Buffer)
-	err := tpl.ExecuteTemplate(buf, "base", data)
-	panic_if(err)
-
-	_, err = buf.WriteTo(w)
-	panic_if(err)
-}
-
 type TweetCollection interface {
 	Tweet(id scraper.TweetID) scraper.Tweet
 	User(id scraper.UserID) scraper.User
@@ -69,18 +57,19 @@ func (app *Application) buffered_render_tweet_page(w http.ResponseWriter, tpl_fi
 	panic_if(err)
 	partials = append(partials, tweet_partials...)
 
-	tpl, err := template.New("does this matter at all? lol").Funcs(
-		func_map(template.FuncMap{
+	r := renderer{
+		Funcs: func_map(template.FuncMap{
 			"tweet":            data.Tweet,
 			"user":             data.User,
 			"retweet":          data.Retweet,
 			"active_user":      app.get_active_user,
 			"focused_tweet_id": data.FocusedTweetID,
 		}),
-	).ParseFiles(append(partials, get_filepath(tpl_file))...)
-	panic_if(err)
-
-	app.buffered_render(w, tpl, data)
+		Filenames: append(partials, get_filepath(tpl_file)),
+		TplName:   "base",
+		Data:      data,
+	}
+	r.BufferedRender(w)
 }
 
 // Creates a template from the given template file using all the available partials.
@@ -89,12 +78,26 @@ func (app *Application) buffered_render_basic_page(w http.ResponseWriter, tpl_fi
 	partials, err := filepath.Glob(get_filepath("tpl/includes/*.tpl"))
 	panic_if(err)
 
-	tpl, err := template.New("does this matter at all? lol").Funcs(
-		func_map(template.FuncMap{"active_user": app.get_active_user}),
-	).ParseFiles(append(partials, get_filepath(tpl_file))...)
+	r := renderer{
+		Funcs:     func_map(template.FuncMap{"active_user": app.get_active_user}),
+		Filenames: append(partials, get_filepath(tpl_file)),
+		TplName:   "base",
+		Data:      data,
+	}
+	r.BufferedRender(w)
+}
+
+func (app *Application) buffered_render_basic_htmx(w http.ResponseWriter, tpl_name string, data interface{}) {
+	partials, err := filepath.Glob(get_filepath("tpl/includes/*.tpl"))
 	panic_if(err)
 
-	app.buffered_render(w, tpl, data)
+	r := renderer{
+		Funcs:     func_map(template.FuncMap{"active_user": app.get_active_user}),
+		Filenames: partials,
+		TplName:   tpl_name,
+		Data:      data,
+	}
+	r.BufferedRender(w)
 }
 
 func (app *Application) get_active_user() scraper.User {
@@ -107,4 +110,25 @@ func func_map(extras template.FuncMap) template.FuncMap {
 		ret[i] = extras[i]
 	}
 	return ret
+}
+
+type renderer struct {
+	Funcs     template.FuncMap
+	Filenames []string
+	TplName   string
+	Data      interface{}
+}
+
+// Render the given template using a bytes.Buffer.  This avoids the possibility of failing partway
+// through the rendering, and sending an imcomplete response with "Bad Request" or "Server Error" at the end.
+func (r renderer) BufferedRender(w io.Writer) {
+	tpl, err := template.New("").Funcs(r.Funcs).ParseFiles(r.Filenames...)
+	panic_if(err)
+
+	buf := new(bytes.Buffer)
+	err = tpl.ExecuteTemplate(buf, r.TplName, r.Data)
+	panic_if(err)
+
+	_, err = buf.WriteTo(w)
+	panic_if(err)
 }
