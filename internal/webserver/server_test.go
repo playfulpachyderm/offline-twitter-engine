@@ -3,8 +3,8 @@ package webserver_test
 import (
 	"net/http"
 	"net/http/httptest"
-	"testing"
 	"strings"
+	"testing"
 
 	"github.com/andybalholm/cascadia"
 	"github.com/stretchr/testify/assert"
@@ -237,7 +237,6 @@ func TestFollowUnfollowPostOnly(t *testing.T) {
 	resp = do_request(httptest.NewRequest("GET", "/unfollow/kwamurai", nil))
 	require.Equal(resp.StatusCode, 405)
 }
-
 
 // Static content
 // --------------
