@@ -73,6 +73,10 @@ const (
 	CURSOR_END
 )
 
+func (c CursorPosition) IsEnd() bool {
+	return c == CURSOR_END
+}
+
 // Whether to require, exclude, or indifferent a type of content
 type Filter int
 
