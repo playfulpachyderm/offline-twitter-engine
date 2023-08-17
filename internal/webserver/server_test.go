@@ -159,7 +159,6 @@ func TestTimelineWithCursorBadNumber(t *testing.T) {
 	require.Equal(resp.StatusCode, 400)
 }
 
-
 // Tweet Detail page
 // -----------------
 
