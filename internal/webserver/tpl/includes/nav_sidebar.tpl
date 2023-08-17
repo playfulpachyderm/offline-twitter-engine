@@ -7,7 +7,7 @@
       </div>
     </div>
     <ul class="quick-links">
-      <a class="unstyled-link" href="#">
+      <a class="unstyled-link" href="/timeline">
         <li class="quick-link">
           <img class="svg-icon" src="/static/icons/home.svg" />
           <span>Home</span>

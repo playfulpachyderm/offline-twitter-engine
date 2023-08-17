@@ -285,7 +285,7 @@ ul.quick-links {
     margin-bottom: 0.1em;
     border-bottom: 1px solid var(--color-outline-gray);
 }
-.user-feed-tweets .tweet {
+.timeline .tweet {
     border-bottom: 1px solid var(--color-twitter-off-white-dark);
     padding-top: 0.8em;
     padding-bottom: 0.8em;
@@ -304,6 +304,7 @@ ul.quick-links {
     width: 40%;
     left: 30%;
     box-sizing: border-box;
+    z-index: 1;
 }
 
 .back-button {

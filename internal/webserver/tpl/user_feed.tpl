@@ -43,9 +43,7 @@
     </div>
   </div>
 
-  <div class="user-feed-tweets">
-    {{range .Items}}
-      {{template "tweet" .}}
-    {{end}}
+  <div class="timeline user-feed-timeline">
+    {{template "timeline" .}}
   </div>
 {{end}}

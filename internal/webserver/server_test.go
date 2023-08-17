@@ -116,6 +116,50 @@ func TestUserFeedWithCursorBadNumber(t *testing.T) {
 	require.Equal(resp.StatusCode, 400)
 }
 
+// Timeline page
+// -------------
+
+func TestTimeline(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/timeline", nil))
+	require.Equal(resp.StatusCode, 200)
+
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	title_node := cascadia.Query(root, selector("title"))
+	assert.Equal(title_node.FirstChild.Data, "Offline Twitter | Timeline")
+
+	tweet_nodes := cascadia.QueryAll(root, selector(".tweet"))
+	assert.Len(tweet_nodes, 18)
+}
+
+func TestTimelineWithCursor(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/timeline?cursor=1631935701", nil))
+	require.Equal(resp.StatusCode, 200)
+
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	title_node := cascadia.Query(root, selector("title"))
+	assert.Equal(title_node.FirstChild.Data, "Offline Twitter | Timeline")
+
+	tweet_nodes := cascadia.QueryAll(root, selector(".tweet"))
+	assert.Len(tweet_nodes, 10)
+}
+
+func TestTimelineWithCursorBadNumber(t *testing.T) {
+	require := require.New(t)
+
+	// With a cursor but it sucks
+	resp := do_request(httptest.NewRequest("GET", "/timeline?cursor=asdf", nil))
+	require.Equal(resp.StatusCode, 400)
+}
+
+
 // Tweet Detail page
 // -----------------
 
