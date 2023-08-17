@@ -93,7 +93,6 @@ func (r SpaceResponse) ToTweetTrove() TweetTrove {
 }
 
 func (api API) GetSpace(id SpaceID) (SpaceResponse, error) {
-	// TODO: break up this URL into params so it's readable
 	url, err := url.Parse(GraphqlURL{
 		BaseUrl: "https://twitter.com/i/api/graphql/Ha9BKBF0uAz9d4-lz0jnYA/AudioSpaceById",
 		Variables: GraphqlVariables{

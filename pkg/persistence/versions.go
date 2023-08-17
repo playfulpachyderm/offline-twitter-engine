@@ -116,6 +116,8 @@ var MIGRATIONS = []string{
 			foreign key(user_id) references users(id)
 			foreign key(tweet_id) references tweets(id)
 		);`,
+	`create index if not exists index_tweets_posted_at on tweets (posted_at);
+		create index if not exists index_retweets_retweeted_at on retweets (retweeted_at)`,
 }
 var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
 

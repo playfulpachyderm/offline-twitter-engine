@@ -259,7 +259,8 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
 
 	where_clause := "where " + strings.Join(where_clauses, " and ")
 
-	q := `select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
+	q := `select * from (
+	select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
            mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id, ifnull(tombstone_types.short_name, "") tombstone_type,
            is_expandable,
            is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at,
@@ -267,10 +268,12 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
            posted_at chrono, user_id by_user_id
       from tweets
  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
-     ` + where_clause + `
+     ` + where_clause + ` ` + c.SortOrder.OrderByClause() + ` limit ?
+    )
 
      union
 
+    select * from (
     select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
            mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id, ifnull(tombstone_types.short_name, "") tombstone_type,
            is_expandable,
@@ -282,8 +285,10 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
      ` + where_clause + `
      ` + c.SortOrder.OrderByClause() + `
-     limit ?`
+     limit ?
+    ) ` + c.SortOrder.OrderByClause() + ` limit ?`
 
+	bind_values = append(bind_values, c.PageSize)
 	bind_values = append(bind_values, bind_values...)
 	bind_values = append(bind_values, c.PageSize)
 

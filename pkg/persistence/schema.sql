@@ -64,7 +64,7 @@ create table tweets (rowid integer primary key,
 );
 create index if not exists index_tweets_in_reply_to_id on tweets (in_reply_to_id);
 create index if not exists index_tweets_user_id        on tweets (user_id);
-
+create index if not exists index_tweets_posted_at      on tweets (posted_at);
 
 create table retweets(rowid integer primary key,
     retweet_id integer not null unique,
@@ -74,6 +74,7 @@ create table retweets(rowid integer primary key,
     foreign key(tweet_id) references tweets(id)
     foreign key(retweeted_by) references users(id)
 );
+create index if not exists index_retweets_retweeted_at on retweets (retweeted_at);
 
 create table urls (rowid integer primary key,
     tweet_id integer not null,
