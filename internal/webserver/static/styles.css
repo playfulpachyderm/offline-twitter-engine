@@ -400,3 +400,12 @@ input[type="submit"] {
 .retweeted-by-label {
     margin: 0 0.2em;
 }
+
+.user-bio {
+    margin: 1.5em 0;
+}
+
+.followers-followees-container {
+    margin-top: 1em;
+    gap: 4em;
+}

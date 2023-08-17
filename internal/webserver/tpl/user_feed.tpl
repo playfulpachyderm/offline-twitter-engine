@@ -8,8 +8,10 @@
     {{end}}
 
     <div class="user-feed-header-info-container">
-      {{template "author-info" $user}}
-      <button>{{if $user.IsFollowed}}Unfollow{{else}}Follow{{end}}</button>
+      <div class="row">
+        {{template "author-info" $user}}
+        {{template "following-button" $user}}
+      </div>
       <div class="user-bio">
         <span>{{$user.Bio}}</span>
       </div>
