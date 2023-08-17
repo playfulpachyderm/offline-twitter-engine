@@ -61,6 +61,33 @@ func (app *Application) WithMiddlewares() http.Handler {
 	return ret
 }
 
+func (app *Application) SetActiveUser(handle scraper.UserHandle) error {
+	if handle == "no account" {
+		scraper.InitApi(scraper.NewGuestSession())
+		app.ActiveUser = get_default_user()
+		app.DisableScraping = true // API requests will fail b/c not logged in
+	} else {
+		user, err := app.Profile.GetUserByHandle(handle)
+		if err != nil {
+			return fmt.Errorf("set active user to %q: %w", handle, err)
+		}
+		scraper.InitApi(app.Profile.LoadSession(handle))
+		app.ActiveUser = user
+		app.DisableScraping = false
+	}
+	return nil
+}
+
+func get_default_user() scraper.User {
+	return scraper.User{
+		ID:                    0,
+		Handle:                "[nobody]",
+		DisplayName:           "[Not logged in]",
+		ProfileImageLocalPath: path.Base(scraper.DEFAULT_PROFILE_IMAGE_URL),
+		IsContentDownloaded:   true,
+	}
+}
+
 var this_dir string
 
 func init() {
@@ -226,17 +253,41 @@ func (t UserProfileData) FocusedTweetID() scraper.TweetID {
 	return scraper.TweetID(0)
 }
 
+func parse_cursor_value(c *persistence.Cursor, r *http.Request) error {
+	cursor_param := r.URL.Query().Get("cursor")
+	if cursor_param != "" {
+		var err error
+		c.CursorValue, err = strconv.Atoi(cursor_param)
+		if err != nil {
+			return fmt.Errorf("attempted to parse cursor value %q as int: %w", c.CursorValue, err)
+		}
+		c.CursorPosition = persistence.CURSOR_MIDDLE
+	}
+	return nil
+}
+
 func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'UserFeed' handler (path: %q)", r.URL.Path)
 
-	_, tail := path.Split(r.URL.Path)
+	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	if len(parts) != 1 {
+		app.error_404(w)
+	}
 
-	user, err := app.Profile.GetUserByHandle(scraper.UserHandle(tail))
+	user, err := app.Profile.GetUserByHandle(scraper.UserHandle(parts[0]))
 	if err != nil {
 		app.error_404(w)
 		return
 	}
-	feed, err := app.Profile.GetUserFeed(user.ID, 50, scraper.TimestampFromUnix(0))
+
+	c := persistence.NewUserFeedCursor(user.Handle)
+	err = parse_cursor_value(&c, r)
+	if err != nil {
+		app.error_400_with_message(w, "invalid cursor (must be a number)")
+		return
+	}
+
+	feed, err := app.Profile.NextPage(c)
 	if err != nil {
 		if errors.Is(err, persistence.ErrEndOfFeed) {
 			// TODO
@@ -249,7 +300,12 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	data := UserProfileData{Feed: feed, UserID: user.ID}
 	app.InfoLog.Printf(to_json(data))
 
-	app.buffered_render_tweet_page(w, "tpl/user_feed.tpl", data)
+	if r.Header.Get("HX-Request") == "true" && c.CursorPosition == persistence.CURSOR_MIDDLE {
+		// It's a Show More request
+		app.buffered_render_tweet_htmx(w, "timeline", data)
+	} else {
+		app.buffered_render_tweet_page(w, "tpl/user_feed.tpl", data)
+	}
 }
 
 type FormErrors map[string]string
@@ -285,32 +341,26 @@ func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			app.InfoLog.Print("Form error parse: " + err.Error())
 			app.error_400_with_message(w, err.Error())
-			return
 		}
 		form.Validate()
 		if len(form.FormErrors) == 0 {
 			api := scraper.NewGuestSession()
 			api.LogIn(form.Username, form.Password)
-			scraper.InitApi(api)
 			app.Profile.SaveSession(api)
+			if err := app.SetActiveUser(api.UserHandle); err != nil {
+				app.ErrorLog.Printf(err.Error())
+			}
 			http.Redirect(w, r, "/login", 303)
 		}
+		return
 	}
+
+	// method = "GET"
 	data := LoginData{
 		LoginForm:        form,
 		ExistingSessions: app.Profile.ListSessions(),
 	}
 	app.buffered_render_basic_page(w, "tpl/login.tpl", &data)
-}
-
-func get_default_user() scraper.User {
-	return scraper.User{
-		ID:                    0,
-		Handle:                "[nobody]",
-		DisplayName:           "[Not logged in]",
-		ProfileImageLocalPath: path.Base(scraper.DEFAULT_PROFILE_IMAGE_URL),
-		IsContentDownloaded:   true,
-	}
 }
 
 func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
@@ -324,21 +374,10 @@ func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
 		app.error_400_with_message(w, err.Error())
 		return
 	}
-	if form.AccountName == "no account" {
-		// Special value that indicates to use a guest session
-		scraper.InitApi(scraper.NewGuestSession())
-		app.ActiveUser = get_default_user()
-		app.DisableScraping = true // API requests will fail b/c not logged in
-	} else {
-		// Activate the selected session
-		user, err := app.Profile.GetUserByHandle(scraper.UserHandle(form.AccountName))
-		if err != nil {
-			app.error_400_with_message(w, fmt.Sprintf("User not in database: %s", form.AccountName))
-			return
-		}
-		scraper.InitApi(app.Profile.LoadSession(scraper.UserHandle(form.AccountName)))
-		app.ActiveUser = user
-		app.DisableScraping = false
+	err = app.SetActiveUser(scraper.UserHandle(form.AccountName))
+	if err != nil {
+		app.error_400_with_message(w, fmt.Sprintf("User not in database: %s", form.AccountName))
+		return
 	}
 	app.buffered_render_basic_htmx(w, "nav-sidebar", nil)
 }
