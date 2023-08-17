@@ -59,6 +59,11 @@
         {{range $main_tweet.Images}}
           <img src="/content/images/{{.LocalFilename}}" style="max-width: 45%"/>
         {{end}}
+        {{range $main_tweet.Videos}}
+          <video controls hx-trigger="click consume">
+            <source src="/content/videos/{{.LocalFilename}}">
+          </video>
+        {{end}}
 
         {{if $main_tweet.QuotedTweetID}}
           {{$quoted_tweet := (tweet $main_tweet.QuotedTweetID)}}
