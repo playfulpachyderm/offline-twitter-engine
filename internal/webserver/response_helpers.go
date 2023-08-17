@@ -87,6 +87,28 @@ func (app *Application) buffered_render_basic_page(w http.ResponseWriter, tpl_fi
 	r.BufferedRender(w)
 }
 
+func (app *Application) buffered_render_tweet_htmx(w http.ResponseWriter, tpl_name string, data TweetCollection) {
+	partials, err := filepath.Glob(get_filepath("tpl/includes/*.tpl"))
+	panic_if(err)
+	tweet_partials, err := filepath.Glob(get_filepath("tpl/tweet_page_includes/*.tpl"))
+	panic_if(err)
+	partials = append(partials, tweet_partials...)
+
+	r := renderer{
+		Funcs: func_map(template.FuncMap{
+			"tweet":            data.Tweet,
+			"user":             data.User,
+			"retweet":          data.Retweet,
+			"active_user":      app.get_active_user,
+			"focused_tweet_id": data.FocusedTweetID,
+		}),
+		Filenames: partials,
+		TplName:   tpl_name,
+		Data:      data,
+	}
+	r.BufferedRender(w)
+}
+
 func (app *Application) buffered_render_basic_htmx(w http.ResponseWriter, tpl_name string, data interface{}) {
 	partials, err := filepath.Glob(get_filepath("tpl/includes/*.tpl"))
 	panic_if(err)
