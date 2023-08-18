@@ -87,6 +87,16 @@ input, select {
     cursor: default;
 }
 
+.circle-outline {
+    display: flex;
+    border-radius: 50%;
+    outline: 1px solid #777;
+    margin: 0 0.4em;
+    font-size: 0.8em;
+    padding: 0.2em;
+    box-sizing: border-box;
+}
+
 .name-and-handle {
     padding: 0 0.6em !important; /* !important to make the ".quick-link .span" rule in the login button not overrule it */
 }
@@ -151,6 +161,9 @@ a.entity {
     display: flex;
     flex-direction: column;
     background-color: var(--color-twitter-off-white);
+}
+img.embedded-link-preview {
+    border-radius: 1em;
 }
 .embedded-link-description {
     color: var(--color-twitter-text-gray);

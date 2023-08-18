@@ -65,8 +65,12 @@
           </video>
         {{end}}
         {{range $main_tweet.Urls}}
-          <a class="embedded-link rounded-gray-outline unstyled-link" target="_blank" href="{{.Text}}" style="width: {{.ThumbnailWidth}}px">
-            <img src="/content/link_preview_images/{{.ThumbnailLocalPath}}"/>
+          <a
+            class="embedded-link rounded-gray-outline unstyled-link"
+            target="_blank"
+            href="{{.Text}}"
+            style="width: {{if (ne .ThumbnailWidth 0)}}{{.ThumbnailWidth}}px {{else}}fit-content {{end}}">
+            <img class="embedded-link-preview" src="/content/link_preview_images/{{.ThumbnailLocalPath}}"/>
             <h3 class="embedded-link-title">{{.Title}}</h3>
             <p class="embedded-link-description">{{.Description}}</p>
             <span class="row embedded-link-domain-container">
