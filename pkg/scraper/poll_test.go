@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -64,4 +65,26 @@ func TestParsePoll4Choices(t *testing.T) {
 
 	assert.Equal("Derek Chauvin", poll.Choice4)
 	assert.Equal(2397, poll.Choice4_Votes)
+}
+
+func TestPollHelpers(t *testing.T) {
+	assert := assert.New(t)
+	p := Poll{
+		Choice1_Votes: 1,
+		Choice2_Votes: 2,
+		Choice3_Votes: 3,
+		Choice4_Votes: 4,
+		VotingEndsAt:  Timestamp{Time: time.Now().Add(10 * time.Second)},
+	}
+	assert.Equal(p.TotalVotes(), 10)
+	assert.Equal(p.VotePercentage(p.Choice3_Votes), 30.0)
+
+	assert.True(p.IsOpen())
+	assert.False(p.IsWinner(p.Choice4_Votes))
+
+	// End the poll
+	p.VotingEndsAt = Timestamp{Time: time.Now().Add(-10 * time.Second)}
+	assert.False(p.IsOpen())
+	assert.False(p.IsWinner(p.Choice2_Votes))
+	assert.True(p.IsWinner(p.Choice4_Votes))
 }
