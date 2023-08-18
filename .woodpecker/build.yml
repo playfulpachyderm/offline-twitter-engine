@@ -22,6 +22,7 @@ pipeline:
     commands:
       - cd cmd
       # - ./tests.sh
+      # TODO: fix the integration tests!
 
   version_bump_test:
     image: offline-twitter/go

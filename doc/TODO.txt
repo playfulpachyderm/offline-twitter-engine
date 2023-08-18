@@ -84,3 +84,39 @@ TODO apiv2-tombstones
 - on User Feed:
   - tombstones (e.g, "Age restricted") that show up as top-level entries
     - keep in mind that these might be retweets; the entry-id is the RetweetID, not the TweetID
+
+TODO tidy-up-command-line-flags
+- make flags that are part of a subcommand go after that subcommand (e.g., `twitter get_user_tweets -n 200 ...`)
+
+TODO: fatih-color
+- replace "terminal-utils" with "fatih/color"
+
+TODO: mobile-requests
+- implement mobile versions of various requests
+- Check in `pkg/scraper/test_responses/mobile_requests`
+
+
+Webserver
+---------
+
+TODO: SQL-logger
+
+TODO const-select-fields
+- There's a few queries that use "select ..." and write out all the fields.  Put the field names in one spot
+
+TODO compound-query-structs
+- Right now the result structs for the compound queries (e.g., "Feed", "TweetDetail") are in the `persistence` package.  They don't go there probably
+
+TOOD: login-routes-tests
+- Make the scraper.API object injectable somehow (get rid of singleton pattern) and add tests for login and change-session sequences
+- Also test profile.ListSessions()
+
+TODO: web-ui-downloading
+- web UI needs buttons to trigger a scrape / refresh manually
+
+TODO: web-ui-search
+
+TODO: webserver-session-arg-active-user
+- make the active user get set on initializing the Application object if a --session flag is given
+
+TODO: webserver-tombstones
