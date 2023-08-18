@@ -64,12 +64,26 @@
             <source src="/content/videos/{{.LocalFilename}}">
           </video>
         {{end}}
+        {{range $main_tweet.Urls}}
+          <a class="embedded-link rounded-gray-outline unstyled-link" target="_blank" href="{{.Text}}" style="width: {{.ThumbnailWidth}}px">
+            <img src="/content/link_preview_images/{{.ThumbnailLocalPath}}"/>
+            <h3 class="embedded-link-title">{{.Title}}</h3>
+            <p class="embedded-link-description">{{.Description}}</p>
+            <span class="row embedded-link-domain-container">
+              <img class="svg-icon" src="/static/icons/link3.svg" />
+              <span class="embedded-link-domain">{{.Domain}}</span>
+            </span>
+          </a>
+        {{end}}
+        {{range $main_tweet.Polls}}
+          {{template "poll" .}}
+        {{end}}
 
         {{if $main_tweet.QuotedTweetID}}
           {{$quoted_tweet := (tweet $main_tweet.QuotedTweetID)}}
           {{$quoted_author := (user $quoted_tweet.UserID)}}
           <a href="/tweet/{{$quoted_tweet.ID}}">
-            <div class="quoted-tweet">
+            <div class="quoted-tweet rounded-gray-outline">
               {{template "author-info" $quoted_author}}
               <div class="quoted-tweet-content">
                 <a href="/tweet/{{$quoted_tweet.ID}}" class="unstyled-link tweet-text">

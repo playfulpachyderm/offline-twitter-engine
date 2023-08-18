@@ -58,7 +58,9 @@ input, select {
 .quoted-tweet {
     padding: 1.3em;
     margin-top: 1em;
+}
 
+.rounded-gray-outline {
     outline-color: lightgray;
     outline-style: solid;
     outline-width: 1px;
@@ -143,6 +145,27 @@ a.entity {
 .tweet-content video {
     max-width: 100%;
     max-height: 40em;
+}
+.embedded-link {
+    padding: 1.3em;
+    margin-top: 1em;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-twitter-off-white);
+}
+.embedded-link-description {
+    color: var(--color-twitter-text-gray);
+    font-size: 0.8em;
+    margin: 0;
+}
+.embedded-link-title {
+    margin: 0.5em 0;
+}
+.embedded-link-domain-container {
+    margin-top: 0.2em
+}
+.embedded-link-domain {
+    margin-left: 0.3em;
 }
 .thread-parent-tweet:first-child, .focused-tweet:first-child {
     padding-top: 1em;
@@ -412,4 +435,39 @@ input[type="submit"] {
 .followers-followees-container {
     margin-top: 1em;
     gap: 4em;
+}
+
+.poll {
+    padding: 1em;
+}
+.poll-choice {
+    position: relative;
+    margin: 0.3em 0;
+}
+.poll-fill-bar {
+    position: absolute;
+    height: 100%;
+    z-index: -1;
+    background-color: var(--color-twitter-off-white-dark);
+}
+.poll-fill-bar.poll-winner {
+    background-color: var(--color-twitter-blue-light);
+}
+.poll-info-container {
+    width: 100%;
+    line-height: 2em;
+    margin: 0 0.5em;
+}
+.poll-choice-label {
+/*    flex-grow: 1;*/
+    width: 50%;
+}
+.poll-choice-votes {
+    width: 50%;
+/*    flex-grow: 1;*/
+}
+.poll-metadata {
+    color: var(--color-twitter-text-gray);
+    margin: 0;
+    font-size: 0.9em;
 }
