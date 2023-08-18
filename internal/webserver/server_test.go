@@ -84,7 +84,7 @@ func TestUserFeed(t *testing.T) {
 	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
 	assert.Len(tweet_nodes, 7)
 	including_quote_tweets := cascadia.QueryAll(root, selector(".tweet"))
-	assert.Len(including_quote_tweets, 9)
+	assert.Len(including_quote_tweets, 10)
 }
 
 func TestUserFeedMissing(t *testing.T) {
