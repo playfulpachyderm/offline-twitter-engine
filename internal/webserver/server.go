@@ -179,13 +179,13 @@ func (t TweetDetailData) FocusedTweetID() scraper.TweetID {
 	return t.MainTweetID
 }
 
-func to_json(t interface{}) string {
-	js, err := json.Marshal(t)
-	if err != nil {
-		panic(err)
-	}
-	return string(js)
-}
+// func to_json(t interface{}) string {
+// 	js, err := json.Marshal(t)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	return string(js)
+// }
 
 func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'TweetDetail' handler (path: %q)", r.URL.Path)
