@@ -28,6 +28,8 @@ pipeline:
     image: offline-twitter/go
     when:
       branch: release-*
+    secrets:
+      - offline_twatter_passwd
     commands:
       - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^release-)\d+\.\d+\.\d+")
       - curl https://apt.playfulpachyderm.com/KEY.gpg | sudo apt-key add -
@@ -37,8 +39,9 @@ pipeline:
       - which twitter
       - twitter create_profile outdated_profile
       - cd outdated_profile
+      - twitter login offline_twatter "$OFFLINE_TWATTER_PASSWD"
       - twitter fetch_user michaelmalice
-      - twitter get_user_tweets michaelmalice
+      - twitter --session Offline_Twatter get_user_tweets michaelmalice
       - (cd ../cmd && ./compile.sh $version)
       - which ../cmd/tw
       - ../cmd/tw fetch_user michaelmalice
