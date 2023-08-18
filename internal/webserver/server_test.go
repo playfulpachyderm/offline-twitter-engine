@@ -217,6 +217,14 @@ func TestTweetsWithContent(t *testing.T) {
 	root, err = html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".embedded-link")), 3)
+
+	// Space
+	resp = do_request(httptest.NewRequest("GET", "/tweet/1624833173514293249", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err = html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".space")), 1)
+	assert.Len(cascadia.QueryAll(root, selector("ul.space-participants-list li")), 9)
 }
 
 // Follow and unfollow

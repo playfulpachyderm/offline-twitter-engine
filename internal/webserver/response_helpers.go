@@ -45,6 +45,7 @@ type TweetCollection interface {
 	Tweet(id scraper.TweetID) scraper.Tweet
 	User(id scraper.UserID) scraper.User
 	Retweet(id scraper.TweetID) scraper.Retweet
+	Space(id scraper.SpaceID) scraper.Space
 	FocusedTweetID() scraper.TweetID
 }
 
@@ -62,6 +63,7 @@ func (app *Application) buffered_render_tweet_page(w http.ResponseWriter, tpl_fi
 			"tweet":            data.Tweet,
 			"user":             data.User,
 			"retweet":          data.Retweet,
+			"space":            data.Space,
 			"active_user":      app.get_active_user,
 			"focused_tweet_id": data.FocusedTweetID,
 		}),
@@ -99,6 +101,7 @@ func (app *Application) buffered_render_tweet_htmx(w http.ResponseWriter, tpl_na
 			"tweet":            data.Tweet,
 			"user":             data.User,
 			"retweet":          data.Retweet,
+			"space":            data.Space,
 			"active_user":      app.get_active_user,
 			"focused_tweet_id": data.FocusedTweetID,
 		}),

@@ -45,6 +45,33 @@ func (p Profile) fill_content(trove *TweetTrove) {
 		}
 	}
 
+	space_ids := []interface{}{}
+	for _, t := range trove.Tweets {
+		if t.SpaceID != "" {
+			space_ids = append(space_ids, t.SpaceID)
+		}
+	}
+	if len(space_ids) > 0 {
+		var spaces []Space
+		err := p.DB.Select(&spaces, `
+		 select id, created_by_id, short_url, state, title, created_at, started_at, ended_at, updated_at, is_available_for_replay,
+		        replay_watch_count, live_listeners_count, is_details_fetched
+		   from spaces
+		  where id in (`+strings.Repeat("?,", len(space_ids)-1)+`?)`,
+			space_ids...,
+		)
+		if err != nil {
+			panic(err)
+		}
+		for _, s := range spaces {
+			err := p.DB.Select(&s.ParticipantIds, "select user_id from space_participants where space_id = ?", s.ID)
+			if err != nil {
+				panic(err)
+			}
+			trove.Spaces[s.ID] = s
+		}
+	}
+
 	in_clause := ""
 	user_ids := []interface{}{}
 	tweet_ids := []interface{}{}
@@ -57,6 +84,12 @@ func (p Profile) fill_content(trove *TweetTrove) {
 
 	for _, r := range trove.Retweets {
 		user_ids = append(user_ids, int(r.RetweetedByID))
+	}
+	for _, s := range trove.Spaces {
+		user_ids = append(user_ids, s.CreatedById)
+		for _, p := range s.ParticipantIds {
+			user_ids = append(user_ids, p)
+		}
 	}
 
 	// Get all the users

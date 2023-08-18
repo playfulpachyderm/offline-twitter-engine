@@ -28,7 +28,7 @@
     {{if $main_tweet.ReplyMentions}}
       <div class="reply-mentions-container" hx-trigger="click consume">
         <span class="replying-to-label">Replying&nbsp;to</span>
-        <ul class="reply-mentions">
+        <ul class="reply-mentions inline-dotted-list">
           {{range $main_tweet.ReplyMentions}}
             <li><a class="entity" href="/{{.}}">@{{.}}</a></li>
           {{end}}
@@ -87,6 +87,9 @@
           <div class="quoted-tweet rounded-gray-outline" hx-trigger="click consume">
             {{template "tweet" (dict "TweetID" $main_tweet.QuotedTweetID "RetweetID" 0 "QuoteNestingLevel" (add .QuoteNestingLevel 1))}}
           </div>
+        {{end}}
+        {{if $main_tweet.SpaceID}}
+          {{template "space" (space $main_tweet.SpaceID)}}
         {{end}}
       </div>
 

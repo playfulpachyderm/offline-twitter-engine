@@ -6,6 +6,9 @@
     --color-twitter-off-white-dark: #dae5e5; /* hsv(180, 4.8, 89.8) */
     --color-outline-gray: #dcdcdc;
 
+    --color-space-purple: #a49bfd;
+    --color-space-purple-outline: #6452fc;
+
 /*
 const QColor COLOR_OUTLINE_GRAY = QColor(220, 220, 220);
 const QColor COLOR_TWITTER_BLUE = QColor(27, 149, 224);
@@ -46,6 +49,20 @@ input, select {
     padding: 0.2em 0.6em;
     box-sizing: border-box;
     border-radius: 0.5em;
+}
+
+ul.inline-dotted-list {
+    list-style: none;
+    margin: 0;
+}
+ul.inline-dotted-list li {
+    display: inline;
+}
+ul.inline-dotted-list li:after {
+    content: " ⋅";
+}
+ul.inline-dotted-list li:last-child:after {
+    content: "";
 }
 
 .tweet {
@@ -118,20 +135,10 @@ input, select {
     margin: 0 5em;
     cursor: default;
 }
-ul.reply-mentions {
-    list-style: none;
+.reply-mentions {
     padding: 0 0.5em;
-    margin: 0;
 }
-ul.reply-mentions li {
-    display: inline;
-}
-ul.reply-mentions li:after {
-    content: " ⋅";
-}
-ul.reply-mentions li:last-child:after {
-    content: "";
-}
+
 .replying-to-label {
     color: var(--color-twitter-text-gray);
 }
@@ -170,7 +177,7 @@ img.embedded-link-preview {
     font-size: 0.8em;
     margin: 0;
 }
-.embedded-link-title {
+h3 {
     margin: 0.5em 0;
 }
 .embedded-link-domain-container {
@@ -474,15 +481,52 @@ input[type="submit"] {
     margin: 0 0.5em;
 }
 .poll-choice-label {
-/*    flex-grow: 1;*/
     width: 50%;
 }
 .poll-choice-votes {
     width: 50%;
-/*    flex-grow: 1;*/
 }
 .poll-metadata {
     color: var(--color-twitter-text-gray);
     margin: 0;
     font-size: 0.9em;
+}
+
+.space {
+    outline: 1px solid var(--color-space-purple-outline);
+    background-color: var(--color-space-purple);
+    border-radius: 1.5em;
+    padding: 1.5em;
+}
+.space-title {
+    padding-top: 0.5em;
+}
+.space .host-label {
+    color: var(--color-space-purple-outline);
+}
+.space-date {
+    color: var(--color-space-purple-outline);
+    font-size: 0.8em;
+}
+.space-info-list {
+    padding: 0;
+}
+.space .layout-spacer {
+    flex-grow: 1;
+}
+ul.space-participants-list {
+    list-style: none;
+    padding: 0;
+}
+ul.space-participants-list li {
+    padding: 0.5em 0;
+    display: inline-block;
+    width: 24%;
+}
+.space-participants-list .author-info {
+    font-size: 0.9em;
+    line-height: 1.2em;
+}
+.space-participants-list .author-info .profile-image {
+    font-size: 0.8em;
 }
