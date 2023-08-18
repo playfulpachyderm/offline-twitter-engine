@@ -81,8 +81,10 @@ func TestUserFeed(t *testing.T) {
 	title_node := cascadia.Query(root, selector("title"))
 	assert.Equal(title_node.FirstChild.Data, "Offline Twitter | @Cernovich")
 
-	tweet_nodes := cascadia.QueryAll(root, selector(".tweet"))
+	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
 	assert.Len(tweet_nodes, 7)
+	including_quote_tweets := cascadia.QueryAll(root, selector(".tweet"))
+	assert.Len(including_quote_tweets, 9)
 }
 
 func TestUserFeedMissing(t *testing.T) {
@@ -105,7 +107,7 @@ func TestUserFeedWithCursor(t *testing.T) {
 	title_node := cascadia.Query(root, selector("title"))
 	assert.Equal(title_node.FirstChild.Data, "Offline Twitter | @Cernovich")
 
-	tweet_nodes := cascadia.QueryAll(root, selector(".tweet"))
+	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
 	assert.Len(tweet_nodes, 2)
 }
 
@@ -132,7 +134,7 @@ func TestTimeline(t *testing.T) {
 	title_node := cascadia.Query(root, selector("title"))
 	assert.Equal(title_node.FirstChild.Data, "Offline Twitter | Timeline")
 
-	tweet_nodes := cascadia.QueryAll(root, selector(".tweet"))
+	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
 	assert.Len(tweet_nodes, 18)
 }
 
@@ -148,7 +150,7 @@ func TestTimelineWithCursor(t *testing.T) {
 	title_node := cascadia.Query(root, selector("title"))
 	assert.Equal(title_node.FirstChild.Data, "Offline Twitter | Timeline")
 
-	tweet_nodes := cascadia.QueryAll(root, selector(".tweet"))
+	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
 	assert.Len(tweet_nodes, 10)
 }
 

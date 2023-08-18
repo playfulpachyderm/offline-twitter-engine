@@ -79,23 +79,10 @@
           {{template "poll" .}}
         {{end}}
 
-        {{if $main_tweet.QuotedTweetID}}
-          {{$quoted_tweet := (tweet $main_tweet.QuotedTweetID)}}
-          {{$quoted_author := (user $quoted_tweet.UserID)}}
-          <a href="/tweet/{{$quoted_tweet.ID}}">
-            <div class="quoted-tweet rounded-gray-outline">
-              {{template "author-info" $quoted_author}}
-              <div class="quoted-tweet-content">
-                <a href="/tweet/{{$quoted_tweet.ID}}" class="unstyled-link tweet-text">
-                  {{$quoted_tweet.Text}}
-                </a>
-                {{range $quoted_tweet.Images}}
-                  <img src="{{.RemoteURL}}" style="max-width: 45%"/>
-                {{end}}
-                <p>{{$quoted_tweet.PostedAt.Time.Format "Jan 2, 2006"}}</p>
-              </div>
-            </div>
-          </a>
+        {{if (and $main_tweet.QuotedTweetID (lt .QuoteNestingLevel 1))}}
+          <div class="quoted-tweet rounded-gray-outline" hx-trigger="click consume">
+            {{template "tweet" (dict "TweetID" $main_tweet.QuotedTweetID "RetweetID" 0 "QuoteNestingLevel" (add .QuoteNestingLevel 1))}}
+          </div>
         {{end}}
       </div>
 

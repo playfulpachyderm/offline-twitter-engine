@@ -283,6 +283,7 @@ func (p Profile) GetTweetDetail(id TweetID) (TweetDetailView, error) {
 type FeedItem struct {
 	TweetID
 	RetweetID TweetID
+	QuoteNestingLevel int
 }
 type Feed struct {
 	Items []FeedItem
