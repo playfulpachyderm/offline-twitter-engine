@@ -190,6 +190,33 @@ func TestTweetDetailInvalidNumber(t *testing.T) {
 	require.Equal(resp.StatusCode, 400)
 }
 
+func TestTweetsWithContent(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	// Poll
+	resp := do_request(httptest.NewRequest("GET", "/tweet/1465534109573390348", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".poll")), 1)
+	assert.Len(cascadia.QueryAll(root, selector(".poll-choice")), 4)
+
+	// Video
+	resp = do_request(httptest.NewRequest("GET", "/tweet/1453461248142495744", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err = html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector("video")), 1)
+
+	// Url
+	resp = do_request(httptest.NewRequest("GET", "/tweet/1438642143170646017", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err = html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".embedded-link")), 3)
+}
+
 // Follow and unfollow
 // -------------------
 
