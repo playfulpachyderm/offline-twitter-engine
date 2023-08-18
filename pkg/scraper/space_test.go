@@ -25,3 +25,18 @@ func TestParseSpace(t *testing.T) {
 	assert.Equal(SpaceID("1YpKkZVyQjoxj"), space.ID)
 	assert.Equal("https://t.co/WBPAHNF8Om", space.ShortUrl)
 }
+
+func TestFormatSpaceDuration(t *testing.T) {
+	assert := assert.New(t)
+	s := Space{
+		StartedAt: TimestampFromUnix(1000 * 1000),
+		EndedAt:   TimestampFromUnix(5000 * 1000),
+	}
+	assert.Equal(s.FormatDuration(), "1h06m")
+
+	s.EndedAt = TimestampFromUnix(500000 * 1000)
+	assert.Equal(s.FormatDuration(), "138h36m")
+
+	s.EndedAt = TimestampFromUnix(1005 * 1000)
+	assert.Equal(s.FormatDuration(), "0m05s")
+}
