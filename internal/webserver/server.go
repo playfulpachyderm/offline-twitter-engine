@@ -237,7 +237,6 @@ func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 	}
-	app.InfoLog.Printf(to_json(trove))
 	data.TweetDetailView = trove
 
 	app.buffered_render_tweet_page(w, "tpl/tweet_detail.tpl", data)
@@ -309,7 +308,6 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	feed.Users[user.ID] = user
 
 	data := UserProfileData{Feed: feed, UserID: user.ID}
-	app.InfoLog.Printf(to_json(data))
 
 	if r.Header.Get("HX-Request") == "true" && c.CursorPosition == persistence.CURSOR_MIDDLE {
 		// It's a Show More request
@@ -339,7 +337,6 @@ func (app *Application) Timeline(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := UserProfileData{Feed: feed} // TODO: wrong struct
-	app.InfoLog.Printf(to_json(data))
 
 	if r.Header.Get("HX-Request") == "true" && c.CursorPosition == persistence.CURSOR_MIDDLE {
 		// It's a Show More request
