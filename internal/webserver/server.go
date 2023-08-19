@@ -98,7 +98,7 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(r.URL.Path, "/")[1:]
 	switch parts[0] {
 	case "static":
-		if use_embedded {
+		if use_embedded == "true" {
 			// Serve directly from the embedded files
 			http.FileServer(http.FS(embedded_files)).ServeHTTP(w, r)
 		} else {

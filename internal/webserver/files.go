@@ -7,4 +7,4 @@ import (
 //go:embed "tpl" "static"
 var embedded_files embed.FS
 
-var use_embedded = false
+var use_embedded = ""

@@ -31,7 +31,7 @@ func init() {
 }
 
 func get_filepath(s string) string {
-	if use_embedded {
+	if use_embedded == "true" {
 		return s
 	}
 	return path.Join(this_dir, s)
@@ -40,7 +40,7 @@ func get_filepath(s string) string {
 func glob(path string) []string {
 	var ret []string
 	var err error
-	if use_embedded {
+	if use_embedded == "true" {
 		ret, err = fs.Glob(embedded_files, get_filepath(path))
 	} else {
 		ret, err = filepath.Glob(get_filepath(path))
@@ -168,7 +168,7 @@ type renderer struct {
 func (r renderer) BufferedRender(w io.Writer) {
 	var tpl *template.Template
 	var err error
-	if use_embedded {
+	if use_embedded == "true" {
 		tpl, err = template.New("").Funcs(r.Funcs).ParseFS(embedded_files, r.Filenames...)
 	} else {
 		tpl, err = template.New("").Funcs(r.Funcs).ParseFiles(r.Filenames...)
