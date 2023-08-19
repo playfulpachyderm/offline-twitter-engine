@@ -226,6 +226,7 @@ func (p Profile) GetTweetDetail(id TweetID) (TweetDetailView, error) {
 	if err != nil {
 		panic(err)
 	}
+	defer stmt.Close()
 
 	// Main tweet and parents
 	var thread []Tweet
@@ -257,6 +258,7 @@ func (p Profile) GetTweetDetail(id TweetID) (TweetDetailView, error) {
 	if err != nil {
 		panic(err)
 	}
+	defer stmt.Close()
 	err = stmt.Select(&replies, id)
 	if err != nil {
 		panic(err)

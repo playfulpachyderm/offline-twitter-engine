@@ -213,6 +213,7 @@ func (p Profile) GetAllFollowedUsers() []scraper.UserHandle {
 	if err != nil {
 		panic(err)
 	}
+	defer rows.Close()
 
 	ret := []scraper.UserHandle{}
 

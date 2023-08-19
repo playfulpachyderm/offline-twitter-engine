@@ -66,6 +66,7 @@ func (p Profile) GetSpaceById(id scraper.SpaceID) (space scraper.Space, err erro
 	if errors.Is(err, sql.ErrNoRows) {
 		err = nil
 	}
+	defer rows.Close()
 	if err != nil {
 		panic(err)
 	}
