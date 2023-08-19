@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"io/fs"
 	"net/http"
+	"path"
 	"path/filepath"
+	"runtime"
 	"runtime/debug"
 
 	"github.com/Masterminds/sprig/v3"
@@ -18,6 +21,32 @@ func panic_if(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+var this_dir string
+
+func init() {
+	_, this_file, _, _ := runtime.Caller(0) // `this_file` is absolute path to this source file
+	this_dir = path.Dir(this_file)
+}
+
+func get_filepath(s string) string {
+	if use_embedded {
+		return s
+	}
+	return path.Join(this_dir, s)
+}
+
+func glob(path string) []string {
+	var ret []string
+	var err error
+	if use_embedded {
+		ret, err = fs.Glob(embedded_files, get_filepath(path))
+	} else {
+		ret, err = filepath.Glob(get_filepath(path))
+	}
+	panic_if(err)
+	return ret
 }
 
 // func (app *Application) error_400(w http.ResponseWriter) {
@@ -52,11 +81,7 @@ type TweetCollection interface {
 // Creates a template from the given template file using all the available partials.
 // Calls `app.buffered_render` to render the created template.
 func (app *Application) buffered_render_tweet_page(w http.ResponseWriter, tpl_file string, data TweetCollection) {
-	partials, err := filepath.Glob(get_filepath("tpl/includes/*.tpl"))
-	panic_if(err)
-	tweet_partials, err := filepath.Glob(get_filepath("tpl/tweet_page_includes/*.tpl"))
-	panic_if(err)
-	partials = append(partials, tweet_partials...)
+	partials := append(glob("tpl/includes/*.tpl"), glob("tpl/tweet_page_includes/*.tpl")...)
 
 	r := renderer{
 		Funcs: func_map(template.FuncMap{
@@ -77,8 +102,7 @@ func (app *Application) buffered_render_tweet_page(w http.ResponseWriter, tpl_fi
 // Creates a template from the given template file using all the available partials.
 // Calls `app.buffered_render` to render the created template.
 func (app *Application) buffered_render_basic_page(w http.ResponseWriter, tpl_file string, data interface{}) {
-	partials, err := filepath.Glob(get_filepath("tpl/includes/*.tpl"))
-	panic_if(err)
+	partials := glob("tpl/includes/*.tpl")
 
 	r := renderer{
 		Funcs:     func_map(template.FuncMap{"active_user": app.get_active_user}),
@@ -90,11 +114,7 @@ func (app *Application) buffered_render_basic_page(w http.ResponseWriter, tpl_fi
 }
 
 func (app *Application) buffered_render_tweet_htmx(w http.ResponseWriter, tpl_name string, data TweetCollection) {
-	partials, err := filepath.Glob(get_filepath("tpl/includes/*.tpl"))
-	panic_if(err)
-	tweet_partials, err := filepath.Glob(get_filepath("tpl/tweet_page_includes/*.tpl"))
-	panic_if(err)
-	partials = append(partials, tweet_partials...)
+	partials := append(glob("tpl/includes/*.tpl"), glob("tpl/tweet_page_includes/*.tpl")...)
 
 	r := renderer{
 		Funcs: func_map(template.FuncMap{
@@ -113,8 +133,7 @@ func (app *Application) buffered_render_tweet_htmx(w http.ResponseWriter, tpl_na
 }
 
 func (app *Application) buffered_render_basic_htmx(w http.ResponseWriter, tpl_name string, data interface{}) {
-	partials, err := filepath.Glob(get_filepath("tpl/includes/*.tpl"))
-	panic_if(err)
+	partials := glob("tpl/includes/*.tpl")
 
 	r := renderer{
 		Funcs:     func_map(template.FuncMap{"active_user": app.get_active_user}),
@@ -147,7 +166,13 @@ type renderer struct {
 // Render the given template using a bytes.Buffer.  This avoids the possibility of failing partway
 // through the rendering, and sending an imcomplete response with "Bad Request" or "Server Error" at the end.
 func (r renderer) BufferedRender(w io.Writer) {
-	tpl, err := template.New("").Funcs(r.Funcs).ParseFiles(r.Filenames...)
+	var tpl *template.Template
+	var err error
+	if use_embedded {
+		tpl, err = template.New("").Funcs(r.Funcs).ParseFS(embedded_files, r.Filenames...)
+	} else {
+		tpl, err = template.New("").Funcs(r.Funcs).ParseFiles(r.Filenames...)
+	}
 	panic_if(err)
 
 	buf := new(bytes.Buffer)

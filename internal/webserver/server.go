@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -88,17 +87,6 @@ func get_default_user() scraper.User {
 	}
 }
 
-var this_dir string
-
-func init() {
-	_, this_file, _, _ := runtime.Caller(0) // `this_file` is absolute path to this source file
-	this_dir = path.Dir(this_file)
-}
-
-func get_filepath(s string) string {
-	return path.Join(this_dir, s)
-}
-
 // Manual router implementation.
 // I don't like the weird matching behavior of http.ServeMux, and it's not hard to write by hand.
 func (app *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -110,7 +98,12 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(r.URL.Path, "/")[1:]
 	switch parts[0] {
 	case "static":
-		http.StripPrefix("/static", http.FileServer(http.Dir(get_filepath("static")))).ServeHTTP(w, r)
+		if use_embedded {
+			// Serve directly from the embedded files
+			http.FileServer(http.FS(embedded_files)).ServeHTTP(w, r)
+		} else {
+			http.StripPrefix("/static", http.FileServer(http.Dir(get_filepath("static")))).ServeHTTP(w, r)
+		}
 	case "tweet":
 		app.TweetDetail(w, r)
 	case "content":
