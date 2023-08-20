@@ -3,6 +3,8 @@ package persistence_test
 import (
 	"testing"
 
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -129,4 +131,138 @@ func TestTimeline(t *testing.T) {
 	assert.Equal(feed.Items[2].TweetID, TweetID(1413664406995566593))
 	assert.Equal(feed.Items[3].RetweetID, TweetID(144919526660333333))
 	assert.Equal(feed.Items[4].TweetID, TweetID(1413658466795737091))
+}
+
+func TestKeywordSearch(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+	c := persistence.NewCursor()
+
+	// Multiple words without quotes
+	c.Keywords = []string{"who", "are"}
+	feed, err := profile.NextPage(c)
+	require.NoError(err)
+	assert.True(len(feed.Items) > 1)
+
+	// Add quotes
+	c.Keywords = []string{"who are"}
+	feed, err = profile.NextPage(c)
+	require.NoError(err)
+	assert.Len(feed.Items, 1)
+	assert.Equal(feed.Items[0].TweetID, TweetID(1261483383483293700))
+
+	// With gibberish (no matches)
+	c.Keywords = []string{"fasdfjkafsldfjsff"}
+	feed, err = profile.NextPage(c)
+	require.NoError(err)
+	assert.Len(feed.Items, 0)
+}
+
+func TestSearchReplyingToUser(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+	c := persistence.NewCursor()
+
+	// Replying to a user
+	c.ToUserHandles = []UserHandle{"spacex"}
+	feed, err := profile.NextPage(c)
+	require.NoError(err)
+	assert.Len(feed.Items, 2)
+	assert.Equal(feed.Items[0].TweetID, TweetID(1428951883058753537))
+	assert.Equal(feed.Items[1].TweetID, TweetID(1428939163961790466))
+
+	// Replying to two users
+	c.ToUserHandles = []UserHandle{"spacex", "covfefeanon"}
+	feed, err = profile.NextPage(c)
+	require.NoError(err)
+	assert.Len(feed.Items, 1)
+	assert.Equal(feed.Items[0].TweetID, TweetID(1428939163961790466))
+}
+
+func TestSearchDateFilters(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+	c := persistence.NewCursor()
+	c.SortOrder = persistence.SORT_ORDER_MOST_LIKES
+
+	// Since timestamp
+	c.SinceTimestamp.Time = time.Date(2021, 10, 1, 0, 0, 0, 0, time.UTC)
+	c.FromUserHandle = UserHandle("cernovich")
+	feed, err := profile.NextPage(c)
+	require.NoError(err)
+	assert.Len(feed.Items, 1)
+	assert.Equal(feed.Items[0].TweetID, TweetID(1453461248142495744))
+
+	// Until timestamp
+	c.SinceTimestamp = TimestampFromUnix(0)
+	c.UntilTimestamp.Time = time.Date(2021, 10, 1, 0, 0, 0, 0, time.UTC)
+	feed, err = profile.NextPage(c)
+	require.NoError(err)
+	assert.Len(feed.Items, 3)
+	assert.Equal(feed.Items[0].TweetID, TweetID(1439027915404939265))
+	assert.Equal(feed.Items[1].TweetID, TweetID(1439068749336748043))
+	assert.Equal(feed.Items[2].TweetID, TweetID(1439067163508150272))
+}
+
+func TestSearchMediaFilters(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+
+	// Links
+	c := persistence.NewCursor()
+	c.SortOrder = persistence.SORT_ORDER_MOST_LIKES
+	c.FilterLinks = persistence.REQUIRE
+	feed, err := profile.NextPage(c)
+	require.NoError(err)
+	assert.Len(feed.Items, 2)
+	assert.Equal(feed.Items[0].TweetID, TweetID(1438642143170646017))
+	assert.Equal(feed.Items[1].TweetID, TweetID(1413665734866186243))
+
+	// Images
+	c = persistence.NewCursor()
+	c.SortOrder = persistence.SORT_ORDER_MOST_LIKES
+	c.FilterImages = persistence.REQUIRE
+	feed, err = profile.NextPage(c)
+	require.NoError(err)
+	assert.Len(feed.Items, 2)
+	assert.Equal(feed.Items[0].TweetID, TweetID(1261483383483293700))
+	assert.Equal(feed.Items[1].TweetID, TweetID(1426669666928414720))
+
+	// Videos
+	c = persistence.NewCursor()
+	c.SortOrder = persistence.SORT_ORDER_MOST_LIKES
+	c.FilterVideos = persistence.REQUIRE
+	feed, err = profile.NextPage(c)
+	require.NoError(err)
+	assert.Len(feed.Items, 2)
+	assert.Equal(feed.Items[0].TweetID, TweetID(1426619468327882761))
+	assert.Equal(feed.Items[1].TweetID, TweetID(1453461248142495744))
+
+	// Polls
+	c = persistence.NewCursor()
+	c.FilterPolls = persistence.REQUIRE
+	feed, err = profile.NextPage(c)
+	require.NoError(err)
+	assert.Len(feed.Items, 1)
+	assert.Equal(feed.Items[0].TweetID, TweetID(1465534109573390348))
+
+	// Spaces
+	c = persistence.NewCursor()
+	c.FilterSpaces = persistence.REQUIRE
+	feed, err = profile.NextPage(c)
+	require.NoError(err)
+	assert.Len(feed.Items, 1)
+	assert.Equal(feed.Items[0].TweetID, TweetID(1624833173514293249))
 }

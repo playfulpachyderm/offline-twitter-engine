@@ -1,8 +1,10 @@
 package persistence
 
 import (
+	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
@@ -114,6 +116,7 @@ type Cursor struct {
 	FilterImages          Filter
 	FilterVideos          Filter
 	FilterPolls           Filter
+	FilterSpaces          Filter
 	FilterReplies         Filter
 	FilterRetweets        Filter
 	FilterOfflineFollowed Filter
@@ -165,6 +168,97 @@ func NewUserFeedCursor(h scraper.UserHandle) Cursor {
 
 		ByUserHandle: h,
 	}
+}
+
+func NewCursorFromSearchQuery(q string) (Cursor, error) {
+	ret := NewCursor()
+	is_in_quotes := false
+	current_token := ""
+
+	for _, char := range q {
+		if char == ' ' && !is_in_quotes {
+			// Token is finished
+			if current_token == "" {
+				// Ignore empty tokens
+				continue
+			}
+			// Add the completed token
+			if err := ret.apply_token(current_token); err != nil {
+				return Cursor{}, err
+			}
+			current_token = ""
+			continue
+		}
+
+		if char == '"' {
+			if is_in_quotes {
+				is_in_quotes = false
+				if err := ret.apply_token(current_token); err != nil {
+					return Cursor{}, err
+				}
+				current_token = ""
+				continue
+			} else {
+				is_in_quotes = true
+				continue
+			}
+		}
+
+		// current_token = fmt.Sprintf("%s%s", current_token, char)
+		current_token += string(char)
+	}
+
+	// End of query string is reached
+	if is_in_quotes {
+		return Cursor{}, ErrUnmatchedQuotes
+	}
+	if current_token != "" {
+		if err := ret.apply_token(current_token); err != nil {
+			return Cursor{}, err
+		}
+	}
+	return ret, nil
+}
+
+var ErrInvalidQuery = errors.New("invalid search query")
+var ErrUnmatchedQuotes = fmt.Errorf("%w (unmatched quotes)", ErrInvalidQuery)
+
+func (c *Cursor) apply_token(token string) error {
+	parts := strings.Split(token, ":")
+	if len(parts) < 2 {
+		c.Keywords = append(c.Keywords, token)
+		return nil
+	}
+	var err error
+	switch parts[0] {
+	case "from":
+		c.FromUserHandle = scraper.UserHandle(parts[1])
+	case "to":
+		c.ToUserHandles = append(c.ToUserHandles, scraper.UserHandle(parts[1]))
+	case "retweeted_by":
+		c.RetweetedByUserHandle = scraper.UserHandle(parts[1])
+	case "since":
+		c.SinceTimestamp.Time, err = time.Parse("2006-01-02", parts[1])
+	case "until":
+		c.UntilTimestamp.Time, err = time.Parse("2006-01-02", parts[1])
+	case "filter":
+		switch parts[1] {
+		case "links":
+			c.FilterLinks = REQUIRE
+		case "images":
+			c.FilterImages = REQUIRE
+		case "videos":
+			c.FilterVideos = REQUIRE
+		case "polls":
+			c.FilterPolls = REQUIRE
+		case "spaces":
+			c.FilterSpaces = REQUIRE
+		}
+	}
+	if err != nil {
+		return fmt.Errorf("query token %q: %w", token, ErrInvalidQuery)
+	}
+	return nil
 }
 
 func (p Profile) NextPage(c Cursor) (Feed, error) {
@@ -229,6 +323,12 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
 		where_clauses = append(where_clauses, "exists (select 1 from polls where polls.tweet_id = tweets.id)")
 	case EXCLUDE:
 		where_clauses = append(where_clauses, "not exists (select 1 from polls where polls.tweet_id = tweets.id)")
+	}
+	switch c.FilterSpaces {
+	case REQUIRE:
+		where_clauses = append(where_clauses, "space_id != 0")
+	case EXCLUDE:
+		where_clauses = append(where_clauses, "space_id = 0")
 	}
 
 	// Filter by lists (e.g., offline-followed)
