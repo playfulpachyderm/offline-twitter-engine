@@ -428,10 +428,12 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 		ret := NewTweetTrove()
 
 		parts := strings.Split(e.EntryID, "-")
-		if parts[0] == "homeConversation" || parts[0] == "conversationthread" || strings.Join(parts[0:2], "-") == "profile-conversation" {
+		if parts[0] == "homeConversation" || parts[0] == "conversationthread" ||
+			strings.Join(parts[0:2], "-") == "profile-conversation" || strings.Join(parts[0:2], "-") == "home-conversation" {
 			// Process it.
 			// - "profile-conversation": conversation thread on a user feed
 			// - "homeConversation": This looks like it got changed to "profile-conversation"
+			// - "home-conversation": probably same as above lol-- someone did some refactoring
 			// - "conversationthread": conversation thread in the replies under a TweetDetail view
 			for _, item := range e.Content.Items {
 				if item.Item.ItemContent.ItemType == "TimelineTimelineCursor" {
@@ -504,6 +506,11 @@ type APIV2Instruction struct {
 
 type APIV2Response struct {
 	Data struct {
+		Home struct {
+			HomeTimelineUrt struct {
+				Instructions []APIV2Instruction `json:"instructions"`
+			} `json:"home_timeline_urt"`
+		} `json:"home"`
 		User struct {
 			Result struct {
 				TimelineV2 struct { // "Likes" feed calls this "timeline_v2" for some reason
@@ -538,6 +545,12 @@ func (api_response APIV2Response) GetMainInstruction() *APIV2Instruction {
 		}
 	}
 	instructions = api_response.Data.ThreadedConversationWithInjectionsV2.Instructions
+	for i := range instructions {
+		if instructions[i].Type == "TimelineAddEntries" {
+			return &instructions[i]
+		}
+	}
+	instructions = api_response.Data.Home.HomeTimelineUrt.Instructions
 	for i := range instructions {
 		if instructions[i].Type == "TimelineAddEntries" {
 			return &instructions[i]
@@ -923,4 +936,61 @@ func (api API) GetUserLikes(user_id UserID, cursor string) (TweetTrove, error) {
 }
 func GetUserLikes(user_id UserID, cursor string) (TweetTrove, error) {
 	return the_api.GetUserLikes(user_id, cursor)
+}
+
+func (api API) GetHomeTimeline(cursor string) (TweetTrove, error) {
+	url := "https://twitter.com/i/api/graphql/W4Tpu1uueTGK53paUgxF0Q/HomeTimeline"
+	body_struct := struct {
+		Variables GraphqlVariables `json:"variables"`
+		Features  GraphqlFeatures  `json:"features"`
+		QueryID   string           `json:"queryId"`
+	}{
+		Variables: GraphqlVariables{
+			Count:                  40,
+			Cursor:                 cursor,
+			IncludePromotedContent: false,
+			// LatestControlAvailable: true, // TODO: new field?
+			WithCommunity: true,
+			// SeenTweetIDs: []string{"...some TweetIDs"}? // TODO: new field?
+		},
+		Features: GraphqlFeatures{
+			RWebListsTimelineRedesignEnabled:                               true,
+			ResponsiveWebGraphqlExcludeDirectiveEnabled:                    true,
+			VerifiedPhoneLabelEnabled:                                      false,
+			CreatorSubscriptionsTweetPreviewApiEnabled:                     true,
+			ResponsiveWebGraphqlTimelineNavigationEnabled:                  true,
+			ResponsiveWebGraphqlSkipUserProfileImageExtensionsEnabled:      false,
+			TweetypieUnmentionOptimizationEnabled:                          true,
+			ResponsiveWebEditTweetApiEnabled:                               true,
+			GraphqlIsTranslatableRWebTweetIsTranslatableEnabled:            true,
+			ViewCountsEverywhereApiEnabled:                                 true,
+			LongformNotetweetsConsumptionEnabled:                           true,
+			TweetAwardsWebTippingEnabled:                                   false,
+			FreedomOfSpeechNotReachFetchEnabled:                            false,
+			StandardizedNudgesMisinfo:                                      true,
+			TweetWithVisibilityResultsPreferGqlLimitedActionsPolicyEnabled: true,
+			LongformNotetweetsRichTextReadEnabled:                          true,
+			LongformNotetweetsInlineMediaEnabled:                           true,
+			ResponsiveWebEnhanceCardsEnabled:                               false,
+		},
+		QueryID: "W4Tpu1uueTGK53paUgxF0Q",
+	}
+	var response APIV2Response
+	body_bytes, err := json.Marshal(body_struct)
+	if err != nil {
+		panic(err)
+	}
+	err = api.do_http_POST(url, string(body_bytes), &response)
+	if err != nil {
+		panic(err)
+	}
+	trove, err := response.ToTweetTrove()
+	if err != nil {
+		return TweetTrove{}, err
+	}
+	return trove, err
+}
+
+func GetHomeTimeline(cursor string) (TweetTrove, error) {
+	return the_api.GetHomeTimeline(cursor)
 }

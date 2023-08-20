@@ -1,9 +1,10 @@
 package scraper_test
 
 import (
+	"testing"
+
 	"encoding/json"
 	"os"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -865,6 +866,21 @@ func TestTweetDetailWithUnjoinedNontombstoneTweet(t *testing.T) {
 	assert.True(is_ok)
 	assert.False(t3.IsStub)
 	assert.Equal(t2.ID, t3.InReplyToID)
+}
+
+func TestParseHomeTimeline(t *testing.T) {
+	require := require.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/home_timeline.json")
+	require.NoError(err)
+	var response_result APIV2Response
+	err = json.Unmarshal(data, &response_result)
+	require.NoError(err)
+
+	trove, err := response_result.ToTweetTrove()
+	require.NoError(err)
+
+	require.Len(trove.Tweets, 13)
+	require.Len(trove.Users, 11)
 }
 
 func TestParseResultAsLikes(t *testing.T) {
