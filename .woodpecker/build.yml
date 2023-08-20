@@ -24,6 +24,15 @@ pipeline:
       # - ./tests.sh
       # TODO: fix the integration tests!
 
+  webserver_test:
+    image: offline-twitter/go
+    commands:
+      - cd cmd
+      - ./compile.sh
+      - ./tw --profile ../sample_data/profile --addr localhost:1000 webserver &
+      - curl localhost:1000/cernovich
+      - jobs -p | xargs -I{} kill -- -{}
+
   version_bump_test:
     image: offline-twitter/go
     when:
