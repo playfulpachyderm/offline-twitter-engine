@@ -14,7 +14,9 @@
         <a onclick="window.history.back()" class="back-button quick-link">
           <img class="svg-icon" src="/static/icons/back.svg" />
         </a>
-        <input class="search-bar" placeholder="Search" type="text" />
+        <form hx-get="/search" hx-push-url="true" hx-target="body">
+          <input name="q" class="search-bar" placeholder="Search" type="text" />
+        </form>
       </div>
       {{template "nav-sidebar"}}
       <main>

@@ -381,6 +381,10 @@ svg {
     left: 50%;
     transform: translate(-50%, -50%);
 }
+.top-bar form {
+    flex-grow: 1;
+    display: flex;
+}
 .search-bar {
     flex-grow: 1;
 }

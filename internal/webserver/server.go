@@ -118,6 +118,8 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		app.UserFollow(w, r)
 	case "unfollow":
 		app.UserUnfollow(w, r)
+	case "search":
+		http.StripPrefix("/search", http.HandlerFunc(app.Search)).ServeHTTP(w, r)
 	default:
 		app.UserFeed(w, r)
 	}

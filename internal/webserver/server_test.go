@@ -1,10 +1,13 @@
 package webserver_test
 
 import (
+	"testing"
+
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
-	"testing"
 
 	"github.com/andybalholm/cascadia"
 	"github.com/stretchr/testify/assert"
@@ -156,6 +159,53 @@ func TestTimelineWithCursorBadNumber(t *testing.T) {
 	// With a cursor but it sucks
 	resp := do_request(httptest.NewRequest("GET", "/timeline?cursor=asdf", nil))
 	require.Equal(resp.StatusCode, 400)
+}
+
+// Search page
+// -----------
+
+func TestSearchQueryStringRedirect(t *testing.T) {
+	assert := assert.New(t)
+
+	// With a cursor but it sucks
+	resp := do_request(httptest.NewRequest("GET", "/search?q=asdf", nil))
+	assert.Equal(resp.StatusCode, 302)
+	assert.Equal(resp.Header.Get("Location"), "/search/asdf")
+}
+
+func TestSearch(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", fmt.Sprintf("/search/%s", url.PathEscape("to:spacex to:covfefeanon")), nil))
+	require.Equal(resp.StatusCode, 200)
+
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	title_node := cascadia.Query(root, selector("title"))
+	assert.Equal(title_node.FirstChild.Data, "Offline Twitter | Search")
+
+	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
+	assert.Len(tweet_nodes, 1)
+}
+
+func TestSearchWithCursor(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	// First, without the cursor
+	resp := do_request(httptest.NewRequest("GET", "/search/who%20are", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".timeline > .tweet")), 3)
+
+	// Add a cursor with the 1st tweet's posted_at time
+	resp = do_request(httptest.NewRequest("GET", "/search/who%20are?cursor=1628979529", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err = html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".timeline > .tweet")), 2)
 }
 
 // Tweet Detail page
