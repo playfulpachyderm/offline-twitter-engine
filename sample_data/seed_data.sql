@@ -78,7 +78,7 @@ insert into tombstone_types(rowid, short_name, tombstone_text) values
 
      foreign key(created_by_id) references users(id)
 );
-INSERT INTO spaces VALUES(323,'1OwGWwnoleRGQ',1178839081222115328,'https://t.co/kxr7O7hfJ6','Ended','I''m showering and the hot water ran out',1676225386889,1676225389824,1676235389824,1676229669381,1,11,255,1);
+INSERT INTO spaces VALUES(323,'1OwGWwnoleRGQ',1178839081222115328,'https://t.co/kxr7O7hfJ6','Ended','I''m showering and the hot water ran out',1676225386,1676225389,1676235389,1676229669,1,11,255,1);
 
 
 CREATE TABLE tweets (rowid integer primary key,

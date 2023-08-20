@@ -118,6 +118,10 @@ var MIGRATIONS = []string{
 		);`,
 	`create index if not exists index_tweets_posted_at on tweets (posted_at);
 		create index if not exists index_retweets_retweeted_at on retweets (retweeted_at)`,
+	`update spaces set ended_at = ended_at/1000 where ended_at > strftime("%s")*500;
+		update spaces set updated_at = updated_at/1000 where updated_at > strftime("%s")*500;
+		update spaces set started_at = started_at/1000 where started_at > strftime("%s")*500;
+		update spaces set created_at = created_at/1000 where created_at > strftime("%s")*500;`,
 }
 var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
 

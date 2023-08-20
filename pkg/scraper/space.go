@@ -27,7 +27,7 @@ type Space struct {
 }
 
 func (space Space) FormatDuration() string {
-	duration := space.EndedAt.Time.Sub(space.StartedAt.Time) / 1000
+	duration := space.EndedAt.Time.Sub(space.StartedAt.Time)
 	h := int(duration.Hours())
 	m := int(duration.Minutes()) % 60
 	s := int(duration.Seconds()) % 60

@@ -29,14 +29,14 @@ func TestParseSpace(t *testing.T) {
 func TestFormatSpaceDuration(t *testing.T) {
 	assert := assert.New(t)
 	s := Space{
-		StartedAt: TimestampFromUnix(1000 * 1000),
-		EndedAt:   TimestampFromUnix(5000 * 1000),
+		StartedAt: TimestampFromUnix(1000),
+		EndedAt:   TimestampFromUnix(5000),
 	}
 	assert.Equal(s.FormatDuration(), "1h06m")
 
-	s.EndedAt = TimestampFromUnix(500000 * 1000)
+	s.EndedAt = TimestampFromUnix(500000)
 	assert.Equal(s.FormatDuration(), "138h36m")
 
-	s.EndedAt = TimestampFromUnix(1005 * 1000)
+	s.EndedAt = TimestampFromUnix(1005)
 	assert.Equal(s.FormatDuration(), "0m05s")
 }

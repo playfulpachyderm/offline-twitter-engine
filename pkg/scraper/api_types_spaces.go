@@ -64,10 +64,10 @@ func (r SpaceResponse) ToTweetTrove() TweetTrove {
 	space.Title = data.Metadata.Title
 	space.State = data.Metadata.State
 	space.CreatedById = UserID(data.Metadata.CreatorResults.Result.ID)
-	space.CreatedAt = TimestampFromUnix(data.Metadata.CreatedAt)
-	space.StartedAt = TimestampFromUnix(data.Metadata.StartedAt)
-	space.EndedAt = TimestampFromUnix(data.Metadata.EndedAt)
-	space.UpdatedAt = TimestampFromUnix(data.Metadata.UpdatedAt)
+	space.CreatedAt = TimestampFromUnix(data.Metadata.CreatedAt / 1000)
+	space.StartedAt = TimestampFromUnix(data.Metadata.StartedAt / 1000)
+	space.EndedAt = TimestampFromUnix(data.Metadata.EndedAt / 1000)
+	space.UpdatedAt = TimestampFromUnix(data.Metadata.UpdatedAt / 1000)
 	space.IsAvailableForReplay = data.Metadata.IsSpaceAvailableForReplay
 	space.ReplayWatchCount = data.Metadata.TotalReplayWatched
 	space.LiveListenersCount = data.Metadata.TotalLiveListeners

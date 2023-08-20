@@ -53,9 +53,6 @@ TODO post-tweets
 
 TODO fetch-DMs
 
-TODO spaces-timestamps-millis
-- spaces timestamps are in milliseconds.  Need to be converted to seconds
-
 TODO fix-spaces-participants-duplicates
 - It is creating a new copy of the participants every time it gets scraped again
 
