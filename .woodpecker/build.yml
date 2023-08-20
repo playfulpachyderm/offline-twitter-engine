@@ -31,6 +31,7 @@ pipeline:
       - ./compile.sh
       - ./tw --profile ../sample_data/profile --addr localhost:1000 webserver &
       - curl localhost:1000/cernovich
+      - sleep 1
       - jobs -p | xargs -I{} kill -- -{}
 
   version_bump_test:
