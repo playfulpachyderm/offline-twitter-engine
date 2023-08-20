@@ -27,11 +27,6 @@ TODO: APIv2-pinned-tweets
 
 TODO video-not-downloading: https://twitter.com/JustinPulitzer/status/1496709662602932224
 
-TODO use-sqlx
-- Users
-- Images, Videos, Urls, Polls
-- Retweets
-
 TODO get-user-tweets-user-doesn't-exist
 
 TODO bash-completions

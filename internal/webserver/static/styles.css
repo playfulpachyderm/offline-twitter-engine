@@ -194,8 +194,8 @@ h3 {
     width: 3em;
     margin-right: 0.5em;
 }
-.thread-parent-tweet .vertical-reply-line,
-.reply-chain > :not(:last-child) .vertical-reply-line {
+.thread-parent-tweet .vertical-reply-line:not(.quoted-tweet .vertical-reply-line),
+.reply-chain > :not(:last-child) .vertical-reply-line:not(.quoted-tweet .vertical-reply-line) {
     width: 2px;
     background-color: var(--color-twitter-off-white-dark);
     flex-grow: 1;
