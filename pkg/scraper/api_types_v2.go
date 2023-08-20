@@ -938,8 +938,8 @@ func GetUserLikes(user_id UserID, cursor string) (TweetTrove, error) {
 	return the_api.GetUserLikes(user_id, cursor)
 }
 
-func (api API) GetHomeTimeline(cursor string) (TweetTrove, error) {
-	url := "https://twitter.com/i/api/graphql/W4Tpu1uueTGK53paUgxF0Q/HomeTimeline"
+func (api API) GetHomeTimeline(cursor string, for_you bool) (TweetTrove, error) {
+	var url string
 	body_struct := struct {
 		Variables GraphqlVariables `json:"variables"`
 		Features  GraphqlFeatures  `json:"features"`
@@ -973,7 +973,13 @@ func (api API) GetHomeTimeline(cursor string) (TweetTrove, error) {
 			LongformNotetweetsInlineMediaEnabled:                           true,
 			ResponsiveWebEnhanceCardsEnabled:                               false,
 		},
-		QueryID: "W4Tpu1uueTGK53paUgxF0Q",
+	}
+	if for_you {
+		body_struct.QueryID = "iMKdg5Vq-ldwmiqCbvX1QA"
+		url = "https://twitter.com/i/api/graphql/iMKdg5Vq-ldwmiqCbvX1QA/HomeLatestTimeline"
+	} else {
+		body_struct.QueryID = "W4Tpu1uueTGK53paUgxF0Q"
+		url = "https://twitter.com/i/api/graphql/W4Tpu1uueTGK53paUgxF0Q/HomeTimeline"
 	}
 	var response APIV2Response
 	body_bytes, err := json.Marshal(body_struct)
@@ -991,6 +997,6 @@ func (api API) GetHomeTimeline(cursor string) (TweetTrove, error) {
 	return trove, err
 }
 
-func GetHomeTimeline(cursor string) (TweetTrove, error) {
-	return the_api.GetHomeTimeline(cursor)
+func GetHomeTimeline(cursor string, for_you bool) (TweetTrove, error) {
+	return the_api.GetHomeTimeline(cursor, for_you)
 }

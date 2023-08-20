@@ -883,6 +883,21 @@ func TestParseHomeTimeline(t *testing.T) {
 	require.Len(trove.Users, 11)
 }
 
+func TestParseHomeTimelineForYou(t *testing.T) {
+	require := require.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/home_timeline_for_you.json")
+	require.NoError(err)
+	var response_result APIV2Response
+	err = json.Unmarshal(data, &response_result)
+	require.NoError(err)
+
+	trove, err := response_result.ToTweetTrove()
+	require.NoError(err)
+	require.Len(trove.Tweets, 13)
+	require.Len(trove.Retweets, 1)
+	require.Len(trove.Users, 8)
+}
+
 func TestParseResultAsLikes(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
