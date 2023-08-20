@@ -91,7 +91,7 @@ func get_default_user() scraper.User {
 // I don't like the weird matching behavior of http.ServeMux, and it's not hard to write by hand.
 func (app *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path == "/" {
-		app.Home(w, r)
+		http.Redirect(w, r, "/timeline", 303)
 		return
 	}
 
@@ -141,37 +141,6 @@ func (app *Application) Run(address string) {
 	app.ErrorLog.Fatal(err)
 }
 
-func (app *Application) Home(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'Home' handler (path: %q)", r.URL.Path)
-	app.buffered_render_basic_page(w, "tpl/home.tpl", nil)
-}
-
-type TweetDetailData struct {
-	persistence.TweetDetailView
-	MainTweetID scraper.TweetID
-}
-
-func NewTweetDetailData() TweetDetailData {
-	return TweetDetailData{
-		TweetDetailView: persistence.NewTweetDetailView(),
-	}
-}
-func (t TweetDetailData) Tweet(id scraper.TweetID) scraper.Tweet {
-	return t.Tweets[id]
-}
-func (t TweetDetailData) User(id scraper.UserID) scraper.User {
-	return t.Users[id]
-}
-func (t TweetDetailData) Retweet(id scraper.TweetID) scraper.Retweet {
-	return t.Retweets[id]
-}
-func (t TweetDetailData) Space(id scraper.SpaceID) scraper.Space {
-	return t.Spaces[id]
-}
-func (t TweetDetailData) FocusedTweetID() scraper.TweetID {
-	return t.MainTweetID
-}
-
 // func to_json(t interface{}) string {
 // 	js, err := json.Marshal(t)
 // 	if err != nil {
@@ -179,82 +148,6 @@ func (t TweetDetailData) FocusedTweetID() scraper.TweetID {
 // 	}
 // 	return string(js)
 // }
-
-func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'TweetDetail' handler (path: %q)", r.URL.Path)
-	_, tail := path.Split(r.URL.Path)
-	val, err := strconv.Atoi(tail)
-	if err != nil {
-		app.error_400_with_message(w, fmt.Sprintf("Invalid tweet ID: %q", tail))
-		return
-	}
-	tweet_id := scraper.TweetID(val)
-
-	data := NewTweetDetailData()
-	data.MainTweetID = tweet_id
-
-	// Return whether the scrape succeeded (if false, we should 404)
-	try_scrape_tweet := func() bool {
-		if app.DisableScraping {
-			return false
-		}
-		trove, err := scraper.GetTweetFullAPIV2(tweet_id, 50) // TODO: parameterizable
-		if err != nil {
-			app.ErrorLog.Print(err)
-			return false
-		}
-		app.Profile.SaveTweetTrove(trove)
-		return true
-	}
-
-	tweet, err := app.Profile.GetTweetById(tweet_id)
-	if err != nil {
-		if errors.Is(err, persistence.ErrNotInDB) {
-			if !try_scrape_tweet() {
-				app.error_404(w)
-				return
-			}
-		} else {
-			panic(err)
-		}
-	} else if !tweet.IsConversationScraped {
-		try_scrape_tweet() // If it fails, we can still render it (not 404)
-	}
-
-	trove, err := app.Profile.GetTweetDetail(data.MainTweetID)
-	if err != nil {
-		if errors.Is(err, persistence.ErrNotInDB) {
-			app.error_404(w)
-			return
-		} else {
-			panic(err)
-		}
-	}
-	data.TweetDetailView = trove
-
-	app.buffered_render_tweet_page(w, "tpl/tweet_detail.tpl", data)
-}
-
-type UserProfileData struct {
-	persistence.Feed
-	scraper.UserID
-}
-
-func (t UserProfileData) Tweet(id scraper.TweetID) scraper.Tweet {
-	return t.Tweets[id]
-}
-func (t UserProfileData) User(id scraper.UserID) scraper.User {
-	return t.Users[id]
-}
-func (t UserProfileData) Retweet(id scraper.TweetID) scraper.Retweet {
-	return t.Retweets[id]
-}
-func (t UserProfileData) Space(id scraper.SpaceID) scraper.Space {
-	return t.Spaces[id]
-}
-func (t UserProfileData) FocusedTweetID() scraper.TweetID {
-	return scraper.TweetID(0)
-}
 
 func parse_cursor_value(c *persistence.Cursor, r *http.Request) error {
 	cursor_param := r.URL.Query().Get("cursor")
@@ -269,149 +162,7 @@ func parse_cursor_value(c *persistence.Cursor, r *http.Request) error {
 	return nil
 }
 
-func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'UserFeed' handler (path: %q)", r.URL.Path)
-
-	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	if len(parts) != 1 {
-		app.error_404(w)
-	}
-
-	user, err := app.Profile.GetUserByHandle(scraper.UserHandle(parts[0]))
-	if err != nil {
-		app.error_404(w)
-		return
-	}
-
-	c := persistence.NewUserFeedCursor(user.Handle)
-	err = parse_cursor_value(&c, r)
-	if err != nil {
-		app.error_400_with_message(w, "invalid cursor (must be a number)")
-		return
-	}
-
-	feed, err := app.Profile.NextPage(c)
-	if err != nil {
-		if errors.Is(err, persistence.ErrEndOfFeed) {
-			// TODO
-		} else {
-			panic(err)
-		}
-	}
-	feed.Users[user.ID] = user
-
-	data := UserProfileData{Feed: feed, UserID: user.ID}
-
-	if r.Header.Get("HX-Request") == "true" && c.CursorPosition == persistence.CURSOR_MIDDLE {
-		// It's a Show More request
-		app.buffered_render_tweet_htmx(w, "timeline", data)
-	} else {
-		app.buffered_render_tweet_page(w, "tpl/user_feed.tpl", data)
-	}
-}
-
-func (app *Application) Timeline(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'Timeline' handler (path: %q)", r.URL.Path)
-
-	c := persistence.NewTimelineCursor()
-	err := parse_cursor_value(&c, r)
-	if err != nil {
-		app.error_400_with_message(w, "invalid cursor (must be a number)")
-		return
-	}
-
-	feed, err := app.Profile.NextPage(c)
-	if err != nil {
-		if errors.Is(err, persistence.ErrEndOfFeed) {
-			// TODO
-		} else {
-			panic(err)
-		}
-	}
-
-	data := UserProfileData{Feed: feed} // TODO: wrong struct
-
-	if r.Header.Get("HX-Request") == "true" && c.CursorPosition == persistence.CURSOR_MIDDLE {
-		// It's a Show More request
-		app.buffered_render_tweet_htmx(w, "timeline", data)
-	} else {
-		app.buffered_render_tweet_page(w, "tpl/offline_timeline.tpl", data)
-	}
-}
-
 type FormErrors map[string]string
-
-type LoginForm struct {
-	Username string `form:"username"`
-	Password string `form:"password"`
-	FormErrors
-}
-
-func (f *LoginForm) Validate() {
-	if f.FormErrors == nil {
-		f.FormErrors = make(FormErrors)
-	}
-	if len(f.Username) == 0 {
-		f.FormErrors["username"] = "cannot be blank"
-	}
-	if len(f.Password) == 0 {
-		f.FormErrors["password"] = "cannot be blank"
-	}
-}
-
-type LoginData struct {
-	LoginForm
-	ExistingSessions []scraper.UserHandle
-}
-
-func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'Login' handler (path: %q)", r.URL.Path)
-	var form LoginForm
-	if r.Method == "POST" {
-		err := parse_form(r, &form)
-		if err != nil {
-			app.InfoLog.Print("Form error parse: " + err.Error())
-			app.error_400_with_message(w, err.Error())
-		}
-		form.Validate()
-		if len(form.FormErrors) == 0 {
-			api := scraper.NewGuestSession()
-			api.LogIn(form.Username, form.Password)
-			app.Profile.SaveSession(api)
-			if err := app.SetActiveUser(api.UserHandle); err != nil {
-				app.ErrorLog.Printf(err.Error())
-			}
-			http.Redirect(w, r, "/login", 303)
-		}
-		return
-	}
-
-	// method = "GET"
-	data := LoginData{
-		LoginForm:        form,
-		ExistingSessions: app.Profile.ListSessions(),
-	}
-	app.buffered_render_basic_page(w, "tpl/login.tpl", &data)
-}
-
-func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'change-session' handler (path: %q)", r.URL.Path)
-	form := struct {
-		AccountName string `form:"account"`
-	}{}
-	err := parse_form(r, &form)
-	if err != nil {
-		app.InfoLog.Print("Form error parse: " + err.Error())
-		app.error_400_with_message(w, err.Error())
-		return
-	}
-	err = app.SetActiveUser(scraper.UserHandle(form.AccountName))
-	if err != nil {
-		app.error_400_with_message(w, fmt.Sprintf("User not in database: %s", form.AccountName))
-		return
-	}
-	app.buffered_render_basic_htmx(w, "nav-sidebar", nil)
-}
 
 var formDecoder = form.NewDecoder()
 var (
@@ -429,51 +180,4 @@ func parse_form(req *http.Request, result interface{}) error {
 		return ErrIncorrectFormParams
 	}
 	return nil
-}
-
-func (app *Application) UserFollow(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'UserFollow' handler (path: %q)", r.URL.Path)
-
-	if r.Method != "POST" {
-		http.Error(w, "Method not allowed", 405)
-		return
-	}
-
-	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	if len(parts) != 2 {
-		app.error_400_with_message(w, "Bad URL: "+r.URL.Path)
-		return
-	}
-	user, err := app.Profile.GetUserByHandle(scraper.UserHandle(parts[1]))
-	if err != nil {
-		app.error_404(w)
-		return
-	}
-
-	app.Profile.SetUserFollowed(&user, true)
-
-	app.buffered_render_basic_htmx(w, "following-button", user)
-}
-
-func (app *Application) UserUnfollow(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'UserUnfollow' handler (path: %q)", r.URL.Path)
-
-	if r.Method != "POST" {
-		http.Error(w, "Method not allowed", 405)
-		return
-	}
-
-	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	if len(parts) != 2 {
-		app.error_400_with_message(w, "Bad URL: "+r.URL.Path)
-		return
-	}
-	user, err := app.Profile.GetUserByHandle(scraper.UserHandle(parts[1]))
-	if err != nil {
-		app.error_404(w)
-		return
-	}
-
-	app.Profile.SetUserFollowed(&user, false)
-	app.buffered_render_basic_htmx(w, "following-button", user)
 }

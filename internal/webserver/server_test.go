@@ -53,17 +53,13 @@ func do_request(req *http.Request) *http.Response {
 // Homepage
 // --------
 
+// Should redirect to the timeline
 func TestHomepage(t *testing.T) {
-	assert := assert.New(t)
 	require := require.New(t)
 
 	resp := do_request(httptest.NewRequest("GET", "/", nil))
-	require.Equal(resp.StatusCode, 200)
-
-	root, err := html.Parse(resp.Body)
-	require.NoError(err)
-	title_node := cascadia.Query(root, selector("title"))
-	assert.Equal(title_node.FirstChild.Data, "Offline Twitter | Home")
+	require.Equal(resp.StatusCode, 303)
+	require.Equal(resp.Header.Get("Location"), "/timeline")
 }
 
 // User feed
