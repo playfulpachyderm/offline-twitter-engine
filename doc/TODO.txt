@@ -3,14 +3,6 @@ User profile images and banner images => extract to table.  Add `is_downloaded` 
 
 TODO update-all
 
-TODO: downloading-modes
-- Could compose the following:
-	- Primary user's top-level tweets and threads
-	- Primary user's replies
-	- Primary user's retweets
-	- Parents and replies for primary user's tweets/replies
-
-
 TODO broadcast-cards
 panic: Unknown card type: 3691233323:periscope_broadcast
 panic: Unknown card type: 745291183405076480:broadcast

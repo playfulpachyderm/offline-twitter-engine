@@ -58,6 +58,8 @@ type GraphqlFeatures struct {
 	VibeApiEnabled                                                 bool `json:"vibe_api_enabled,omitempty"`
 	InteractiveTextEnabled                                         bool `json:"interactive_text_enabled,omitempty"`
 	ResponsiveWebTextConversationsEnabled                          bool `json:"responsive_web_text_conversations_enabled"`
+	ResponsiveWebTwitterArticleTweetConsumptionEnabled             bool `json:"responsive_web_twitter_article_tweet_consumption_enabled"`
+	ResponsiveWebMediaDownloadVideoEnabled                         bool `json:"responsive_web_media_download_video_enabled"`
 
 	// Spaces
 	Spaces2022H2Clipping          bool `json:"spaces_2022_h2_clipping,omitempty"`

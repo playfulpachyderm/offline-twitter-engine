@@ -75,8 +75,9 @@ func main() {
 	log.SetLevel(logging_level)
 
 	if len(args) < 2 {
-		if len(args) == 1 && (args[0] == "list_followed" || args[0] == "webserver") {
-			// "list_followed" doesn't need a target, so create a fake second arg
+		if len(args) == 1 && (args[0] == "list_followed" || args[0] == "webserver" ||
+			args[0] == "fetch_timeline" || args[0] == "fetch_timeline_for_you") {
+			// Doesn't need a target, so create a fake second arg
 			args = append(args, "")
 		} else {
 			die("", true, 1)
@@ -138,6 +139,10 @@ func main() {
 		fetch_user_feed(target, 999999999)
 	case "get_user_likes":
 		get_user_likes(target, *how_many)
+	case "fetch_timeline":
+		fetch_timeline(false)
+	case "fetch_timeline_for_you":
+		fetch_timeline(true)
 	case "download_tweet_content":
 		download_tweet_content(target)
 	case "search":
@@ -286,6 +291,16 @@ func get_user_likes(handle string, how_many int) {
 	trove, err := scraper.GetUserLikes(user.ID, "") // TODO: how_many
 	if err != nil {
 		die(fmt.Sprintf("Error scraping feed: %s\n  %s", handle, err.Error()), false, -2)
+	}
+	profile.SaveTweetTrove(trove)
+
+	happy_exit(fmt.Sprintf("Saved %d tweets, %d retweets and %d users", len(trove.Tweets), len(trove.Retweets), len(trove.Users)))
+}
+
+func fetch_timeline(is_for_you bool) {
+	trove, err := scraper.GetHomeTimeline("", is_for_you)
+	if err != nil {
+		die(fmt.Sprintf("Error fetching timeline:\n  %s", err.Error()), false, -2)
 	}
 	profile.SaveTweetTrove(trove)
 
