@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"path"
 	"strconv"
+	"strings"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
@@ -39,10 +39,11 @@ func (t TweetDetailData) FocusedTweetID() scraper.TweetID {
 
 func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'TweetDetail' handler (path: %q)", r.URL.Path)
-	_, tail := path.Split(r.URL.Path)
-	val, err := strconv.Atoi(tail)
+
+	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	val, err := strconv.Atoi(parts[1])
 	if err != nil {
-		app.error_400_with_message(w, fmt.Sprintf("Invalid tweet ID: %q", tail))
+		app.error_400_with_message(w, fmt.Sprintf("Invalid tweet ID: %q", parts[1]))
 		return
 	}
 	tweet_id := scraper.TweetID(val)
@@ -74,7 +75,7 @@ func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 		} else {
 			panic(err)
 		}
-	} else if !tweet.IsConversationScraped {
+	} else if !tweet.IsConversationScraped || (len(parts) > 2 && parts[2] == "scrape") {
 		try_scrape_tweet() // If it fails, we can still render it (not 404)
 	}
 

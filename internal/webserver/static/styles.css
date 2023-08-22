@@ -171,6 +171,7 @@ a.entity {
 }
 img.embedded-link-preview {
     border-radius: 1em;
+    max-width: 100%;
 }
 .embedded-link-description {
     color: var(--color-twitter-text-gray);
@@ -312,6 +313,7 @@ ul.quick-links {
 
 .quick-link span {
     padding: 0 0.3em;
+    white-space: nowrap;
 }
 
 .followers-count, .following-count {
@@ -533,4 +535,22 @@ ul.space-participants-list li {
 }
 .space-participants-list .author-info .profile-image {
     font-size: 0.8em;
+}
+
+.dropdown {
+    position: relative;
+}
+ul.dropdown-items {
+    list-style: none;
+    position: absolute;
+    top: 2em;
+    width: fit-content;
+    padding: 0.3em;
+    background-color: var(--color-twitter-off-white);
+    outline: 1px solid var(--color-outline-gray);
+    border-radius: 0.3em;
+    visibility: hidden;
+}
+.dropdown-button:focus + .dropdown-items, .dropdown-items:hover {
+    visibility: visible;
 }

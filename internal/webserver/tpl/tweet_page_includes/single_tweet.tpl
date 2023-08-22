@@ -69,7 +69,7 @@
             class="embedded-link rounded-gray-outline unstyled-link"
             target="_blank"
             href="{{.Text}}"
-            style="width: {{if (ne .ThumbnailWidth 0)}}{{.ThumbnailWidth}}px {{else}}fit-content {{end}}">
+            style="max-width: {{if (ne .ThumbnailWidth 0)}}{{.ThumbnailWidth}}px {{else}}fit-content {{end}}">
             <img class="embedded-link-preview" src="/content/link_preview_images/{{.ThumbnailLocalPath}}"/>
             <h3 class="embedded-link-title">{{.Title}}</h3>
             <p class="embedded-link-description">{{.Description}}</p>
@@ -93,7 +93,7 @@
         {{end}}
       </div>
 
-      <div class="interactions-bar">
+      <div class="interactions-bar row">
 <!--         <div class="interaction-stat">
           {template "quote-tweet-icon"}
           <span>{{$main_tweet.NumQuoteTweets}}</span>
@@ -111,6 +111,25 @@
           <span>{{$main_tweet.NumLikes}}</span>
         </div>
         <div class="dummy"></div>
+        <div class="dropdown" hx-trigger="click consume">
+          <button class="dropdown-button">
+            <img class="svg-icon" src="/static/icons/more.svg" />
+          </button>
+          <ul class="dropdown-items">
+            <a class="unstyled-link" target="_blank" href="https://twitter.com/{{$author.Handle}}/status/{{$main_tweet.ID}}">
+              <li class="quick-link">
+                <img class="svg-icon" src="/static/icons/external-link.svg" />
+                <span>Open on twitter.com</span>
+              </li>
+            </a>
+            <a class="unstyled-link" target="_blank" hx-post="/tweet/{{$main_tweet.ID}}/scrape" hx-target="body">
+              <li class="quick-link">
+                <img class="svg-icon" src="/static/icons/download.svg" />
+                <span>Re-fetch tweet</span>
+              </li>
+            </a>
+          </ul>
+        </div>
       </div>
     </span>
   </div>

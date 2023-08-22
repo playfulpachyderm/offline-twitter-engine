@@ -97,8 +97,8 @@ TOOD: login-routes-tests
 
 TODO: web-ui-downloading
 - web UI needs buttons to trigger a scrape / refresh manually
-
-TODO: web-ui-search
+	- user feed
+	- timeline
 
 TODO: webserver-session-arg-active-user
 - make the active user get set on initializing the Application object if a --session flag is given
