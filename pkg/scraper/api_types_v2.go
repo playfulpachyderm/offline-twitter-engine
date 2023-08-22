@@ -463,6 +463,9 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 			// TODO: user feed tombstone entries
 			return NewTweetTrove()
 		}
+		if strings.Split(e.EntryID, "-")[0] == "messageprompt" {
+			return NewTweetTrove()
+		}
 		ret, err := e.Content.ItemContent.TweetResults.ToTweetTrove()
 
 		// Handle tombstones in parent reply thread
