@@ -31,22 +31,22 @@ func TestParseSingleUser(t *testing.T) {
 	assert.Equal(UserID(44067298), user.ID)
 	assert.Equal("Michael Malice", user.DisplayName)
 	assert.Equal(UserHandle("michaelmalice"), user.Handle)
-	assert.Equal("Author of Dear Reader, The New Right & The Anarchist Handbook\nHost of \"YOUR WELCOME\" \nSubject of Ego & Hubris by "+
-		"Harvey Pekar\nUnderwear Model\nHe/Him ⚑", user.Bio)
-	assert.Equal(941, user.FollowingCount)
-	assert.Equal(208589, user.FollowersCount)
-	assert.Equal("Brooklyn", user.Location)
+	assert.Equal("Author: Dear Reader, The New Right, The Anarchist Handbook & The White Pill \n"+
+		"Host: \"YOUR WELCOME\" \nSubject: Ego & Hubris by Harvey Pekar\nHe/Him ⚑", user.Bio)
+	assert.Equal(1035, user.FollowingCount)
+	assert.Equal(649484, user.FollowersCount)
+	assert.Equal("Austin", user.Location)
 	assert.Equal("https://amzn.to/3oInafv", user.Website)
 	assert.Equal(int64(1243920952), user.JoinDate.Unix())
 	assert.False(user.IsPrivate)
 	assert.True(user.IsVerified)
 	assert.False(user.IsBanned)
-	assert.Equal("https://pbs.twimg.com/profile_images/1064051934812913664/Lbwdb_C9.jpg", user.ProfileImageUrl)
-	assert.Equal("https://pbs.twimg.com/profile_images/1064051934812913664/Lbwdb_C9_normal.jpg", user.GetTinyProfileImageUrl())
-	assert.Equal("https://pbs.twimg.com/profile_banners/44067298/1615134676", user.BannerImageUrl)
-	assert.Equal("michaelmalice_profile_Lbwdb_C9.jpg", user.ProfileImageLocalPath)
-	assert.Equal("michaelmalice_banner_1615134676.jpg", user.BannerImageLocalPath)
-	assert.Equal(TweetID(1403835414373339136), user.PinnedTweetID)
+	assert.Equal("https://pbs.twimg.com/profile_images/1415820415314931715/_VVX4GI8.jpg", user.ProfileImageUrl)
+	assert.Equal("https://pbs.twimg.com/profile_images/1415820415314931715/_VVX4GI8_normal.jpg", user.GetTinyProfileImageUrl())
+	assert.Equal("https://pbs.twimg.com/profile_banners/44067298/1664774013", user.BannerImageUrl)
+	assert.Equal("michaelmalice_profile__VVX4GI8.jpg", user.ProfileImageLocalPath)
+	assert.Equal("michaelmalice_banner_1664774013.jpg", user.BannerImageLocalPath)
+	assert.Equal(TweetID(1692611652397453790), user.PinnedTweetID)
 }
 
 /**
@@ -54,7 +54,7 @@ func TestParseSingleUser(t *testing.T) {
  */
 func TestParseBannedUser(t *testing.T) {
 	assert := assert.New(t)
-	data, err := os.ReadFile("test_responses/suspended_user.json")
+	data, err := os.ReadFile("test_responses/api_v2/user_suspended.json")
 	if err != nil {
 		panic(err)
 	}
@@ -66,7 +66,6 @@ func TestParseBannedUser(t *testing.T) {
 
 	user, err := ParseSingleUser(apiUser)
 	require.NoError(t, err)
-	assert.Equal(UserID(193918550), user.ID)
 	assert.True(user.IsBanned)
 
 	// Test generation of profile images for banned user

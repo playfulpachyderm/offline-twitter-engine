@@ -254,8 +254,15 @@ type APIUser struct {
 type UserResponse struct {
 	Data struct {
 		User struct {
-			ID     int64   `json:"rest_id,string"`
-			Legacy APIUser `json:"legacy"`
+			Result struct {
+				ID                 int64   `json:"rest_id,string"`
+				Legacy             APIUser `json:"legacy"`
+				IsBlueVerified     bool    `json:"is_blue_verified"`
+				UnavailableMessage struct {
+					Text string `json:"text"`
+				} `json:"unavailable_message"`
+				Reason string `json:"reason"`
+			} `json:"result"`
 		} `json:"user"`
 	} `json:"data"`
 	Errors []struct {
@@ -266,8 +273,9 @@ type UserResponse struct {
 }
 
 func (u UserResponse) ConvertToAPIUser() APIUser {
-	ret := u.Data.User.Legacy
-	ret.ID = u.Data.User.ID
+	ret := u.Data.User.Result.Legacy
+	ret.ID = u.Data.User.Result.ID
+	ret.Verified = u.Data.User.Result.IsBlueVerified
 
 	// Banned users
 	for _, api_error := range u.Errors {
@@ -278,6 +286,18 @@ func (u UserResponse) ConvertToAPIUser() APIUser {
 		} else {
 			panic(fmt.Errorf("Unknown api error %q:\n  %w", api_error.Message, EXTERNAL_API_ERROR))
 		}
+	}
+
+	// Banned users, new version
+	if u.Data.User.Result.UnavailableMessage.Text != "" {
+		if u.Data.User.Result.Reason == "Suspended" {
+			ret.IsBanned = true
+		}
+	}
+
+	// Deleted users
+	if ret.ID == 0 && ret.ScreenName == "" && u.Data.User.Result.UnavailableMessage.Text == "" {
+		ret.DoesntExist = true
 	}
 
 	return ret

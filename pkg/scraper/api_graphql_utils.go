@@ -6,26 +6,29 @@ import (
 )
 
 type GraphqlVariables struct {
-	UserID                                 UserID  `json:"userId,string,omitempty"`
-	FocalTweetID                           TweetID `json:"focalTweetId,string,omitempty"`
-	Cursor                                 string  `json:"cursor,omitempty"`
-	WithRuxInjections                      bool    `json:"with_rux_injections"`
-	IncludePromotedContent                 bool    `json:"includePromotedContent"`
-	Count                                  int     `json:"count,omitempty"`
-	WithCommunity                          bool    `json:"withCommunity"`
-	WithQuickPromoteEligibilityTweetFields bool    `json:"withQuickPromoteEligibilityTweetFields"`
-	WithSuperFollowsUserFields             bool    `json:"withSuperFollowsUserFields,omitempty"`
-	WithBirdwatchPivots                    bool    `json:"withBirdwatchPivots"`
-	WithBirdwatchNotes                     bool    `json:"withBirdwatchNotes,omitempty"`
-	WithDownvotePerspective                bool    `json:"withDownvotePerspective"`
-	WithReactionsMetadata                  bool    `json:"withReactionsMetadata"`
-	WithReactionsPerspective               bool    `json:"withReactionsPerspective"`
-	WithSuperFollowsTweetFields            bool    `json:"withSuperFollowsTweetFields,omitempty"`
-	WithVoice                              bool    `json:"withVoice"`
-	WithV2Timeline                         bool    `json:"withV2Timeline"`
-	FSInteractiveText                      bool    `json:"__fs_interactive_text,omitempty"`
-	FSResponsiveWebUCGqlEnabled            bool    `json:"__fs_responsive_web_uc_gql_enabled,omitempty"`
-	FSDontMentionMeViewApiEnabled          bool    `json:"__fs_dont_mention_me_view_api_enabled,omitempty"`
+	UserID                                 UserID     `json:"userId,string,omitempty"`
+	ScreenName                             UserHandle `json:"screen_name,omitempty"`
+	RawQuery                               string     `json:"rawQuery,omitempty"`
+	Product                                string     `json:"product,omitempty"`
+	FocalTweetID                           TweetID    `json:"focalTweetId,string,omitempty"`
+	Cursor                                 string     `json:"cursor,omitempty"`
+	WithRuxInjections                      bool       `json:"with_rux_injections"`
+	IncludePromotedContent                 bool       `json:"includePromotedContent"`
+	Count                                  int        `json:"count,omitempty"`
+	WithCommunity                          bool       `json:"withCommunity"`
+	WithQuickPromoteEligibilityTweetFields bool       `json:"withQuickPromoteEligibilityTweetFields"`
+	WithSuperFollowsUserFields             bool       `json:"withSuperFollowsUserFields,omitempty"`
+	WithBirdwatchPivots                    bool       `json:"withBirdwatchPivots"`
+	WithBirdwatchNotes                     bool       `json:"withBirdwatchNotes,omitempty"`
+	WithDownvotePerspective                bool       `json:"withDownvotePerspective"`
+	WithReactionsMetadata                  bool       `json:"withReactionsMetadata"`
+	WithReactionsPerspective               bool       `json:"withReactionsPerspective"`
+	WithSuperFollowsTweetFields            bool       `json:"withSuperFollowsTweetFields,omitempty"`
+	WithVoice                              bool       `json:"withVoice"`
+	WithV2Timeline                         bool       `json:"withV2Timeline"`
+	FSInteractiveText                      bool       `json:"__fs_interactive_text,omitempty"`
+	FSResponsiveWebUCGqlEnabled            bool       `json:"__fs_responsive_web_uc_gql_enabled,omitempty"`
+	FSDontMentionMeViewApiEnabled          bool       `json:"__fs_dont_mention_me_view_api_enabled,omitempty"`
 
 	// Spaces
 	ID              SpaceID `json:"id"`
@@ -60,6 +63,11 @@ type GraphqlFeatures struct {
 	ResponsiveWebTextConversationsEnabled                          bool `json:"responsive_web_text_conversations_enabled"`
 	ResponsiveWebTwitterArticleTweetConsumptionEnabled             bool `json:"responsive_web_twitter_article_tweet_consumption_enabled"`
 	ResponsiveWebMediaDownloadVideoEnabled                         bool `json:"responsive_web_media_download_video_enabled"`
+	SubscriptionsVerificationInfoVerifiedSinceEnabled              bool `json:"subscriptions_verification_info_verified_since_enabled"`
+	HiddenProfileLikesEnabled                                      bool `json:"hidden_profile_likes_enabled"`
+	HiddenProfileSubscriptionsEnabled                              bool `json:"hidden_profile_subscriptions_enabled"`
+	HighlightsTweetsTabUIEnabled                                   bool `json:"highlights_tweets_tab_ui_enabled"`
+	SubscriptionsVerificationInfoIsIdentityVerifiedEnabled         bool `json:"subscriptions_verification_info_is_identity_verified_enabled"` //nolint:lll // I didn't choose this field name
 
 	// Spaces
 	Spaces2022H2Clipping          bool `json:"spaces_2022_h2_clipping,omitempty"`

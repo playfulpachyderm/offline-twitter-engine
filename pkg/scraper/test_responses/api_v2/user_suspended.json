@@ -1,0 +1,1 @@
+{"data":{"user":{"result":{"__typename":"UserUnavailable","unavailable_message":{"rtl":false,"text":"Twitter suspends accounts that violate the Twitter Rules. Learn more","entities":[{"fromIndex":58,"toIndex":68,"ref":{"type":"TimelineUrl","url":"https://help.twitter.com/rules-and-policies/twitter-rules","urlType":"ExternalUrl"}}]},"reason":"Suspended"}}}}

@@ -71,7 +71,7 @@ func TestUserProfileToAPIUser(t *testing.T) {
 
 	result := user_resp.ConvertToAPIUser()
 	assert.Equal(int64(44067298), result.ID)
-	assert.Equal(user_resp.Data.User.Legacy.FollowersCount, result.FollowersCount)
+	assert.Equal(user_resp.Data.User.Result.Legacy.FollowersCount, result.FollowersCount)
 }
 
 func TestGetCursor(t *testing.T) {

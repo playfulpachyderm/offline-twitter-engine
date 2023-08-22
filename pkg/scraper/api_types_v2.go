@@ -531,6 +531,13 @@ type APIV2Response struct {
 		ThreadedConversationWithInjectionsV2 struct {
 			Instructions []APIV2Instruction `json:"instructions"`
 		} `json:"threaded_conversation_with_injections_v2"`
+		SearchByRawQuery struct {
+			SearchTimeline struct {
+				Timeline struct {
+					Instructions []APIV2Instruction `json:"instructions"`
+				} `json:"timeline"`
+			} `json:"search_timeline"`
+		} `json:"search_by_raw_query"`
 	} `json:"data"`
 }
 
@@ -554,6 +561,12 @@ func (api_response APIV2Response) GetMainInstruction() *APIV2Instruction {
 		}
 	}
 	instructions = api_response.Data.Home.HomeTimelineUrt.Instructions
+	for i := range instructions {
+		if instructions[i].Type == "TimelineAddEntries" {
+			return &instructions[i]
+		}
+	}
+	instructions = api_response.Data.SearchByRawQuery.SearchTimeline.Timeline.Instructions
 	for i := range instructions {
 		if instructions[i].Type == "TimelineAddEntries" {
 			return &instructions[i]
@@ -1004,4 +1017,122 @@ func (api API) GetHomeTimeline(cursor string, is_for_you bool) (TweetTrove, erro
 
 func GetHomeTimeline(cursor string, is_for_you bool) (TweetTrove, error) {
 	return the_api.GetHomeTimeline(cursor, is_for_you)
+}
+
+func (api API) GetUser(handle UserHandle) (APIUser, error) {
+	url, err := url.Parse(GraphqlURL{
+		BaseUrl: "https://api.twitter.com/graphql/SAMkL5y_N9pmahSw8yy6gw/UserByScreenName",
+		Variables: GraphqlVariables{
+			ScreenName:                  handle,
+			Count:                       20,
+			IncludePromotedContent:      false,
+			WithSuperFollowsUserFields:  true,
+			WithDownvotePerspective:     false,
+			WithReactionsMetadata:       false,
+			WithReactionsPerspective:    false,
+			WithSuperFollowsTweetFields: true,
+			WithBirdwatchNotes:          false,
+			WithVoice:                   true,
+			WithV2Timeline:              false,
+		},
+		Features: GraphqlFeatures{
+			ResponsiveWebTwitterBlueVerifiedBadgeIsEnabled:                 true,
+			VerifiedPhoneLabelEnabled:                                      false,
+			ResponsiveWebGraphqlTimelineNavigationEnabled:                  true,
+			UnifiedCardsAdMetadataContainerDynamicCardContentQueryEnabled:  true,
+			TweetypieUnmentionOptimizationEnabled:                          true,
+			ResponsiveWebUcGqlEnabled:                                      true,
+			VibeApiEnabled:                                                 true,
+			ResponsiveWebEditTweetApiEnabled:                               true,
+			GraphqlIsTranslatableRWebTweetIsTranslatableEnabled:            true,
+			StandardizedNudgesMisinfo:                                      true,
+			TweetWithVisibilityResultsPreferGqlLimitedActionsPolicyEnabled: false,
+			InteractiveTextEnabled:                                         true,
+			ResponsiveWebTextConversationsEnabled:                          false,
+			ResponsiveWebEnhanceCardsEnabled:                               true,
+		},
+	}.String())
+	if err != nil {
+		panic(err)
+	}
+
+	var response UserResponse
+	err = api.do_http(url.String(), "", &response)
+	if err != nil {
+		panic(err)
+	}
+
+	return response.ConvertToAPIUser(), nil
+}
+
+func (api *API) Search(query string, cursor string) (APIV2Response, error) {
+	url, err := url.Parse(GraphqlURL{
+		BaseUrl: "https://twitter.com/i/api/graphql/NA567V_8AFwu0cZEkAAKcw/SearchTimeline",
+		Variables: GraphqlVariables{
+			RawQuery:                    query,
+			Count:                       50,
+			Product:                     "Top",
+			Cursor:                      cursor,
+			IncludePromotedContent:      false,
+			WithSuperFollowsUserFields:  true,
+			WithDownvotePerspective:     false,
+			WithReactionsMetadata:       false,
+			WithReactionsPerspective:    false,
+			WithSuperFollowsTweetFields: true,
+			WithBirdwatchNotes:          false,
+			WithVoice:                   true,
+			WithV2Timeline:              false,
+		},
+		Features: GraphqlFeatures{
+			ResponsiveWebTwitterBlueVerifiedBadgeIsEnabled:                 true,
+			VerifiedPhoneLabelEnabled:                                      false,
+			ResponsiveWebGraphqlTimelineNavigationEnabled:                  true,
+			UnifiedCardsAdMetadataContainerDynamicCardContentQueryEnabled:  true,
+			TweetypieUnmentionOptimizationEnabled:                          true,
+			ResponsiveWebUcGqlEnabled:                                      true,
+			VibeApiEnabled:                                                 true,
+			ResponsiveWebEditTweetApiEnabled:                               true,
+			GraphqlIsTranslatableRWebTweetIsTranslatableEnabled:            true,
+			StandardizedNudgesMisinfo:                                      true,
+			TweetWithVisibilityResultsPreferGqlLimitedActionsPolicyEnabled: false,
+			InteractiveTextEnabled:                                         true,
+			ResponsiveWebTextConversationsEnabled:                          false,
+			ResponsiveWebEnhanceCardsEnabled:                               true,
+		},
+	}.String())
+	if err != nil {
+		panic(err)
+	}
+
+	var result APIV2Response
+	err = api.do_http(url.String(), cursor, &result)
+	return result, err
+}
+
+func (api *API) GetMoreTweetsFromSearch(query string, response *APIV2Response, max_results int) error {
+	last_response := response
+	for last_response.GetCursorBottom() != "" && len(response.GetMainInstruction().Entries) < max_results {
+		fresh_response, err := api.Search(query, last_response.GetCursorBottom())
+		if err != nil {
+			return err
+		}
+		if fresh_response.GetCursorBottom() == last_response.GetCursorBottom() || len(fresh_response.GetMainInstruction().Entries) == 0 {
+			// Empty response, cursor same as previous: end of feed has been reached
+			return END_OF_FEED
+		}
+
+		last_response = &fresh_response
+
+		// Copy the results over
+		// Copy over the entries
+		response.GetMainInstruction().Entries = append(
+			response.GetMainInstruction().Entries,
+			last_response.GetMainInstruction().Entries...)
+
+		fmt.Printf("Have %d tweets\n", len(response.GetMainInstruction().Entries))
+	}
+	fmt.Println()
+	fmt.Printf("Cursor bottom: %q\n", last_response.GetCursorBottom())
+	fmt.Printf("Entries count: %d\n", len(response.GetMainInstruction().Entries))
+	return nil
 }

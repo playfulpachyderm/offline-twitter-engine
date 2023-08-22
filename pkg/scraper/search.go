@@ -18,13 +18,13 @@ func TimestampToDateString(timestamp int) string {
  * - videos
  */
 func Search(query string, min_results int) (trove TweetTrove, err error) {
-	tweet_response, err := the_api.Search(query, "")
+	api_response, err := the_api.Search(query, "")
 	if err != nil {
 		return
 	}
 
-	if len(tweet_response.GlobalObjects.Tweets) < min_results && tweet_response.GetCursor() != "" {
-		err = the_api.GetMoreTweetsFromSearch(query, &tweet_response, min_results)
+	if len(api_response.GetMainInstruction().Entries) < min_results && api_response.GetCursorBottom() != "" {
+		err = the_api.GetMoreTweetsFromSearch(query, &api_response, min_results)
 		if errors.Is(err, END_OF_FEED) {
 			println("End of feed!")
 		} else if err != nil {
@@ -32,7 +32,7 @@ func Search(query string, min_results int) (trove TweetTrove, err error) {
 		}
 	}
 
-	trove, err = tweet_response.ToTweetTrove()
+	trove, err = api_response.ToTweetTrove()
 	if err != nil {
 		err = fmt.Errorf("Error parsing the tweet trove for search query %q:\n  %w", query, err)
 		return

@@ -80,6 +80,12 @@ TODO: mobile-requests
 - Check in `pkg/scraper/test_responses/mobile_requests`
 
 
+TODO: search-bottom-cursor
+- Entry type "TimelineReplaceEntries" that replaces the cursor in the timeline instead of the new timeline having a new one
+- As first step, need helper function that returns the []Instruction element in a APIV2Response (not just the MainInstruction which is TimelineAddEntries)
+	- since different requests have different paths to the Instructions, e.g., Data.User.Result.Timeline.Timeline.Instructions vs Data.Home.HomeTimelineUrt.Instructions, etc
+
+
 Webserver
 ---------
 

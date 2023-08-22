@@ -175,8 +175,14 @@ func ParseSingleUser(apiUser APIUser) (ret User, err error) {
 
 // Calls API#GetUser and returns the parsed result
 func GetUser(handle UserHandle) (User, error) {
-	apiUser, err := the_api.GetUser(handle)
+	apiUser, err := NewGuestSession().GetUser(handle)
 	if apiUser.ScreenName == "" {
+		if apiUser.IsBanned || apiUser.DoesntExist {
+			ret := GetUnknownUserWithHandle(handle)
+			ret.IsBanned = apiUser.IsBanned
+			ret.IsDeleted = apiUser.DoesntExist
+			return ret, nil
+		}
 		apiUser.ScreenName = string(handle)
 	}
 	if err != nil {

@@ -248,18 +248,23 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
  * returns: the single Tweet
  */
 func GetTweet(id TweetID) (Tweet, error) {
-	tweet_response, err := the_api.GetTweet(id, "")
+	resp, err := the_api.GetTweetDetail(id, "")
 	if err != nil {
-		return Tweet{}, fmt.Errorf("Error in API call:\n  %w", err)
+		return Tweet{}, fmt.Errorf("Error getting tweet detail: %d\n  %w", id, err)
+	}
+	trove, err := resp.ToTweetTrove()
+	if err != nil {
+		return Tweet{}, err
 	}
 
-	single_tweet, ok := tweet_response.GlobalObjects.Tweets[fmt.Sprint(id)]
-
+	// Find the main tweet and update its "is_conversation_downloaded" and "last_scraped_at"
+	tweet, ok := trove.Tweets[id]
 	if !ok {
-		return Tweet{}, fmt.Errorf("Didn't get the tweet!")
+		panic("Trove didn't contain its own tweet!")
 	}
-
-	return ParseSingleTweet(single_tweet)
+	tweet.LastScrapedAt = Timestamp{time.Now()}
+	tweet.IsConversationScraped = true
+	return tweet, nil
 }
 
 /**

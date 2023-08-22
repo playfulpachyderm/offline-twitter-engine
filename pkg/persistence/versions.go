@@ -52,6 +52,8 @@ var MIGRATIONS = []string{
 		                            (6, 'no longer exists', 'This Tweet is from an account that no longer exists')`,
 	`alter table videos add column thumbnail_remote_url text not null default "missing";
 		alter table videos add column thumbnail_local_filename text not null default "missing"`,
+
+	// 5
 	`alter table videos add column duration integer not null default 0;
 		alter table videos add column view_count integer not null default 0`,
 	`alter table users add column is_banned boolean default 0`,
@@ -59,6 +61,8 @@ var MIGRATIONS = []string{
 	`insert into tombstone_types (rowid, short_name, tombstone_text) values (7, 'age-restricted', 'Age-restricted adult content. '
 		|| 'This content might not be appropriate for people under 18 years old. To view this media, you’ll need to log in to Twitter')`,
 	`alter table users add column is_followed boolean default 0`,
+
+	// 10
 	`create table fake_user_sequence(latest_fake_id integer not null);
 		insert into fake_user_sequence values(0x4000000000000000);
 		alter table users add column is_id_fake boolean default 0;`,
@@ -75,6 +79,8 @@ var MIGRATIONS = []string{
 		create index if not exists index_polls_tweet_id on polls (tweet_id);
 		create index if not exists index_images_tweet_id on images (tweet_id);
 		create index if not exists index_videos_tweet_id on videos (tweet_id);`,
+
+	// 15
 	`alter table spaces add column created_by_id integer references users(id);
 		alter table spaces add column state text not null default "";
 		alter table spaces add column title text not null default "";
@@ -116,12 +122,15 @@ var MIGRATIONS = []string{
 			foreign key(user_id) references users(id)
 			foreign key(tweet_id) references tweets(id)
 		);`,
+
+	// 20
 	`create index if not exists index_tweets_posted_at on tweets (posted_at);
 		create index if not exists index_retweets_retweeted_at on retweets (retweeted_at)`,
 	`update spaces set ended_at = ended_at/1000 where ended_at > strftime("%s")*500;
 		update spaces set updated_at = updated_at/1000 where updated_at > strftime("%s")*500;
 		update spaces set started_at = started_at/1000 where started_at > strftime("%s")*500;
 		update spaces set created_at = created_at/1000 where created_at > strftime("%s")*500;`,
+	`alter table users add column is_deleted boolean default 0`,
 }
 var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
 
