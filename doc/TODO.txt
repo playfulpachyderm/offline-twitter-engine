@@ -104,3 +104,14 @@ TODO: webserver-session-arg-active-user
 - make the active user get set on initializing the Application object if a --session flag is given
 
 TODO: webserver-tombstones
+
+TODO: fetch-timeline
+- HTMX polling element on base template
+
+TODO: progressive-web-app
+
+TODO: paste-twitter-urls-in-search-bar
+- pasting a link from twitter.com into the search bar should handle it properly
+	- tweet detail
+	- user profile
+	- space
