@@ -28,6 +28,15 @@ cd data
 # Print an error message in red before exiting if a test fails
 trap 'echo -e "\033[31mTEST FAILURE.  Aborting\033[0m"' ERR
 
+# Testing login
+tw login offline_twatter "$OFFLINE_TWATTER_PASSWD"
+test -f Offline_Twatter.session
+test "$(jq .UserHandle Offline_Twatter.session)" = "\"Offline_Twatter\""
+test "$(jq .IsAuthenticated Offline_Twatter.session)" = "true"
+jq .CSRFToken Offline_Twatter.session | grep -P '"\w+"'
+
+shopt -s expand_aliases
+alias tw="tw --session Offline_Twatter"
 
 # Fetch a user
 test $(find profile_images | wc -l) = "1"                      # should be empty to begin
@@ -280,13 +289,14 @@ test "$(sqlite3 twitter.db "select tombstone_type, text from tweets where id = 1
 
 
 # Test no-clobbering of num_likes/num_retweets etc when a tweet gets deleted/tombstoned
-tw fetch_tweet 1489428890783461377  # Quoted tweet
-test "$(sqlite3 twitter.db "select tombstone_type from tweets where id = 1489428890783461377")" = ""  # Should not be tombstoned
-test "$(sqlite3 twitter.db "select num_likes from tweets where id = 1489428890783461377")" -gt "50"  # Should have some likes
-initial_vals=$(sqlite3 twitter.db "select num_likes, num_retweets, num_replies, num_quote_tweets from tweets where id = 1489428890783461377")
-tw fetch_tweet 1489432246452985857  # Quoting tweet
-test "$(sqlite3 twitter.db "select tombstone_type from tweets where id = 1489428890783461377")" -gt "0"  # Should be hidden
-test "$(sqlite3 twitter.db "select num_likes, num_retweets, num_replies, num_quote_tweets from tweets where id = 1489428890783461377")" = "$initial_vals"
+# TODO: this tweet got deleted
+# tw fetch_tweet 1489428890783461377  # Quoted tweet
+# test "$(sqlite3 twitter.db "select tombstone_type from tweets where id = 1489428890783461377")" = ""  # Should not be tombstoned
+# test "$(sqlite3 twitter.db "select num_likes from tweets where id = 1489428890783461377")" -gt "50"  # Should have some likes
+# initial_vals=$(sqlite3 twitter.db "select num_likes, num_retweets, num_replies, num_quote_tweets from tweets where id = 1489428890783461377")
+# tw fetch_tweet 1489432246452985857  # Quoting tweet
+# test "$(sqlite3 twitter.db "select tombstone_type from tweets where id = 1489428890783461377")" -gt "0"  # Should be hidden
+# test "$(sqlite3 twitter.db "select num_likes, num_retweets, num_replies, num_quote_tweets from tweets where id = 1489428890783461377")" = "$initial_vals"
 
 
 # Test a tweet thread with a deleted account; should generate a user with a fake ID
@@ -323,12 +333,6 @@ test "$(sqlite3 twitter.db "select count(*) from users where is_followed = 1")" 
 tw unfollow cernovich
 test "$(sqlite3 twitter.db "select count(*) from users where is_followed = 1")" = "0"
 
-# Testing login
-tw login offline_twatter "$OFFLINE_TWATTER_PASSWD"
-test -f Offline_Twatter.session
-test "$(jq .UserHandle Offline_Twatter.session)" = "\"Offline_Twatter\""
-test "$(jq .IsAuthenticated Offline_Twatter.session)" = "true"
-jq .CSRFToken Offline_Twatter.session | grep -P '"\w+"'
 
 # When not logged in, age-restricted tweet should fail to fetch
 tw fetch_user PandasAndVidya

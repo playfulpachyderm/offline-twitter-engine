@@ -19,10 +19,11 @@ pipeline:
     image: offline-twitter/go
     secrets:
       - offline_twatter_passwd
+    when:
+      path: pkg/scraper/**
     commands:
       - cd cmd
-      # - ./tests.sh
-      # TODO: fix the integration tests!
+      - ./tests.sh
 
   webserver_test:
     image: offline-twitter/go
