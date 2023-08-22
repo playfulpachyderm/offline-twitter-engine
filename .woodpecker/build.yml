@@ -19,9 +19,9 @@ pipeline:
     image: offline-twitter/go
     secrets:
       - offline_twatter_passwd
-    when:  # At least one
-      path: pkg/scraper/**
-      branch: release-*
+    # when:  # At least one
+    #   path: pkg/scraper/**
+    #   branch: release-*
     commands:
       - cd cmd
       - ./tests.sh
