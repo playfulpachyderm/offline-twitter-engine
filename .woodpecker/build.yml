@@ -19,9 +19,9 @@ pipeline:
     image: offline-twitter/go
     secrets:
       - offline_twatter_passwd
-    # when:  # At least one
-    #   path: pkg/scraper/**
-    #   branch: release-*
+    when:  # At least one
+      path: pkg/scraper/**
+      branch: release-*
     commands:
       - cd cmd
       - ./tests.sh
@@ -52,11 +52,11 @@ pipeline:
       - twitter create_profile outdated_profile
       - cd outdated_profile
       - twitter login offline_twatter "$OFFLINE_TWATTER_PASSWD"
-      - twitter fetch_user michaelmalice
-      - twitter --session Offline_Twatter get_user_tweets michaelmalice
+      - twitter fetch_user pcmonk
+      - twitter --session Offline_Twatter get_user_tweets pcmonk
       - (cd ../cmd && ./compile.sh $version)
       - which ../cmd/tw
-      - ../cmd/tw fetch_user michaelmalice
+      - ../cmd/tw fetch_user pcmonk
 
   dpkg_build_and_upload:
     when:
