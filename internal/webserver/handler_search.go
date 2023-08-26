@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
@@ -29,6 +30,25 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 	// Handle "@username"
 	if search_text[0] == '@' {
 		http.Redirect(w, r, fmt.Sprintf("/%s", search_text[1:]), 302)
+		return
+	}
+
+	// Handle pasted URLs
+	maybe_url, err := url.Parse(search_text)
+	if err == nil && (maybe_url.Host == "twitter.com" || maybe_url.Host == "mobile.twitter.com") {
+		parts := strings.Split(strings.Trim(maybe_url.Path, "/"), "/")
+		if len(parts) == 3 && parts[1] == "status" {
+			id, err := strconv.Atoi(parts[2])
+			if err == nil {
+				http.Redirect(w, r, fmt.Sprintf("/tweet/%d", id), 302)
+				return
+			}
+		}
+
+		if len(parts) == 1 {
+			http.Redirect(w, r, fmt.Sprintf("/%s", parts[0]), 302)
+			return
+		}
 	}
 
 	c, err := persistence.NewCursorFromSearchQuery(search_text)

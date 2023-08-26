@@ -243,6 +243,7 @@ h3 {
 
 .posted-at-container {
     flex-grow: 1;
+    min-width: 5em;
 }
 p.posted-at {
     float: right;
@@ -550,6 +551,7 @@ ul.dropdown-items {
     outline: 1px solid var(--color-outline-gray);
     border-radius: 0.3em;
     visibility: hidden;
+    z-index: 1; /* otherwise in quote-tweets, the dropdown button from quoting-tweet is on top of it */
 }
 .dropdown-button:focus + .dropdown-items, .dropdown-items:hover {
     visibility: visible;

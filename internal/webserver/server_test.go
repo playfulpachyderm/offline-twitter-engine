@@ -216,6 +216,38 @@ func TestSearchRedirectOnUserHandle(t *testing.T) {
 	assert.Equal(resp.Header.Get("Location"), "/somebody")
 }
 
+func TestSearchRedirectOnTweetLink(t *testing.T) {
+	assert := assert.New(t)
+
+	// Desktop URL
+	resp := do_request(httptest.NewRequest("GET",
+		fmt.Sprintf("/search/%s", url.PathEscape("https://twitter.com/wispem_wantex/status/1695221528617468324")),
+		nil))
+	assert.Equal(resp.StatusCode, 302)
+	assert.Equal(resp.Header.Get("Location"), "/tweet/1695221528617468324")
+
+	// Mobile URL
+	resp = do_request(httptest.NewRequest("GET",
+		fmt.Sprintf("/search/%s", url.PathEscape("https://mobile.twitter.com/wispem_wantex/status/1695221528617468324")),
+		nil))
+	assert.Equal(resp.StatusCode, 302)
+	assert.Equal(resp.Header.Get("Location"), "/tweet/1695221528617468324")
+}
+
+func TestSearchRedirectOnUserFeedLink(t *testing.T) {
+	assert := assert.New(t)
+
+	// Desktop URL
+	resp := do_request(httptest.NewRequest("GET", fmt.Sprintf("/search/%s", url.PathEscape("https://twitter.com/agsdf")), nil))
+	assert.Equal(resp.StatusCode, 302)
+	assert.Equal(resp.Header.Get("Location"), "/agsdf")
+
+	// Mobile URL
+	resp = do_request(httptest.NewRequest("GET", fmt.Sprintf("/search/%s", url.PathEscape("https://mobile.twitter.com/agsdfhh")), nil))
+	assert.Equal(resp.StatusCode, 302)
+	assert.Equal(resp.Header.Get("Location"), "/agsdfhh")
+}
+
 // Tweet Detail page
 // -----------------
 

@@ -69,7 +69,9 @@
             class="embedded-link rounded-gray-outline unstyled-link"
             target="_blank"
             href="{{.Text}}"
-            style="max-width: {{if (ne .ThumbnailWidth 0)}}{{.ThumbnailWidth}}px {{else}}fit-content {{end}}">
+            style="max-width: {{if (ne .ThumbnailWidth 0)}}{{.ThumbnailWidth}}px {{else}}fit-content {{end}}"
+            hx-trigger="click consume"
+          >
             <img class="embedded-link-preview" src="/content/link_preview_images/{{.ThumbnailLocalPath}}"/>
             <h3 class="embedded-link-title">{{.Title}}</h3>
             <p class="embedded-link-description">{{.Description}}</p>
