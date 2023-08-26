@@ -26,6 +26,11 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Handle "@username"
+	if search_text[0] == '@' {
+		http.Redirect(w, r, fmt.Sprintf("/%s", search_text[1:]), 302)
+	}
+
 	c, err := persistence.NewCursorFromSearchQuery(search_text)
 	if err != nil {
 		app.error_400_with_message(w, err.Error())

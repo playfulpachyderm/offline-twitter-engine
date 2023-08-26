@@ -168,7 +168,6 @@ func TestTimelineWithCursorBadNumber(t *testing.T) {
 func TestSearchQueryStringRedirect(t *testing.T) {
 	assert := assert.New(t)
 
-	// With a cursor but it sucks
 	resp := do_request(httptest.NewRequest("GET", "/search?q=asdf", nil))
 	assert.Equal(resp.StatusCode, 302)
 	assert.Equal(resp.Header.Get("Location"), "/search/asdf")
@@ -207,6 +206,14 @@ func TestSearchWithCursor(t *testing.T) {
 	root, err = html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".timeline > .tweet")), 2)
+}
+
+func TestSearchRedirectOnUserHandle(t *testing.T) {
+	assert := assert.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", fmt.Sprintf("/search/%s", url.PathEscape("@somebody")), nil))
+	assert.Equal(resp.StatusCode, 302)
+	assert.Equal(resp.Header.Get("Location"), "/somebody")
 }
 
 // Tweet Detail page
