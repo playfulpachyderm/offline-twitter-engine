@@ -16,6 +16,7 @@ import (
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 type CapturingWriter struct {
@@ -271,6 +272,24 @@ func TestTweetsWithContent(t *testing.T) {
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".space")), 1)
 	assert.Len(cascadia.QueryAll(root, selector("ul.space-participants-list li")), 9)
+}
+
+func TestLongTweet(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/tweet/1695110851324256692", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	paragraphs := cascadia.QueryAll(root, selector(".tweet-text"))
+	assert.Len(paragraphs, 22)
+
+	twt, err := profile.GetTweetById(scraper.TweetID(1695110851324256692))
+	require.NoError(err)
+	for i, s := range strings.Split(twt.Text, "\n") {
+		assert.Equal(strings.TrimSpace(s), strings.TrimSpace(paragraphs[i].FirstChild.Data))
+	}
 }
 
 // Follow and unfollow

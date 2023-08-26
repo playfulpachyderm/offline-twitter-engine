@@ -50,7 +50,7 @@
     </span>
     <span class="vertical-container-1">
       <div class="tweet-content">
-        {{range (split "\n" $main_tweet.Text)}}
+        {{range (splitList "\n" $main_tweet.Text)}}
           <p class="tweet-text">
             {{.}}
           </p>

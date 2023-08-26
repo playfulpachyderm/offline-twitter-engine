@@ -143,14 +143,6 @@ func (app *Application) Run(address string) {
 	app.ErrorLog.Fatal(err)
 }
 
-// func to_json(t interface{}) string {
-// 	js, err := json.Marshal(t)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	return string(js)
-// }
-
 func parse_cursor_value(c *persistence.Cursor, r *http.Request) error {
 	cursor_param := r.URL.Query().Get("cursor")
 	if cursor_param != "" {
