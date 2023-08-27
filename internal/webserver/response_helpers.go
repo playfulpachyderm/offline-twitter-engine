@@ -167,7 +167,11 @@ type Entity struct {
 func get_entities(text string) []Entity {
 	ret := []Entity{}
 	start := 0
-	for _, idxs := range regexp.MustCompile(`[@#]\w+`).FindAllStringIndex(text, -1) {
+	for _, idxs := range regexp.MustCompile(`(\s|^)[@#]\w+`).FindAllStringIndex(text, -1) {
+		// Handle leading whitespace.  Only match start-of-string or leading whitespace to avoid matching, e.g., emails
+		if text[idxs[0]] == ' ' || text[idxs[0]] == '\n' {
+			idxs[0] += 1
+		}
 		if start != idxs[0] {
 			ret = append(ret, Entity{ENTITY_TYPE_TEXT, text[start:idxs[0]]})
 		}

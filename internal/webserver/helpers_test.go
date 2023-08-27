@@ -44,3 +44,15 @@ func TestGetEntitiesHashtagAndMention(t *testing.T) {
 	assert.Equal(entities[4].EntityType, ENTITY_TYPE_TEXT)
 	assert.Equal(entities[4].Contents, " in it")
 }
+
+func TestGetEntitiesNoMatchEmail(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	s := "My email is somebody@somedomain.com"
+	entities := get_entities(s)
+
+	require.Len(entities, 1)
+	assert.Equal(entities[0].EntityType, ENTITY_TYPE_TEXT)
+	assert.Equal(entities[0].Contents, s)
+}
