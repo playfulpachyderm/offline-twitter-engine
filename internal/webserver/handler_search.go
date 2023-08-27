@@ -37,6 +37,8 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 	maybe_url, err := url.Parse(search_text)
 	if err == nil && (maybe_url.Host == "twitter.com" || maybe_url.Host == "mobile.twitter.com") {
 		parts := strings.Split(strings.Trim(maybe_url.Path, "/"), "/")
+
+		// Handle tweet links
 		if len(parts) == 3 && parts[1] == "status" {
 			id, err := strconv.Atoi(parts[2])
 			if err == nil {
@@ -45,7 +47,8 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		if len(parts) == 1 {
+		// Handle user profile links
+		if len(parts) == 1 || (len(parts) == 2 && parts[1] == "with_replies") {
 			http.Redirect(w, r, fmt.Sprintf("/%s", parts[0]), 302)
 			return
 		}
