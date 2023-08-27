@@ -29,9 +29,9 @@ type Application struct {
 
 	Middlewares []Middleware
 
-	Profile         persistence.Profile
-	ActiveUser      scraper.User
-	DisableScraping bool
+	Profile            persistence.Profile
+	ActiveUser         scraper.User
+	IsScrapingDisabled bool
 }
 
 func NewApp(profile persistence.Profile) Application {
@@ -41,8 +41,9 @@ func NewApp(profile persistence.Profile) Application {
 		InfoLog:   log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
 		ErrorLog:  log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
 
-		Profile:    profile,
-		ActiveUser: get_default_user(),
+		Profile:            profile,
+		ActiveUser:         get_default_user(),
+		IsScrapingDisabled: true, // Until an active user is set
 	}
 	ret.Middlewares = []Middleware{
 		secureHeaders,
@@ -64,7 +65,7 @@ func (app *Application) SetActiveUser(handle scraper.UserHandle) error {
 	if handle == "no account" {
 		scraper.InitApi(scraper.NewGuestSession())
 		app.ActiveUser = get_default_user()
-		app.DisableScraping = true // API requests will fail b/c not logged in
+		app.IsScrapingDisabled = true // API requests will fail b/c not logged in
 	} else {
 		user, err := app.Profile.GetUserByHandle(handle)
 		if err != nil {
@@ -72,7 +73,7 @@ func (app *Application) SetActiveUser(handle scraper.UserHandle) error {
 		}
 		scraper.InitApi(app.Profile.LoadSession(handle))
 		app.ActiveUser = user
-		app.DisableScraping = false
+		app.IsScrapingDisabled = false
 	}
 	return nil
 }
@@ -139,6 +140,9 @@ func (app *Application) Run(address string) {
 	}
 
 	app.InfoLog.Printf("Starting server on %s", address)
+
+	app.start_background()
+
 	err := srv.ListenAndServe()
 	app.ErrorLog.Fatal(err)
 }

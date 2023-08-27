@@ -53,7 +53,7 @@ func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 
 	// Return whether the scrape succeeded (if false, we should 404)
 	try_scrape_tweet := func() bool {
-		if app.DisableScraping {
+		if app.IsScrapingDisabled {
 			return false
 		}
 		trove, err := scraper.GetTweetFullAPIV2(tweet_id, 50) // TODO: parameterizable

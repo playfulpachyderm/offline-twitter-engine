@@ -234,6 +234,8 @@ func (api *API) do_http_POST(url string, body string, result interface{}) error 
 	if err != nil {
 		return fmt.Errorf("Error executing HTTP POST request:\n  %w", err)
 	}
+	api.update_csrf_token()
+
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {

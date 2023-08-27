@@ -49,7 +49,7 @@ func selector(s string) cascadia.Sel {
 func do_request(req *http.Request) *http.Response {
 	recorder := httptest.NewRecorder()
 	app := webserver.NewApp(profile)
-	app.DisableScraping = true
+	app.IsScrapingDisabled = true
 	app.ServeHTTP(recorder, req)
 	return recorder.Result()
 }

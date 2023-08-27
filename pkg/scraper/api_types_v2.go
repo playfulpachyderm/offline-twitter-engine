@@ -954,7 +954,7 @@ func GetUserLikes(user_id UserID, cursor string) (TweetTrove, error) {
 	return the_api.GetUserLikes(user_id, cursor)
 }
 
-func (api API) GetHomeTimeline(cursor string, is_for_you bool) (TweetTrove, error) {
+func (api *API) GetHomeTimeline(cursor string, is_for_you bool) (TweetTrove, error) {
 	var url string
 	body_struct := struct {
 		Variables GraphqlVariables `json:"variables"`

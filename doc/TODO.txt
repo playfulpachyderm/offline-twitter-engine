@@ -97,7 +97,7 @@ TODO const-select-fields
 TODO compound-query-structs
 - Right now the result structs for the compound queries (e.g., "Feed", "TweetDetail") are in the `persistence` package.  They don't go there probably
 
-TOOD: login-routes-tests
+TODO: login-routes-tests
 - Make the scraper.API object injectable somehow (get rid of singleton pattern) and add tests for login and change-session sequences
 - Also test profile.ListSessions()
 
@@ -111,13 +111,15 @@ TODO: webserver-session-arg-active-user
 
 TODO: webserver-tombstones
 
-TODO: fetch-timeline
-- HTMX polling element on base template
-
 TODO: progressive-web-app
 
 TODO: paste-twitter-urls-in-search-bar
 - pasting a link from twitter.com into the search bar should handle it properly
-	- tweet detail
-	- user profile
 	- space
+
+TODO: image-width-and-height
+- Images should have explicit "width" and "height" attributes.  This reduces Cumulative Layout Shift (CLS) while loading the page.
+- https://web.dev/optimize-cls/#images-without-dimensions
+
+TODO: quote-tweet-icon
+- show quote-tweets on a tweet
