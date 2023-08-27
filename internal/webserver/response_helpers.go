@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"path"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"runtime/debug"
 
@@ -91,6 +92,7 @@ func (app *Application) buffered_render_tweet_page(w http.ResponseWriter, tpl_fi
 			"space":            data.Space,
 			"active_user":      app.get_active_user,
 			"focused_tweet_id": data.FocusedTweetID,
+			"get_entities":     get_entities,
 		}),
 		Filenames: append(partials, get_filepath(tpl_file)),
 		TplName:   "base",
@@ -124,6 +126,7 @@ func (app *Application) buffered_render_tweet_htmx(w http.ResponseWriter, tpl_na
 			"space":            data.Space,
 			"active_user":      app.get_active_user,
 			"focused_tweet_id": data.FocusedTweetID,
+			"get_entities":     get_entities,
 		}),
 		Filenames: partials,
 		TplName:   tpl_name,
@@ -146,6 +149,41 @@ func (app *Application) buffered_render_basic_htmx(w http.ResponseWriter, tpl_na
 
 func (app *Application) get_active_user() scraper.User {
 	return app.ActiveUser
+}
+
+type EntityType int
+
+const (
+	ENTITY_TYPE_TEXT EntityType = iota
+	ENTITY_TYPE_MENTION
+	ENTITY_TYPE_HASHTAG
+)
+
+type Entity struct {
+	EntityType
+	Contents string
+}
+
+func get_entities(text string) []Entity {
+	ret := []Entity{}
+	start := 0
+	for _, idxs := range regexp.MustCompile(`[@#]\w+`).FindAllStringIndex(text, -1) {
+		if start != idxs[0] {
+			ret = append(ret, Entity{ENTITY_TYPE_TEXT, text[start:idxs[0]]})
+		}
+		piece := text[idxs[0]+1 : idxs[1]] // Chop off the "#" or "@"
+		if text[idxs[0]] == '@' {
+			ret = append(ret, Entity{ENTITY_TYPE_MENTION, piece})
+		} else {
+			ret = append(ret, Entity{ENTITY_TYPE_HASHTAG, piece})
+		}
+		start = idxs[1]
+	}
+	if start < len(text) {
+		ret = append(ret, Entity{ENTITY_TYPE_TEXT, text[start:]})
+	}
+
+	return ret
 }
 
 func func_map(extras template.FuncMap) template.FuncMap {

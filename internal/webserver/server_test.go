@@ -318,6 +318,24 @@ func TestTweetsWithContent(t *testing.T) {
 	assert.Len(cascadia.QueryAll(root, selector("ul.space-participants-list li")), 9)
 }
 
+func TestTweetWithEntities(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/tweet/1489944024278523906", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	entities := cascadia.QueryAll(root, selector(".entity"))
+	assert.Len(entities, 2)
+	assert.Equal(entities[0].Data, "a")
+	assert.Equal(entities[0].FirstChild.Data, "@gofundme")
+	assert.Contains(entities[0].Attr, html.Attribute{Key: "href", Val: "/gofundme"})
+	assert.Equal(entities[1].Data, "a")
+	assert.Equal(entities[1].FirstChild.Data, "#BankruptGoFundMe")
+	assert.Contains(entities[1].Attr, html.Attribute{Key: "href", Val: "/search/%23BankruptGoFundMe"})
+}
+
 func TestLongTweet(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)

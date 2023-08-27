@@ -51,8 +51,19 @@
     <span class="vertical-container-1">
       <div class="tweet-content">
         {{range (splitList "\n" $main_tweet.Text)}}
-          <p class="tweet-text">
-            {{.}}
+          <p class="tweet-text" hx-trigger="click consume">
+            {{range (get_entities .)}}
+              {{if (eq .EntityType 1)}}
+                <!-- Mention -->
+                <a class="entity" href="/{{.Contents}}">@{{.Contents}}</a>
+              {{else if (eq .EntityType 2)}}
+                <!-- Hashtag -->
+                <a class="entity" href="/search/%23{{.Contents}}">#{{.Contents}}</a>
+              {{else}}
+                <!-- Just text -->
+                {{.Contents}}
+              {{end}}
+            {{end}}
           </p>
         {{end}}
 
@@ -114,7 +125,7 @@
         </div>
         <div class="dummy"></div>
         <div class="dropdown" hx-trigger="click consume">
-          <button class="dropdown-button">
+          <button class="dropdown-button" title="Options">
             <img class="svg-icon" src="/static/icons/more.svg" />
           </button>
           <ul class="dropdown-items">
