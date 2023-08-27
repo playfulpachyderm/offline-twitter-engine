@@ -100,7 +100,7 @@ ul.inline-dotted-list li:last-child:after {
     line-height: 0;
 }
 
-.author-info, .tweet-text {
+.author-info, .tweet .text {
     cursor: default;
 }
 
@@ -147,15 +147,15 @@ a.entity {
     color: var(--color-twitter-blue);
 }
 
-.tweet-text {
+.tweet .text {
     display: block;
     margin-bottom: 0.4em;
     margin-top: 0;
 }
-.focused-tweet .tweet-text {
+.focused-tweet .text {
     font-size: 1.4em;
 }
-.focused-tweet .quoted-tweet .tweet-text {
+.focused-tweet .quoted-tweet .text {
     font-size: unset;
 }
 .tweet-content video {

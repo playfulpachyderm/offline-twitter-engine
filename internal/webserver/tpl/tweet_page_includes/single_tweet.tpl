@@ -4,7 +4,7 @@
 <div class="tweet"
   {{if (not (eq $main_tweet.ID (focused_tweet_id)))}}
     hx-post="/tweet/{{$main_tweet.ID}}"
-    hx-trigger="click target::not(.tweet-text)"
+    hx-trigger="click"
     hx-target="body"
     hx-swap="outerHTML"
     hx-push-url="true"
@@ -50,23 +50,7 @@
     </span>
     <span class="vertical-container-1">
       <div class="tweet-content">
-        {{range (splitList "\n" $main_tweet.Text)}}
-          <p class="tweet-text" hx-trigger="click consume">
-            {{range (get_entities .)}}
-              {{if (eq .EntityType 1)}}
-                <!-- Mention -->
-                <a class="entity" href="/{{.Contents}}">@{{.Contents}}</a>
-              {{else if (eq .EntityType 2)}}
-                <!-- Hashtag -->
-                <a class="entity" href="/search/%23{{.Contents}}">#{{.Contents}}</a>
-              {{else}}
-                <!-- Just text -->
-                {{.Contents}}
-              {{end}}
-            {{end}}
-          </p>
-        {{end}}
-
+        {{template "text-with-entities" $main_tweet.Text}}
         {{range $main_tweet.Images}}
           <img src="/content/images/{{.LocalFilename}}" style="max-width: 45%"/>
         {{end}}

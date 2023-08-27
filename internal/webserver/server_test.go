@@ -87,6 +87,20 @@ func TestUserFeed(t *testing.T) {
 	assert.Len(including_quote_tweets, 10)
 }
 
+func TestUserFeedWithEntityInBio(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/michaelmalice", nil))
+	require.Equal(resp.StatusCode, 200)
+
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	bio_entities := cascadia.QueryAll(root, selector(".user-bio .entity"))
+	require.Len(bio_entities, 1)
+	assert.Equal(bio_entities[0].FirstChild.Data, "@SheathUnderwear")
+}
+
 func TestUserFeedMissing(t *testing.T) {
 	require := require.New(t)
 
@@ -344,7 +358,7 @@ func TestLongTweet(t *testing.T) {
 	require.Equal(resp.StatusCode, 200)
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	paragraphs := cascadia.QueryAll(root, selector(".tweet-text"))
+	paragraphs := cascadia.QueryAll(root, selector(".tweet .text"))
 	assert.Len(paragraphs, 22)
 
 	twt, err := profile.GetTweetById(scraper.TweetID(1695110851324256692))

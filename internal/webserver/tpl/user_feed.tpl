@@ -13,7 +13,7 @@
         {{template "following-button" $user}}
       </div>
       <div class="user-bio">
-        <span>{{$user.Bio}}</span>
+        {{template "text-with-entities" $user.Bio}}
       </div>
       {{if $user.Location}}
         <div class="user-location bio-info-with-icon">
