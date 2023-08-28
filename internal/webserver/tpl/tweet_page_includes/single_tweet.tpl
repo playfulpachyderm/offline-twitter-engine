@@ -91,10 +91,10 @@
       </div>
 
       <div class="interactions-bar row">
-<!--         <div class="interaction-stat">
-          {template "quote-tweet-icon"}
+        <div class="interaction-stat">
+          <img class="svg-icon" src="/static/icons/quote.svg" />
           <span>{{$main_tweet.NumQuoteTweets}}</span>
-        </div> -->
+        </div>
         <div class="interaction-stat">
           <img class="svg-icon" src="/static/icons/reply.svg" />
           <span>{{$main_tweet.NumReplies}}</span>

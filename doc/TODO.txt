@@ -79,7 +79,6 @@ TODO: mobile-requests
 - implement mobile versions of various requests
 - Check in `pkg/scraper/test_responses/mobile_requests`
 
-
 TODO: search-bottom-cursor
 - Entry type "TimelineReplaceEntries" that replaces the cursor in the timeline instead of the new timeline having a new one
 - As first step, need helper function that returns the []Instruction element in a APIV2Response (not just the MainInstruction which is TimelineAddEntries)
@@ -103,7 +102,6 @@ TODO: login-routes-tests
 
 TODO: web-ui-downloading
 - web UI needs buttons to trigger a scrape / refresh manually
-	- user feed
 	- timeline
 
 TODO: webserver-session-arg-active-user
@@ -121,5 +119,8 @@ TODO: image-width-and-height
 - Images should have explicit "width" and "height" attributes.  This reduces Cumulative Layout Shift (CLS) while loading the page.
 - https://web.dev/optimize-cls/#images-without-dimensions
 
-TODO: quote-tweet-icon
-- show quote-tweets on a tweet
+TODO: download-buttons-not-ugly
+- Make the options buttons for downloading less ugly (rn they are ugly)
+
+TODO: show-errors-in-UI
+- if an HTTP request fails, show an error in the UI somehow

@@ -41,6 +41,26 @@
           <span class="following-label">is following</span>
           <span class="following-count">{{$user.FollowingCount}}</span>
         </div>
+
+        <div class="dropdown" hx-trigger="click consume">
+          <button class="dropdown-button" title="Options">
+            <img class="svg-icon" src="/static/icons/more.svg" />
+          </button>
+          <ul class="dropdown-items">
+            <a class="unstyled-link" target="_blank" href="https://twitter.com/{{$user.Handle}}">
+              <li class="quick-link">
+                <img class="svg-icon" src="/static/icons/external-link.svg" />
+                <span>Open on twitter.com</span>
+              </li>
+            </a>
+            <a class="unstyled-link" target="_blank" hx-post="/{{$user.Handle}}/scrape" hx-target="body">
+              <li class="quick-link">
+                <img class="svg-icon" src="/static/icons/download.svg" />
+                <span>Re-fetch user feed</span>
+              </li>
+            </a>
+          </ul>
+        </div>
       </div>
     </div>
   </div>

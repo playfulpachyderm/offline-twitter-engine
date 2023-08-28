@@ -287,6 +287,11 @@ func (api *API) do_http(url string, cursor string, result interface{}) error {
 	}
 	defer resp.Body.Close()
 
+	if api.IsAuthenticated {
+		// New request has been made, so the cookie will be changed; update the csrf to match
+		api.update_csrf_token()
+	}
+
 	if resp.StatusCode != 200 && resp.StatusCode != 403 {
 		content, err := io.ReadAll(resp.Body)
 		if err != nil {
@@ -311,10 +316,6 @@ func (api *API) do_http(url string, cursor string, result interface{}) error {
 		return fmt.Errorf("Error parsing API response:\n  %w", err)
 	}
 
-	if api.IsAuthenticated {
-		// New request has been made, so the cookie will be changed; update the csrf to match
-		api.update_csrf_token()
-	}
 	return nil
 }
 

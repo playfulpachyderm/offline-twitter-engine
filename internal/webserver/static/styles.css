@@ -546,6 +546,7 @@ ul.dropdown-items {
     position: absolute;
     top: 2em;
     width: fit-content;
+    margin: 0;
     padding: 0.3em;
     background-color: var(--color-twitter-off-white);
     outline: 1px solid var(--color-outline-gray);

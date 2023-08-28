@@ -34,14 +34,26 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'UserFeed' handler (path: %q)", r.URL.Path)
 
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	if len(parts) != 1 {
-		app.error_404(w)
-	}
 
 	user, err := app.Profile.GetUserByHandle(scraper.UserHandle(parts[0]))
 	if err != nil {
 		app.error_404(w)
 		return
+	}
+
+	if len(parts) == 2 && parts[1] == "scrape" {
+		if app.IsScrapingDisabled {
+			http.Error(w, "Scraping is disabled (are you logged in?)", 401)
+			return
+		}
+
+		// Run scraper
+		trove, err := scraper.GetUserFeedGraphqlFor(user.ID, 50) // TODO: parameterizable
+		if err != nil {
+			app.ErrorLog.Print(err)
+			// TOOD: show error in UI
+		}
+		app.Profile.SaveTweetTrove(trove)
 	}
 
 	c := persistence.NewUserFeedCursor(user.Handle)
