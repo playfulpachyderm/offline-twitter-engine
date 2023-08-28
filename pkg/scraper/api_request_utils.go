@@ -210,8 +210,6 @@ func (api *API) update_csrf_token() {
 			return
 		}
 	}
-
-	panic("No CSRF Token Found")
 }
 
 func (api *API) do_http_POST(url string, body string, result interface{}) error {
