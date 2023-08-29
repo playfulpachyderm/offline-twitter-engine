@@ -86,13 +86,14 @@ func (app *Application) buffered_render_tweet_page(w http.ResponseWriter, tpl_fi
 
 	r := renderer{
 		Funcs: func_map(template.FuncMap{
-			"tweet":            data.Tweet,
-			"user":             data.User,
-			"retweet":          data.Retweet,
-			"space":            data.Space,
-			"active_user":      app.get_active_user,
-			"focused_tweet_id": data.FocusedTweetID,
-			"get_entities":     get_entities,
+			"tweet":              data.Tweet,
+			"user":               data.User,
+			"retweet":            data.Retweet,
+			"space":              data.Space,
+			"active_user":        app.get_active_user,
+			"focused_tweet_id":   data.FocusedTweetID,
+			"get_entities":       get_entities,
+			"get_tombstone_text": get_tombstone_text,
 		}),
 		Filenames: append(partials, get_filepath(tpl_file)),
 		TplName:   "base",
@@ -120,13 +121,14 @@ func (app *Application) buffered_render_tweet_htmx(w http.ResponseWriter, tpl_na
 
 	r := renderer{
 		Funcs: func_map(template.FuncMap{
-			"tweet":            data.Tweet,
-			"user":             data.User,
-			"retweet":          data.Retweet,
-			"space":            data.Space,
-			"active_user":      app.get_active_user,
-			"focused_tweet_id": data.FocusedTweetID,
-			"get_entities":     get_entities,
+			"tweet":              data.Tweet,
+			"user":               data.User,
+			"retweet":            data.Retweet,
+			"space":              data.Space,
+			"active_user":        app.get_active_user,
+			"focused_tweet_id":   data.FocusedTweetID,
+			"get_entities":       get_entities,
+			"get_tombstone_text": get_tombstone_text,
 		}),
 		Filenames: partials,
 		TplName:   tpl_name,
@@ -188,6 +190,13 @@ func get_entities(text string) []Entity {
 	}
 
 	return ret
+}
+
+func get_tombstone_text(t scraper.Tweet) string {
+	if t.TombstoneText != "" {
+		return t.TombstoneText
+	}
+	return t.TombstoneType
 }
 
 func func_map(extras template.FuncMap) template.FuncMap {

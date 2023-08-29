@@ -114,6 +114,20 @@ func TestBuildUserFeedEnd(t *testing.T) {
 	assert.Equal(feed.CursorBottom.CursorPosition, persistence.CURSOR_END)
 }
 
+func TestUserFeedWithTombstone(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+
+	c := persistence.NewUserFeedCursor(UserHandle("Heminator"))
+	feed, err := profile.NextPage(c)
+	require.NoError(err)
+	tombstone_tweet := feed.Tweets[TweetID(31)]
+	assert.Equal(tombstone_tweet.TombstoneText, "This Tweet was deleted by the Tweet author")
+}
+
 func TestTweetDetailWithReplies(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)

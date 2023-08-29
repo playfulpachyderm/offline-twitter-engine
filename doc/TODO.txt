@@ -100,14 +100,8 @@ TODO: login-routes-tests
 - Make the scraper.API object injectable somehow (get rid of singleton pattern) and add tests for login and change-session sequences
 - Also test profile.ListSessions()
 
-TODO: web-ui-downloading
-- web UI needs buttons to trigger a scrape / refresh manually
-	- timeline
-
 TODO: webserver-session-arg-active-user
 - make the active user get set on initializing the Application object if a --session flag is given
-
-TODO: webserver-tombstones
 
 TODO: progressive-web-app
 

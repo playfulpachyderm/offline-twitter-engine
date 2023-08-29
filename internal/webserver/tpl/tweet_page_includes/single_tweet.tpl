@@ -50,6 +50,11 @@
     </span>
     <span class="vertical-container-1">
       <div class="tweet-content">
+        {{if (ne $main_tweet.TombstoneType "")}}
+          <div class="tombstone">
+            {{(get_tombstone_text $main_tweet)}}
+          </div>
+        {{end}}
         {{template "text-with-entities" $main_tweet.Text}}
         {{range $main_tweet.Images}}
           <img src="/content/images/{{.LocalFilename}}" style="max-width: 45%"/>

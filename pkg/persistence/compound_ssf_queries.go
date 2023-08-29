@@ -360,10 +360,7 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
 	where_clause := "where " + strings.Join(where_clauses, " and ")
 
 	q := `select * from (
-	select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
-           mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id, ifnull(tombstone_types.short_name, "") tombstone_type,
-           is_expandable,
-           is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at,
+	select ` + TWEETS_ALL_SQL_FIELDS + `,
            0 tweet_id, 0 retweet_id, 0 retweeted_by, 0 retweeted_at,
            posted_at chrono, user_id by_user_id
       from tweets
@@ -374,10 +371,7 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
      union
 
     select * from (
-    select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
-           mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id, ifnull(tombstone_types.short_name, "") tombstone_type,
-           is_expandable,
-           is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at,
+    select ` + TWEETS_ALL_SQL_FIELDS + `,
            tweet_id, retweet_id, retweeted_by, retweeted_at,
            retweeted_at chrono, retweeted_by by_user_id
       from retweets

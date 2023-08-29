@@ -70,6 +70,7 @@ type Tweet struct {
 	SpaceID SpaceID `db:"space_id"`
 
 	TombstoneType string `db:"tombstone_type"`
+	TombstoneText string `db:"tombstone_text"`
 	IsStub        bool   `db:"is_stub"`
 
 	IsContentDownloaded   bool      `db:"is_content_downloaded"`

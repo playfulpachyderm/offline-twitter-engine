@@ -13,6 +13,12 @@ var (
 	ErrNotInDB   = errors.New("not in database")
 )
 
+const TWEETS_ALL_SQL_FIELDS = `
+		tweets.id id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id,
+		quoted_tweet_id, mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id,
+		ifnull(tombstone_types.short_name, "") tombstone_type, ifnull(tombstone_types.tombstone_text, "") tombstone_text,
+		is_expandable, is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at`
+
 func (p Profile) fill_content(trove *TweetTrove) {
 	if len(trove.Tweets) == 0 {
 		// Empty trove, nothing to fetch
@@ -30,10 +36,7 @@ func (p Profile) fill_content(trove *TweetTrove) {
 	if len(quoted_ids) > 0 {
 		var quoted_tweets []Tweet
 		err := p.DB.Select(&quoted_tweets, `
-		     select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
-		            mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id,
-		            ifnull(tombstone_types.short_name, "") tombstone_type, is_expandable,
-		            is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at
+		     select `+TWEETS_ALL_SQL_FIELDS+`
 		       from tweets
 		  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
 		      where id in (`+strings.Repeat("?,", len(quoted_ids)-1)+`?)`, quoted_ids...)
@@ -215,10 +218,7 @@ func (p Profile) GetTweetDetail(id TweetID) (TweetDetailView, error) {
 		         where tweets.id = all_replies.id and tweets.in_reply_to_id != 0
 		        )
 
-		 select tweets.id id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id,
-		        quoted_tweet_id, mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id,
-		        ifnull(tombstone_types.short_name, "") tombstone_type, is_expandable,
-	            is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at
+		 select ` + TWEETS_ALL_SQL_FIELDS + `
 	       from tweets
 	  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
 	 inner join all_replies on tweets.id = all_replies.id
@@ -246,10 +246,7 @@ func (p Profile) GetTweetDetail(id TweetID) (TweetDetailView, error) {
 
 	var replies []Tweet
 	stmt, err = p.DB.Preparex(
-		`select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
-	            mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id, ifnull(tombstone_types.short_name, "") tombstone_type,
-	            is_expandable,
-	            is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at
+		`select ` + TWEETS_ALL_SQL_FIELDS + `
 	       from tweets
 	  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
 	      where in_reply_to_id = ?
@@ -287,10 +284,7 @@ func (p Profile) GetTweetDetail(id TweetID) (TweetDetailView, error) {
 		                )
 		           )
 
-		    select tweets.id id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id,
-		           quoted_tweet_id, mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id,
-		           ifnull(tombstone_types.short_name, "") tombstone_type, is_expandable,
-		           is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at
+		    select ` + TWEETS_ALL_SQL_FIELDS + `
 		      from top_ids_by_parent
 		 left join tweets on tweets.id = top_ids_by_parent.id
 		 left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid`
@@ -342,77 +336,4 @@ func NewFeed() Feed {
 		Items:      []FeedItem{},
 		TweetTrove: NewTweetTrove(),
 	}
-}
-
-// Return the given tweet, all its parent tweets, and a list of conversation threads
-func (p Profile) GetUserFeed(id UserID, count int, max_posted_at Timestamp) (Feed, error) {
-	ret := NewFeed()
-
-	tweet_max_clause := ""
-	retweet_max_clause := ""
-	if max_posted_at.Unix() > 0 {
-		tweet_max_clause = " and posted_at < :max_posted_at "
-		retweet_max_clause = " and retweeted_at < :max_posted_at "
-	}
-
-	q := `select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
-               mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id, ifnull(tombstone_types.short_name, "") tombstone_type,
-               is_expandable,
-               is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at,
-               0 tweet_id, 0 retweet_id, 0 retweeted_by, 0 retweeted_at,
-               posted_at order_by
-          from tweets
-     left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
-         where user_id = :id` + tweet_max_clause + `
-
-         union
-
-        select id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id, quoted_tweet_id,
-               mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id, ifnull(tombstone_types.short_name, "") tombstone_type,
-               is_expandable,
-               is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at,
-               tweet_id, retweet_id, retweeted_by, retweeted_at,
-               retweeted_at order_by
-          from retweets
-     left join tweets on retweets.tweet_id = tweets.id
-     left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
-         where retweeted_by = :id` + retweet_max_clause + `
-
-         order by order_by desc
-         limit :limit`
-
-	stmt, err := p.DB.PrepareNamed(q)
-	if err != nil {
-		panic(err)
-	}
-
-	args := map[string]interface{}{
-		"id":            id,
-		"limit":         count,
-		"max_posted_at": max_posted_at,
-	}
-	var results []struct {
-		Tweet
-		Retweet
-		OrderBy int `db:"order_by"`
-	}
-	err = stmt.Select(&results, args)
-	if err != nil {
-		panic(err)
-	}
-	if len(results) == 0 {
-		return NewFeed(), ErrEndOfFeed
-	}
-
-	for _, val := range results {
-		ret.Tweets[val.Tweet.ID] = val.Tweet
-		if val.Retweet.RetweetID != 0 {
-			ret.Retweets[val.Retweet.RetweetID] = val.Retweet
-		}
-		ret.Items = append(ret.Items, FeedItem{TweetID: val.Tweet.ID, RetweetID: val.Retweet.RetweetID})
-	}
-
-	p.fill_content(&ret.TweetTrove)
-
-	return ret, nil
 }

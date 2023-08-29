@@ -368,6 +368,18 @@ func TestLongTweet(t *testing.T) {
 	}
 }
 
+func TestTombstoneTweet(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/tweet/31", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	tombstone := cascadia.Query(root, selector(".tweet .tombstone"))
+	assert.Equal("This Tweet was deleted by the Tweet author", strings.TrimSpace(tombstone.FirstChild.Data))
+}
+
 // Follow and unfollow
 // -------------------
 

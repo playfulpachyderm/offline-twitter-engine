@@ -5,10 +5,10 @@
     --color-twitter-off-white: #f7f9f9; /* hsv(180, 0.8, 97.6) */
     --color-twitter-off-white-dark: #dae5e5; /* hsv(180, 4.8, 89.8) */
     --color-outline-gray: #dcdcdc;
+    --color-twitter-text-gray: #536471;
 
     --color-space-purple: #a49bfd;
     --color-space-purple-outline: #6452fc;
-
 /*
 const QColor COLOR_OUTLINE_GRAY = QColor(220, 220, 220);
 const QColor COLOR_TWITTER_BLUE = QColor(27, 149, 224);
@@ -556,4 +556,11 @@ ul.dropdown-items {
 }
 .dropdown-button:focus + .dropdown-items, .dropdown-items:hover {
     visibility: visible;
+}
+.tombstone {
+    outline: 1px solid var(--color-outline-gray);
+    background-color: var(--color-twitter-off-white);
+    padding: 0.5em 1em;
+    border-radius: 0.5em;
+    color: var(--color-twitter-text-gray);
 }
