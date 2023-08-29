@@ -57,10 +57,15 @@
         {{end}}
         {{template "text-with-entities" $main_tweet.Text}}
         {{range $main_tweet.Images}}
-          <img src="/content/images/{{.LocalFilename}}" style="max-width: 45%"/>
+          <img class="tweet-image" src="/content/images/{{.LocalFilename}}"
+            width="{{.Width}}" height="{{.Height}}"
+            {{if (gt (len $main_tweet.Images) 1)}}
+              style="max-width: 45%"
+            {{end}}
+          />
         {{end}}
         {{range $main_tweet.Videos}}
-          <video controls hx-trigger="click consume">
+          <video controls hx-trigger="click consume" width="{{.Width}}" height="{{.Height}}">
             <source src="/content/videos/{{.LocalFilename}}">
           </video>
         {{end}}
@@ -72,7 +77,10 @@
             style="max-width: {{if (ne .ThumbnailWidth 0)}}{{.ThumbnailWidth}}px {{else}}fit-content {{end}}"
             hx-trigger="click consume"
           >
-            <img class="embedded-link-preview" src="/content/link_preview_images/{{.ThumbnailLocalPath}}"/>
+            <img src="/content/link_preview_images/{{.ThumbnailLocalPath}}"
+              class="embedded-link-preview"
+              width="{{.ThumbnailWidth}}" height="{{.ThumbnailHeight}}"
+            />
             <h3 class="embedded-link-title">{{.Title}}</h3>
             <p class="embedded-link-description">{{.Description}}</p>
             <span class="row embedded-link-domain-container">

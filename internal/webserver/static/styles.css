@@ -564,3 +564,8 @@ ul.dropdown-items {
     border-radius: 0.5em;
     color: var(--color-twitter-text-gray);
 }
+.tweet-image {
+    max-width: 95%;
+    width: auto;
+    height: auto;
+}
