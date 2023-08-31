@@ -162,3 +162,18 @@ v0.4.1
 	- removed gray thread-connector line showing up in QTs
 - Make the search bar work for searches
 - Add scraper request for HomeTimeline
+
+v0.4.2
+------
+
+- BUGFIX: fix long tweets displaying with paragraphs in wrong order
+- BUGFIX: fix scrolling issues when using "back" button / history
+- Search bar improvements:
+	- can now paste twitter.com / mobile.twitter.com links into the search bar
+	- go directly to user feed by entering "@elonmusk" (for example)
+- UI improvements:
+	- Make entities (#hashtags, @mentions) clickable in tweets and user bios
+	- Make tombstones show
+	- Other misc improvements
+- Add manual re-scrape button to user feeds
+- Add automatic timeline scraping in background when logged in

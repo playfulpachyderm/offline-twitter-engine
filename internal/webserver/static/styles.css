@@ -566,6 +566,10 @@ ul.dropdown-items {
 }
 .tweet-image {
     max-width: 95%;
+    max-height: 30em;
     width: auto;
     height: auto;
+}
+.tweet video {
+    max-height: 25em;
 }
