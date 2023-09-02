@@ -894,7 +894,7 @@ func (api *API) GetMoreTweetReplies(tweet_id TweetID, response *APIV2Response, m
 	return nil
 }
 
-func (api API) GetUserLikes(user_id UserID, cursor string) (TweetTrove, error) {
+func (api *API) GetUserLikes(user_id UserID, cursor string) (APIV2Response, error) {
 	url, err := url.Parse(GraphqlURL{
 		BaseUrl: "https://twitter.com/i/api/graphql/2Z6LYO4UTM4BnWjaNCod6g/Likes",
 		Variables: GraphqlVariables{
@@ -937,6 +937,51 @@ func (api API) GetUserLikes(user_id UserID, cursor string) (TweetTrove, error) {
 	if err != nil {
 		panic(err)
 	}
+	return response, nil
+}
+
+func (api *API) GetMoreUserLikes(user_id UserID, response *APIV2Response, max_results int) error {
+	last_response := response
+	for last_response.GetCursorBottom() != "" && len(response.GetMainInstruction().Entries) < max_results {
+		fresh_response, err := api.GetUserLikes(user_id, last_response.GetCursorBottom())
+		if err != nil {
+			return err
+		}
+		if fresh_response.GetCursorBottom() == last_response.GetCursorBottom() || len(fresh_response.GetMainInstruction().Entries) == 0 {
+			// Empty response, cursor same as previous: end of feed has been reached
+			return END_OF_FEED
+		}
+
+		last_response = &fresh_response
+
+		// Copy the results over
+		// Copy over the entries
+		response.GetMainInstruction().Entries = append(
+			response.GetMainInstruction().Entries,
+			last_response.GetMainInstruction().Entries...)
+
+		fmt.Printf("Have %d tweets\n", len(response.GetMainInstruction().Entries))
+	}
+	fmt.Println()
+	fmt.Printf("Cursor bottom: %q\n", last_response.GetCursorBottom())
+	fmt.Printf("Entries count: %d\n", len(response.GetMainInstruction().Entries))
+	return nil
+}
+
+func GetUserLikes(user_id UserID, how_many int) (TweetTrove, error) {
+	response, err := the_api.GetUserLikes(user_id, "")
+	if err != nil {
+		return TweetTrove{}, err
+	}
+
+	if len(response.GetMainInstruction().Entries) < how_many && response.GetCursorBottom() != "" {
+		err = the_api.GetMoreUserLikes(user_id, &response, how_many)
+		if errors.Is(err, END_OF_FEED) {
+			println("End of feed!")
+		} else if err != nil {
+			return TweetTrove{}, err
+		}
+	}
 	trove, err := response.ToTweetTroveAsLikes()
 	if err != nil {
 		return TweetTrove{}, err
@@ -949,9 +994,6 @@ func (api API) GetUserLikes(user_id UserID, cursor string) (TweetTrove, error) {
 		trove.Likes[i] = l
 	}
 	return trove, nil
-}
-func GetUserLikes(user_id UserID, cursor string) (TweetTrove, error) {
-	return the_api.GetUserLikes(user_id, cursor)
 }
 
 func (api *API) GetHomeTimeline(cursor string, is_for_you bool) (TweetTrove, error) {
