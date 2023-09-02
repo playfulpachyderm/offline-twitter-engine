@@ -353,7 +353,7 @@ test $(sqlite3 twitter.db "select count(*) from tweets where user_id = 44067298 
 
 
 # Test fetching user Likes
-tw fetch_user Offline_Twatter  # TODO: why doesn't this work when authenticated?
+tw fetch_user Offline_Twatter
 tw --session Offline_Twatter get_user_likes Offline_Twatter
 test $(sqlite3 twitter.db "select count(*) from likes") -ge "2"
 test $(sqlite3 twitter.db "select count(*) from likes where tweet_id = 1671902735250124802") = "1"

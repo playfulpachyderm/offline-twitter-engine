@@ -288,7 +288,7 @@ func get_user_likes(handle string, how_many int) {
 		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
 	}
 
-	trove, err := scraper.GetUserLikes(user.ID, "") // TODO: how_many
+	trove, err := scraper.GetUserLikes(user.ID, how_many)
 	if err != nil {
 		die(fmt.Sprintf("Error scraping feed: %s\n  %s", handle, err.Error()), false, -2)
 	}
