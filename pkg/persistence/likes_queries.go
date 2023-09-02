@@ -20,6 +20,14 @@ func (p Profile) SaveLike(l scraper.Like) error {
 	return nil
 }
 
+func (p Profile) DeleteLike(l scraper.Like) error {
+	_, err := p.DB.NamedExec(`delete from likes where user_id = :user_id and tweet_id = :tweet_id`, l)
+	if err != nil {
+		return fmt.Errorf("Error executing DeleteLike(%#v):\n  %w", l, err)
+	}
+	return nil
+}
+
 func (p Profile) GetLikeBySortID(id scraper.LikeSortID) (scraper.Like, error) {
 	var l scraper.Like
 	err := p.DB.Get(&l, `

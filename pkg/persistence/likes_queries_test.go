@@ -36,3 +36,22 @@ func TestSaveAndLoadLike(t *testing.T) {
 		t.Error(diff)
 	}
 }
+
+func TestDeleteLike(t *testing.T) {
+	require := require.New(t)
+
+	profile_path := "test_profiles/TestLikesQueries"
+	profile := create_or_load_profile(profile_path)
+
+	like := create_dummy_like()
+	err := profile.SaveLike(like)
+	require.NoError(err)
+
+	// Delete it
+	err = profile.DeleteLike(like)
+	require.NoError(err)
+
+	// Should be gone
+	_, err = profile.GetLikeBySortID(like.SortID)
+	require.Error(err)
+}
