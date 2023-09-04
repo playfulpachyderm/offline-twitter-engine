@@ -73,6 +73,7 @@ type Tweet struct {
 	TombstoneText string `db:"tombstone_text"`
 	IsStub        bool   `db:"is_stub"`
 
+	IsLikedByCurrentUser  bool      `db:"is_liked_by_current_user"`
 	IsContentDownloaded   bool      `db:"is_content_downloaded"`
 	IsConversationScraped bool      `db:"is_conversation_scraped"`
 	LastScrapedAt         Timestamp `db:"last_scraped_at"`

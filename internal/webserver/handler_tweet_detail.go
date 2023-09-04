@@ -79,7 +79,7 @@ func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 		try_scrape_tweet() // If it fails, we can still render it (not 404)
 	}
 
-	trove, err := app.Profile.GetTweetDetail(data.MainTweetID)
+	trove, err := app.Profile.GetTweetDetail(data.MainTweetID, app.ActiveUser.ID)
 	if err != nil {
 		if errors.Is(err, persistence.ErrNotInDB) {
 			app.error_404(w)

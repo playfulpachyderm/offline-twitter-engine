@@ -261,7 +261,7 @@ func (c *Cursor) apply_token(token string) error {
 	return nil
 }
 
-func (p Profile) NextPage(c Cursor) (Feed, error) {
+func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error) {
 	where_clauses := []string{}
 	bind_values := []interface{}{}
 
@@ -273,7 +273,7 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
 
 	// From, to, by, and RT'd by user handles
 	if c.FromUserHandle != "" {
-		where_clauses = append(where_clauses, "user_id = (select id from users where handle like ?)")
+		where_clauses = append(where_clauses, "tweets.user_id = (select id from users where handle like ?)")
 		bind_values = append(bind_values, c.FromUserHandle)
 	}
 	for _, to_user := range c.ToUserHandles {
@@ -362,9 +362,10 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
 	q := `select * from (
 	select ` + TWEETS_ALL_SQL_FIELDS + `,
            0 tweet_id, 0 retweet_id, 0 retweeted_by, 0 retweeted_at,
-           posted_at chrono, user_id by_user_id
+           posted_at chrono, tweets.user_id by_user_id
       from tweets
  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
+ left join likes on tweets.id = likes.tweet_id and likes.user_id = ?
      ` + where_clause + ` ` + c.SortOrder.OrderByClause() + ` limit ?
     )
 
@@ -372,16 +373,18 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
 
     select * from (
     select ` + TWEETS_ALL_SQL_FIELDS + `,
-           tweet_id, retweet_id, retweeted_by, retweeted_at,
+           retweets.tweet_id, retweet_id, retweeted_by, retweeted_at,
            retweeted_at chrono, retweeted_by by_user_id
       from retweets
  left join tweets on retweets.tweet_id = tweets.id
  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
+ left join likes on tweets.id = likes.tweet_id and likes.user_id = ?
      ` + where_clause + `
      ` + c.SortOrder.OrderByClause() + `
      limit ?
     ) ` + c.SortOrder.OrderByClause() + ` limit ?`
 
+	bind_values = append([]interface{}{current_user_id}, bind_values...)
 	bind_values = append(bind_values, c.PageSize)
 	bind_values = append(bind_values, bind_values...)
 	bind_values = append(bind_values, c.PageSize)
@@ -406,7 +409,7 @@ func (p Profile) NextPage(c Cursor) (Feed, error) {
 		ret.Items = append(ret.Items, FeedItem{TweetID: val.Tweet.ID, RetweetID: val.Retweet.RetweetID})
 	}
 
-	p.fill_content(&ret.TweetTrove)
+	p.fill_content(&ret.TweetTrove, current_user_id)
 
 	ret.CursorBottom = c
 

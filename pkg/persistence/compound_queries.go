@@ -14,12 +14,13 @@ var (
 )
 
 const TWEETS_ALL_SQL_FIELDS = `
-		tweets.id id, user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id,
+		tweets.id id, tweets.user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id,
 		quoted_tweet_id, mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id,
 		ifnull(tombstone_types.short_name, "") tombstone_type, ifnull(tombstone_types.tombstone_text, "") tombstone_text,
+		case when likes.user_id is null then 0 else 1 end is_liked_by_current_user,
 		is_expandable, is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at`
 
-func (p Profile) fill_content(trove *TweetTrove) {
+func (p Profile) fill_content(trove *TweetTrove, current_user_id UserID) {
 	if len(trove.Tweets) == 0 {
 		// Empty trove, nothing to fetch
 		return
@@ -39,7 +40,8 @@ func (p Profile) fill_content(trove *TweetTrove) {
 		     select `+TWEETS_ALL_SQL_FIELDS+`
 		       from tweets
 		  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
-		      where id in (`+strings.Repeat("?,", len(quoted_ids)-1)+`?)`, quoted_ids...)
+		  left join likes on tweets.id = likes.tweet_id and likes.user_id = ?
+		      where id in (`+strings.Repeat("?,", len(quoted_ids)-1)+`?)`, append([]interface{}{current_user_id}, quoted_ids...)...)
 		if err != nil {
 			panic(err)
 		}
@@ -207,7 +209,7 @@ func NewTweetDetailView() TweetDetailView {
 }
 
 // Return the given tweet, all its parent tweets, and a list of conversation threads
-func (p Profile) GetTweetDetail(id TweetID) (TweetDetailView, error) {
+func (p Profile) GetTweetDetail(id TweetID, current_user_id UserID) (TweetDetailView, error) {
 	// TODO: compound-query-structs
 	ret := NewTweetDetailView()
 	ret.MainTweetID = id
@@ -221,6 +223,7 @@ func (p Profile) GetTweetDetail(id TweetID) (TweetDetailView, error) {
 		 select ` + TWEETS_ALL_SQL_FIELDS + `
 	       from tweets
 	  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
+	  left join likes on tweets.id = likes.tweet_id and likes.user_id = ?
 	 inner join all_replies on tweets.id = all_replies.id
 	      order by id asc`)
 	if err != nil {
@@ -230,7 +233,7 @@ func (p Profile) GetTweetDetail(id TweetID) (TweetDetailView, error) {
 
 	// Main tweet and parents
 	var thread []Tweet
-	err = stmt.Select(&thread, id)
+	err = stmt.Select(&thread, id, current_user_id)
 	if err != nil {
 		panic(err)
 	}
@@ -249,6 +252,7 @@ func (p Profile) GetTweetDetail(id TweetID) (TweetDetailView, error) {
 		`select ` + TWEETS_ALL_SQL_FIELDS + `
 	       from tweets
 	  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
+	  left join likes on tweets.id = likes.tweet_id and likes.user_id = ?
 	      where in_reply_to_id = ?
 	      order by num_likes desc
 	      limit 50`)
@@ -256,7 +260,7 @@ func (p Profile) GetTweetDetail(id TweetID) (TweetDetailView, error) {
 		panic(err)
 	}
 	defer stmt.Close()
-	err = stmt.Select(&replies, id)
+	err = stmt.Select(&replies, current_user_id, id)
 	if err != nil {
 		panic(err)
 	}
@@ -287,7 +291,9 @@ func (p Profile) GetTweetDetail(id TweetID) (TweetDetailView, error) {
 		    select ` + TWEETS_ALL_SQL_FIELDS + `
 		      from top_ids_by_parent
 		 left join tweets on tweets.id = top_ids_by_parent.id
-		 left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid`
+		 left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
+		 left join likes on tweets.id = likes.tweet_id and likes.user_id = ?`
+		reply_1_ids = append(reply_1_ids, current_user_id)
 		err = p.DB.Select(&replies, reply2_query, reply_1_ids...)
 		if err != nil {
 			panic(err)
@@ -304,7 +310,7 @@ func (p Profile) GetTweetDetail(id TweetID) (TweetDetailView, error) {
 		}
 	}
 
-	p.fill_content(&ret.TweetTrove)
+	p.fill_content(&ret.TweetTrove, current_user_id)
 	return ret, nil
 }
 

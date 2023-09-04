@@ -21,7 +21,7 @@ func TestBuildUserFeed(t *testing.T) {
 	c := persistence.NewUserFeedCursor(UserHandle("cernovich"))
 	c.PageSize = 2
 
-	feed, err := profile.NextPage(c)
+	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
 
 	assert.Len(feed.Retweets, 2)
@@ -63,7 +63,7 @@ func TestBuildUserFeedPage2(t *testing.T) {
 	c.PageSize = 2
 	c.CursorPosition = persistence.CURSOR_MIDDLE
 	c.CursorValue = 1644107102
-	feed, err := profile.NextPage(c)
+	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
 
 	assert.Len(feed.Retweets, 1)
@@ -103,7 +103,7 @@ func TestBuildUserFeedEnd(t *testing.T) {
 	c.PageSize = 2
 	c.CursorPosition = persistence.CURSOR_MIDDLE
 	c.CursorValue = 1 // Won't be anything
-	feed, err := profile.NextPage(c)
+	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
 
 	assert.Len(feed.Retweets, 0)
@@ -114,6 +114,24 @@ func TestBuildUserFeedEnd(t *testing.T) {
 	assert.Equal(feed.CursorBottom.CursorPosition, persistence.CURSOR_END)
 }
 
+func TestUserFeedHasLikesInfo(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+
+	// Fetch @Peter_Nimitz user feed while logged in as @MysteryGrove
+	c := persistence.NewUserFeedCursor(UserHandle("Peter_Nimitz"))
+	feed, err := profile.NextPage(c, UserID(1178839081222115328))
+	require.NoError(err)
+
+	// Should have "liked" 1 tweet
+	for _, t := range feed.Tweets {
+		assert.Equal(t.IsLikedByCurrentUser, t.ID == TweetID(1413646595493568516))
+	}
+}
+
 func TestUserFeedWithTombstone(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
@@ -122,7 +140,7 @@ func TestUserFeedWithTombstone(t *testing.T) {
 	require.NoError(err)
 
 	c := persistence.NewUserFeedCursor(UserHandle("Heminator"))
-	feed, err := profile.NextPage(c)
+	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	tombstone_tweet := feed.Tweets[TweetID(31)]
 	assert.Equal(tombstone_tweet.TombstoneText, "This Tweet was deleted by the Tweet author")
@@ -135,7 +153,7 @@ func TestTweetDetailWithReplies(t *testing.T) {
 	profile, err := persistence.LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
-	tweet_detail, err := profile.GetTweetDetail(TweetID(1413646595493568516))
+	tweet_detail, err := profile.GetTweetDetail(TweetID(1413646595493568516), UserID(1178839081222115328))
 	require.NoError(err)
 
 	assert.Len(tweet_detail.Retweets, 0)
@@ -151,8 +169,9 @@ func TestTweetDetailWithReplies(t *testing.T) {
 		1413772782358433792,
 		1413773185296650241,
 	} {
-		_, is_ok := tweet_detail.Tweets[id]
+		t, is_ok := tweet_detail.Tweets[id]
 		assert.True(is_ok)
+		assert.Equal(t.IsLikedByCurrentUser, id == 1413646595493568516)
 	}
 
 	assert.Len(tweet_detail.Users, 4)
@@ -189,7 +208,7 @@ func TestTweetDetailWithParents(t *testing.T) {
 	profile, err := persistence.LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
-	tweet_detail, err := profile.GetTweetDetail(TweetID(1413773185296650241))
+	tweet_detail, err := profile.GetTweetDetail(TweetID(1413773185296650241), UserID(1178839081222115328))
 	require.NoError(err)
 
 	assert.Len(tweet_detail.Retweets, 0)
@@ -201,8 +220,9 @@ func TestTweetDetailWithParents(t *testing.T) {
 		1413772782358433792,
 		1413773185296650241,
 	} {
-		_, is_ok := tweet_detail.Tweets[id]
+		t, is_ok := tweet_detail.Tweets[id]
 		assert.True(is_ok)
+		assert.Equal(t.IsLikedByCurrentUser, id == 1413646595493568516)
 	}
 
 	assert.Len(tweet_detail.Users, 2)

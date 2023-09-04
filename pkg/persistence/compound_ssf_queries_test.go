@@ -25,7 +25,7 @@ func TestCursorSearchByNewest(t *testing.T) {
 	c.Keywords = []string{"think"}
 	c.SortOrder = persistence.SORT_ORDER_NEWEST
 
-	feed, err := profile.NextPage(c)
+	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
 
 	assert.Len(feed.Items, 3)
@@ -41,7 +41,7 @@ func TestCursorSearchByNewest(t *testing.T) {
 	assert.Equal(next_cursor.PageSize, c.PageSize)
 	assert.Equal(next_cursor.CursorValue, 1629520619)
 
-	feed, err = profile.NextPage(next_cursor)
+	feed, err = profile.NextPage(next_cursor, UserID(0))
 	require.NoError(err)
 
 	assert.Len(feed.Items, 2)
@@ -67,7 +67,7 @@ func TestCursorSearchWithRetweets(t *testing.T) {
 	c.FilterRetweets = persistence.REQUIRE
 	c.SortOrder = persistence.SORT_ORDER_OLDEST
 
-	feed, err := profile.NextPage(c)
+	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
 
 	assert.Len(feed.Items, 3)
@@ -83,7 +83,7 @@ func TestCursorSearchWithRetweets(t *testing.T) {
 	assert.Equal(next_cursor.PageSize, c.PageSize)
 	assert.Equal(next_cursor.CursorValue, 1644111031)
 
-	feed, err = profile.NextPage(next_cursor)
+	feed, err = profile.NextPage(next_cursor, UserID(0))
 	require.NoError(err)
 
 	assert.Len(feed.Items, 0)
@@ -102,7 +102,7 @@ func TestTimeline(t *testing.T) {
 	c := persistence.NewTimelineCursor()
 	c.PageSize = 5
 
-	feed, err := profile.NextPage(c)
+	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
 
 	assert.Len(feed.Items, 5)
@@ -121,7 +121,7 @@ func TestTimeline(t *testing.T) {
 	assert.Equal(next_cursor.CursorValue, 1635367140)
 
 	next_cursor.CursorValue = 1631935323 // Scroll down a bit, kind of randomly
-	feed, err = profile.NextPage(next_cursor)
+	feed, err = profile.NextPage(next_cursor, UserID(0))
 	require.NoError(err)
 
 	assert.Len(feed.Items, 5)
@@ -143,20 +143,20 @@ func TestKeywordSearch(t *testing.T) {
 
 	// Multiple words without quotes
 	c.Keywords = []string{"who", "are"}
-	feed, err := profile.NextPage(c)
+	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.True(len(feed.Items) > 1)
 
 	// Add quotes
 	c.Keywords = []string{"who are"}
-	feed, err = profile.NextPage(c)
+	feed, err = profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.Len(feed.Items, 1)
 	assert.Equal(feed.Items[0].TweetID, TweetID(1261483383483293700))
 
 	// With gibberish (no matches)
 	c.Keywords = []string{"fasdfjkafsldfjsff"}
-	feed, err = profile.NextPage(c)
+	feed, err = profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.Len(feed.Items, 0)
 }
@@ -171,7 +171,7 @@ func TestSearchReplyingToUser(t *testing.T) {
 
 	// Replying to a user
 	c.ToUserHandles = []UserHandle{"spacex"}
-	feed, err := profile.NextPage(c)
+	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.Len(feed.Items, 2)
 	assert.Equal(feed.Items[0].TweetID, TweetID(1428951883058753537))
@@ -179,7 +179,7 @@ func TestSearchReplyingToUser(t *testing.T) {
 
 	// Replying to two users
 	c.ToUserHandles = []UserHandle{"spacex", "covfefeanon"}
-	feed, err = profile.NextPage(c)
+	feed, err = profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.Len(feed.Items, 1)
 	assert.Equal(feed.Items[0].TweetID, TweetID(1428939163961790466))
@@ -197,7 +197,7 @@ func TestSearchDateFilters(t *testing.T) {
 	// Since timestamp
 	c.SinceTimestamp.Time = time.Date(2021, 10, 1, 0, 0, 0, 0, time.UTC)
 	c.FromUserHandle = UserHandle("cernovich")
-	feed, err := profile.NextPage(c)
+	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.Len(feed.Items, 1)
 	assert.Equal(feed.Items[0].TweetID, TweetID(1453461248142495744))
@@ -205,7 +205,7 @@ func TestSearchDateFilters(t *testing.T) {
 	// Until timestamp
 	c.SinceTimestamp = TimestampFromUnix(0)
 	c.UntilTimestamp.Time = time.Date(2021, 10, 1, 0, 0, 0, 0, time.UTC)
-	feed, err = profile.NextPage(c)
+	feed, err = profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.Len(feed.Items, 3)
 	assert.Equal(feed.Items[0].TweetID, TweetID(1439027915404939265))
@@ -224,7 +224,7 @@ func TestSearchMediaFilters(t *testing.T) {
 	c := persistence.NewCursor()
 	c.SortOrder = persistence.SORT_ORDER_MOST_LIKES
 	c.FilterLinks = persistence.REQUIRE
-	feed, err := profile.NextPage(c)
+	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.Len(feed.Items, 2)
 	assert.Equal(feed.Items[0].TweetID, TweetID(1438642143170646017))
@@ -234,7 +234,7 @@ func TestSearchMediaFilters(t *testing.T) {
 	c = persistence.NewCursor()
 	c.SortOrder = persistence.SORT_ORDER_MOST_LIKES
 	c.FilterImages = persistence.REQUIRE
-	feed, err = profile.NextPage(c)
+	feed, err = profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.Len(feed.Items, 2)
 	assert.Equal(feed.Items[0].TweetID, TweetID(1261483383483293700))
@@ -244,7 +244,7 @@ func TestSearchMediaFilters(t *testing.T) {
 	c = persistence.NewCursor()
 	c.SortOrder = persistence.SORT_ORDER_MOST_LIKES
 	c.FilterVideos = persistence.REQUIRE
-	feed, err = profile.NextPage(c)
+	feed, err = profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.Len(feed.Items, 2)
 	assert.Equal(feed.Items[0].TweetID, TweetID(1426619468327882761))
@@ -253,7 +253,7 @@ func TestSearchMediaFilters(t *testing.T) {
 	// Polls
 	c = persistence.NewCursor()
 	c.FilterPolls = persistence.REQUIRE
-	feed, err = profile.NextPage(c)
+	feed, err = profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.Len(feed.Items, 1)
 	assert.Equal(feed.Items[0].TweetID, TweetID(1465534109573390348))
@@ -261,7 +261,7 @@ func TestSearchMediaFilters(t *testing.T) {
 	// Spaces
 	c = persistence.NewCursor()
 	c.FilterSpaces = persistence.REQUIRE
-	feed, err = profile.NextPage(c)
+	feed, err = profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.Len(feed.Items, 1)
 	assert.Equal(feed.Items[0].TweetID, TweetID(1624833173514293249))

@@ -17,7 +17,7 @@ func (app *Application) Timeline(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	feed, err := app.Profile.NextPage(c)
+	feed, err := app.Profile.NextPage(c, app.ActiveUser.ID)
 	if err != nil {
 		if errors.Is(err, persistence.ErrEndOfFeed) {
 			// TODO

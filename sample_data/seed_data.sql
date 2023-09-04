@@ -287,6 +287,7 @@ create table likes(rowid integer primary key,
     foreign key(user_id) references users(id)
     foreign key(tweet_id) references tweets(id)
 );
+insert into likes values(1, 1, 1178839081222115328, 1413646595493568516);
 
 create table fake_user_sequence(latest_fake_id integer not null);
 insert into fake_user_sequence values(0x4000000000000000);
