@@ -120,6 +120,7 @@ ul.inline-dotted-list li:last-child:after {
 
 .display-name {
     font-weight: bold;
+    white-space: nowrap;
 }
 .handle {
     color: var(--color-twitter-text-gray);
@@ -551,11 +552,11 @@ ul.dropdown-items {
     background-color: var(--color-twitter-off-white);
     outline: 1px solid var(--color-outline-gray);
     border-radius: 0.3em;
-    visibility: hidden;
+    display: none;
     z-index: 1; /* otherwise in quote-tweets, the dropdown button from quoting-tweet is on top of it */
 }
 .dropdown-button:focus + .dropdown-items, .dropdown-items:hover {
-    visibility: visible;
+    display: block;
 }
 .tombstone {
     outline: 1px solid var(--color-outline-gray);
@@ -572,4 +573,7 @@ ul.dropdown-items {
 }
 .tweet video {
     max-height: 25em;
+}
+.like-icon.liked, .like-icon:hover {
+    filter: invert(20%) sepia(97%) saturate(4383%) hue-rotate(321deg) brightness(101%) contrast(95%);
 }
