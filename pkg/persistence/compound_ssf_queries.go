@@ -110,6 +110,7 @@ type Cursor struct {
 	RetweetedByUserHandle scraper.UserHandle
 	ByUserHandle          scraper.UserHandle
 	ToUserHandles         []scraper.UserHandle
+	LikedByUserHandle     scraper.UserHandle
 	SinceTimestamp        scraper.Timestamp
 	UntilTimestamp        scraper.Timestamp
 	FilterLinks           Filter
@@ -167,6 +168,22 @@ func NewUserFeedCursor(h scraper.UserHandle) Cursor {
 		PageSize:       50,
 
 		ByUserHandle: h,
+	}
+}
+
+// Generate a cursor for a User's Likes
+func NewUserFeedLikesCursor(h scraper.UserHandle) Cursor {
+	return Cursor{
+		Keywords:       []string{},
+		ToUserHandles:  []scraper.UserHandle{},
+		SinceTimestamp: scraper.TimestampFromUnix(0),
+		UntilTimestamp: scraper.TimestampFromUnix(0),
+		CursorPosition: CURSOR_START,
+		CursorValue:    0,
+		SortOrder:      SORT_ORDER_NEWEST,
+		PageSize:       50,
+
+		LikedByUserHandle: h,
 	}
 }
 
@@ -351,13 +368,23 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
 		where_clauses = append(where_clauses, "retweet_id = 0")
 	}
 
+	liked_by_filter_join_clause := ""
+	if c.LikedByUserHandle != "" {
+		liked_by_filter_join_clause = " join likes filter_likes on tweets.id = filter_likes.tweet_id "
+		where_clauses = append(where_clauses, "filter_likes.user_id = (select id from users where handle like ?) ")
+		bind_values = append(bind_values, c.LikedByUserHandle)
+	}
+
 	// Pagination
 	if c.CursorPosition != CURSOR_START {
 		where_clauses = append(where_clauses, c.SortOrder.PaginationWhereClause())
 		bind_values = append(bind_values, c.CursorValue)
 	}
 
-	where_clause := "where " + strings.Join(where_clauses, " and ")
+	where_clause := ""
+	if len(where_clauses) > 0 {
+		where_clause = "where " + strings.Join(where_clauses, " and ")
+	}
 
 	q := `select * from (
 	select ` + TWEETS_ALL_SQL_FIELDS + `,
@@ -366,6 +393,7 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
       from tweets
  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
  left join likes on tweets.id = likes.tweet_id and likes.user_id = ?
+     ` + liked_by_filter_join_clause + `
      ` + where_clause + ` ` + c.SortOrder.OrderByClause() + ` limit ?
     )
 
@@ -379,6 +407,7 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
  left join tweets on retweets.tweet_id = tweets.id
  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
  left join likes on tweets.id = likes.tweet_id and likes.user_id = ?
+     ` + liked_by_filter_join_clause + `
      ` + where_clause + `
      ` + c.SortOrder.OrderByClause() + `
      limit ?

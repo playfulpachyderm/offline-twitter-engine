@@ -146,6 +146,24 @@ func TestUserFeedWithTombstone(t *testing.T) {
 	assert.Equal(tombstone_tweet.TombstoneText, "This Tweet was deleted by the Tweet author")
 }
 
+func TestUserLikesFeed(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+
+	// Fetch @Peter_Nimitz user feed while logged in as @MysteryGrove
+	c := persistence.NewUserFeedLikesCursor(UserHandle("MysteryGrove"))
+	feed, err := profile.NextPage(c, UserID(0))
+	require.NoError(err)
+
+	// Should have "liked" 1 tweet
+	require.Len(feed.Tweets, 1)
+	_, is_ok := feed.Tweets[1413646595493568516]
+	assert.True(is_ok)
+}
+
 func TestTweetDetailWithReplies(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
