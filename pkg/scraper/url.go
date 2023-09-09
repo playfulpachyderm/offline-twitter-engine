@@ -26,6 +26,17 @@ type Url struct {
 	IsContentDownloaded bool `db:"is_content_downloaded"`
 }
 
+func (u Url) GetDomain() string {
+	if u.Domain != "" {
+		return u.Domain
+	}
+	urlstruct, err := url.Parse(u.Text)
+	if err != nil {
+		panic(err)
+	}
+	return urlstruct.Host
+}
+
 func ParseAPIUrlCard(apiCard APICard) Url {
 	values := apiCard.BindingValues
 	ret := Url{}

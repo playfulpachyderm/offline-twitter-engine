@@ -70,24 +70,25 @@
           </video>
         {{end}}
         {{range $main_tweet.Urls}}
-          <a
-            class="embedded-link rounded-gray-outline unstyled-link"
-            target="_blank"
-            href="{{.Text}}"
-            style="max-width: {{if (ne .ThumbnailWidth 0)}}{{.ThumbnailWidth}}px {{else}}fit-content {{end}}"
-            hx-trigger="click consume"
-          >
-            <img src="/content/link_preview_images/{{.ThumbnailLocalPath}}"
-              class="embedded-link-preview"
-              width="{{.ThumbnailWidth}}" height="{{.ThumbnailHeight}}"
-            />
-            <h3 class="embedded-link-title">{{.Title}}</h3>
-            <p class="embedded-link-description">{{.Description}}</p>
-            <span class="row embedded-link-domain-container">
-              <img class="svg-icon" src="/static/icons/link3.svg" />
-              <span class="embedded-link-domain">{{.Domain}}</span>
-            </span>
-          </a>
+          <div class="click-eater" hx-trigger="click consume">
+            <a
+              class="embedded-link rounded-gray-outline unstyled-link"
+              target="_blank"
+              href="{{.Text}}"
+              style="max-width: {{if (ne .ThumbnailWidth 0)}}{{.ThumbnailWidth}}px {{else}}fit-content {{end}}"
+            >
+              <img src="/content/link_preview_images/{{.ThumbnailLocalPath}}"
+                class="embedded-link-preview"
+                width="{{.ThumbnailWidth}}" height="{{.ThumbnailHeight}}"
+              />
+              <h3 class="embedded-link-title">{{.Title}}</h3>
+              <p class="embedded-link-description">{{.Description}}</p>
+              <span class="row embedded-link-domain-container">
+                <img class="svg-icon" src="/static/icons/link3.svg" />
+                <span class="embedded-link-domain">{{(.GetDomain)}}</span>
+              </span>
+            </a>
+          </div>
         {{end}}
         {{range $main_tweet.Polls}}
           {{template "poll" .}}

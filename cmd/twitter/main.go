@@ -32,7 +32,7 @@ func main() {
 	flag.BoolVar(show_version_flag, "v", false, "")
 
 	session_name := flag.String("session", "", "Name of session file to use")
-	addr := flag.String("addr", "localhost:1488", "port to listen on") // Random port that's probably not in use
+	addr := flag.String("addr", "localhost:1973", "port to listen on") // Random port that's probably not in use
 
 	how_many := flag.Int("n", 50, "")
 	flag.IntVar(how_many, "number", 50, "")
