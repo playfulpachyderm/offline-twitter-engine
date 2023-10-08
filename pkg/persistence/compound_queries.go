@@ -197,6 +197,7 @@ type TweetDetailView struct {
 	TweetTrove
 	ParentIDs   []TweetID
 	MainTweetID TweetID
+	ThreadIDs   []TweetID
 	ReplyChains [][]TweetID
 }
 
@@ -247,6 +248,39 @@ func (p Profile) GetTweetDetail(id TweetID, current_user_id UserID) (TweetDetail
 		}
 	}
 
+	// Threaded replies
+	stmt, err = p.DB.Preparex(`
+			with recursive thread_replies(id) as (
+				values(?)
+					union all
+				select tweets.id from tweets
+				                 join thread_replies on tweets.in_reply_to_id = thread_replies.id
+				                where tweets.user_id = ?
+			)
+
+		 select ` + TWEETS_ALL_SQL_FIELDS + `
+	       from tweets
+	  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
+	  left join likes on tweets.id = likes.tweet_id and likes.user_id = ?
+	 inner join thread_replies on tweets.id = thread_replies.id
+	      order by id asc`)
+
+	if err != nil {
+		panic(err)
+	}
+	defer stmt.Close()
+	var reply_thread []Tweet
+	err = stmt.Select(&reply_thread, id, ret.Tweets[ret.MainTweetID].UserID, current_user_id)
+	if err != nil {
+		panic(err)
+	}
+	for _, tweet := range reply_thread {
+		ret.Tweets[tweet.ID] = tweet
+		if tweet.ID != ret.MainTweetID {
+			ret.ThreadIDs = append(ret.ThreadIDs, tweet.ID)
+		}
+	}
+
 	var replies []Tweet
 	stmt, err = p.DB.Preparex(
 		`select ` + TWEETS_ALL_SQL_FIELDS + `
@@ -254,16 +288,22 @@ func (p Profile) GetTweetDetail(id TweetID, current_user_id UserID) (TweetDetail
 	  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
 	  left join likes on tweets.id = likes.tweet_id and likes.user_id = ?
 	      where in_reply_to_id = ?
+	        and id != ? -- skip the main Thread if there is one
 	      order by num_likes desc
 	      limit 50`)
 	if err != nil {
 		panic(err)
 	}
 	defer stmt.Close()
-	err = stmt.Select(&replies, current_user_id, id)
+	thread_top_id := TweetID(0)
+	if len(ret.ThreadIDs) > 0 {
+		thread_top_id = ret.ThreadIDs[0]
+	}
+	err = stmt.Select(&replies, current_user_id, id, thread_top_id)
 	if err != nil {
 		panic(err)
 	}
+
 	if len(replies) > 0 {
 		reply_1_ids := []interface{}{}
 		for _, r := range replies {

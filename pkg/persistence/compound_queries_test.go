@@ -256,3 +256,39 @@ func TestTweetDetailWithParents(t *testing.T) {
 
 	require.Len(tweet_detail.ReplyChains, 0)
 }
+
+func TestTweetDetailWithThread(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+
+	tweet_detail, err := profile.GetTweetDetail(TweetID(1698762403163304110), UserID(0))
+	require.NoError(err)
+
+	assert.Len(tweet_detail.Retweets, 0)
+
+	assert.Len(tweet_detail.Tweets, 11)
+
+	expected_thread := []TweetID{
+		1698762405268902217, 1698762406929781161, 1698762408410390772, 1698762409974857832,
+		1698762411853971851, 1698762413393236329, 1698762414957666416,
+	}
+
+	assert.Equal(expected_thread, tweet_detail.ThreadIDs)
+
+	for _, id := range expected_thread {
+		_, is_ok := tweet_detail.Tweets[id]
+		assert.True(is_ok)
+	}
+
+	assert.Len(tweet_detail.Users, 2)
+	_, is_ok := tweet_detail.Users[1458284524761075714]
+	assert.True(is_ok)
+	_, is_ok = tweet_detail.Users[534463724]
+	assert.True(is_ok)
+
+	require.Len(tweet_detail.ReplyChains, 1) // Should not include the Thread replies
+	assert.Equal(tweet_detail.ReplyChains[0][0], TweetID(1698792233619562866))
+}
