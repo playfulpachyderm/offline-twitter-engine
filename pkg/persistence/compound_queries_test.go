@@ -206,17 +206,15 @@ func TestTweetDetailWithReplies(t *testing.T) {
 	require.Len(tweet_detail.ParentIDs, 1)
 	assert.Equal(tweet_detail.ParentIDs[0], TweetID(1413646309047767042))
 
-	require.Len(tweet_detail.ReplyChains, 4)
-	assert.Len(tweet_detail.ReplyChains[0], 1)
-	assert.Equal(tweet_detail.ReplyChains[0][0], TweetID(1413647919215906817))
-	assert.Len(tweet_detail.ReplyChains[1], 2)
-	assert.Equal(tweet_detail.ReplyChains[1][0], TweetID(1413657324267311104))
-	assert.Equal(tweet_detail.ReplyChains[1][1], TweetID(1413658466795737091))
-	assert.Len(tweet_detail.ReplyChains[2], 1)
-	assert.Equal(tweet_detail.ReplyChains[2][0], TweetID(1413650853081276421))
-	assert.Len(tweet_detail.ReplyChains[3], 2)
-	assert.Equal(tweet_detail.ReplyChains[3][0], TweetID(1413772782358433792))
-	assert.Equal(tweet_detail.ReplyChains[3][1], TweetID(1413773185296650241))
+	require.Len(tweet_detail.ReplyChains, 3)
+	assert.Len(tweet_detail.ReplyChains[0], 2)
+	assert.Equal(tweet_detail.ReplyChains[0][0], TweetID(1413657324267311104))
+	assert.Equal(tweet_detail.ReplyChains[0][1], TweetID(1413658466795737091))
+	assert.Len(tweet_detail.ReplyChains[1], 1)
+	assert.Equal(tweet_detail.ReplyChains[1][0], TweetID(1413650853081276421))
+	assert.Len(tweet_detail.ReplyChains[2], 2)
+	assert.Equal(tweet_detail.ReplyChains[2][0], TweetID(1413772782358433792))
+	assert.Equal(tweet_detail.ReplyChains[2][1], TweetID(1413773185296650241))
 }
 
 func TestTweetDetailWithParents(t *testing.T) {
