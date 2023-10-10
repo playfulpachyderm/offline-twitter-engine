@@ -97,17 +97,15 @@ func get_thumbnail_local_path(remote_url string) string {
 	)
 }
 
-/**
- * Given an URL, try to parse it as a tweet url.
- * The bool is an `is_ok` value; true if the parse was successful, false if it didn't match
- */
+// Given an URL, try to parse it as a tweet url.
+// The bool is an `is_ok` value; true if the parse was successful, false if it didn't match
 func TryParseTweetUrl(s string) (UserHandle, TweetID, bool) {
 	parsed_url, err := url.Parse(s)
 	if err != nil {
 		return UserHandle(""), TweetID(0), false
 	}
 
-	if parsed_url.Host != "twitter.com" && parsed_url.Host != "mobile.twitter.com" {
+	if parsed_url.Host != "twitter.com" && parsed_url.Host != "mobile.twitter.com" && parsed_url.Host != "x.com" {
 		return UserHandle(""), TweetID(0), false
 	}
 

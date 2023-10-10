@@ -257,7 +257,7 @@ func TestSearchRedirectOnUserFeedLink(t *testing.T) {
 	assert.Equal(resp.Header.Get("Location"), "/agsdf")
 
 	// "With Replies" page
-	resp = do_request(httptest.NewRequest("GET", fmt.Sprintf("/search/%s", url.PathEscape("https://twitter.com/agsdf/with_replies")), nil))
+	resp = do_request(httptest.NewRequest("GET", fmt.Sprintf("/search/%s", url.PathEscape("https://x.com/agsdf/with_replies")), nil))
 	assert.Equal(resp.StatusCode, 302)
 	assert.Equal(resp.Header.Get("Location"), "/agsdf")
 
