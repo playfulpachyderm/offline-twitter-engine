@@ -35,7 +35,9 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 
 	// Handle pasted URLs
 	maybe_url, err := url.Parse(search_text)
-	if err == nil && (maybe_url.Host == "twitter.com" || maybe_url.Host == "mobile.twitter.com") {
+	if err == nil && (maybe_url.Host == "twitter.com" || maybe_url.Host == "mobile.twitter.com" || maybe_url.Host == "x.com") {
+		// TODO: use scraper.TryParseTweetUrl for this somehow
+		// Problem: it currently only supports tweet URLs
 		parts := strings.Split(strings.Trim(maybe_url.Path, "/"), "/")
 
 		// Handle tweet links
