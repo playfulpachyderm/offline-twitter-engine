@@ -250,6 +250,18 @@ func TestSearchMediaFilters(t *testing.T) {
 	assert.Equal(feed.Items[0].TweetID, TweetID(1426619468327882761))
 	assert.Equal(feed.Items[1].TweetID, TweetID(1453461248142495744))
 
+	// Media (generic)
+	c = persistence.NewCursor()
+	c.SortOrder = persistence.SORT_ORDER_MOST_LIKES
+	c.FilterMedia = persistence.REQUIRE
+	feed, err = profile.NextPage(c, UserID(0))
+	require.NoError(err)
+	assert.Len(feed.Items, 4)
+	assert.Equal(feed.Items[0].TweetID, TweetID(1426619468327882761))
+	assert.Equal(feed.Items[1].TweetID, TweetID(1261483383483293700))
+	assert.Equal(feed.Items[2].TweetID, TweetID(1426669666928414720))
+	assert.Equal(feed.Items[3].TweetID, TweetID(1453461248142495744))
+
 	// Polls
 	c = persistence.NewCursor()
 	c.FilterPolls = persistence.REQUIRE
@@ -265,4 +277,13 @@ func TestSearchMediaFilters(t *testing.T) {
 	require.NoError(err)
 	assert.Len(feed.Items, 1)
 	assert.Equal(feed.Items[0].TweetID, TweetID(1624833173514293249))
+
+	// Negative filter (images)
+	c = persistence.NewCursor()
+	c.FilterImages = persistence.EXCLUDE
+	c.FromUserHandle = UserHandle("covfefeanon")
+	feed, err = profile.NextPage(c, UserID(0))
+	require.NoError(err)
+	assert.Len(feed.Items, 1)
+	assert.Equal(feed.Items[0].TweetID, TweetID(1428951883058753537))
 }

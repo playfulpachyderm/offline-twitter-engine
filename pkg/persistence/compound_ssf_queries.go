@@ -116,6 +116,7 @@ type Cursor struct {
 	FilterLinks           Filter
 	FilterImages          Filter
 	FilterVideos          Filter
+	FilterMedia           Filter
 	FilterPolls           Filter
 	FilterSpaces          Filter
 	FilterReplies         Filter
@@ -266,12 +267,30 @@ func (c *Cursor) apply_token(token string) error {
 			c.FilterImages = REQUIRE
 		case "videos":
 			c.FilterVideos = REQUIRE
+		case "media":
+			c.FilterMedia = REQUIRE
 		case "polls":
 			c.FilterPolls = REQUIRE
 		case "spaces":
 			c.FilterSpaces = REQUIRE
 		}
+	case "-filter":
+		switch parts[1] {
+		case "links":
+			c.FilterLinks = EXCLUDE
+		case "images":
+			c.FilterImages = EXCLUDE
+		case "videos":
+			c.FilterVideos = EXCLUDE
+		case "media":
+			c.FilterMedia = EXCLUDE
+		case "polls":
+			c.FilterPolls = EXCLUDE
+		case "spaces":
+			c.FilterSpaces = EXCLUDE
+		}
 	}
+
 	if err != nil {
 		return fmt.Errorf("query token %q: %w", token, ErrInvalidQuery)
 	}
@@ -334,6 +353,14 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
 		where_clauses = append(where_clauses, "exists (select 1 from videos where videos.tweet_id = tweets.id)")
 	case EXCLUDE:
 		where_clauses = append(where_clauses, "not exists (select 1 from videos where videos.tweet_id = tweets.id)")
+	}
+	switch c.FilterMedia {
+	case REQUIRE:
+		where_clauses = append(where_clauses, `(exists (select 1 from videos where videos.tweet_id = tweets.id)
+		                                     or exists (select 1 from images where images.tweet_id = tweets.id))`)
+	case EXCLUDE:
+		where_clauses = append(where_clauses, `not (exists (select 1 from videos where videos.tweet_id = tweets.id)
+		                                         or exists (select 1 from images where images.tweet_id = tweets.id))`)
 	}
 	switch c.FilterPolls {
 	case REQUIRE:
