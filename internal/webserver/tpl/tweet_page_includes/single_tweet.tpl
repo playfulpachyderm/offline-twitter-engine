@@ -13,7 +13,7 @@
   {{if (not (eq .RetweetID 0))}}
     {{$retweet := (retweet .RetweetID)}}
     {{$retweet_user := (user $retweet.RetweetedByID)}}
-    <div class="retweet-info-container">
+    <div class="retweet-info-container" hx-trigger="click consume">
       <img class="svg-icon" src="/static/icons/retweet.svg" />
       <span class="retweeted-by-label">Retweeted by</span>
       <a class="retweeted-by-user" hx-get="/{{$retweet_user.Handle}}" hx-target="body" hx-swap="outerHTML" hx-push-url="true">

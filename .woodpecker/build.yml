@@ -33,7 +33,7 @@ pipeline:
       - ./compile.sh
       - ./tw --profile ../sample_data/profile --addr localhost:1000 webserver &
       - sleep 1
-      - curl localhost:1000/cernovich
+      - curl localhost:1000/cernovich > webserver_test_output.html
       - jobs -p | xargs -I{} kill -- -{}
 
   version_bump_test:
