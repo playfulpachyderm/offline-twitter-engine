@@ -380,6 +380,22 @@ func TestTombstoneTweet(t *testing.T) {
 	assert.Equal("This Tweet was deleted by the Tweet author", strings.TrimSpace(tombstone.FirstChild.Data))
 }
 
+func TestTweetThread(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/tweet/1698762403163304110", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+
+	reply_chains := cascadia.QueryAll(root, selector(".reply-chain"))
+	require.Len(reply_chains, 2)
+
+	thread_chain := reply_chains[0]
+	assert.Len(cascadia.QueryAll(thread_chain, selector(".reply-tweet")), 7)
+}
+
 // Follow and unfollow
 // -------------------
 
