@@ -190,10 +190,6 @@ create table hashtags (rowid integer primary key,
     foreign key(tweet_id) references tweets(id)
 );
 
-create table database_version(rowid integer primary key,
-    version_number integer not null unique
-);
-
 create table likes(rowid integer primary key,
     sort_order integer unique not null,
     user_id integer not null,
@@ -202,6 +198,12 @@ create table likes(rowid integer primary key,
     foreign key(user_id) references users(id)
     foreign key(tweet_id) references tweets(id)
 );
+create index if not exists index_likes_user_id on likes (user_id);
+create index if not exists index_likes_tweet_id on likes (tweet_id);
 
 create table fake_user_sequence(latest_fake_id integer not null);
 insert into fake_user_sequence values(0x4000000000000000);
+
+create table database_version(rowid integer primary key,
+    version_number integer not null unique
+);

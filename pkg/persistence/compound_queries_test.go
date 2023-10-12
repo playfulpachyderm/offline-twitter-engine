@@ -155,13 +155,40 @@ func TestUserLikesFeed(t *testing.T) {
 
 	// Fetch @Peter_Nimitz user feed while logged in as @MysteryGrove
 	c := persistence.NewUserFeedLikesCursor(UserHandle("MysteryGrove"))
+	require.Equal(c.SortOrder, persistence.SORT_ORDER_LIKED_AT)
+	c.PageSize = 2
 	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
 
-	// Should have "liked" 1 tweet
+	require.Len(feed.Tweets, 2)
+	for i, expected_tweet_id := range []TweetID{1698765208393576891, 1426669666928414720} {
+		assert.Equal(feed.Items[i].TweetID, expected_tweet_id)
+		_, is_ok := feed.Tweets[expected_tweet_id]
+		assert.True(is_ok)
+	}
+
+	require.Equal(feed.CursorBottom.CursorValue, 4)
+	feed, err = profile.NextPage(feed.CursorBottom, UserID(0))
+	require.NoError(err)
+
+	require.Len(feed.Tweets, 2)
+	for i, expected_tweet_id := range []TweetID{1343633011364016128, 1513313535480287235} {
+		assert.Equal(feed.Items[i].TweetID, expected_tweet_id)
+		_, is_ok := feed.Tweets[expected_tweet_id]
+		assert.True(is_ok)
+	}
+
+	assert.Equal(feed.CursorBottom.CursorValue, 2)
+	feed, err = profile.NextPage(feed.CursorBottom, UserID(0))
+	require.NoError(err)
+
 	require.Len(feed.Tweets, 1)
-	_, is_ok := feed.Tweets[1413646595493568516]
-	assert.True(is_ok)
+	for i, expected_tweet_id := range []TweetID{1413646595493568516} {
+		assert.Equal(feed.Items[i].TweetID, expected_tweet_id)
+		_, is_ok := feed.Tweets[expected_tweet_id]
+		assert.True(is_ok)
+	}
+	assert.Equal(feed.CursorBottom.CursorPosition, persistence.CURSOR_END)
 }
 
 func TestTweetDetailWithReplies(t *testing.T) {

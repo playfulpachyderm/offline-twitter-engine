@@ -16,6 +16,7 @@ const (
 	SORT_ORDER_OLDEST
 	SORT_ORDER_MOST_LIKES
 	SORT_ORDER_MOST_RETWEETS
+	SORT_ORDER_LIKED_AT
 )
 
 func (o SortOrder) OrderByClause() string {
@@ -28,6 +29,8 @@ func (o SortOrder) OrderByClause() string {
 		return "order by num_likes desc"
 	case SORT_ORDER_MOST_RETWEETS:
 		return "order by num_retweets desc"
+	case SORT_ORDER_LIKED_AT:
+		return "order by likes_sort_order desc"
 	default:
 		panic(fmt.Sprintf("Invalid sort order: %d", o))
 	}
@@ -42,6 +45,8 @@ func (o SortOrder) PaginationWhereClause() string {
 		return "num_likes < ?"
 	case SORT_ORDER_MOST_RETWEETS:
 		return "num_retweets < ?"
+	case SORT_ORDER_LIKED_AT:
+		return "likes_sort_order < ?"
 	default:
 		panic(fmt.Sprintf("Invalid sort order: %d", o))
 	}
@@ -56,6 +61,8 @@ func (o SortOrder) NextCursorValue(r CursorResult) int {
 		return r.NumLikes
 	case SORT_ORDER_MOST_RETWEETS:
 		return r.NumRetweets
+	case SORT_ORDER_LIKED_AT:
+		return r.LikeSortOrder
 	default:
 		panic(fmt.Sprintf("Invalid sort order: %d", o))
 	}
@@ -94,8 +101,9 @@ const (
 type CursorResult struct {
 	scraper.Tweet
 	scraper.Retweet
-	Chrono   int            `db:"chrono"`
-	ByUserID scraper.UserID `db:"by_user_id"`
+	Chrono        int            `db:"chrono"`
+	LikeSortOrder int            `db:"likes_sort_order"`
+	ByUserID      scraper.UserID `db:"by_user_id"`
 }
 
 type Cursor struct {
@@ -181,7 +189,7 @@ func NewUserFeedLikesCursor(h scraper.UserHandle) Cursor {
 		UntilTimestamp: scraper.TimestampFromUnix(0),
 		CursorPosition: CURSOR_START,
 		CursorValue:    0,
-		SortOrder:      SORT_ORDER_NEWEST,
+		SortOrder:      SORT_ORDER_LIKED_AT,
 		PageSize:       50,
 
 		LikedByUserHandle: h,
@@ -255,6 +263,8 @@ func (c *Cursor) apply_token(token string) error {
 		c.ToUserHandles = append(c.ToUserHandles, scraper.UserHandle(parts[1]))
 	case "retweeted_by":
 		c.RetweetedByUserHandle = scraper.UserHandle(parts[1])
+	case "liked_by":
+		c.LikedByUserHandle = scraper.UserHandle(parts[1])
 	case "since":
 		c.SinceTimestamp.Time, err = time.Parse("2006-01-02", parts[1])
 	case "until":
@@ -396,10 +406,16 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
 	}
 
 	liked_by_filter_join_clause := ""
+	likes_sort_order_field := ""
 	if c.LikedByUserHandle != "" {
 		liked_by_filter_join_clause = " join likes filter_likes on tweets.id = filter_likes.tweet_id "
 		where_clauses = append(where_clauses, "filter_likes.user_id = (select id from users where handle like ?) ")
 		bind_values = append(bind_values, c.LikedByUserHandle)
+		likes_sort_order_field = ", coalesce(filter_likes.sort_order, -1) likes_sort_order "
+
+		// Don't include retweets on "liked by" searches because it doesn't distinguish which retweet
+		// version was the "liked" one
+		where_clauses = append(where_clauses, "retweet_id = 0")
 	}
 
 	// Pagination
@@ -414,7 +430,7 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
 	}
 
 	q := `select * from (
-	select ` + TWEETS_ALL_SQL_FIELDS + `,
+	select ` + TWEETS_ALL_SQL_FIELDS + likes_sort_order_field + `,
            0 tweet_id, 0 retweet_id, 0 retweeted_by, 0 retweeted_at,
            posted_at chrono, tweets.user_id by_user_id
       from tweets
@@ -427,7 +443,7 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
      union
 
     select * from (
-    select ` + TWEETS_ALL_SQL_FIELDS + `,
+    select ` + TWEETS_ALL_SQL_FIELDS + likes_sort_order_field + `,
            retweets.tweet_id, retweet_id, retweeted_by, retweeted_at,
            retweeted_at chrono, retweeted_by by_user_id
       from retweets
