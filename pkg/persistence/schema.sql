@@ -191,7 +191,7 @@ create table hashtags (rowid integer primary key,
 );
 
 create table likes(rowid integer primary key,
-    sort_order integer unique not null,
+    sort_order integer not null, -- Can't be unique because "-1" is used as "unknown" value
     user_id integer not null,
     tweet_id integer not null,
     unique(user_id, tweet_id)

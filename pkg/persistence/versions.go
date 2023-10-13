@@ -131,6 +131,24 @@ var MIGRATIONS = []string{
 		update spaces set started_at = started_at/1000 where started_at > strftime("%s")*500;
 		update spaces set created_at = created_at/1000 where created_at > strftime("%s")*500;`,
 	`alter table users add column is_deleted boolean default 0`,
+	`begin transaction;
+		alter table likes rename to likes_old;
+
+		create table likes(rowid integer primary key,
+		    sort_order integer not null,
+		    user_id integer not null,
+		    tweet_id integer not null,
+		    unique(user_id, tweet_id)
+		    foreign key(user_id) references users(id)
+		    foreign key(tweet_id) references tweets(id)
+		);
+
+		create index if not exists index_likes_user_id on likes (user_id);
+		create index if not exists index_likes_tweet_id on likes (tweet_id);
+		insert into likes select * from likes_old;
+		drop table likes_old;
+		commit;
+		vacuum;`,
 }
 var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
 
