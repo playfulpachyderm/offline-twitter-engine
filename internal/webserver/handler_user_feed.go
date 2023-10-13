@@ -12,6 +12,7 @@ import (
 type UserProfileData struct {
 	persistence.Feed
 	scraper.UserID
+	FeedType string
 }
 
 func (t UserProfileData) Tweet(id scraper.TweetID) scraper.Tweet {
@@ -41,22 +42,42 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(parts) == 2 && parts[1] == "scrape" {
+	if len(parts) > 1 && parts[len(parts)-1] == "scrape" {
 		if app.IsScrapingDisabled {
 			http.Error(w, "Scraping is disabled (are you logged in?)", 401)
 			return
 		}
 
-		// Run scraper
-		trove, err := scraper.GetUserFeedGraphqlFor(user.ID, 50) // TODO: parameterizable
-		if err != nil {
-			app.ErrorLog.Print(err)
-			// TOOD: show error in UI
+		if len(parts) == 2 { // Already checked the last part is "scrape"
+			// Run scraper
+			trove, err := scraper.GetUserFeedGraphqlFor(user.ID, 50) // TODO: parameterizable
+			if err != nil {
+				app.ErrorLog.Print(err)
+				// TOOD: show error in UI
+			}
+			app.Profile.SaveTweetTrove(trove)
+		} else if len(parts) == 3 && parts[1] == "likes" {
+			trove, err := scraper.GetUserLikes(user.ID, 50) // TODO: parameterizable
+			if err != nil {
+				app.ErrorLog.Print(err)
+				// TOOD: show error in UI
+			}
+			app.Profile.SaveTweetTrove(trove)
 		}
-		app.Profile.SaveTweetTrove(trove)
 	}
 
-	c := persistence.NewUserFeedCursor(user.Handle)
+	var c persistence.Cursor
+	if len(parts) > 1 && parts[1] == "likes" {
+		c = persistence.NewUserFeedLikesCursor(user.Handle)
+	} else {
+		c = persistence.NewUserFeedCursor(user.Handle)
+	}
+	if len(parts) > 1 && parts[1] == "without_replies" {
+		c.FilterReplies = persistence.EXCLUDE
+	}
+	if len(parts) > 1 && parts[1] == "media" {
+		c.FilterMedia = persistence.REQUIRE
+	}
 	err = parse_cursor_value(&c, r)
 	if err != nil {
 		app.error_400_with_message(w, "invalid cursor (must be a number)")
@@ -74,6 +95,11 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	feed.Users[user.ID] = user
 
 	data := UserProfileData{Feed: feed, UserID: user.ID}
+	if len(parts) == 2 {
+		data.FeedType = parts[1]
+	} else {
+		data.FeedType = ""
+	}
 
 	if r.Header.Get("HX-Request") == "true" && c.CursorPosition == persistence.CURSOR_MIDDLE {
 		// It's a Show More request

@@ -180,6 +180,23 @@ func NewUserFeedCursor(h scraper.UserHandle) Cursor {
 	}
 }
 
+// Generate a cursor appropriate for a user's Media tab
+func NewUserFeedMediaCursor(h scraper.UserHandle) Cursor {
+	return Cursor{
+		Keywords:       []string{},
+		ToUserHandles:  []scraper.UserHandle{},
+		SinceTimestamp: scraper.TimestampFromUnix(0),
+		UntilTimestamp: scraper.TimestampFromUnix(0),
+		CursorPosition: CURSOR_START,
+		CursorValue:    0,
+		SortOrder:      SORT_ORDER_NEWEST,
+		PageSize:       50,
+
+		ByUserHandle: h,
+		FilterMedia:  REQUIRE,
+	}
+}
+
 // Generate a cursor for a User's Likes
 func NewUserFeedLikesCursor(h scraper.UserHandle) Cursor {
 	return Cursor{
@@ -263,6 +280,7 @@ func (c *Cursor) apply_token(token string) error {
 		c.ToUserHandles = append(c.ToUserHandles, scraper.UserHandle(parts[1]))
 	case "retweeted_by":
 		c.RetweetedByUserHandle = scraper.UserHandle(parts[1])
+		c.FilterRetweets = NONE // Clear the "exclude retweets" filter set by default in NewCursor
 	case "liked_by":
 		c.LikedByUserHandle = scraper.UserHandle(parts[1])
 	case "since":
@@ -283,6 +301,10 @@ func (c *Cursor) apply_token(token string) error {
 			c.FilterPolls = REQUIRE
 		case "spaces":
 			c.FilterSpaces = REQUIRE
+		case "replies":
+			c.FilterReplies = REQUIRE
+		case "retweets":
+			c.FilterRetweets = REQUIRE
 		}
 	case "-filter":
 		switch parts[1] {
@@ -298,6 +320,10 @@ func (c *Cursor) apply_token(token string) error {
 			c.FilterPolls = EXCLUDE
 		case "spaces":
 			c.FilterSpaces = EXCLUDE
+		case "replies":
+			c.FilterReplies = EXCLUDE
+		case "retweets":
+			c.FilterRetweets = EXCLUDE
 		}
 	}
 

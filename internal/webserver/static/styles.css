@@ -221,6 +221,21 @@ h3 {
 .user-feed-header .profile-image {
     width: 8em;
 }
+.user-feed-header a.user-feed-tab {
+    flex-grow: 1;
+    text-align: center;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: var(--color-twitter-text-gray);
+    padding: 0.8em;
+}
+.user-feed-header a.user-feed-tab.active-tab {
+    color: var(--color-twitter-blue);
+    border-bottom: 0.2em solid var(--color-twitter-blue);
+}
+.user-feed-header a.user-feed-tab:hover {
+    color: var(--color-twitter-blue);
+}
 
 .row {
     display: flex;

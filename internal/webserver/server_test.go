@@ -133,6 +133,54 @@ func TestUserFeedWithCursorBadNumber(t *testing.T) {
 	require.Equal(resp.StatusCode, 400)
 }
 
+func TestUserFeedTweetsOnlyTab(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/Peter_Nimitz/without_replies", nil))
+	require.Equal(resp.StatusCode, 200)
+
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	tweets := cascadia.QueryAll(root, selector(".timeline > .tweet"))
+	assert.Len(tweets, 2)
+}
+
+func TestUserFeedMediaTab(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/Cernovich/media", nil))
+	require.Equal(resp.StatusCode, 200)
+
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	tweets := cascadia.QueryAll(root, selector(".timeline > .tweet"))
+	assert.Len(tweets, 1)
+}
+
+func TestUserFeedLikesTab(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/MysteryGrove/likes", nil))
+	require.Equal(resp.StatusCode, 200)
+
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	tweets := cascadia.QueryAll(root, selector(".timeline > .tweet"))
+	assert.Len(tweets, 5)
+
+	// Double check pagination works properly
+	resp = do_request(httptest.NewRequest("GET", "/MysteryGrove/likes?cursor=5", nil))
+	require.Equal(resp.StatusCode, 200)
+
+	root, err = html.Parse(resp.Body)
+	require.NoError(err)
+	tweets = cascadia.QueryAll(root, selector(".timeline > .tweet"))
+	assert.Len(tweets, 4)
+}
+
 // Timeline page
 // -------------
 
