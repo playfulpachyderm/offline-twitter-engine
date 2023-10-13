@@ -117,14 +117,7 @@
           <img class="svg-icon" src="/static/icons/retweet.svg" />
           <span>{{$main_tweet.NumRetweets}}</span>
         </div>
-        <div class="interaction-stat">
-          {{if $main_tweet.IsLikedByCurrentUser}}
-            <img class="svg-icon like-icon liked" src="/static/icons/like_filled.svg" />
-          {{else}}
-            <img class="svg-icon like-icon" src="/static/icons/like.svg" />
-          {{end}}
-          <span>{{$main_tweet.NumLikes}}</span>
-        </div>
+        {{template "likes-count" $main_tweet}}
         <div class="dummy"></div>
         <div class="dropdown" hx-trigger="click consume">
           <button class="dropdown-button" title="Options">

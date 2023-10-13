@@ -51,44 +51,71 @@ func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 	data := NewTweetDetailData()
 	data.MainTweetID = tweet_id
 
-	// Return whether the scrape succeeded (if false, we should 404)
-	try_scrape_tweet := func() bool {
-		if app.IsScrapingDisabled {
-			return false
-		}
-		trove, err := scraper.GetTweetFullAPIV2(tweet_id, 50) // TODO: parameterizable
-		if err != nil {
-			app.ErrorLog.Print(err)
-			return false
-		}
-		app.Profile.SaveTweetTrove(trove)
-		return true
-	}
+	is_needing_scrape := (len(parts) > 2 && parts[2] == "scrape")
+	is_available := false
 
+	// Check if tweet is already in DB
 	tweet, err := app.Profile.GetTweetById(tweet_id)
 	if err != nil {
 		if errors.Is(err, persistence.ErrNotInDB) {
-			if !try_scrape_tweet() {
-				app.error_404(w)
-				return
-			}
+			is_needing_scrape = true
+			is_available = false
 		} else {
 			panic(err)
 		}
-	} else if !tweet.IsConversationScraped || (len(parts) > 2 && parts[2] == "scrape") {
-		try_scrape_tweet() // If it fails, we can still render it (not 404)
+	} else {
+		is_available = true
+		if !tweet.IsConversationScraped {
+			is_needing_scrape = true
+		}
+	}
+	if is_available && len(parts) > 2 && (parts[2] == "like" || parts[2] == "unlike") {
+		is_needing_scrape = false
+	}
+
+	if is_needing_scrape && !app.IsScrapingDisabled {
+		trove, err := scraper.GetTweetFullAPIV2(tweet_id, 50) // TODO: parameterizable
+		if err == nil {
+			app.Profile.SaveTweetTrove(trove)
+			is_available = true
+		} else {
+			app.ErrorLog.Print(err)
+			// TODO: show error in UI
+		}
+	}
+
+	if !is_available {
+		app.error_404(w)
+		return
+	}
+
+	if len(parts) > 2 && parts[2] == "like" {
+		like, err := scraper.LikeTweet(tweet.ID)
+		// if err != nil && !errors.Is(err, scraper.AlreadyLikedThisTweet) {}
+		panic_if(err)
+		fmt.Printf("Like: %#v\n", like)
+		err = app.Profile.SaveLike(like)
+		panic_if(err)
+		tweet.IsLikedByCurrentUser = true
+
+		app.buffered_render_basic_htmx(w, "likes-count", tweet)
+		return
+	} else if len(parts) > 2 && parts[2] == "unlike" {
+		err = scraper.UnlikeTweet(tweet_id)
+		panic_if(err)
+		err = app.Profile.DeleteLike(scraper.Like{UserID: app.ActiveUser.ID, TweetID: tweet.ID})
+		panic_if(err)
+		tweet.IsLikedByCurrentUser = false
+
+		app.buffered_render_basic_htmx(w, "likes-count", tweet)
+		return
 	}
 
 	trove, err := app.Profile.GetTweetDetail(data.MainTweetID, app.ActiveUser.ID)
-	if err != nil {
-		if errors.Is(err, persistence.ErrNotInDB) {
-			app.error_404(w)
-			return
-		} else {
-			panic(err)
-		}
-	}
+	panic_if(err) // ErrNotInDB should be impossible, since we already fetched the single tweet successfully
+
 	data.TweetDetailView = trove
+	// fmt.Println(to_json(data))
 
 	app.buffered_render_tweet_page(w, "tpl/tweet_detail.tpl", data)
 }

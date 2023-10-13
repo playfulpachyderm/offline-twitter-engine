@@ -574,6 +574,9 @@ ul.dropdown-items {
 .tweet video {
     max-height: 25em;
 }
+.like-icon {
+    cursor: pointer;
+}
 .like-icon.liked, .like-icon:hover {
     filter: invert(20%) sepia(97%) saturate(4383%) hue-rotate(321deg) brightness(101%) contrast(95%);
 }
