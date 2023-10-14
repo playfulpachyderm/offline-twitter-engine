@@ -6,7 +6,7 @@
     hx-post="/tweet/{{$main_tweet.ID}}"
     hx-trigger="click"
     hx-target="body"
-    hx-swap="outerHTML"
+    hx-swap="outerHTML show:#focused-tweet:top"
     hx-push-url="true"
   {{end}}
 >

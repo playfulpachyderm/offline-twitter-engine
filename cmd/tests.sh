@@ -340,7 +340,7 @@ tw fetch_tweet_only https://twitter.com/PandasAndVidya/status/156271472796842803
 test "$(sqlite3 twitter.db "select count(*) from tweets where id = 156271472796842803")" == "0"
 
 # Fetch an age-restricted tweet while logged in
-tw --session Offline_Twatter fetch_tweet_only https://twitter.com/PandasAndVidya/status/1562714727968428032
+tw fetch_tweet_only https://twitter.com/PandasAndVidya/status/1562714727968428032
 test "$(sqlite3 twitter.db "select count(*) from tweets where id = 156271472796842803")" == "0"
 
 # Test that you can pass a session with the `.session` file extension too
@@ -348,13 +348,13 @@ tw --session Offline_Twatter.session list_followed > /dev/null  # Dummy operatio
 
 
 # Test search
-tw --session Offline_Twatter search "from:michaelmalice constitution"
+tw  search "from:michaelmalice constitution"
 test $(sqlite3 twitter.db "select count(*) from tweets where user_id = 44067298 and text like '%constitution%'") -gt "30"  # Not sure exactly how many
 
 
 # Test fetching user Likes
 tw fetch_user Offline_Twatter
-tw --session Offline_Twatter get_user_likes Offline_Twatter
+tw get_user_likes Offline_Twatter
 test $(sqlite3 twitter.db "select count(*) from likes") -ge "2"
 test $(sqlite3 twitter.db "select count(*) from likes where tweet_id = 1671902735250124802") = "1"
 
@@ -362,9 +362,9 @@ test $(sqlite3 twitter.db "select count(*) from likes where tweet_id = 167190273
 # Test liking and unliking
 tw fetch_tweet_only 1589023388676554753
 test $(sqlite3 twitter.db "select count(*) from likes where tweet_id = 1589023388676554753 and user_id = (select id from users where handle like 'offline_twatter')") = "0"
-tw --session Offline_Twatter like_tweet https://twitter.com/elonmusk/status/1589023388676554753
+tw like_tweet https://twitter.com/elonmusk/status/1589023388676554753
 test $(sqlite3 twitter.db "select count(*) from likes where tweet_id = 1589023388676554753 and user_id = (select id from users where handle like 'offline_twatter')") = "1"
-tw --session Offline_Twatter unlike_tweet https://twitter.com/elonmusk/status/1589023388676554753
+tw unlike_tweet https://twitter.com/elonmusk/status/1589023388676554753
 # TODO: implement deleting a Like
 # test $(sqlite3 twitter.db "select count(*) from likes where tweet_id = 1589023388676554753 and user_id = (select id from users where handle like 'offline_twatter')") = "0"
 
@@ -372,4 +372,3 @@ tw --session Offline_Twatter unlike_tweet https://twitter.com/elonmusk/status/15
 # TODO: Maybe this file should be broken up into multiple test scripts
 
 echo -e "\033[32mAll tests passed.  Finished successfully.\033[0m"
-

@@ -13,7 +13,7 @@
           <span>Home</span>
         </li>
       </a>
-      <a class="unstyled-link" href="#">
+      <a class="unstyled-link" onclick="document.querySelector('#search-bar').focus()">
         <li class="quick-link">
           <img class="svg-icon" src="/static/icons/explore.svg" />
           <span>Explore</span>

@@ -7,7 +7,7 @@
       {{template "tweet" (dict "TweetID" . "RetweetID" 0 "QuoteNestingLevel" 0)}}
     </div>
   {{end}}
-  <div class="focused-tweet">
+  <div id="focused-tweet">
     {{template "tweet" (dict "TweetID" .MainTweetID "RetweetID" 0 "QuoteNestingLevel" 0)}}
   </div>
 
