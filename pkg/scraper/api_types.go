@@ -289,14 +289,12 @@ func (u UserResponse) ConvertToAPIUser() APIUser {
 	}
 
 	// Banned users, new version
-	if u.Data.User.Result.UnavailableMessage.Text != "" {
-		if u.Data.User.Result.Reason == "Suspended" {
-			ret.IsBanned = true
-		}
+	if u.Data.User.Result.Reason == "Suspended" {
+		ret.IsBanned = true
 	}
 
 	// Deleted users
-	if ret.ID == 0 && ret.ScreenName == "" && u.Data.User.Result.UnavailableMessage.Text == "" {
+	if ret.ID == 0 && ret.ScreenName == "" && u.Data.User.Result.Reason != "Suspended" {
 		ret.DoesntExist = true
 	}
 

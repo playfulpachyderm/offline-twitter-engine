@@ -169,8 +169,10 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 
 	// Process images
 	for _, media := range apiTweet.Entities.Media {
-		if media.Type != "photo" { // TODO: remove this eventually
-			panic(fmt.Errorf("Unknown media type %q:\n  %w", media.Type, EXTERNAL_API_ERROR))
+		if media.Type != "photo" {
+			// Videos now have an entry in "Entities.Media" but they can be ignored; the useful bit is in ExtendedEntities
+			// So skip ones that aren't "photo"
+			continue
 		}
 		new_image := ParseAPIMedia(media)
 		new_image.TweetID = ret.ID
