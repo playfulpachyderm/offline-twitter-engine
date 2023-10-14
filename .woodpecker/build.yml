@@ -20,7 +20,9 @@ pipeline:
     secrets:
       - offline_twatter_passwd
     when:  # At least one
-      - path: pkg/scraper/**
+      - path:
+        - pkg/scraper/**
+        - cmd/**
       - branch: release-*
     commands:
       - cd cmd

@@ -150,13 +150,13 @@ func (s *Int64Slice) UnmarshalJSON(data []byte) error {
 	var result []string
 
 	if err := json.Unmarshal(data, &result); err != nil {
-		return err
+		panic(err)
 	}
 
 	for _, str := range result {
 		num, err := strconv.ParseInt(str, 10, 64)
 		if err != nil {
-			return err
+			panic(err)
 		}
 		*s = append(*s, num)
 	}

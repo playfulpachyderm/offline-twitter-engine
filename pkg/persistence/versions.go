@@ -149,6 +149,8 @@ var MIGRATIONS = []string{
 		drop table likes_old;
 		commit;
 		vacuum;`,
+	`insert into tombstone_types(rowid, short_name, tombstone_text)
+	                     values (8, 'newer-version-available', 'There’s a new version of this Tweet')`,
 }
 var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
 
