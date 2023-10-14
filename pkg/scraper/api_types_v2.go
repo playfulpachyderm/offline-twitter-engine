@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -143,6 +144,25 @@ func (u APIV2UserResult) ToUser() User {
 	return user
 }
 
+type Int64Slice []int64
+
+func (s *Int64Slice) UnmarshalJSON(data []byte) error {
+	var result []string
+
+	if err := json.Unmarshal(data, &result); err != nil {
+		return err
+	}
+
+	for _, str := range result {
+		num, err := strconv.ParseInt(str, 10, 64)
+		if err != nil {
+			return err
+		}
+		*s = append(*s, num)
+	}
+	return nil
+}
+
 type Tombstone struct {
 	Text struct {
 		Text string `json:"text"`
@@ -164,6 +184,9 @@ type _Result struct {
 			} `json:"result"`
 		} `json:"note_tweet_results"`
 	} `json:"note_tweet"`
+	EditControl struct {
+		EditTweetIDs Int64Slice `json:"edit_tweet_ids"`
+	} `json:"edit_control"`
 }
 
 type APIV2Result struct {
@@ -183,7 +206,8 @@ func (api_result APIV2Result) ToTweetTrove() (TweetTrove, error) {
 		return ret, ErrorIsTombstone
 	}
 
-	if api_result.Result.Legacy.ID == 0 && api_result.Result.Tweet.Legacy.ID != 0 {
+	if api_result.Result.Legacy.ID == 0 && api_result.Result.Tweet.Legacy.ID != 0 ||
+		api_result.Result.ID == 0 && api_result.Result.Tweet.ID != 0 {
 		// If the tweet has "__typename" of "TweetWithVisibilityResults", it uses a new structure with
 		// a "tweet" field with the regular data, alongside a "tweetInterstitial" field which is ignored
 		// for now.
@@ -201,7 +225,18 @@ func (api_result APIV2Result) ToTweetTrove() (TweetTrove, error) {
 	// Process the tweet itself
 	main_tweet_trove, err := api_result.Result.Legacy.ToTweetTrove()
 	if errors.Is(err, ERR_NO_TWEET) {
-		return TweetTrove{}, err
+		// If the tweet is edited, the entry is just a list of the more recent versions
+		edit_tweet_ids := api_result.Result.EditControl.EditTweetIDs
+		if api_result.Result.ID != 0 && len(edit_tweet_ids) > 1 && edit_tweet_ids[len(edit_tweet_ids)-1] != api_result.Result.ID {
+			// There's a more recent version of the tweet available
+			main_tweet_trove.Tweets[TweetID(api_result.Result.ID)] = Tweet{
+				TombstoneType: "newer-version-available",
+				ID:            TweetID(api_result.Result.ID),
+			}
+		} else {
+			// Not edited; something else is wrong
+			return TweetTrove{}, err
+		}
 	} else if err != nil {
 		panic(err)
 	}

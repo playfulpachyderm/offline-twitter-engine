@@ -608,6 +608,27 @@ func TestAPIV2UserFeedTombstoneEntry(t *testing.T) {
 	// assert.True(user.IsIdFake)
 }
 
+func TestTweetWithNewerVersion(t *testing.T) {
+	assert := assert.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/tweet_with_newer_version.json")
+	require.NoError(t, err)
+
+	var entry APIV2Result
+	err = json.Unmarshal(data, &entry)
+	require.NoError(t, err)
+
+	trove, err := entry.ToTweetTrove()
+	assert.NoError(err)
+
+	assert.Len(trove.Tweets, 1)
+	tweet, is_ok := trove.Tweets[1653413433461579783]
+	assert.True(is_ok)
+	assert.Equal(tweet.TombstoneType, "newer-version-available")
+
+	assert.Len(trove.Users, 0)
+	assert.Len(trove.Retweets, 0)
+}
+
 func TestAPIV2ConversationThreadWithTombstones(t *testing.T) {
 	assert := assert.New(t)
 	data, err := os.ReadFile("test_responses/api_v2/conversation_thread_with_tombstones.json")
