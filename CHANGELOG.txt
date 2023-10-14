@@ -177,3 +177,16 @@ v0.4.2
 	- Other misc improvements
 - Add manual re-scrape button to user feeds
 - Add automatic timeline scraping in background when logged in
+
+v0.5.0
+------
+
+- Add support for user "likes"
+	- Logged-in user's "liked" tweets show filled-in heart in the UI
+	- Can "like" (and "unlike") a tweet by clicking on its heart icon
+- UI improvements:
+	- Show entire threads in UI
+	- Add tabs to User Feed: "Tweets", "Tweets with replies", "Media", "Likes"
+	- Search now supports sort orders: most recent, least recent, most likes, most retweets
+- Add support for a number of upstream stuff: "x.com" links, "Tweets" renamed to "Posts", new API formats, edited tweets
+- Bugfixes
