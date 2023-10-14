@@ -143,14 +143,15 @@ func (u APIV2UserResult) ToUser() User {
 	return user
 }
 
+type Tombstone struct {
+	Text struct {
+		Text string `json:"text"`
+	} `json:"text"`
+}
 type _Result struct {
-	ID        int64      `json:"rest_id,string"`
-	Legacy    APIV2Tweet `json:"legacy"`
-	Tombstone *struct {
-		Text struct {
-			Text string `json:"text"`
-		} `json:"text"`
-	} `json:"tombstone"`
+	ID                 int64            `json:"rest_id,string"`
+	Legacy             APIV2Tweet       `json:"legacy"`
+	Tombstone          *Tombstone       `json:"tombstone"`
 	Core               *APIV2UserResult `json:"core"`
 	Card               APIV2Card        `json:"card"`
 	QuotedStatusResult *APIV2Result     `json:"quoted_status_result"`
@@ -213,6 +214,16 @@ func (api_result APIV2Result) ToTweetTrove() (TweetTrove, error) {
 		quoted_api_result := api_result.Result.QuotedStatusResult
 		quoted_trove, err := quoted_api_result.ToTweetTrove()
 
+		// Handle `"quoted_status_result": {}` results
+		if errors.Is(err, ERR_NO_TWEET) {
+			// Replace it with a tombstone
+			err = ErrorIsTombstone
+			if quoted_api_result.Result.Tombstone == nil {
+				quoted_api_result.Result.Tombstone = &Tombstone{}
+			}
+			quoted_api_result.Result.Tombstone.Text.Text = "This Post is unavailable. Learn more"
+		}
+
 		// Quoted tombstones can be handled here since we already have the ID and user handle
 		if errors.Is(err, ErrorIsTombstone) {
 			tombstoned_tweet := quoted_api_result.Result.Legacy.APITweet
@@ -256,9 +267,9 @@ func (api_result APIV2Result) ToTweetTrove() (TweetTrove, error) {
 	if api_result.Result.Legacy.RetweetedStatusResult == nil {
 		// We have to filter out retweets.  For some reason, retweets have a copy of the card in both the retweeting
 		// and the retweeted TweetResults; it should only be parsed for the real Tweet, not the Retweet
-		main_tweet, is_ok := ret.Tweets[TweetID(api_result.Result.Legacy.ID)]
+		main_tweet, is_ok := ret.Tweets[TweetID(api_result.Result.ID)]
 		if !is_ok {
-			panic(fmt.Errorf("Tweet trove didn't contain its own tweet with ID %d:\n  %w", api_result.Result.Legacy.ID, EXTERNAL_API_ERROR))
+			return TweetTrove{}, ERR_NO_TWEET
 		}
 		if api_result.Result.Card.Legacy.Name == "summary_large_image" || api_result.Result.Card.Legacy.Name == "player" {
 			url := api_result.Result.Card.ParseAsUrl()
@@ -595,9 +606,7 @@ func (api_response APIV2Response) GetCursorBottom() string {
 	return ""
 }
 
-/**
- * Returns `true` if there's no non-cursor entries in this response, false otherwise
- */
+// Returns `true` if there's no non-cursor entries in this response, false otherwise
 func (api_response APIV2Response) IsEmpty() bool {
 	for _, e := range api_response.GetMainInstruction().Entries {
 		if !strings.Contains(e.EntryID, "cursor") {
@@ -607,9 +616,7 @@ func (api_response APIV2Response) IsEmpty() bool {
 	return true
 }
 
-/**
- * Parse the collected API response and turn it into a TweetTrove
- */
+// Parse the collected API response and turn it into a TweetTrove
 func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 	ret := NewTweetTrove()
 

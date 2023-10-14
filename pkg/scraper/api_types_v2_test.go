@@ -595,7 +595,6 @@ func TestAPIV2UserFeedTombstoneEntry(t *testing.T) {
 	require.NoError(t, err)
 
 	trove := entry.ToTweetTrove()
-	assert.NoError(err)
 	// assert.Len(trove.Tweets, 1)
 	// assert.Len(trove.Users, 1)
 	assert.Len(trove.Retweets, 0)
@@ -916,4 +915,26 @@ func TestParseResultAsLikes(t *testing.T) {
 		_, is_ok := trove.Tweets[l.TweetID]
 		assert.True(is_ok, "Like (%#v) didn't have its Tweet in the trove", l)
 	}
+}
+
+func TestTweetWithImplicitQuotedTombstone(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/tweet_with_implicit_quoted_tombstone.json")
+	require.NoError(err)
+	var entry_result APIV2Entry
+	err = json.Unmarshal(data, &entry_result)
+	require.NoError(err)
+
+	trove := entry_result.ToTweetTrove()
+
+	assert.Len(trove.Tweets, 2)
+
+	t1, is_ok := trove.Tweets[TweetID(1586033916367904768)]
+	assert.True(is_ok)
+	assert.False(t1.IsStub)
+	t2, is_ok := trove.Tweets[TweetID(1586033437806305280)]
+	assert.True(is_ok)
+	assert.True(t2.IsStub)
+	assert.Equal(t2.TombstoneType, "unavailable")
 }

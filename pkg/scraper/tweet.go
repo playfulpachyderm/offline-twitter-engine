@@ -131,7 +131,7 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 		ret.PostedAt, err = TimestampFromString(apiTweet.CreatedAt)
 		if err != nil {
 			if ret.ID == 0 {
-				return Tweet{}, fmt.Errorf("unable to parse tweet:\n  %w", ERR_NO_TWEET)
+				return Tweet{}, fmt.Errorf("unable to parse tweet: %w", ERR_NO_TWEET)
 			}
 			return Tweet{}, fmt.Errorf("Error parsing time on tweet ID %d:\n  %w", ret.ID, err)
 		}
