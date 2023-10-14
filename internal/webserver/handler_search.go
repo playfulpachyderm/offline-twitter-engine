@@ -9,7 +9,40 @@ import (
 	"strings"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
+
+type SearchPageData struct {
+	persistence.Feed
+	SearchText       string
+	SortOrder        persistence.SortOrder
+	SortOrderOptions []string
+	// TODO: fill out the search text in the search bar as well (needs modifying the base template)
+}
+
+func NewSearchPageData() SearchPageData {
+	ret := SearchPageData{SortOrderOptions: []string{}}
+	for i := 0; i < 4; i++ { // Don't include "Liked At" option which is #4
+		ret.SortOrderOptions = append(ret.SortOrderOptions, persistence.SortOrder(i).String())
+	}
+	return ret
+}
+
+func (t SearchPageData) Tweet(id scraper.TweetID) scraper.Tweet {
+	return t.Tweets[id]
+}
+func (t SearchPageData) User(id scraper.UserID) scraper.User {
+	return t.Users[id]
+}
+func (t SearchPageData) Retweet(id scraper.TweetID) scraper.Retweet {
+	return t.Retweets[id]
+}
+func (t SearchPageData) Space(id scraper.SpaceID) scraper.Space {
+	return t.Spaces[id]
+}
+func (t SearchPageData) FocusedTweetID() scraper.TweetID {
+	return scraper.TweetID(0)
+}
 
 func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'Search' handler (path: %q)", r.URL.Path)
@@ -67,6 +100,11 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 		app.error_400_with_message(w, "invalid cursor (must be a number)")
 		return
 	}
+	var is_ok bool
+	c.SortOrder, is_ok = persistence.SortOrderFromString(r.URL.Query().Get("sort-order"))
+	if !is_ok && r.URL.Query().Get("sort-order") != "" {
+		app.error_400_with_message(w, "Invalid sort order")
+	}
 
 	feed, err := app.Profile.NextPage(c, app.ActiveUser.ID)
 	if err != nil {
@@ -77,7 +115,10 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	data := UserProfileData{Feed: feed} // TODO: wrong struct
+	data := NewSearchPageData()
+	data.Feed = feed
+	data.SearchText = search_text
+	data.SortOrder = c.SortOrder
 
 	if r.Header.Get("HX-Request") == "true" && c.CursorPosition == persistence.CURSOR_MIDDLE {
 		// It's a Show More request

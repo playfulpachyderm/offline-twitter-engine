@@ -6,7 +6,7 @@
     <p>End of feed</p>
   {{else}}
     <button class="show-more"
-      hx-get="?cursor={{.CursorBottom.CursorValue}}"
+      hx-get="?{{(cursor_to_query_params .CursorBottom)}}"
       hx-swap="outerHTML"
     >Show more</button>
   {{end}}

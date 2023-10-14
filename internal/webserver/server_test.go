@@ -270,6 +270,41 @@ func TestSearchWithCursor(t *testing.T) {
 	assert.Len(cascadia.QueryAll(root, selector(".timeline > .tweet")), 2)
 }
 
+func TestSearchWithSortOrder(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/search/think?sort-order=most%20likes", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Contains(cascadia.Query(root, selector("select[name='sort-order'] option[selected]")).FirstChild.Data, "most likes")
+
+	tweets := cascadia.QueryAll(root, selector(".timeline > .tweet"))
+	txts := []string{
+		"Morally nuanced and complicated discussion",
+		"a lot of y’all embarrass yourselves on this",
+		"this is why the \"think tank mindset\" is a dead end",
+		"At this point what can we expect I guess",
+		"Idk if this is relevant to your department",
+	}
+	for i, txt := range txts {
+		assert.Contains(cascadia.Query(tweets[i], selector("p.text")).FirstChild.Data, txt)
+	}
+
+	resp = do_request(httptest.NewRequest("GET", "/search/think?sort-order=most%20likes&cursor=413", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err = html.Parse(resp.Body)
+	require.NoError(err)
+	tweets = cascadia.QueryAll(root, selector(".timeline > .tweet"))
+	for i, txt := range txts[2:] {
+		assert.Contains(cascadia.Query(tweets[i], selector("p.text")).FirstChild.Data, txt)
+	}
+}
+
+// Search bar pasted link redirects
+// --------------------------------
+
 func TestSearchRedirectOnUserHandle(t *testing.T) {
 	assert := assert.New(t)
 

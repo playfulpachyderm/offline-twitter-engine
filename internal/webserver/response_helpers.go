@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/fs"
 	"net/http"
+	"net/url"
 	"path"
 	"path/filepath"
 	"regexp"
@@ -15,6 +16,7 @@ import (
 
 	"github.com/Masterminds/sprig/v3"
 
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -86,14 +88,15 @@ func (app *Application) buffered_render_tweet_page(w http.ResponseWriter, tpl_fi
 
 	r := renderer{
 		Funcs: func_map(template.FuncMap{
-			"tweet":              data.Tweet,
-			"user":               data.User,
-			"retweet":            data.Retweet,
-			"space":              data.Space,
-			"active_user":        app.get_active_user,
-			"focused_tweet_id":   data.FocusedTweetID,
-			"get_entities":       get_entities,
-			"get_tombstone_text": get_tombstone_text,
+			"tweet":                  data.Tweet,
+			"user":                   data.User,
+			"retweet":                data.Retweet,
+			"space":                  data.Space,
+			"active_user":            app.get_active_user,
+			"focused_tweet_id":       data.FocusedTweetID,
+			"get_entities":           get_entities,
+			"get_tombstone_text":     get_tombstone_text,
+			"cursor_to_query_params": cursor_to_query_params,
 		}),
 		Filenames: append(partials, get_filepath(tpl_file)),
 		TplName:   "base",
@@ -121,14 +124,15 @@ func (app *Application) buffered_render_tweet_htmx(w http.ResponseWriter, tpl_na
 
 	r := renderer{
 		Funcs: func_map(template.FuncMap{
-			"tweet":              data.Tweet,
-			"user":               data.User,
-			"retweet":            data.Retweet,
-			"space":              data.Space,
-			"active_user":        app.get_active_user,
-			"focused_tweet_id":   data.FocusedTweetID,
-			"get_entities":       get_entities,
-			"get_tombstone_text": get_tombstone_text,
+			"tweet":                  data.Tweet,
+			"user":                   data.User,
+			"retweet":                data.Retweet,
+			"space":                  data.Space,
+			"active_user":            app.get_active_user,
+			"focused_tweet_id":       data.FocusedTweetID,
+			"get_entities":           get_entities,
+			"get_tombstone_text":     get_tombstone_text,
+			"cursor_to_query_params": cursor_to_query_params,
 		}),
 		Filenames: partials,
 		TplName:   tpl_name,
@@ -232,4 +236,11 @@ func (r renderer) BufferedRender(w io.Writer) {
 
 	_, err = buf.WriteTo(w)
 	panic_if(err)
+}
+
+func cursor_to_query_params(c persistence.Cursor) string {
+	result := url.Values{}
+	result.Set("cursor", fmt.Sprint(c.CursorValue))
+	result.Set("sort-order", c.SortOrder.String())
+	return result.Encode()
 }

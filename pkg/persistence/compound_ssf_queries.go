@@ -19,6 +19,21 @@ const (
 	SORT_ORDER_LIKED_AT
 )
 
+func (o SortOrder) String() string {
+	return []string{"newest", "oldest", "most likes", "most retweets", "liked at"}[o]
+}
+
+func SortOrderFromString(s string) (SortOrder, bool) {
+	result, is_ok := map[string]SortOrder{
+		"newest":        SORT_ORDER_NEWEST,
+		"oldest":        SORT_ORDER_OLDEST,
+		"most likes":    SORT_ORDER_MOST_LIKES,
+		"most retweets": SORT_ORDER_MOST_RETWEETS,
+		"liked at":      SORT_ORDER_LIKED_AT,
+	}[s]
+	return result, is_ok // Have to store as temporary variable b/c otherwise it interprets it as single-value and compile fails
+}
+
 func (o SortOrder) OrderByClause() string {
 	switch o {
 	case SORT_ORDER_NEWEST:
