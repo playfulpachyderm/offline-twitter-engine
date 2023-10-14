@@ -199,7 +199,12 @@ func (api_result APIV2Result) ToTweetTrove() (TweetTrove, error) {
 	}
 
 	// Process the tweet itself
-	main_tweet_trove := api_result.Result.Legacy.ToTweetTrove()
+	main_tweet_trove, err := api_result.Result.Legacy.ToTweetTrove()
+	if errors.Is(err, ERR_NO_TWEET) {
+		return TweetTrove{}, err
+	} else if err != nil {
+		panic(err)
+	}
 	ret.MergeWith(main_tweet_trove)
 
 	// Parse the User info
@@ -269,7 +274,7 @@ func (api_result APIV2Result) ToTweetTrove() (TweetTrove, error) {
 		// and the retweeted TweetResults; it should only be parsed for the real Tweet, not the Retweet
 		main_tweet, is_ok := ret.Tweets[TweetID(api_result.Result.ID)]
 		if !is_ok {
-			return TweetTrove{}, ERR_NO_TWEET
+			panic(fmt.Errorf("Tweet trove didn't contain its own tweet with ID %d:\n  %w", api_result.Result.ID, EXTERNAL_API_ERROR))
 		}
 		if api_result.Result.Card.Legacy.Name == "summary_large_image" || api_result.Result.Card.Legacy.Name == "player" {
 			url := api_result.Result.Card.ParseAsUrl()
@@ -326,7 +331,7 @@ type APIV2Tweet struct {
 	APITweet
 }
 
-func (api_v2_tweet APIV2Tweet) ToTweetTrove() TweetTrove {
+func (api_v2_tweet APIV2Tweet) ToTweetTrove() (TweetTrove, error) {
 	ret := NewTweetTrove()
 
 	// If there's a retweet, we ignore the main tweet except for posted_at and retweeting UserID
@@ -357,12 +362,12 @@ func (api_v2_tweet APIV2Tweet) ToTweetTrove() TweetTrove {
 	} else {
 		main_tweet, err := ParseSingleTweet(api_v2_tweet.APITweet)
 		if err != nil {
-			panic(err)
+			return ret, fmt.Errorf("parsing APIV2Tweet: %w", err)
 		}
 		ret.Tweets[main_tweet.ID] = main_tweet
 	}
 
-	return ret
+	return ret, nil
 }
 
 type ItemContent struct {
