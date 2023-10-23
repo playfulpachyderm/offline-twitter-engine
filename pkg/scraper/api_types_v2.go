@@ -12,6 +12,7 @@ import (
 )
 
 var ErrorIsTombstone = errors.New("tweet is a tombstone")
+var ErrTweetNotFound = errors.New("api responded 'no status found with that ID'")
 
 type CardValue struct {
 	Type        string `json:"type"`
@@ -590,6 +591,10 @@ type APIV2Response struct {
 			} `json:"search_timeline"`
 		} `json:"search_by_raw_query"`
 	} `json:"data"`
+	Errors []struct {
+		Message string `json:"message"`
+		Code    int    `json:"code"`
+	} `json:"errors"`
 }
 
 func (api_response APIV2Response) GetMainInstruction() *APIV2Instruction {
@@ -913,6 +918,13 @@ func (api *API) GetTweetDetail(tweet_id TweetID, cursor string) (APIV2Response, 
 }
 
 func (api *API) GetMoreTweetReplies(tweet_id TweetID, response *APIV2Response, min_tweets int) error {
+	if len(response.Errors) != 0 {
+		if response.Errors[0].Message == "_Missing: No status found with that ID." {
+			return ErrTweetNotFound
+		}
+		panic(fmt.Sprintf("Unknown error: %s", response.Errors[0].Message))
+	}
+
 	last_response := response
 	for last_response.GetCursorBottom() != "" && len(response.GetMainInstruction().Entries) < min_tweets {
 		fresh_response, err := api.GetTweetDetail(tweet_id, last_response.GetCursorBottom())
