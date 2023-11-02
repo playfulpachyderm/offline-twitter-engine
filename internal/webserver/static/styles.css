@@ -152,6 +152,7 @@ a.entity {
     display: block;
     margin-bottom: 0.4em;
     margin-top: 0;
+    overflow-wrap: anywhere;
 }
 #focused-tweet .text {
     font-size: 1.4em;
