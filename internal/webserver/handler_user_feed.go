@@ -42,13 +42,14 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(parts) > 1 && parts[len(parts)-1] == "scrape" {
+	if r.URL.Query().Has("scrape") {
 		if app.IsScrapingDisabled {
+			app.InfoLog.Printf("Would have scraped: %s", r.URL.Path)
 			http.Error(w, "Scraping is disabled (are you logged in?)", 401)
 			return
 		}
 
-		if len(parts) == 2 { // Already checked the last part is "scrape"
+		if len(parts) == 1 { // The URL is just the user handle
 			// Run scraper
 			trove, err := scraper.GetUserFeedGraphqlFor(user.ID, 50) // TODO: parameterizable
 			if err != nil {
@@ -56,7 +57,7 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 				// TOOD: show error in UI
 			}
 			app.Profile.SaveTweetTrove(trove)
-		} else if len(parts) == 3 && parts[1] == "likes" {
+		} else if len(parts) == 2 && parts[1] == "likes" {
 			trove, err := scraper.GetUserLikes(user.ID, 50) // TODO: parameterizable
 			if err != nil {
 				app.ErrorLog.Print(err)

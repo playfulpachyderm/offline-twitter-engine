@@ -3,7 +3,7 @@
 {{$author := (user $main_tweet.UserID)}}
 <div class="tweet"
   {{if (not (eq $main_tweet.ID (focused_tweet_id)))}}
-    hx-post="/tweet/{{$main_tweet.ID}}"
+    hx-get="/tweet/{{$main_tweet.ID}}"
     hx-trigger="click"
     hx-target="body"
     hx-swap="outerHTML show:#focused-tweet:top"
@@ -130,7 +130,7 @@
                 <span>Open on twitter.com</span>
               </li>
             </a>
-            <a class="unstyled-link" target="_blank" hx-post="/tweet/{{$main_tweet.ID}}/scrape" hx-target="body">
+            <a class="unstyled-link" target="_blank" hx-get="/tweet/{{$main_tweet.ID}}?scrape" hx-target="body">
               <li class="quick-link">
                 <img class="svg-icon" src="/static/icons/download.svg" />
                 <span>Re-fetch tweet</span>

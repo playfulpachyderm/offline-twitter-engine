@@ -34,7 +34,11 @@ func (api API) LikeTweet(id TweetID) (Like, error) {
 	}
 	if len(result.Errors) > 0 {
 		if strings.Contains(result.Errors[0].Message, "has already favorited tweet") {
-			return Like{}, AlreadyLikedThisTweet
+			return Like{
+				UserID:  api.UserID,
+				TweetID: id,
+				SortID:  -1,
+			}, AlreadyLikedThisTweet
 		}
 	}
 	if result.Data.FavoriteTweet != "Done" {
