@@ -54,8 +54,8 @@ func (p Profile) SaveSpace(s scraper.Space) error {
 // Get a Space by ID
 func (p Profile) GetSpaceById(id scraper.SpaceID) (space scraper.Space, err error) {
 	err = p.DB.Get(&space,
-		`select id, created_by_id, short_url, state, title, created_at, started_at, ended_at, updated_at, is_available_for_replay,
-	            replay_watch_count, live_listeners_count, is_details_fetched
+		`select id, ifnull(created_by_id, 0) created_by_id, short_url, state, title, created_at, started_at, ended_at, updated_at,
+		        is_available_for_replay, replay_watch_count, live_listeners_count, is_details_fetched
 	       from spaces
 	      where id = ?`, id)
 	if err != nil {

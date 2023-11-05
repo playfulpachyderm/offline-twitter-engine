@@ -59,8 +59,8 @@ func (p Profile) fill_content(trove *TweetTrove, current_user_id UserID) {
 	if len(space_ids) > 0 {
 		var spaces []Space
 		err := p.DB.Select(&spaces, `
-		 select id, created_by_id, short_url, state, title, created_at, started_at, ended_at, updated_at, is_available_for_replay,
-		        replay_watch_count, live_listeners_count, is_details_fetched
+		 select id, ifnull(created_by_id, 0) created_by_id, short_url, state, title, created_at, started_at, ended_at, updated_at,
+		        is_available_for_replay, replay_watch_count, live_listeners_count, is_details_fetched
 		   from spaces
 		  where id in (`+strings.Repeat("?,", len(space_ids)-1)+`?)`,
 			space_ids...,
