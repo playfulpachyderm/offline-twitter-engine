@@ -31,7 +31,7 @@
           <span>Messages</span>
         </li>
       </a>
-      <a class="unstyled-link" href="#">
+      <a class="unstyled-link" href="/lists">
         <li class="quick-link">
           <img class="svg-icon" src="/static/icons/lists.svg" />
           <span>Lists</span>

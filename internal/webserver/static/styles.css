@@ -596,3 +596,13 @@ ul.dropdown-items {
 .like-icon.liked, .like-icon:hover {
     filter: invert(20%) sepia(97%) saturate(4383%) hue-rotate(321deg) brightness(101%) contrast(95%);
 }
+
+.users-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    padding: 1em;
+}
+.users-list-container .author-info .profile-image {
+    width: 4em;
+}

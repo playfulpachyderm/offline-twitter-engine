@@ -543,3 +543,14 @@ func TestStaticFileNonexistent(t *testing.T) {
 	resp := do_request(httptest.NewRequest("GET", "/static/blehblehblehwfe", nil))
 	require.Equal(resp.StatusCode, 404)
 }
+
+// Lists
+// -----
+
+func TestLists(t *testing.T) {
+	assert := assert.New(t)
+	resp := do_request(httptest.NewRequest("GET", "/lists", nil))
+	root, err := html.Parse(resp.Body)
+	assert.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".users-list-container .author-info")), 4)
+}
