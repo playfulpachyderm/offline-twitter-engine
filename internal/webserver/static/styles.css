@@ -222,7 +222,10 @@ h3 {
 .user-feed-header .profile-image {
     width: 8em;
 }
-.user-feed-header a.user-feed-tab {
+.tabs-container {
+    outline: 1px solid var(--color-outline-gray);
+}
+.tabs-container a.tab {
     flex-grow: 1;
     text-align: center;
     font-size: 1.1em;
@@ -230,11 +233,11 @@ h3 {
     color: var(--color-twitter-text-gray);
     padding: 0.8em;
 }
-.user-feed-header a.user-feed-tab.active-tab {
+.tabs-container a.tab.active-tab {
     color: var(--color-twitter-blue);
     border-bottom: 0.2em solid var(--color-twitter-blue);
 }
-.user-feed-header a.user-feed-tab:hover {
+.tabs-container a.tab:hover {
     color: var(--color-twitter-blue);
 }
 
@@ -348,7 +351,6 @@ ul.quick-links {
 }
 .user-feed-header-info-container {
     padding: 2em;
-    margin-bottom: 0.1em;
     border-bottom: 1px solid var(--color-outline-gray);
 }
 .timeline .tweet, .quoted-tweet .tweet {
@@ -600,9 +602,30 @@ ul.dropdown-items {
 .users-list-container {
     display: flex;
     flex-direction: column;
-    gap: 1em;
-    padding: 1em;
 }
 .users-list-container .author-info .profile-image {
     width: 4em;
+}
+.users-list-container .user {
+    border-color: var(--color-twitter-off-white-dark);
+    border-bottom-style: solid;
+    border-width: 1px;
+    padding: 1em;
+}
+.users-list-container .user p.bio {
+    margin: 0 5.3em;
+    font-size: 0.9em;
+    color: var(--color-twitter-text-gray);
+}
+.sort-order-container {
+    padding: 1em 1em 1em 3em;
+    margin-bottom: -0.5em;
+    border-bottom: 1px solid var(--color-outline-gray);
+}
+.sort-order-container select {
+    text-transform: capitalize;
+    margin: 0 1em;
+}
+.sort-order-container .sort-order-label {
+    font-weight: bold;
 }

@@ -58,18 +58,18 @@
       </div>
     </div>
 
-    <div class="row user-feed-tabs-container">
-      <a class="user-feed-tab unstyled-link {{if (eq .FeedType "")}}active-tab{{end}}" href="/{{$user.Handle}}">
-        <span class="user-feed-tab-inner">Tweets and replies</span>
+    <div class="row tabs-container">
+      <a class="tab unstyled-link {{if (eq .FeedType "")}}active-tab{{end}}" href="/{{$user.Handle}}">
+        <span class="tab-inner">Tweets and replies</span>
       </a>
-      <a class="user-feed-tab unstyled-link {{if (eq .FeedType "without_replies")}}active-tab{{end}}" href="/{{$user.Handle}}/without_replies">
-        <span class="user-feed-tab-inner">Tweets</span>
+      <a class="tab unstyled-link {{if (eq .FeedType "without_replies")}}active-tab{{end}}" href="/{{$user.Handle}}/without_replies">
+        <span class="tab-inner">Tweets</span>
       </a>
-      <a class="user-feed-tab unstyled-link {{if (eq .FeedType "media")}}active-tab{{end}}" href="/{{$user.Handle}}/media">
-        <span class="user-feed-tab-inner">Media</span>
+      <a class="tab unstyled-link {{if (eq .FeedType "media")}}active-tab{{end}}" href="/{{$user.Handle}}/media">
+        <span class="tab-inner">Media</span>
       </a>
-      <a class="user-feed-tab unstyled-link {{if (eq .FeedType "likes")}}active-tab{{end}}" href="/{{$user.Handle}}/likes">
-        <span class="user-feed-tab-inner">Likes</span>
+      <a class="tab unstyled-link {{if (eq .FeedType "likes")}}active-tab{{end}}" href="/{{$user.Handle}}/likes">
+        <span class="tab-inner">Likes</span>
       </a>
     </div>
   </div>

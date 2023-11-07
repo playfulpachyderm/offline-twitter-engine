@@ -17,6 +17,8 @@ type SearchPageData struct {
 	SearchText       string
 	SortOrder        persistence.SortOrder
 	SortOrderOptions []string
+	IsUsersSearch    bool
+	UsersList        []scraper.User
 	// TODO: fill out the search text in the search bar as well (needs modifying the base template)
 }
 
@@ -44,6 +46,14 @@ func (t SearchPageData) FocusedTweetID() scraper.TweetID {
 	return scraper.TweetID(0)
 }
 
+func (app *Application) SearchUsers(w http.ResponseWriter, r *http.Request) {
+	ret := NewSearchPageData()
+	ret.IsUsersSearch = true
+	ret.SearchText = strings.Trim(r.URL.Path, "/")
+	ret.UsersList = app.Profile.SearchUsers(ret.SearchText)
+	app.buffered_render_tweet_page(w, "tpl/search.tpl", ret)
+}
+
 func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'Search' handler (path: %q)", r.URL.Path)
 
@@ -57,6 +67,12 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 			// TODO: return an actual page
 		}
 		http.Redirect(w, r, fmt.Sprintf("/search/%s", url.PathEscape(search_text)), 302)
+		return
+	}
+
+	// Handle users search
+	if r.URL.Query().Get("type") == "users" {
+		app.SearchUsers(w, r)
 		return
 	}
 
