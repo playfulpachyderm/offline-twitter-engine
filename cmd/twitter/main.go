@@ -76,7 +76,7 @@ func main() {
 
 	if len(args) < 2 {
 		if len(args) == 1 && (args[0] == "list_followed" || args[0] == "webserver" || args[0] == "fetch_timeline" ||
-		                      args[0] == "fetch_timeline_for_you" || args[0] == "fetch_inbox") {
+			args[0] == "fetch_timeline_for_you" || args[0] == "fetch_inbox") {
 			// Doesn't need a target, so create a fake second arg
 			args = append(args, "")
 		} else {
