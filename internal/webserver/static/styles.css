@@ -484,6 +484,13 @@ input[type="submit"] {
     margin-top: 1em;
     gap: 4em;
 }
+.followers-followees-container .spacer {
+    flex-grow: 1;
+}
+.user-feed-buttons-container {
+    display: flex;
+    flex-direction: row;
+}
 
 .poll {
     padding: 1em;

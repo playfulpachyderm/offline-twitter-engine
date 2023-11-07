@@ -42,17 +42,14 @@
           <span class="following-count">{{$user.FollowingCount}}</span>
         </div>
 
-        <a class="unstyled-link" target="_blank" href="https://twitter.com/{{$user.Handle}}">
-          <li class="quick-link">
+        <div class="spacer"></div>
+
+        <div class="user-feed-buttons-container">
+          <a class="unstyled-link quick-link" target="_blank" href="https://twitter.com/{{$user.Handle}}" title="Open on twitter.com">
             <img class="svg-icon" src="/static/icons/external-link.svg" />
-            <span>Open on twitter.com</span>
-          </li>
-        </a>
-        <div class="XXX">
-          <a class="unstyled-link" title="Refresh" hx-get="?scrape" hx-target="body">
-            <li class="quick-link">
+          </a>
+          <a class="unstyled-link quick-link" hx-get="?scrape" hx-target="body" title="Refresh">
             <img class="svg-icon" src="/static/icons/refresh.svg" />
-          </li>
           </a>
         </div>
       </div>
