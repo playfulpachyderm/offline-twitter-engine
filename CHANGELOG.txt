@@ -190,3 +190,10 @@ v0.5.0
 	- Search now supports sort orders: most recent, least recent, most likes, most retweets
 - Add support for a number of upstream stuff: "x.com" links, "Tweets" renamed to "Posts", new API formats, edited tweets
 - Bugfixes
+
+v0.5.1
+------
+
+- Add a preliminary Lists page which shows all offline-follows
+- Add search page support for searching users
+- Automatic background scraping of logged-in user's Likes

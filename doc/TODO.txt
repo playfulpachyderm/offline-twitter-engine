@@ -119,21 +119,16 @@ TODO: paste-twitter-urls-in-search-bar
 - pasting a link from twitter.com into the search bar should handle it properly
 	- space
 
-TODO: download-buttons-not-ugly
-- Make the options buttons for downloading less ugly (rn they are ugly)
+TODO: ui-deuglifying
+- Download buttons ("..." dropdown)
+  - on a tweet
+- "Follow" / "Unfollow" button
 
 TODO: show-errors-in-UI
 - if an HTTP request fails, show an error in the UI somehow
 
-TODO: likes-through-UI-sort-order
-- Context: when you "like" a tweet through Offline Twitter, the sort-order is unknown, so it won't show up in your "likes" feed on your profile
-- Add a background task that scrapes the logged-in user's likes periodically, perhaps every 3 minutes or every 10 likes
-
 TODO: refactor-compound_queries_test-file
 - Move the tests for user feeds into the compound_queries_ssf_test file
-
-TODO: move-force-scrape-to-query-string
-- currently URLs end with "/scrape" to indicate they should force a scrape.  That should probably be "?scrape=1" or "?scrape"
 
 TODO: search-bar/preserve-contents-on-search
 - When performing a search, keep the search text in the search bar
