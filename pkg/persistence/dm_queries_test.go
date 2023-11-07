@@ -7,7 +7,8 @@ import (
 	"github.com/go-test/deep"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"offline_twitter/scraper"
+
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 func TestSaveAndLoadChatRoom(t *testing.T) {

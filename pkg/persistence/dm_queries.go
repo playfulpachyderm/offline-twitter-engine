@@ -3,7 +3,7 @@ package persistence
 import (
 	"fmt"
 
-	"offline_twitter/scraper"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 func (p Profile) SaveChatRoom(r scraper.DMChatRoom) error {
