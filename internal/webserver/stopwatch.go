@@ -11,22 +11,26 @@ var is_for_you_only = true // Do one initial scrape of the "for you" feed and th
 func (app *Application) background_scrape() {
 	// Avoid crashing the thread if a scrape fails
 	defer func() {
-		if err := recover(); err != nil {
+		if r := recover(); r != nil {
 			// TODO
-			fmt.Println("Panicked!")
-			fmt.Printf("%#v\n", err)
+			fmt.Println("Background Home Timeline thread: panicked!")
+			if err, ok := r.(error); ok {
+				fmt.Println(err.Error())
+			} else {
+				fmt.Println(r)
+			}
 		}
 	}()
 
-	fmt.Println("Starting scrape...")
+	fmt.Println("Starting home timeline scrape...")
 
 	// Do nothing if scraping is currently disabled
 	if app.IsScrapingDisabled {
-		fmt.Println("Skipping scrape!")
+		fmt.Println("Skipping home timeline scrape!")
 		return
 	}
 
-	fmt.Println("Scraping...")
+	fmt.Println("Scraping home timeline...")
 	trove, err := scraper.GetHomeTimeline("", is_for_you_only)
 	if err != nil {
 		app.ErrorLog.Printf("Background scrape failed: %s", err.Error())
@@ -38,16 +42,46 @@ func (app *Application) background_scrape() {
 	is_for_you_only = false
 }
 
+func (app *Application) background_user_likes_scrape() {
+	// Avoid crashing the thread if a scrape fails
+	defer func() {
+		if r := recover(); r != nil {
+			// TODO
+			fmt.Println("Background Home Timeline thread: panicked!")
+			if err, ok := r.(error); ok {
+				fmt.Println(err.Error())
+			} else {
+				fmt.Println(r)
+			}
+		}
+	}()
+
+	fmt.Println("Starting user likes scrape...")
+
+	// Do nothing if scraping is currently disabled
+	if app.IsScrapingDisabled {
+		fmt.Println("Skipping user likes scrape!")
+		return
+	}
+
+	fmt.Println("Scraping user likes...")
+	trove, err := scraper.GetUserLikes(app.ActiveUser.ID, 50) // TODO: parameterizable
+	if err != nil {
+		app.ErrorLog.Printf("Background scrape failed: %s", err.Error())
+		return
+	}
+	fmt.Println("Saving scrape results...")
+	app.Profile.SaveTweetTrove(trove)
+	fmt.Println("Scraping succeeded.")
+}
+
 func (app *Application) start_background() {
-	// Start a goroutine to run the background task every 3 minutes
 	fmt.Println("Starting background")
+
+	// Scrape the home timeline every 3 minutes
 	go func() {
-		fmt.Println("Starting routine")
-
-		// Initial delay before the first task execution (0 seconds here, adjust as needed)
-		initialDelay := 10 * time.Second
-		time.Sleep(initialDelay)
-
+		// Initial delay before the first task execution
+		time.Sleep(10 * time.Second)
 		app.background_scrape()
 
 		// Create a timer that triggers the background task every 3 minutes
@@ -56,10 +90,21 @@ func (app *Application) start_background() {
 		defer timer.Stop()
 
 		for range timer.C {
-			// Execute the background task
-			fmt.Println("Starting routine")
-
 			app.background_scrape()
+		}
+	}()
+
+	// Scrape the logged-in user's likes every 10 minutes
+	go func() {
+		time.Sleep(15 * time.Second)
+		app.background_user_likes_scrape()
+
+		interval := 10 * time.Minute // TODO: parameterizable
+		timer := time.NewTicker(interval)
+		defer timer.Stop()
+
+		for range timer.C {
+			app.background_user_likes_scrape()
 		}
 	}()
 }
