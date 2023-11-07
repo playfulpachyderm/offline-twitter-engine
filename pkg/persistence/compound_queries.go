@@ -101,9 +101,7 @@ func (p Profile) fill_content(trove *TweetTrove, current_user_id UserID) {
 	if len(user_ids) > 0 { // It could be a search with no results, end of feed, etc-- strings.Repeat will fail!
 		var users []User
 		userquery := `
-	        select id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified,
-	               is_banned, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path, pinned_tweet_id,
-	               is_content_downloaded, is_followed
+	        select ` + USERS_ALL_SQL_FIELDS + `
 	          from users
 	         where id in (` + strings.Repeat("?,", len(user_ids)-1) + `?)`
 		// fmt.Printf("%s\n", userquery)

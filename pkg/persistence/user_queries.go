@@ -6,8 +6,15 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/jmoiron/sqlx"
+
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
+
+const USERS_ALL_SQL_FIELDS = `
+		id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified,
+		is_banned, is_deleted, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path,
+		pinned_tweet_id, is_content_downloaded, is_followed`
 
 // Save the given User to the database.
 // If the User is already in the database, it will update most of its attributes (follower count, etc)
@@ -100,9 +107,7 @@ func (p Profile) GetUserByHandle(handle scraper.UserHandle) (scraper.User, error
 
 	var ret scraper.User
 	err := db.Get(&ret, `
-	    select id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified,
-	           is_banned, is_deleted, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path,
-	           pinned_tweet_id, is_content_downloaded, is_followed
+	    select `+USERS_ALL_SQL_FIELDS+`
 	      from users
 	     where lower(handle) = lower(?)
 	`, handle)
@@ -126,9 +131,7 @@ func (p Profile) GetUserByID(id scraper.UserID) (scraper.User, error) {
 	var ret scraper.User
 
 	err := db.Get(&ret, `
-	    select id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified,
-	           is_banned, is_deleted, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path,
-	           pinned_tweet_id, is_content_downloaded, is_followed
+	    select `+USERS_ALL_SQL_FIELDS+`
 	      from users
 	     where id = ?
 	`, id)
@@ -260,16 +263,22 @@ func (p Profile) get_profile_image_output_path(u scraper.User) string {
 // Do a text search for users
 func (p Profile) SearchUsers(s string) []scraper.User {
 	var ret []scraper.User
-	val := fmt.Sprintf("%%%s%%", s)
-	err := p.DB.Select(&ret, `
-	    select id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified,
-	           is_banned, is_deleted, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path,
-	           pinned_tweet_id, is_content_downloaded, is_followed
+	q, args, err := sqlx.Named(`
+		select `+USERS_ALL_SQL_FIELDS+`
 	      from users
-	     where handle like ?
-	        or display_name like ?
-	     order by followers_count desc
-	`, val, val)
+	     where handle like :val
+	        or display_name like :val
+	     order by handle like :val or display_name like :val desc,
+	              followers_count desc
+	     `,
+		struct {
+			Val string `db:"val"`
+		}{fmt.Sprintf("%%%s%%", s)},
+	)
+	if err != nil {
+		panic(err)
+	}
+	err = p.DB.Select(&ret, q, args...)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		panic(err)
 	}
