@@ -302,6 +302,18 @@ func TestSearchWithSortOrder(t *testing.T) {
 	}
 }
 
+func TestSearchUsers(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/search/no?type=users", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	user_elements := cascadia.QueryAll(root, selector(".users-list-container .user"))
+	assert.Len(user_elements, 2)
+}
+
 // Search bar pasted link redirects
 // --------------------------------
 
