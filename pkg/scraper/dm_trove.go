@@ -5,9 +5,9 @@ import (
 )
 
 type DMTrove struct {
-	Rooms      map[DMChatRoomID]DMChatRoom
-	Messages   map[DMMessageID]DMMessage
-	TweetTrove TweetTrove
+	Rooms    map[DMChatRoomID]DMChatRoom
+	Messages map[DMMessageID]DMMessage
+	TweetTrove
 }
 
 func NewDMTrove() DMTrove {

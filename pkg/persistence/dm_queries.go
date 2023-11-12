@@ -3,10 +3,10 @@ package persistence
 import (
 	"fmt"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-func (p Profile) SaveChatRoom(r scraper.DMChatRoom) error {
+func (p Profile) SaveChatRoom(r DMChatRoom) error {
 	_, err := p.DB.NamedExec(`
 		insert into chat_rooms (id, type, last_messaged_at, is_nsfw)
 					    values (:id, :type, :last_messaged_at, :is_nsfw)
@@ -61,7 +61,7 @@ func (p Profile) SaveChatRoom(r scraper.DMChatRoom) error {
 	return nil
 }
 
-func (p Profile) GetChatRoom(id scraper.DMChatRoomID) (ret scraper.DMChatRoom, err error) {
+func (p Profile) GetChatRoom(id DMChatRoomID) (ret DMChatRoom, err error) {
 	err = p.DB.Get(&ret, `
         select id, type, last_messaged_at, is_nsfw
           from chat_rooms
@@ -71,7 +71,7 @@ func (p Profile) GetChatRoom(id scraper.DMChatRoomID) (ret scraper.DMChatRoom, e
 		return ret, fmt.Errorf("Error getting chat room (%s):\n  %w", id, err)
 	}
 
-	participants := []scraper.DMChatParticipant{}
+	participants := []DMChatParticipant{}
 	err = p.DB.Select(&participants, `
 		select chat_room_id, user_id, last_read_event_id, is_chat_settings_valid, is_notifications_disabled,
 		       is_mention_notifications_disabled, is_read_only, is_trusted, is_muted, status
@@ -82,14 +82,14 @@ func (p Profile) GetChatRoom(id scraper.DMChatRoomID) (ret scraper.DMChatRoom, e
 	if err != nil {
 		return ret, fmt.Errorf("Error getting chat room participants (%s):\n  %w", id, err)
 	}
-	ret.Participants = make(map[scraper.UserID]scraper.DMChatParticipant)
+	ret.Participants = make(map[UserID]DMChatParticipant)
 	for _, p := range participants {
 		ret.Participants[p.UserID] = p
 	}
 	return ret, nil
 }
 
-func (p Profile) SaveChatMessage(m scraper.DMMessage) error {
+func (p Profile) SaveChatMessage(m DMMessage) error {
 	_, err := p.DB.NamedExec(`
 		insert into chat_messages (id, chat_room_id, sender_id, sent_at, request_id, in_reply_to_id, text)
 		values (:id, :chat_room_id, :sender_id, :sent_at, :request_id, :in_reply_to_id, :text)
@@ -115,7 +115,7 @@ func (p Profile) SaveChatMessage(m scraper.DMMessage) error {
 	return nil
 }
 
-func (p Profile) GetChatMessage(id scraper.DMMessageID) (ret scraper.DMMessage, err error) {
+func (p Profile) GetChatMessage(id DMMessageID) (ret DMMessage, err error) {
 	err = p.DB.Get(&ret, `
 		select id, chat_room_id, sender_id, sent_at, request_id, text, in_reply_to_id
 		  from chat_messages
@@ -126,7 +126,7 @@ func (p Profile) GetChatMessage(id scraper.DMMessageID) (ret scraper.DMMessage, 
 		return ret, fmt.Errorf("Error getting chat message (%d):\n  %w", id, err)
 	}
 
-	reaccs := []scraper.DMReaction{}
+	reaccs := []DMReaction{}
 	err = p.DB.Select(&reaccs, `
 		select id, message_id, sender_id, sent_at, emoji
 		  from chat_message_reactions
@@ -136,7 +136,7 @@ func (p Profile) GetChatMessage(id scraper.DMMessageID) (ret scraper.DMMessage, 
 	if err != nil {
 		return ret, fmt.Errorf("Error getting reactions to chat message (%d):\n  %w", id, err)
 	}
-	ret.Reactions = make(map[scraper.UserID]scraper.DMReaction)
+	ret.Reactions = make(map[UserID]DMReaction)
 	for _, r := range reaccs {
 		ret.Reactions[r.SenderID] = r
 	}

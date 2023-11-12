@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 func TestSaveAndLoadChatRoom(t *testing.T) {
@@ -18,7 +18,7 @@ func TestSaveAndLoadChatRoom(t *testing.T) {
 
 	chat_room := create_dummy_chat_room()
 	chat_room.Type = "fnort"
-	primary_user, is_ok := chat_room.Participants[scraper.UserID(-1)]
+	primary_user, is_ok := chat_room.Participants[UserID(-1)]
 	require.True(is_ok)
 	primary_user.Status = fmt.Sprintf("status for %s", chat_room.ID)
 	chat_room.Participants[primary_user.UserID] = primary_user
@@ -43,12 +43,12 @@ func TestModifyChatRoom(t *testing.T) {
 
 	// Save it
 	chat_room := create_dummy_chat_room()
-	chat_room.LastMessagedAt = scraper.TimestampFromUnix(2)
+	chat_room.LastMessagedAt = TimestampFromUnix(2)
 	err := profile.SaveChatRoom(chat_room)
 	require.NoError(err)
 
 	// Modify it
-	chat_room.LastMessagedAt = scraper.TimestampFromUnix(35)
+	chat_room.LastMessagedAt = TimestampFromUnix(35)
 	err = profile.SaveChatRoom(chat_room)
 	require.NoError(err)
 
@@ -56,7 +56,7 @@ func TestModifyChatRoom(t *testing.T) {
 	new_chat_room, err := profile.GetChatRoom(chat_room.ID)
 	require.NoError(err)
 
-	assert.Equal(t, new_chat_room.LastMessagedAt, scraper.TimestampFromUnix(35))
+	assert.Equal(t, new_chat_room.LastMessagedAt, TimestampFromUnix(35))
 }
 
 func TestModifyChatParticipant(t *testing.T) {
@@ -70,16 +70,16 @@ func TestModifyChatParticipant(t *testing.T) {
 	require.NoError(err)
 
 	// Add a participant and modify the existing one
-	primary_user, is_ok := chat_room.Participants[scraper.UserID(-1)]
+	primary_user, is_ok := chat_room.Participants[UserID(-1)]
 	require.True(is_ok)
 	primary_user.IsReadOnly = true
-	primary_user.LastReadEventID = scraper.DMMessageID(1500)
+	primary_user.LastReadEventID = DMMessageID(1500)
 	chat_room.Participants[primary_user.UserID] = primary_user
 	new_user := create_dummy_user()
-	chat_room.Participants[new_user.ID] = scraper.DMChatParticipant{
+	chat_room.Participants[new_user.ID] = DMChatParticipant{
 		DMChatRoomID:        chat_room.ID,
 		UserID:              new_user.ID,
-		LastReadEventID:     scraper.DMMessageID(0),
+		LastReadEventID:     DMMessageID(0),
 		IsChatSettingsValid: false,
 	}
 
@@ -133,11 +133,11 @@ func TestAddReactionToChatMessage(t *testing.T) {
 
 	// Add a reaction
 	new_user := create_dummy_user()
-	message.Reactions[new_user.ID] = scraper.DMReaction{
-		ID:          scraper.DMMessageID(message.ID + 10),
+	message.Reactions[new_user.ID] = DMReaction{
+		ID:          DMMessageID(message.ID + 10),
 		DMMessageID: message.ID,
 		SenderID:    new_user.ID,
-		SentAt:      scraper.TimestampFromUnix(51000),
+		SentAt:      TimestampFromUnix(51000),
 		Emoji:       "🅱",
 	}
 	require.NoError(profile.SaveUser(&new_user))

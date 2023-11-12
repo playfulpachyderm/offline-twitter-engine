@@ -2,6 +2,10 @@ package scraper
 
 type DMChatRoomID string
 
+// A participant in a chat room.
+//
+// Most settings will only be fetched for the logged-in user (other chat members will just be "false" for
+// everything).  The "IsChatSettingsValid" flag indicates whether this is the case.
 type DMChatParticipant struct {
 	DMChatRoomID    DMChatRoomID `db:"chat_room_id"`
 	UserID          UserID       `db:"user_id"`

@@ -1,7 +1,6 @@
 package webserver
 
 import (
-	// "errors"
 	"net/http"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
