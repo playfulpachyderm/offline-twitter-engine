@@ -52,7 +52,8 @@ INSERT INTO users VALUES
     (97706,1159179478582603776,'Evelyn Kokemoor','EKokemoor','mars/wisconsin ⚧️⚢ ~macrep-racdec',256,139,'','',1565204898,0,0,0,'https://pbs.twimg.com/profile_images/1643762712868970497/r9JyQjKg.jpg','EKokemoor_profile_r9JyQjKg.jpg','https://pbs.twimg.com/profile_banners/1159179478582603776/1626219975','EKokemoor_banner_1626219975.jpg',1540465706139090944,0,0,0,0),
     (160242,534463724,'iko','ilyakooo0',replace('Code poet.\n~racfer-hattes','\n',char(10)),473,173,'','http://iko.soy',1332519666,0,0,0,'https://pbs.twimg.com/profile_images/1671427114438909952/8v8raTeb.jpg','ilyakooo0_profile_8v8raTeb.jpg','','',0,0,0,0,0),
     (169994,1689006330235760640,'sol🏴‍☠️','sol_plunder','',165,134,'','',1691525490,0,0,0,'https://pbs.twimg.com/profile_images/1689006644905033728/T1uO4Jvt.jpg','sol_plunder_profile_T1uO4Jvt.jpg','','',1704554384930058537,0,0,0,0),
-    (1680,1458284524761075714,'wispem-wantex','wispem_wantex',replace('~wispem-wantex\n\nCurrently looking for work (DMs open)','\n',char(10)),136,483,'on my computer','https://offline-twitter.com/',1636517116,0,0,0,'https://pbs.twimg.com/profile_images/1462880679687954433/dXJN4Bo4.jpg','wispem_wantex_profile_dXJN4Bo4.jpg','','',1695221528617468324,1,0,0,0);
+    (1680,1458284524761075714,'wispem-wantex','wispem_wantex',replace('~wispem-wantex\n\nCurrently looking for work (DMs open)','\n',char(10)),136,483,'on my computer','https://offline-twitter.com/',1636517116,0,0,0,'https://pbs.twimg.com/profile_images/1462880679687954433/dXJN4Bo4.jpg','wispem_wantex_profile_dXJN4Bo4.jpg','','',1695221528617468324,1,0,0,0),
+    (27398,1488963321701171204,'Offline Twatter','Offline_Twatter',replace('Offline Twitter is an open source twitter client and tweet-archiving app all in one.  Try it out!\n\nSource code: https://t.co/2PMumKSxFO','\n',char(10)),4,2,'','https://offline-twitter.com',1643831522,0,0,0,'https://pbs.twimg.com/profile_images/1507883049853210626/TytFbk_3.jpg','Offline_Twatter_profile_TytFbk_3.jpg','','',1507883724615999488,1,1,0,0);
 
 create table tombstone_types (rowid integer primary key,
     short_name text not null unique,
@@ -337,6 +338,9 @@ create table chat_rooms (rowid integer primary key,
     last_messaged_at integer not null,
     is_nsfw boolean not null
 );
+INSERT INTO chat_rooms VALUES
+    (1,'1458284524761075714-1488963321701171204','ONE_TO_ONE',1686025129132,0),
+    (2,'1488963321701171204-1178839081222115328','ONE_TO_ONE',1686025129144,0);
 
 create table chat_room_participants(rowid integer primary key,
     chat_room_id text not null,
@@ -351,6 +355,11 @@ create table chat_room_participants(rowid integer primary key,
     status text not null,
     unique(chat_room_id, user_id)
 );
+INSERT INTO chat_room_participants VALUES
+    (1,'1458284524761075714-1488963321701171204',1458284524761075714,1665936253483614212,0,0,0,0,0,0,''),
+    (2,'1458284524761075714-1488963321701171204',1488963321701171204,1665936253483614212,1,0,0,0,1,0,'AT_END'),
+    (3,'1488963321701171204-1178839081222115328',1488963321701171204,1686075343331,1,0,0,0,1,0,'AT_END'),
+    (4,'1488963321701171204-1178839081222115328',1178839081222115328,1686075343331,0,0,0,0,0,0,'');
 
 create table chat_messages (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
@@ -363,6 +372,18 @@ create table chat_messages (rowid integer primary key,
     foreign key(chat_room_id) references chat_rooms(id)
     foreign key(sender_id) references users(id)
 );
+INSERT INTO chat_messages VALUES
+    (1,1663623062195957773,'1458284524761075714-1488963321701171204',1488963321701171204,1685473621419,'',0,'Yes helo'),
+    (2,1663623203644751885,'1458284524761075714-1488963321701171204',1458284524761075714,1685473655064,'',0,'Yeah i know who you are lol'),
+    (3,1665922180176044037,'1458284524761075714-1488963321701171204',1458284524761075714,1686021773787,'',1663623062195957773,'Yes?'),
+    (4,1665936253483614212,'1458284524761075714-1488963321701171204',1458284524761075714,1686025129132,'',0,replace('Check this out\nhttps://t.co/rHeWGgNIZ1','\n',char(10))),
+    (5,1665936253483614213,'1488963321701171204-1178839081222115328',1488963321701171204,1686025129140,'',0,'bruh1'),
+    (6,1665936253483614214,'1488963321701171204-1178839081222115328',1178839081222115328,1686025129141,'',0,'bruh2'),
+    (7,1665936253483614215,'1488963321701171204-1178839081222115328',1178839081222115328,1686025129142,'',1665936253483614214,'replying to bruh2'),
+    (8,1665936253483614216,'1488963321701171204-1178839081222115328',1488963321701171204,1686025129143,'',0,'This conversation is totally fake lol'),
+    (9,1665936253483614217,'1488963321701171204-1178839081222115328',1178839081222115328,1686025129144,'',0,'exactly');
+
+
 
 create table chat_message_reactions (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
@@ -373,6 +394,10 @@ create table chat_message_reactions (rowid integer primary key,
     foreign key(message_id) references chat_messages(id)
     foreign key(sender_id) references users(id)
 );
+INSERT INTO chat_message_reactions VALUES
+    (1,1665914315742781440,1663623062195957773,1458284524761075714,1686019898732,'😂'),
+    (2,1665936253487546456,1665936253483614216,1488963321701171204,1686063453455,'🤔'),
+    (3,1665936253834578774,1665936253483614216,1178839081222115328,1686075343331,'🤔');
 
 
 create table fake_user_sequence(latest_fake_id integer not null);

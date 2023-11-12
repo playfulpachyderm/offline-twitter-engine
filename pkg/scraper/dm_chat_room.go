@@ -20,13 +20,16 @@ type DMChatParticipant struct {
 	Status                         string `db:"status"`
 }
 
+// A chat room. Stores a map of chat participants and a reference to the most recent message,
+// for preview purposes.
 type DMChatRoom struct {
 	ID             DMChatRoomID `db:"id"`
 	Type           string       `db:"type"`
-	LastMessagedAt Timestamp    `db:"last_messaged_at"`
+	LastMessagedAt Timestamp    `db:"last_messaged_at"` // Used for ordering the chats in the UI
 	IsNSFW         bool         `db:"is_nsfw"`
 
-	Participants map[UserID]DMChatParticipant
+	LastMessageID DMMessageID `db:"last_message_id"` // Not stored, but used to generate preview
+	Participants  map[UserID]DMChatParticipant
 }
 
 func ParseAPIDMChatRoom(api_room APIDMConversation) DMChatRoom {

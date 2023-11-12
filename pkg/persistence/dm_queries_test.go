@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -150,4 +151,74 @@ func TestAddReactionToChatMessage(t *testing.T) {
 	if diff := deep.Equal(message, new_message); diff != nil {
 		t.Error(diff)
 	}
+}
+
+func TestGetChatRoomsPreview(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+
+	chat_view := profile.GetChatRoomsPreview(UserID(1458284524761075714))
+	assert.Len(chat_view.Rooms, 1)
+	assert.Len(chat_view.RoomIDs, 1)
+	assert.Equal(chat_view.RoomIDs, []DMChatRoomID{"1458284524761075714-1488963321701171204"})
+
+	room, is_ok := chat_view.Rooms[chat_view.RoomIDs[0]]
+	require.True(is_ok)
+	assert.Equal(room.LastMessageID, DMMessageID(1665936253483614212))
+
+	msg, is_ok := chat_view.Messages[room.LastMessageID]
+	require.True(is_ok)
+	assert.Equal(msg.Text, "Check this out\nhttps://t.co/rHeWGgNIZ1")
+
+	require.Len(room.Participants, 2)
+	for _, user_id := range []UserID{1458284524761075714, 1488963321701171204} {
+		participant, is_ok := room.Participants[user_id]
+		require.True(is_ok)
+		assert.Equal(participant.IsChatSettingsValid, participant.UserID == 1488963321701171204)
+		_, is_ok = chat_view.Users[user_id]
+		require.True(is_ok)
+	}
+}
+
+func TestGetChatRoomContents(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+
+	room_id := DMChatRoomID("1458284524761075714-1488963321701171204")
+	chat_view := profile.GetChatRoomContents(room_id)
+	assert.Len(chat_view.Rooms, 1)
+	room, is_ok := chat_view.Rooms[room_id]
+	require.True(is_ok)
+
+	// Participants
+	require.Len(room.Participants, 2)
+	for _, user_id := range []UserID{1458284524761075714, 1488963321701171204} {
+		participant, is_ok := room.Participants[user_id]
+		require.True(is_ok)
+		assert.Equal(participant.IsChatSettingsValid, participant.UserID == 1488963321701171204)
+		_, is_ok = chat_view.Users[user_id]
+		require.True(is_ok)
+	}
+
+	// Messages
+	require.Equal(chat_view.MessageIDs, []DMMessageID{1663623062195957773, 1663623203644751885, 1665922180176044037, 1665936253483614212})
+	require.Len(chat_view.Messages, 4)
+	for _, msg_id := range chat_view.MessageIDs {
+		msg, is_ok := chat_view.Messages[msg_id]
+		assert.True(is_ok)
+		assert.Equal(msg.ID, msg_id)
+	}
+
+	// Reactions
+	msg_with_reacc := chat_view.Messages[DMMessageID(1663623062195957773)]
+	require.Len(msg_with_reacc.Reactions, 1)
+	reacc, is_ok := msg_with_reacc.Reactions[UserID(1458284524761075714)]
+	require.True(is_ok)
+	assert.Equal(reacc.Emoji, "😂")
 }

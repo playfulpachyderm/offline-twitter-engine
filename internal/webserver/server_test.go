@@ -564,5 +564,5 @@ func TestLists(t *testing.T) {
 	resp := do_request(httptest.NewRequest("GET", "/lists", nil))
 	root, err := html.Parse(resp.Body)
 	assert.NoError(err)
-	assert.Len(cascadia.QueryAll(root, selector(".users-list-container .author-info")), 4)
+	assert.Len(cascadia.QueryAll(root, selector(".users-list-container .author-info")), 5)
 }
