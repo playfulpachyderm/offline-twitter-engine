@@ -566,3 +566,45 @@ func TestLists(t *testing.T) {
 	assert.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".users-list-container .author-info")), 5)
 }
+
+// Messages
+// --------
+
+func TestMessages(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	// Boilerplate for setting an active user
+	app := webserver.NewApp(profile)
+	app.IsScrapingDisabled = true
+	app.ActiveUser = scraper.User{ID: 1488963321701171204, Handle: "Offline_Twatter"} // Simulate a login
+
+	// Chat list
+	recorder := httptest.NewRecorder()
+	app.ServeHTTP(recorder, httptest.NewRequest("GET", "/messages", nil))
+	resp := recorder.Result()
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".chat-list .chat")), 2)
+	assert.Len(cascadia.QueryAll(root, selector(".chat-view .dm-message-and-reacts-container")), 0) // No messages until you click on one
+
+	// Chat detail
+	recorder = httptest.NewRecorder()
+	app.ServeHTTP(recorder, httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328", nil))
+	resp = recorder.Result()
+	root, err = html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".chat-list .chat")), 2) // Chat list still renders
+	assert.Len(cascadia.QueryAll(root, selector("#chat-view .dm-message-and-reacts-container")), 5)
+
+	// HTMX version
+	recorder = httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328", nil)
+	req.Header.Set("HX-Request", "true")
+	app.ServeHTTP(recorder, req)
+	resp = recorder.Result()
+	root, err = html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".chat-list")), 0) // No chat list
+	assert.Len(cascadia.QueryAll(root, selector("#chat-view .dm-message-and-reacts-container")), 5)
+}
