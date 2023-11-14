@@ -25,7 +25,7 @@
           <span>Notifications</span>
         </li>
       </a>
-      <a class="unstyled-link" href="#">
+      <a class="unstyled-link" href="/messages">
         <li class="quick-link">
           <img class="svg-icon" src="/static/icons/messages.svg" />
           <span>Messages</span>

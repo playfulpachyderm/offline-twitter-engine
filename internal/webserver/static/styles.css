@@ -208,6 +208,7 @@ h3 {
 .profile-image {
     border-radius: 50%;
     width: 3em;
+    height: 3em;
     display: inline;
     border: 1px solid var(--color-outline-gray);
 }
@@ -221,6 +222,7 @@ h3 {
 }
 .user-feed-header .profile-image {
     width: 8em;
+    height: 8em;
 }
 .tabs-container {
     outline: 1px solid var(--color-outline-gray);
@@ -612,6 +614,7 @@ ul.dropdown-items {
 }
 .users-list-container .author-info .profile-image {
     width: 4em;
+    height: 4em;
 }
 .users-list-container .user {
     border-color: var(--color-twitter-off-white-dark);
@@ -635,4 +638,73 @@ ul.dropdown-items {
 }
 .sort-order-container .sort-order-label {
     font-weight: bold;
+}
+
+.chats-container {
+    display: flex;
+    flex-direction: row;
+
+    /** Setup to allow the two panes to scroll independently **/
+    height: 100vh;
+    padding-top: 4em;
+    margin-top: -4em;
+    box-sizing: border-box;
+}
+.chats-container .chat-list {
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+}
+.chats-container .chat-list .chat {
+    border-bottom: 1px solid var(--color-outline-gray);
+    padding: 0.5em;
+    box-sizing: border-box;
+}
+.chats-container #chat-view {
+    width: 70%;
+    border-left: 1px solid var(--color-outline-gray);
+    overflow-y: scroll;
+    padding: 0.5em;
+    box-sizing: border-box;
+}
+.chats-container #chat-view .our-message {
+    justify-content: flex-end;
+}
+.dm-message-and-reacts-container {
+    display: flex;
+    flex-direction: column;
+    margin: 1em 0;
+}
+p.dm-message-text {
+    display: inline-block;
+    padding: 1em;
+    background-color: #ddd;
+    border-radius: 1em;
+    margin: 0;
+}
+.our-message p.dm-message-text {
+    background-color: var(--color-twitter-blue-light);
+}
+.sender-profile-image-container {
+    display: flex;
+    align-items: flex-end;
+}
+.sender-profile-image-container a {
+    line-height: 0; /* TODO: This is redundant with ".author-info a" rule above */
+}
+.dm-message-container {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5em;
+}
+.our-message .dm-message-container {
+    flex-direction: row-reverse;
+}
+.dm-message-reactions {
+    display: flex;
+    padding: 0 4em;
+}
+.our-message .dm-message-reactions {
+    flex-direction: row-reverse;
 }
