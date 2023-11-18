@@ -492,6 +492,10 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 					// "Show More" replies button in a thread on Tweet Detail page
 					continue
 				}
+				if item.Item.ItemContent.ItemType == "TimelineTweetComposer" {
+					// Composer button
+					continue
+				}
 				trove, err := item.Item.ItemContent.TweetResults.ToTweetTrove()
 				if errors.Is(err, ErrorIsTombstone) {
 					// TODO: do something with tombstones in replies to a Tweet Detail

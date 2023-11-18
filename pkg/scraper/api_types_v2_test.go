@@ -959,3 +959,16 @@ func TestTweetWithImplicitQuotedTombstone(t *testing.T) {
 	assert.True(t2.IsStub)
 	assert.Equal(t2.TombstoneType, "unavailable")
 }
+
+func TestNoFailOnComposerEntry(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/composer_entry_item.json")
+	require.NoError(err)
+	var entry_result APIV2Entry
+	err = json.Unmarshal(data, &entry_result)
+	require.NoError(err)
+
+	trove := entry_result.ToTweetTrove()
+	assert.Len(trove.Tweets, 0)
+}
