@@ -244,7 +244,7 @@ create table chat_message_reactions (rowid integer primary key,
     message_id integer not null,
     sender_id integer not null,
     sent_at integer not null,
-    emoji text not null check (length(emoji) = 1),
+    emoji text not null,
     foreign key(message_id) references chat_messages(id)
     foreign key(sender_id) references users(id)
 );
