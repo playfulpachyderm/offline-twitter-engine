@@ -28,6 +28,16 @@ func (t1 *DMTrove) MergeWith(t2 DMTrove) {
 	t1.TweetTrove.MergeWith(t2.TweetTrove)
 }
 
+func (t DMTrove) GetOldestMessage(id DMChatRoomID) DMMessageID {
+	oldest := DMMessageID(^uint(0) >> 1) // Max integer
+	for _, m := range t.Messages {
+		if m.ID < oldest && m.DMChatRoomID == id {
+			oldest = m.ID
+		}
+	}
+	return oldest
+}
+
 // Returns a DMTrove and the cursor for the next update
 func GetInbox(how_many int) (DMTrove, string) {
 	if !the_api.IsAuthenticated {
@@ -52,4 +62,28 @@ func GetInbox(how_many int) (DMTrove, string) {
 	}
 
 	return trove, cursor
+}
+
+func GetConversation(id DMChatRoomID, max_id DMMessageID, how_many int) DMTrove {
+	if !the_api.IsAuthenticated {
+		log.Fatalf("Fetching DMs can only be done when authenticated.  Please provide `--session [user]`")
+	}
+	dm_response, err := the_api.GetDMConversation(id, max_id)
+	if err != nil {
+		panic(err)
+	}
+
+	trove := dm_response.ToDMTrove()
+	oldest := trove.GetOldestMessage(id)
+	for len(trove.Messages) < how_many && dm_response.Status != "AT_END" {
+		dm_response, err = the_api.GetDMConversation(id, oldest)
+		if err != nil {
+			panic(err)
+		}
+		next_trove := dm_response.ToDMTrove()
+		oldest = next_trove.GetOldestMessage(id)
+		trove.MergeWith(next_trove)
+	}
+
+	return trove
 }

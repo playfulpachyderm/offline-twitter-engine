@@ -67,8 +67,9 @@ type APIInbox struct {
 }
 
 type APIDMResponse struct {
-	InboxInitialState APIInbox `json:"inbox_initial_state"`
-	InboxTimeline     APIInbox `json:"inbox_timeline"`
+	InboxInitialState    APIInbox `json:"inbox_initial_state"`
+	InboxTimeline        APIInbox `json:"inbox_timeline"`
+	ConversationTimeline APIInbox `json:"conversation_timeline"`
 }
 
 func (r APIInbox) ToDMTrove() DMTrove {
@@ -211,4 +212,62 @@ func (api *API) GetInboxTrusted(oldest_id int) (APIInbox, error) {
 	var result APIDMResponse
 	err = api.do_http(url.String(), "", &result)
 	return result.InboxTimeline, err
+}
+
+func (api *API) GetDMConversation(id DMChatRoomID, max_id DMMessageID) (APIInbox, error) {
+	url, err := url.Parse("https://twitter.com/i/api/1.1/dm/conversation/" + string(id) + ".json")
+	if err != nil {
+		panic(err)
+	}
+	query := url.Query()
+	query.Add("max_id", fmt.Sprint(max_id))
+	query.Add("context", "FETCH_DM_CONVERSATION_HISTORY")
+	query.Add("include_profile_interstitial_type", "1")
+	query.Add("include_blocking", "1")
+	query.Add("include_blocked_by", "1")
+	query.Add("include_followed_by", "1")
+	query.Add("include_want_retweets", "1")
+	query.Add("include_mute_edge", "1")
+	query.Add("include_can_dm", "1")
+	query.Add("include_can_media_tag", "1")
+	query.Add("include_ext_has_nft_avatar", "1")
+	query.Add("include_ext_is_blue_verified", "1")
+	query.Add("include_ext_verified_type", "1")
+	query.Add("include_ext_profile_image_shape", "1")
+	query.Add("skip_status", "1")
+	query.Add("dm_secret_conversations_enabled", "false")
+	query.Add("krs_registration_enabled", "true")
+	query.Add("cards_platform", "Web-12")
+	query.Add("include_cards", "1")
+	query.Add("include_ext_alt_text", "true")
+	query.Add("include_ext_limited_action_results", "true")
+	query.Add("include_quote_count", "true")
+	query.Add("include_reply_count", "1")
+	query.Add("tweet_mode", "extended")
+	query.Add("include_ext_views", "true")
+	query.Add("dm_users", "false")
+	query.Add("include_groups", "true")
+	query.Add("include_inbox_timelines", "true")
+	query.Add("include_ext_media_color", "true")
+	query.Add("supports_reactions", "true")
+	query.Add("include_conversation_info", "true")
+	query.Add("ext", strings.Join([]string{
+		"mediaColor",
+		"altText",
+		"mediaStats",
+		"highlightedLabel",
+		"hasNftAvatar",
+		"voiceInfo",
+		"birdwatchPivot",
+		"enrichments",
+		"superFollowMetadata",
+		"unmentionInfo",
+		"editControl",
+		"vibe",
+	}, ","))
+	url.RawQuery = query.Encode()
+
+	var result APIDMResponse
+	err = api.do_http(url.String(), "", &result)
+	return result.ConversationTimeline, err
 }

@@ -377,6 +377,8 @@ tw fetch_inbox
 test $(sqlite3 twitter.db "select count(*) from chat_rooms") -ge "1"
 test $(sqlite3 twitter.db "select count(*) from chat_messages where chat_room_id = '1458284524761075714-1488963321701171204'") -ge "5"
 
+# Test fetch a DM conversation
+tw fetch_dm "1458284524761075714-1488963321701171204"
 
 # TODO: Maybe this file should be broken up into multiple test scripts
 

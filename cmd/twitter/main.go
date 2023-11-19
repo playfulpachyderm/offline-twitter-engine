@@ -161,6 +161,8 @@ func main() {
 		start_webserver(*addr)
 	case "fetch_inbox":
 		fetch_inbox(*how_many)
+	case "fetch_dm":
+		fetch_dm(target, *how_many)
 	default:
 		die(fmt.Sprintf("Invalid operation: %s", operation), true, 3)
 	}
@@ -400,6 +402,17 @@ func start_webserver(addr string) {
 
 func fetch_inbox(how_many int) {
 	trove, _ := scraper.GetInbox(how_many)
+	profile.SaveDMTrove(trove)
+	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)))
+}
+
+func fetch_dm(id string, how_many int) {
+	room, err := profile.GetChatRoom(scraper.DMChatRoomID(id))
+	if err != nil {
+		panic(err)
+	}
+	max_id := scraper.DMMessageID(^uint(0) >> 1)
+	trove := scraper.GetConversation(room.ID, max_id, how_many)
 	profile.SaveDMTrove(trove)
 	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)))
 }

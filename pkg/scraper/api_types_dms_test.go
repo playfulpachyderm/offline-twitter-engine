@@ -116,3 +116,37 @@ func TestParseInbox(t *testing.T) {
 	assert.True(is_ok)
 	assert.Equal(room.ID, room_id)
 }
+
+func TestParseDMRoomResponse(t *testing.T) {
+	assert := assert.New(t)
+	data, err := os.ReadFile("test_responses/dms/dm_conversation_response.json")
+	require.NoError(t, err)
+
+	var inbox APIDMResponse
+	err = json.Unmarshal(data, &inbox)
+	require.NoError(t, err)
+
+	trove := inbox.ConversationTimeline.ToDMTrove()
+
+	for _, id := range []DMMessageID{
+		1663623062195957773,
+		1663623203644751885,
+		1665922180176044037,
+		1665936253483614212,
+		1726009944393372005,
+	} {
+		m, is_ok := trove.Messages[id]
+		assert.True(is_ok, "Message with ID %d not in the trove!")
+		assert.Equal(m.ID, id)
+	}
+	for _, id := range []UserID{1458284524761075714, 1488963321701171204} {
+		u, is_ok := trove.TweetTrove.Users[id]
+		assert.True(is_ok, "User with ID %d not in the trove!")
+		assert.Equal(u.ID, id)
+	}
+	room_id := DMChatRoomID("1458284524761075714-1488963321701171204")
+	room, is_ok := trove.Rooms[room_id]
+	assert.True(is_ok)
+	assert.Equal(room.ID, room_id)
+	assert.Equal(trove.GetOldestMessage(room_id), DMMessageID(1663623062195957773))
+}
