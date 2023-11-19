@@ -399,7 +399,7 @@ func start_webserver(addr string) {
 }
 
 func fetch_inbox(how_many int) {
-	trove := scraper.GetInbox(how_many)
+	trove, _ := scraper.GetInbox(how_many)
 	profile.SaveDMTrove(trove)
 	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)))
 }
