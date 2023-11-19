@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 )
@@ -59,7 +60,7 @@ type APIInbox struct {
 		} `json:"trusted"`
 	} `json:"inbox_timelines"`
 	Entries []struct {
-		Message          APIDMMessage  `json:"message"`
+		Message APIDMMessage `json:"message"`
 	} `json:"entries"`
 	Users         map[string]APIUser           `json:"users"`
 	Conversations map[string]APIDMConversation `json:"conversations"`

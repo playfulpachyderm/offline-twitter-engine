@@ -148,10 +148,10 @@ test $(find images -mindepth 2 | wc -l) = "$((initial_images_count + 1))"
 
 
 # Fetch and attempt to download a DMCAed tweet
-tw fetch_user TyCardon
-tw fetch_tweet_only https://twitter.com/TyCardon/status/1480640777281839106
-tw download_tweet_content 1480640777281839106
-test $(sqlite3 twitter.db "select is_blocked_by_dmca, is_downloaded from videos where tweet_id = 1480640777281839106") = "1|0"
+# tw fetch_user TyCardon # TODO: This guy went private
+# tw fetch_tweet_only https://twitter.com/TyCardon/status/1480640777281839106
+# tw download_tweet_content 1480640777281839106
+# test $(sqlite3 twitter.db "select is_blocked_by_dmca, is_downloaded from videos where tweet_id = 1480640777281839106") = "1|0"
 
 # Fetch a tweet with a poll
 tw fetch_tweet 1465534109573390348
@@ -368,6 +368,14 @@ test $(sqlite3 twitter.db "select count(*) from likes where tweet_id = 158902338
 tw unlike_tweet https://twitter.com/elonmusk/status/1589023388676554753
 # TODO: implement deleting a Like
 # test $(sqlite3 twitter.db "select count(*) from likes where tweet_id = 1589023388676554753 and user_id = (select id from users where handle like 'offline_twatter')") = "0"
+
+
+# Test fetch inbox
+test $(sqlite3 twitter.db "select count(*) from chat_rooms") = "0"
+test $(sqlite3 twitter.db "select count(*) from chat_messages") = "0"
+tw fetch_inbox
+test $(sqlite3 twitter.db "select count(*) from chat_rooms") -ge "1"
+test $(sqlite3 twitter.db "select count(*) from chat_messages where chat_room_id = '1458284524761075714-1488963321701171204'") -ge "5"
 
 
 # TODO: Maybe this file should be broken up into multiple test scripts
