@@ -150,3 +150,24 @@ func TestParseDMRoomResponse(t *testing.T) {
 	assert.Equal(room.ID, room_id)
 	assert.Equal(trove.GetOldestMessage(room_id), DMMessageID(1663623062195957773))
 }
+
+func TestParseInboxUpdates(t *testing.T) {
+	assert := assert.New(t)
+	data, err := os.ReadFile("test_responses/dms/user_updates_simulated.json")
+	require.NoError(t, err)
+
+	var inbox APIDMResponse
+	err = json.Unmarshal(data, &inbox)
+	require.NoError(t, err)
+
+	trove := inbox.UserEvents.ToDMTrove()
+
+	assert.Len(trove.Messages, 2) // Should ignore stuff that isn't a message
+
+	_, is_ok := trove.Messages[1725969457464447135]
+	assert.True(is_ok)
+
+	message_receiving_a_reacc, is_ok := trove.Messages[1725980964718100721]
+	assert.True(is_ok)
+	assert.Len(message_receiving_a_reacc.Reactions, 1)
+}

@@ -75,6 +75,42 @@ func (app *Application) background_user_likes_scrape() {
 	fmt.Println("Scraping succeeded.")
 }
 
+var inbox_cursor string = ""
+
+func (app *Application) background_dm_polling_scrape() {
+	// Avoid crashing the thread if a scrape fails
+	defer func() {
+		if r := recover(); r != nil {
+			// TODO
+			fmt.Println("Background Home Timeline thread: panicked!")
+			if err, ok := r.(error); ok {
+				fmt.Println(err.Error())
+			} else {
+				fmt.Println(r)
+			}
+		}
+	}()
+
+	fmt.Println("Starting user DMs scrape...")
+
+	// Do nothing if scraping is currently disabled
+	if app.IsScrapingDisabled {
+		fmt.Println("Skipping user DMs scrape!")
+		return
+	}
+
+	fmt.Println("Scraping user DMs...")
+	var trove scraper.DMTrove
+	if inbox_cursor == "" {
+		trove, inbox_cursor = scraper.GetInbox(0)
+	} else {
+		trove, inbox_cursor = scraper.PollInboxUpdates(inbox_cursor)
+	}
+	fmt.Println("Saving DM results...")
+	app.Profile.SaveDMTrove(trove)
+	fmt.Println("Scraping DMs succeeded.")
+}
+
 func (app *Application) start_background() {
 	fmt.Println("Starting background")
 
@@ -105,6 +141,19 @@ func (app *Application) start_background() {
 
 		for range timer.C {
 			app.background_user_likes_scrape()
+		}
+	}()
+
+	// Scrape inbox DMs every 10 seconds
+	go func() {
+		time.Sleep(5 * time.Second)
+		app.background_dm_polling_scrape()
+
+		interval := 10 * time.Second
+		timer := time.NewTicker(interval)
+		defer timer.Stop()
+		for range timer.C {
+			app.background_dm_polling_scrape()
 		}
 	}()
 }

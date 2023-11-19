@@ -7,10 +7,11 @@ import (
 )
 
 type APIDMReaction struct {
-	ID       int    `json:"id,string"`
-	Time     int    `json:"time,string"`
-	SenderID int    `json:"sender_id,string"`
-	Emoji    string `json:"emoji_reaction"`
+	ID        int    `json:"id,string"`
+	Time      int    `json:"time,string"`
+	SenderID  int    `json:"sender_id,string"`
+	Emoji     string `json:"emoji_reaction"`
+	MessageID int    `json:"message_id,string"`
 }
 
 type APIDMMessage struct {
@@ -60,7 +61,37 @@ type APIInbox struct {
 		} `json:"trusted"`
 	} `json:"inbox_timelines"`
 	Entries []struct {
-		Message APIDMMessage `json:"message"`
+		Message          APIDMMessage  `json:"message"`
+		ReactionCreate   APIDMReaction `json:"reaction_create"`
+		JoinConversation struct {
+			ID             int    `json:"id,string"`
+			ConversationID string `json:"conversation_id"`
+			SenderID       int    `json:"sender_id,string"`
+			Time           int    `json:"time,string"`
+			Participants   []struct {
+				UserID int `json:"user_id,string"`
+			} `json:"participants"`
+		} `json:"join_conversation"`
+		TrustConversation struct {
+			ID             int    `json:"id,string"`
+			ConversationID string `json:"conversation_id"`
+			Reason         string `json:"reason"`
+			Time           int    `json:"time,string"`
+		} `json:"trust_conversation"`
+		ParticipantsLeave struct {
+			ID             int    `json:"id,string"`
+			ConversationID string `json:"conversation_id"`
+			Time           int    `json:"time,string"`
+			Participants   []struct {
+				UserID int `json:"user_id,string"`
+			} `json:"participants"`
+		} `json:"participants_leave"`
+		ConversationRead struct {
+			ID              int    `json:"id,string"`
+			Time            int    `json:"time,string"`
+			ConversationID  string `json:"conversation_id"`
+			LastReadEventID int    `json:"last_read_event_id,string"`
+		} `json:"conversation_read"`
 	} `json:"entries"`
 	Users         map[string]APIUser           `json:"users"`
 	Conversations map[string]APIDMConversation `json:"conversations"`
@@ -70,13 +101,30 @@ type APIDMResponse struct {
 	InboxInitialState    APIInbox `json:"inbox_initial_state"`
 	InboxTimeline        APIInbox `json:"inbox_timeline"`
 	ConversationTimeline APIInbox `json:"conversation_timeline"`
+	UserEvents           APIInbox `json:"user_events"`
 }
 
 func (r APIInbox) ToDMTrove() DMTrove {
 	ret := NewDMTrove()
 
 	for _, entry := range r.Entries {
+		if entry.JoinConversation.ID != 0 || entry.TrustConversation.ID != 0 ||
+			entry.ParticipantsLeave.ID != 0 || entry.ConversationRead.ID != 0 {
+			// TODO: message invitations
+			// TODO: people join/leave the chat
+			// TODO: updating read/unread indicators
+			continue
+		}
+		if entry.ReactionCreate.ID != 0 {
+			// Convert it into a Message
+			entry.Message.ID = entry.ReactionCreate.MessageID
+			entry.Message.MessageReactions = []APIDMReaction{entry.ReactionCreate}
+		}
 		result := ParseAPIDMMessage(entry.Message)
+		if _, is_ok := ret.Messages[result.ID]; is_ok {
+			// No clobbering
+			panic("Already in the trove: " + fmt.Sprint(result.ID))
+		}
 		ret.Messages[result.ID] = result
 		// TODO: parse Tweet attachments
 	}
@@ -270,4 +318,53 @@ func (api *API) GetDMConversation(id DMChatRoomID, max_id DMMessageID) (APIInbox
 	var result APIDMResponse
 	err = api.do_http(url.String(), "", &result)
 	return result.ConversationTimeline, err
+}
+
+func (api *API) PollInboxUpdates(cursor string) (APIInbox, error) {
+	url, err := url.Parse("https://twitter.com/i/api/1.1/dm/user_updates.json")
+	if err != nil {
+		panic(err)
+	}
+	query := url.Query()
+	query.Add("cursor", cursor)
+	query.Add("nsfw_filtering_enabled", "false")
+	query.Add("filter_low_quality", "true")
+	query.Add("include_quality", "all")
+	query.Add("dm_secret_conversations_enabled", "false")
+	query.Add("krs_registration_enabled", "true")
+	query.Add("cards_platform", "Web-12")
+	query.Add("include_cards", "1")
+	query.Add("include_ext_alt_text", "true")
+	query.Add("include_ext_limited_action_results", "true")
+	query.Add("include_quote_count", "true")
+	query.Add("include_reply_count", "1")
+	query.Add("tweet_mode", "extended")
+	query.Add("include_ext_views", "true")
+	query.Add("dm_users", "false")
+	query.Add("include_groups", "true")
+	query.Add("include_inbox_timelines", "true")
+	query.Add("include_ext_media_color", "true")
+	query.Add("supports_reactions", "true")
+	query.Add("include_ext_edit_control", "true")
+	query.Add("include_ext_business_affiliations_label", "true")
+	query.Add("ext", strings.Join([]string{
+		"mediaColor",
+		"altText",
+		"businessAffiliationsLabel",
+		"mediaStats",
+		"highlightedLabel",
+		"hasNftAvatar",
+		"voiceInfo",
+		"birdwatchPivot",
+		"enrichments",
+		"superFollowMetadata",
+		"unmentionInfo",
+		"editControl",
+		"vibe",
+	}, ","))
+	url.RawQuery = query.Encode()
+
+	var result APIDMResponse
+	err = api.do_http(url.String(), "", &result)
+	return result.UserEvents, err
 }

@@ -87,3 +87,16 @@ func GetConversation(id DMChatRoomID, max_id DMMessageID, how_many int) DMTrove 
 
 	return trove
 }
+
+// Returns a DMTrove and the cursor for the next update
+func PollInboxUpdates(cursor string) (DMTrove, string) {
+	if !the_api.IsAuthenticated {
+		log.Fatalf("Fetching DMs can only be done when authenticated.  Please provide `--session [user]`")
+	}
+	dm_response, err := the_api.PollInboxUpdates(cursor)
+	if err != nil {
+		panic(err)
+	}
+
+	return dm_response.ToDMTrove(), dm_response.Cursor
+}
