@@ -11,7 +11,7 @@
               <img class="profile-image" src="/content/{{$user.GetProfileImageLocalPath}}" />
             </a>
           </div>
-          <p class="dm-message-text">{{$message.Text}}</p>
+          <div class="dm-message-text-container">{{template "text-with-entities" $message.Text}}</div>
         </div>
         <div class="dm-message-reactions">
           {{range $message.Reactions}}
@@ -19,6 +19,9 @@
             <span title="{{$sender.DisplayName}} (@{{$sender.Handle}})">{{.Emoji}}</span>
           {{end}}
         </div>
+        <p class="posted-at">
+          {{$message.SentAt.Time.Format "Jan 2, 2006 @ 3:04 pm"}}
+        </p>
       </div>
     {{end}}
   </div>

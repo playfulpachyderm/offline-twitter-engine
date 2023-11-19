@@ -27,7 +27,7 @@ func (t MessageData) FocusedTweetID() scraper.TweetID {
 }
 
 func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'Lists' handler (path: %q)", r.URL.Path)
+	app.traceLog.Printf("'Messages' handler (path: %q)", r.URL.Path)
 
 	// TODO: what if no active user?
 

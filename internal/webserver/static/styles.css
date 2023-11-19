@@ -148,11 +148,14 @@ a.entity {
     color: var(--color-twitter-blue);
 }
 
-.tweet .text {
+.tweet .text, .dm-message-text-container .text {
     display: block;
     margin-bottom: 0.4em;
     margin-top: 0;
     overflow-wrap: anywhere;
+}
+.dm-message-text-container .text:last-child {
+    margin-bottom: 0;
 }
 #focused-tweet .text {
     font-size: 1.4em;
@@ -651,39 +654,57 @@ ul.dropdown-items {
     box-sizing: border-box;
 }
 .chats-container .chat-list {
-    width: 30%;
+    flex-basis: 0;
+    flex-grow: 4;
     display: flex;
     flex-direction: column;
     overflow-y: scroll;
 }
 .chats-container .chat-list .chat {
     border-bottom: 1px solid var(--color-outline-gray);
-    padding: 0.5em;
+    padding: 1em 1em 0 1em;
     box-sizing: border-box;
+    cursor: pointer;
 }
+.chats-container .chat-list .chat .chat-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.chats-container .chat-list .chat .chat-preview-header .posted-at {
+    margin: 0;
+}
+.chats-container .chat-list .chat .chat-preview {
+    font-size: 0.9em;
+    color: var(--color-twitter-text-gray);
+    padding: 0 1em;
+    border-left: 1px solid var(--color-outline-gray);
+}
+
 .chats-container #chat-view {
-    width: 70%;
+    flex-basis: 0;
+    flex-grow: 7;
     border-left: 1px solid var(--color-outline-gray);
     overflow-y: scroll;
     padding: 0.5em;
     box-sizing: border-box;
 }
 .chats-container #chat-view .our-message {
-    justify-content: flex-end;
+    align-items: flex-end;
 }
 .dm-message-and-reacts-container {
     display: flex;
     flex-direction: column;
     margin: 1em 0;
 }
-p.dm-message-text {
+.dm-message-text-container {
     display: inline-block;
     padding: 1em;
     background-color: #ddd;
     border-radius: 1em;
     margin: 0;
 }
-.our-message p.dm-message-text {
+.our-message .dm-message-text-container {
     background-color: var(--color-twitter-blue-light);
 }
 .sender-profile-image-container {
@@ -707,4 +728,7 @@ p.dm-message-text {
 }
 .our-message .dm-message-reactions {
     flex-direction: row-reverse;
+}
+.dm-message-and-reacts-container p.posted-at {
+    margin: 0 4.5em;
 }

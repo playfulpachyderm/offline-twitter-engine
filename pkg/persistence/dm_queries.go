@@ -1,6 +1,8 @@
 package persistence
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -188,7 +190,10 @@ func (p Profile) GetChatRoomsPreview(id UserID) DMChatView {
 			panic(err)
 		}
 		err = p.DB.Get(&msg, q, args...)
-		if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			// TODO
+			fmt.Printf("No messages found in chat; skipping preview\n")
+		} else if err != nil {
 			panic(err)
 		}
 
