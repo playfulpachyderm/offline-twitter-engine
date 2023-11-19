@@ -99,7 +99,7 @@ func TestParseInbox(t *testing.T) {
 	err = json.Unmarshal(data, &inbox)
 	require.NoError(t, err)
 
-	trove := inbox.ToDMTrove()
+	trove := inbox.InboxInitialState.ToDMTrove()
 
 	for _, id := range []DMMessageID{1663623062195957773, 1663623203644751885, 1665922180176044037, 1665936253483614212} {
 		m, is_ok := trove.Messages[id]

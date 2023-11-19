@@ -28,7 +28,8 @@ func (t1 *DMTrove) MergeWith(t2 DMTrove) {
 	t1.TweetTrove.MergeWith(t2.TweetTrove)
 }
 
-func GetInbox() DMTrove {
+// Returns a DMTrove and the cursor for the next update
+func GetInbox(how_many int) (DMTrove, string) {
 	if !the_api.IsAuthenticated {
 		log.Fatalf("Fetching DMs can only be done when authenticated.  Please provide `--session [user]`")
 	}
@@ -36,5 +37,19 @@ func GetInbox() DMTrove {
 	if err != nil {
 		panic(err)
 	}
-	return dm_response.ToDMTrove()
+
+	trove := dm_response.ToDMTrove()
+	cursor := dm_response.Cursor
+	next_cursor_id := dm_response.InboxTimelines.Trusted.MinEntryID
+	for len(trove.Rooms) < how_many && dm_response.Status != "AT_END" {
+		dm_response, err = the_api.GetInboxTrusted(next_cursor_id)
+		if err != nil {
+			panic(err)
+		}
+		next_trove := dm_response.ToDMTrove()
+		next_cursor_id = dm_response.MinEntryID
+		trove.MergeWith(next_trove)
+	}
+
+	return trove, cursor
 }

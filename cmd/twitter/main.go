@@ -160,7 +160,7 @@ func main() {
 	case "webserver":
 		start_webserver(*addr)
 	case "fetch_inbox":
-		fetch_inbox()
+		fetch_inbox(*how_many)
 	default:
 		die(fmt.Sprintf("Invalid operation: %s", operation), true, 3)
 	}
@@ -398,8 +398,8 @@ func start_webserver(addr string) {
 	app.Run(addr)
 }
 
-func fetch_inbox() {
-	trove := scraper.GetInbox()
+func fetch_inbox(how_many int) {
+	trove := scraper.GetInbox(how_many)
 	profile.SaveDMTrove(trove)
 	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)))
 }
