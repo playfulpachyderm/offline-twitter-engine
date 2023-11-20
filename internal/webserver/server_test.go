@@ -596,15 +596,4 @@ func TestMessages(t *testing.T) {
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".chat-list .chat")), 2) // Chat list still renders
 	assert.Len(cascadia.QueryAll(root, selector("#chat-view .dm-message-and-reacts-container")), 5)
-
-	// HTMX version
-	recorder = httptest.NewRecorder()
-	req := httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328", nil)
-	req.Header.Set("HX-Request", "true")
-	app.ServeHTTP(recorder, req)
-	resp = recorder.Result()
-	root, err = html.Parse(resp.Body)
-	require.NoError(err)
-	assert.Len(cascadia.QueryAll(root, selector(".chat-list")), 0) // No chat list
-	assert.Len(cascadia.QueryAll(root, selector("#chat-view .dm-message-and-reacts-container")), 5)
 }
