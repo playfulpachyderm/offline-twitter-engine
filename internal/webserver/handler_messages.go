@@ -37,14 +37,7 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 		chat_contents := app.Profile.GetChatRoomContents(chat_view.ActiveRoomID)
 		chat_view.MergeWith(chat_contents.DMTrove)
 		chat_view.MessageIDs = chat_contents.MessageIDs
-
 	}
 
 	app.buffered_render_tweet_page(w, "tpl/messages.tpl", MessageData(chat_view))
 }
-
-// type DMChatView struct {
-// 	scraper.DMTrove
-// 	RoomIDs    []scraper.DMChatRoomID
-// 	MessageIDs []scraper.DMMessageID
-// }
