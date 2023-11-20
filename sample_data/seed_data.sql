@@ -336,11 +336,19 @@ create table chat_rooms (rowid integer primary key,
     id text unique not null,
     type text not null,
     last_messaged_at integer not null,
-    is_nsfw boolean not null
+    is_nsfw boolean not null,
+
+    -- Group DM info
+    created_at integer not null default 0,
+    created_by_user_id integer not null default 0,
+    name text not null default '',
+    avatar_image_remote_url text not null default '',
+    avatar_image_local_path text not null default ''
 );
+
 INSERT INTO chat_rooms VALUES
-    (1,'1458284524761075714-1488963321701171204','ONE_TO_ONE',1686025129132,0),
-    (2,'1488963321701171204-1178839081222115328','ONE_TO_ONE',1686025129144,0);
+    (1,'1458284524761075714-1488963321701171204','ONE_TO_ONE',1686025129132,0,0,0,'','',''),
+    (2,'1488963321701171204-1178839081222115328','ONE_TO_ONE',1686025129144,0,0,0,'','','');
 
 create table chat_room_participants(rowid integer primary key,
     chat_room_id text not null,

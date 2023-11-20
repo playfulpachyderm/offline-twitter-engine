@@ -33,15 +33,11 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 
 	chat_view := app.Profile.GetChatRoomsPreview(app.ActiveUser.ID)
 	if strings.Trim(r.URL.Path, "/") != "" {
-		message_id := scraper.DMChatRoomID(strings.Trim(r.URL.Path, "/"))
-		chat_contents := app.Profile.GetChatRoomContents(message_id)
+		chat_view.ActiveRoomID = scraper.DMChatRoomID(strings.Trim(r.URL.Path, "/"))
+		chat_contents := app.Profile.GetChatRoomContents(chat_view.ActiveRoomID)
 		chat_view.MergeWith(chat_contents.DMTrove)
 		chat_view.MessageIDs = chat_contents.MessageIDs
 
-		if r.Header.Get("HX-Request") == "true" {
-			app.buffered_render_tweet_htmx(w, "chat-view", MessageData(chat_view))
-			return
-		}
 	}
 
 	app.buffered_render_tweet_page(w, "tpl/messages.tpl", MessageData(chat_view))

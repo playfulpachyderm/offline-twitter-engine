@@ -90,6 +90,35 @@ func TestParseAPIDMConversation(t *testing.T) {
 	assert.False(p2.IsChatSettingsValid)
 }
 
+func TestParseAPIDMGroupChat(t *testing.T) {
+	assert := assert.New(t)
+	data, err := os.ReadFile("test_responses/dms/chat_room_group_chat.json")
+	require.NoError(t, err)
+
+	var api_room APIDMConversation
+	err = json.Unmarshal(data, &api_room)
+	require.NoError(t, err)
+
+	// Simulate one of the participants being logged in
+	InitApi(API{UserID: 1458284524761075714})
+
+	chat_room := ParseAPIDMChatRoom(api_room)
+	assert.Equal(DMChatRoomID("1710215025518948715"), chat_room.ID)
+	assert.Equal("GROUP_DM", chat_room.Type)
+	assert.Equal(TimestampFromUnix(1700112789457), chat_room.LastMessagedAt)
+	assert.False(chat_room.IsNSFW)
+
+	// Group DM settings
+	assert.Equal(chat_room.CreatedAt, TimestampFromUnix(1696582011))
+	assert.Equal(chat_room.CreatedByUserID, UserID(2694459866))
+	assert.Equal(chat_room.Name, "Schön ist die Welt")
+	assert.Equal(chat_room.AvatarImageRemoteURL,
+		"https://pbs.twimg.com/dm_group_img/1722785857403240448/3Wt_yJEq6i_G-kAT2rXheTojjhqkYE3okoW5JGUUHY7J9D8O9o?format=jpg&name=orig")
+	assert.Equal(chat_room.AvatarImageLocalPath, "1710215025518948715_avatar_3Wt_yJEq6i_G-kAT2rXheTojjhqkYE3okoW5JGUUHY7J9D8O9o.jpg")
+
+	assert.Len(chat_room.Participants, 5)
+}
+
 func TestParseInbox(t *testing.T) {
 	assert := assert.New(t)
 	data, err := os.ReadFile("test_responses/dms/inbox.json")

@@ -1,5 +1,11 @@
 package scraper
 
+import (
+	"fmt"
+	"net/url"
+	"path"
+)
+
 type DMChatRoomID string
 
 // A participant in a chat room.
@@ -28,6 +34,13 @@ type DMChatRoom struct {
 	LastMessagedAt Timestamp    `db:"last_messaged_at"` // Used for ordering the chats in the UI
 	IsNSFW         bool         `db:"is_nsfw"`
 
+	// GROUP_DM rooms
+	CreatedAt            Timestamp `db:"created_at"`
+	CreatedByUserID      UserID    `db:"created_by_user_id"`
+	Name                 string    `db:"name"`
+	AvatarImageRemoteURL string    `db:"avatar_image_remote_url"`
+	AvatarImageLocalPath string    `db:"avatar_image_local_path"`
+
 	LastMessageID DMMessageID `db:"last_message_id"` // Not stored, but used to generate preview
 	Participants  map[UserID]DMChatParticipant
 }
@@ -38,6 +51,18 @@ func ParseAPIDMChatRoom(api_room APIDMConversation) DMChatRoom {
 	ret.Type = api_room.Type
 	ret.LastMessagedAt = TimestampFromUnix(int64(api_room.SortTimestamp))
 	ret.IsNSFW = api_room.NSFW
+
+	if ret.Type == "GROUP_DM" {
+		ret.CreatedAt = TimestampFromUnix(int64(api_room.CreateTime / 1000))
+		ret.CreatedByUserID = UserID(api_room.CreatedByUserID)
+		ret.Name = api_room.Name
+		ret.AvatarImageRemoteURL = api_room.AvatarImage
+		tmp_url, err := url.Parse(ret.AvatarImageRemoteURL)
+		if err != nil {
+			panic(err)
+		}
+		ret.AvatarImageLocalPath = fmt.Sprintf("%s_avatar_%s.%s", ret.ID, path.Base(tmp_url.Path), tmp_url.Query().Get("format"))
+	}
 
 	ret.Participants = make(map[UserID]DMChatParticipant)
 	for _, api_participant := range api_room.Participants {

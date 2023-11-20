@@ -13,10 +13,15 @@ import (
 
 func (p Profile) SaveChatRoom(r DMChatRoom) error {
 	_, err := p.DB.NamedExec(`
-		insert into chat_rooms (id, type, last_messaged_at, is_nsfw)
-					    values (:id, :type, :last_messaged_at, :is_nsfw)
-         on conflict do update
-                           set last_messaged_at=:last_messaged_at
+		insert into chat_rooms (id, type, last_messaged_at, is_nsfw, created_at, created_by_user_id, name,
+		                        avatar_image_remote_url, avatar_image_local_path)
+		                values (:id, :type, :last_messaged_at, :is_nsfw, :created_at, :created_by_user_id, :name,
+		                        :avatar_image_remote_url, :avatar_image_local_path)
+		 on conflict do update
+		                   set last_messaged_at=:last_messaged_at,
+		                       name=:name,
+		                       avatar_image_remote_url=:avatar_image_remote_url,
+		                       avatar_image_local_path=:avatar_image_local_path
 		`, r,
 	)
 	if err != nil {
@@ -68,7 +73,7 @@ func (p Profile) SaveChatRoom(r DMChatRoom) error {
 
 func (p Profile) GetChatRoom(id DMChatRoomID) (ret DMChatRoom, err error) {
 	err = p.DB.Get(&ret, `
-        select id, type, last_messaged_at, is_nsfw
+        select id, type, last_messaged_at, is_nsfw, created_at, created_by_user_id, name, avatar_image_remote_url, avatar_image_local_path
           from chat_rooms
          where id = ?
     `, id)
@@ -150,8 +155,9 @@ func (p Profile) GetChatMessage(id DMMessageID) (ret DMMessage, err error) {
 
 type DMChatView struct {
 	DMTrove
-	RoomIDs    []DMChatRoomID
-	MessageIDs []DMMessageID
+	RoomIDs      []DMChatRoomID
+	MessageIDs   []DMMessageID
+	ActiveRoomID DMChatRoomID
 }
 
 func NewDMChatView() DMChatView {
@@ -167,7 +173,8 @@ func (p Profile) GetChatRoomsPreview(id UserID) DMChatView {
 
 	var rooms []DMChatRoom
 	err := p.DB.Select(&rooms, `
-		select id, type, last_messaged_at, is_nsfw
+		select id, type, last_messaged_at, is_nsfw, created_at, created_by_user_id, name,
+		       avatar_image_remote_url, avatar_image_local_path
 		  from chat_rooms
 		 where exists (select 1 from chat_room_participants where chat_room_id = chat_rooms.id and user_id = ?)
 		 order by last_messaged_at desc
@@ -231,7 +238,8 @@ func (p Profile) GetChatRoomContents(id DMChatRoomID) DMChatView {
 	ret := NewDMChatView()
 	var room DMChatRoom
 	err := p.DB.Get(&room, `
-		select id, type, last_messaged_at, is_nsfw
+		select id, type, last_messaged_at, is_nsfw, created_at, created_by_user_id, name,
+		       avatar_image_remote_url, avatar_image_local_path
 	      from chat_rooms
 	     where id = ?
 	`, id)

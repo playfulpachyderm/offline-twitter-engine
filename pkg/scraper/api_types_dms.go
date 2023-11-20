@@ -47,6 +47,12 @@ type APIDMConversation struct {
 	Trusted               bool   `json:"trusted"`
 	Muted                 bool   `json:"muted"`
 	Status                string `json:"status"`
+
+	// For type == "GROUP_DM"
+	CreateTime      int    `json:"create_time,string"`
+	CreatedByUserID int    `json:"created_by_user_id,string"`
+	Name            string `json:"name"`
+	AvatarImage     string `json:"avatar_image_https"`
 }
 
 type APIInbox struct {

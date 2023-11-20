@@ -210,7 +210,14 @@ create table chat_rooms (rowid integer primary key,
     id text unique not null,
     type text not null,
     last_messaged_at integer not null,
-    is_nsfw boolean not null
+    is_nsfw boolean not null,
+
+    -- Group DM info
+    created_at integer not null,
+    created_by_user_id integer not null,
+    name text not null default '',
+    avatar_image_remote_url text not null default '',
+    avatar_image_local_path text not null default ''
 );
 
 create table chat_room_participants(rowid integer primary key,
