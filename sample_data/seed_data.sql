@@ -168,7 +168,8 @@ INSERT INTO tweets VALUES
     (1408673,1698765208393576891,1458284524761075714,'I appreciate the C preprocessor for this cutting insight',1693852161,0,0,0,0,1698764077458202845,1620206875450167296,'EKokemoor','EKokemoor','',NULL,NULL,0,1,0,0,0),
     (1409940,1698797388914151523,1458284524761075714,replace('This looks quite neat, but "comptime" is cool because it was designed to do stuff like declaring arrays where the size is the result of a function call, e.g.\n\nvar my_array: [fibonacci(10)]u32;\n\n...yet being able to create DSLs just emerged from this very simple concept','\n',char(10)),1693859834,2,0,1,0,1698792233619562866,0,'ilyakooo0','ilyakooo0','',NULL,NULL,0,1,0,0,0),
     (1409953,1698802806096846909,1689006330235760640,replace('Just poking around at some examples and explanation videos, It does seem very similar to Template Haskell, though maybe a bit more ergonomic.\n\nIs there something missing from this mental model?','\n',char(10)),1693861125,3,0,1,0,1698797388914151523,0,'wispem_wantex,ilyakooo0','wispem_wantex,ilyakooo0','',NULL,NULL,0,1,0,0,0),
-    (1411566,1698848086880133147,1458284524761075714,'I have basically no experience with one and literally no experience with the other, and additionally I''ve never even used Haskell.  So unfortunately I''m not really in a position to say.',1693871921,1,0,1,0,1698802806096846909,0,'sol_plunder,ilyakooo0','sol_plunder,ilyakooo0','',NULL,NULL, 0,1,0,0,0);
+    (1411566,1698848086880133147,1458284524761075714,'I have basically no experience with one and literally no experience with the other, and additionally I''ve never even used Haskell.  So unfortunately I''m not really in a position to say.',1693871921,1,0,1,0,1698802806096846909,0,'sol_plunder,ilyakooo0','sol_plunder,ilyakooo0','',NULL,NULL, 0,1,0,0,0),
+    (1169437,1665509126737129472,1458284524761075714,replace('Btw, to the extent this has happened, it''s partly thanks to the Golden One (@TheGloriousLion) who invented #fizeekfriday and the "post physique" rejoinder.  Everyone should follow him if they don''t already.\n\nSince I forgot last week, and since it''s topical, here''s a leg poast','\n',char(10)),1685923294,7,0,0,0,1665505986184900611,0,'TheGloriousLion','','fizeekfriday',NULL,NULL,0,1,0,0,0);
 
 CREATE TABLE retweets(rowid integer primary key,
     retweet_id integer not null unique,
@@ -377,19 +378,20 @@ create table chat_messages (rowid integer primary key,
     request_id text not null,
     in_reply_to_id integer,
     text text not null,
+    embedded_tweet_id integer not null default 0,
     foreign key(chat_room_id) references chat_rooms(id)
     foreign key(sender_id) references users(id)
 );
 INSERT INTO chat_messages VALUES
-    (1,1663623062195957773,'1458284524761075714-1488963321701171204',1488963321701171204,1685473621419,'',0,'Yes helo'),
-    (2,1663623203644751885,'1458284524761075714-1488963321701171204',1458284524761075714,1685473655064,'',0,'Yeah i know who you are lol'),
-    (3,1665922180176044037,'1458284524761075714-1488963321701171204',1458284524761075714,1686021773787,'',1663623062195957773,'Yes?'),
-    (4,1665936253483614212,'1458284524761075714-1488963321701171204',1458284524761075714,1686025129132,'',0,replace('Check this out\nhttps://t.co/rHeWGgNIZ1','\n',char(10))),
-    (5,1665936253483614213,'1488963321701171204-1178839081222115328',1488963321701171204,1686025129140,'',0,'bruh1'),
-    (6,1665936253483614214,'1488963321701171204-1178839081222115328',1178839081222115328,1686025129141,'',0,'bruh2'),
-    (7,1665936253483614215,'1488963321701171204-1178839081222115328',1178839081222115328,1686025129142,'',1665936253483614214,'replying to bruh2'),
-    (8,1665936253483614216,'1488963321701171204-1178839081222115328',1488963321701171204,1686025129143,'',0,'This conversation is totally fake lol'),
-    (9,1665936253483614217,'1488963321701171204-1178839081222115328',1178839081222115328,1686025129144,'',0,'exactly');
+    (1,1663623062195957773,'1458284524761075714-1488963321701171204',1488963321701171204,1685473621419,'',0,'Yes helo',0),
+    (2,1663623203644751885,'1458284524761075714-1488963321701171204',1458284524761075714,1685473655064,'',0,'Yeah i know who you are lol',0),
+    (3,1665922180176044037,'1458284524761075714-1488963321701171204',1458284524761075714,1686021773787,'',1663623062195957773,'Yes?',0),
+    (4,1665936253483614212,'1458284524761075714-1488963321701171204',1458284524761075714,1686025129132,'',0,replace('Check this out\nhttps://t.co/rHeWGgNIZ1','\n',char(10)),1665509126737129472),
+    (5,1665936253483614213,'1488963321701171204-1178839081222115328',1488963321701171204,1686025129140,'',0,'bruh1',0),
+    (6,1665936253483614214,'1488963321701171204-1178839081222115328',1178839081222115328,1686025129141,'',0,'bruh2',0),
+    (7,1665936253483614215,'1488963321701171204-1178839081222115328',1178839081222115328,1686025129142,'',1665936253483614214,'replying to bruh2',0),
+    (8,1665936253483614216,'1488963321701171204-1178839081222115328',1488963321701171204,1686025129143,'',0,'This conversation is totally fake lol',0),
+    (9,1665936253483614217,'1488963321701171204-1178839081222115328',1178839081222115328,1686025129144,'',0,'exactly',0);
 
 
 

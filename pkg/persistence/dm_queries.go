@@ -101,8 +101,8 @@ func (p Profile) GetChatRoom(id DMChatRoomID) (ret DMChatRoom, err error) {
 
 func (p Profile) SaveChatMessage(m DMMessage) error {
 	_, err := p.DB.NamedExec(`
-		insert into chat_messages (id, chat_room_id, sender_id, sent_at, request_id, in_reply_to_id, text)
-		values (:id, :chat_room_id, :sender_id, :sent_at, :request_id, :in_reply_to_id, :text)
+		insert into chat_messages (id, chat_room_id, sender_id, sent_at, request_id, in_reply_to_id, text, embedded_tweet_id)
+		values (:id, :chat_room_id, :sender_id, :sent_at, :request_id, :in_reply_to_id, :text, :embedded_tweet_id)
 		on conflict do nothing
 		`, m,
 	)
@@ -127,7 +127,7 @@ func (p Profile) SaveChatMessage(m DMMessage) error {
 
 func (p Profile) GetChatMessage(id DMMessageID) (ret DMMessage, err error) {
 	err = p.DB.Get(&ret, `
-		select id, chat_room_id, sender_id, sent_at, request_id, text, in_reply_to_id
+		select id, chat_room_id, sender_id, sent_at, request_id, text, in_reply_to_id, embedded_tweet_id
 		  from chat_messages
 		 where id = ?
 		`, id,
@@ -186,7 +186,7 @@ func (p Profile) GetChatRoomsPreview(id UserID) DMChatView {
 		// Fetch the latest message
 		var msg DMMessage
 		q, args, err := sqlx.Named(`
-			select id, chat_room_id, sender_id, sent_at, request_id, text, in_reply_to_id
+			select id, chat_room_id, sender_id, sent_at, request_id, text, in_reply_to_id, embedded_tweet_id
 		      from chat_messages
 		     where chat_room_id = :room_id
 		       and sent_at = (select max(sent_at) from chat_messages where chat_room_id = :room_id)
@@ -271,7 +271,7 @@ func (p Profile) GetChatRoomContents(id DMChatRoomID) DMChatView {
 	// Fetch all messages
 	var msgs []DMMessage
 	err = p.DB.Select(&msgs, `
-		select id, chat_room_id, sender_id, sent_at, request_id, text, in_reply_to_id
+		select id, chat_room_id, sender_id, sent_at, request_id, text, in_reply_to_id, embedded_tweet_id
 	      from chat_messages
 	     where chat_room_id = :room_id
 	     order by sent_at desc
@@ -311,6 +311,30 @@ func (p Profile) GetChatRoomContents(id DMChatRoomID) DMChatView {
 		msg := ret.Messages[reacc.DMMessageID]
 		msg.Reactions[reacc.SenderID] = reacc
 		ret.Messages[reacc.DMMessageID] = msg
+	}
+
+	// Fetch all embedded tweets
+	embedded_tweet_ids := []interface{}{}
+	for _, m := range ret.Messages {
+		if m.EmbeddedTweetID != 0 {
+			embedded_tweet_ids = append(embedded_tweet_ids, m.EmbeddedTweetID)
+		}
+	}
+	if len(embedded_tweet_ids) > 0 {
+		var embedded_tweets []Tweet
+		err = p.DB.Select(&embedded_tweets, `
+		     select `+TWEETS_ALL_SQL_FIELDS+`
+		       from tweets
+		  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
+		  left join likes on tweets.id = likes.tweet_id and likes.user_id = ?
+		      where id in (`+strings.Repeat("?,", len(embedded_tweet_ids)-1)+`?)`,
+			append([]interface{}{UserID(0)}, embedded_tweet_ids...)...)
+		if err != nil {
+			panic(err)
+		}
+		for _, t := range embedded_tweets {
+			ret.Tweets[t.ID] = t
+		}
 	}
 
 	return ret

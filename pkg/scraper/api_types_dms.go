@@ -26,11 +26,58 @@ type APIDMMessage struct {
 		ReplyData struct {
 			ID int `json:"id,string"`
 		} `json:"reply_data"`
+		Urls []struct {
+			Url     string `json:"url"`
+			Indices []int  `json:"indices"`
+		} `json:"urls"`
 		Attachment struct {
-			Tweet APITweet `json:"tweet"`
+			Tweet struct {
+				Url    string `json:"url"`
+				Status struct {
+					APITweet
+					User APIUser `json:"user"`
+				} `json:"status"`
+			} `json:"tweet"`
 		} `json:"attachment"`
 	} `json:"message_data"`
 	MessageReactions []APIDMReaction `json:"message_reactions"`
+}
+
+// Remove embedded tweet short-URLs
+func (m *APIDMMessage) NormalizeContent() {
+	if m.MessageData.Attachment.Tweet.Status.ID != 0 {
+		m.MessageData.Text = strings.Replace(m.MessageData.Text, m.MessageData.Attachment.Tweet.Url, "", 1)
+	}
+	m.MessageData.Text = strings.TrimSpace(m.MessageData.Text)
+}
+
+func (m APIDMMessage) ToDMTrove() DMTrove {
+	ret := NewDMTrove()
+
+	m.NormalizeContent()
+	result := ParseAPIDMMessage(m)
+
+	// Parse tweet attachment
+	if m.MessageData.Attachment.Tweet.Status.ID != 0 {
+		u, err := ParseSingleUser(m.MessageData.Attachment.Tweet.Status.User)
+		if err != nil {
+			panic(err)
+		}
+		ret.Users[u.ID] = u
+
+		t, err := ParseSingleTweet(m.MessageData.Attachment.Tweet.Status.APITweet)
+		if err != nil {
+			panic(err)
+		}
+		t.UserID = u.ID
+		ret.Tweets[t.ID] = t
+		result.EmbeddedTweetID = t.ID
+	}
+	ret.Messages[result.ID] = result
+
+	// TODO: parse attached images
+
+	return ret
 }
 
 type APIDMConversation struct {
@@ -126,13 +173,14 @@ func (r APIInbox) ToDMTrove() DMTrove {
 			entry.Message.ID = entry.ReactionCreate.MessageID
 			entry.Message.MessageReactions = []APIDMReaction{entry.ReactionCreate}
 		}
-		result := ParseAPIDMMessage(entry.Message)
-		if _, is_ok := ret.Messages[result.ID]; is_ok {
-			// No clobbering
-			panic("Already in the trove: " + fmt.Sprint(result.ID))
-		}
-		ret.Messages[result.ID] = result
-		// TODO: parse Tweet attachments
+
+		// TODO:
+		// if _, is_ok := ret.Messages[result.ID]; is_ok {
+		// 	// No clobbering
+		// 	panic("Already in the trove: " + fmt.Sprint(result.ID))
+		// }
+
+		ret.MergeWith(entry.Message.ToDMTrove())
 	}
 	for _, room := range r.Conversations {
 		result := ParseAPIDMChatRoom(room)

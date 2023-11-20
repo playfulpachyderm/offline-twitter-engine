@@ -221,4 +221,14 @@ func TestGetChatRoomContents(t *testing.T) {
 	reacc, is_ok := msg_with_reacc.Reactions[UserID(1458284524761075714)]
 	require.True(is_ok)
 	assert.Equal(reacc.Emoji, "😂")
+
+	// Embedded tweets
+	require.Len(chat_view.Tweets, 1)
+	twt, is_ok := chat_view.Tweets[TweetID(1665509126737129472)]
+	require.True(is_ok)
+	assert.Equal(twt.InReplyToID, TweetID(1665505986184900611))
+	assert.Equal(twt.NumLikes, 7)
+	u, is_ok := chat_view.Users[twt.UserID]
+	require.True(is_ok)
+	assert.Equal(u.Location, "on my computer")
 }

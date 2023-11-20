@@ -242,6 +242,7 @@ create table chat_messages (rowid integer primary key,
     request_id text not null,
     in_reply_to_id integer,
     text text not null,
+    embedded_tweet_id integer not null default 0,
     foreign key(chat_room_id) references chat_rooms(id)
     foreign key(sender_id) references users(id)
 );

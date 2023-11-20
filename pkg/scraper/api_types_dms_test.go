@@ -54,6 +54,33 @@ func TestParseAPIDMMessageWithReaction(t *testing.T) {
 	assert.Equal(reacc.Emoji, "😂")
 }
 
+func TestParseAPIDMMessageWithEmbeddedTweet(t *testing.T) {
+	assert := assert.New(t)
+	data, err := os.ReadFile("test_responses/dms/dm_message_with_tweet_attachment.json")
+	if err != nil {
+		panic(err)
+	}
+	var api_message APIDMMessage
+	err = json.Unmarshal(data, &api_message)
+	require.NoError(t, err)
+
+	trove := api_message.ToDMTrove()
+
+	assert.Len(trove.Messages, 1)
+	m, is_ok := trove.Messages[DMMessageID(1665936253483614212)]
+	assert.True(is_ok)
+	assert.Equal(m.EmbeddedTweetID, TweetID(1665509126737129472))
+	assert.Equal(m.Text, "Check this out")
+
+	assert.Len(trove.Tweets, 1)
+	_, is_ok = trove.Tweets[TweetID(1665509126737129472)]
+	assert.True(is_ok)
+
+	assert.Len(trove.Users, 1)
+	_, is_ok = trove.Users[UserID(1458284524761075714)]
+	assert.True(is_ok)
+}
+
 func TestParseAPIDMConversation(t *testing.T) {
 	assert := assert.New(t)
 	data, err := os.ReadFile("test_responses/dms/dm_chat_room.json")
