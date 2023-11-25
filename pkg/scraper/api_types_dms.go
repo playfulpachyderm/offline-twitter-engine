@@ -26,7 +26,7 @@ type APIDMMessage struct {
 		ReplyData struct {
 			ID int `json:"id,string"`
 		} `json:"reply_data"`
-		Urls []struct {
+		URLs []struct {
 			Url     string `json:"url"`
 			Indices []int  `json:"indices"`
 		} `json:"urls"`
@@ -75,7 +75,7 @@ func (m APIDMMessage) ToDMTrove() DMTrove {
 	}
 	ret.Messages[result.ID] = result
 
-	// TODO: parse attached images
+	// TODO: parse attached images and videos
 
 	return ret
 }

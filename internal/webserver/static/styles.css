@@ -746,3 +746,37 @@ ul.dropdown-items {
 .dm-message-and-reacts-container p.posted-at {
     margin: 0 4.5em;
 }
+.dm-message-content-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 80%;
+}
+.our-message .dm-message-content-container {
+    align-items: flex-end;
+}
+.dm-message-content-container .tweet-preview {
+    border-radius: 1em;
+    border: 1px solid var(--color-outline-gray);
+    max-width: 100%;
+}
+.dm-message-content-container .replying-to-container {
+    background-color: #f0f0f0f0;
+    border-radius: 1em 1em 1em 0em;
+    padding: 0.5em 1.2em 2em 1.2em;
+    margin: 0 0 -2em 0.2em;
+    font-size: 0.9em;
+}
+.our-message .dm-message-content-container .replying-to-container {
+    border-radius: 1em 1em 0em 1em;
+    margin: 0 0.2em -2em;
+}
+.dm-message-content-container .replying-to-label {
+    font-size: 0.8em;
+    display: flex;
+    gap: 0.2em;
+}
+.dm-message-content-container .replying-to-label img.svg-icon {
+    width: 1em;
+
+}

@@ -11,7 +11,31 @@
               <img class="profile-image" src="/content/{{$user.GetProfileImageLocalPath}}" />
             </a>
           </div>
-          <div class="dm-message-text-container">{{template "text-with-entities" $message.Text}}</div>
+          <div class="dm-message-content-container">
+            {{if (ne $message.InReplyToID 0)}}
+              <div class="replying-to-container">
+                <div class="replying-to-label row">
+                  <img class="svg-icon" src="/static/icons/replying_to.svg" />
+                  <span>Replying to</span>
+                </div>
+                <div class="replying-to-message">
+                  {{(index $.DMTrove.Messages $message.InReplyToID).Text}}
+                </div>
+              </div>
+            {{end}}
+            {{if (ne $message.EmbeddedTweetID 0)}}
+              <div class="tweet-preview">
+                {{template "tweet" (dict
+                  "TweetID" $message.EmbeddedTweetID
+                  "RetweetID" 0
+                  "QuoteNestingLevel" 1)
+                }}
+              </div>
+            {{end}}
+            <div class="dm-message-text-container">
+              {{template "text-with-entities" $message.Text}}
+            </div>
+          </div>
         </div>
         <div class="dm-message-reactions">
           {{range $message.Reactions}}

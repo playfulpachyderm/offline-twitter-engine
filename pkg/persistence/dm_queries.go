@@ -337,5 +337,7 @@ func (p Profile) GetChatRoomContents(id DMChatRoomID) DMChatView {
 		}
 	}
 
+	p.fill_content(&ret.DMTrove.TweetTrove, UserID(0))
+
 	return ret
 }

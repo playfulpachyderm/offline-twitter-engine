@@ -171,7 +171,7 @@ func TestGetChatRoomsPreview(t *testing.T) {
 
 	msg, is_ok := chat_view.Messages[room.LastMessageID]
 	require.True(is_ok)
-	assert.Equal(msg.Text, "Check this out\nhttps://t.co/rHeWGgNIZ1")
+	assert.Equal(msg.Text, "Check this out")
 
 	require.Len(room.Participants, 2)
 	for _, user_id := range []UserID{1458284524761075714, 1488963321701171204} {
