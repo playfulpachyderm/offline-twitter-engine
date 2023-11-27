@@ -38,8 +38,15 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 
 	user, err := app.Profile.GetUserByHandle(scraper.UserHandle(parts[0]))
 	if err != nil {
-		app.error_404(w)
-		return
+		if !app.IsScrapingDisabled {
+			user, err = scraper.GetUser(scraper.UserHandle(parts[0]))
+		}
+		if err != nil {
+			app.error_404(w)
+			return
+		}
+		app.Profile.SaveUser(&user)
+		app.Profile.DownloadUserContentFor(&user)
 	}
 
 	if r.URL.Query().Has("scrape") {
