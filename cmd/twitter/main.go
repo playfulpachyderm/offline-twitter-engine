@@ -270,7 +270,7 @@ func fetch_tweet_conversation(tweet_identifier string, how_many int) {
 	if err != nil {
 		die(err.Error(), false, -1)
 	}
-	profile.SaveTweetTrove(trove)
+	profile.SaveTweetTrove(trove, true)
 
 	happy_exit(fmt.Sprintf("Saved %d tweets and %d users", len(trove.Tweets), len(trove.Users)))
 }
@@ -291,7 +291,7 @@ func fetch_user_feed(handle string, how_many int) {
 	if err != nil {
 		die(fmt.Sprintf("Error scraping feed: %s\n  %s", handle, err.Error()), false, -2)
 	}
-	profile.SaveTweetTrove(trove)
+	profile.SaveTweetTrove(trove, true)
 
 	happy_exit(fmt.Sprintf("Saved %d tweets, %d retweets and %d users", len(trove.Tweets), len(trove.Retweets), len(trove.Users)))
 }
@@ -306,7 +306,7 @@ func get_user_likes(handle string, how_many int) {
 	if err != nil {
 		die(fmt.Sprintf("Error scraping feed: %s\n  %s", handle, err.Error()), false, -2)
 	}
-	profile.SaveTweetTrove(trove)
+	profile.SaveTweetTrove(trove, true)
 
 	happy_exit(fmt.Sprintf("Saved %d tweets, %d retweets and %d users", len(trove.Tweets), len(trove.Retweets), len(trove.Users)))
 }
@@ -316,7 +316,7 @@ func fetch_timeline(is_for_you bool) {
 	if err != nil {
 		die(fmt.Sprintf("Error fetching timeline:\n  %s", err.Error()), false, -2)
 	}
-	profile.SaveTweetTrove(trove)
+	profile.SaveTweetTrove(trove, true)
 
 	happy_exit(fmt.Sprintf("Saved %d tweets, %d retweets and %d users", len(trove.Tweets), len(trove.Retweets), len(trove.Users)))
 }
@@ -353,7 +353,7 @@ func search(query string, how_many int) {
 	if err != nil {
 		die(fmt.Sprintf("Error scraping search results: %s", err.Error()), false, -100)
 	}
-	profile.SaveTweetTrove(trove)
+	profile.SaveTweetTrove(trove, true)
 
 	happy_exit(fmt.Sprintf("Saved %d tweets and %d users", len(trove.Tweets), len(trove.Users)))
 }
@@ -413,7 +413,7 @@ func start_webserver(addr string) {
 
 func fetch_inbox(how_many int) {
 	trove, _ := scraper.GetInbox(how_many)
-	profile.SaveDMTrove(trove)
+	profile.SaveDMTrove(trove, true)
 	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)))
 }
 
@@ -424,7 +424,7 @@ func fetch_dm(id string, how_many int) {
 	}
 	max_id := scraper.DMMessageID(^uint(0) >> 1)
 	trove := scraper.GetConversation(room.ID, max_id, how_many)
-	profile.SaveDMTrove(trove)
+	profile.SaveDMTrove(trove, true)
 	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)))
 }
 
@@ -435,6 +435,6 @@ func send_dm(room_id string, text string, in_reply_to_id int) {
 	}
 
 	trove := scraper.SendDMMessage(room.ID, text, scraper.DMMessageID(in_reply_to_id))
-	profile.SaveDMTrove(trove)
+	profile.SaveDMTrove(trove, true)
 	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)))
 }

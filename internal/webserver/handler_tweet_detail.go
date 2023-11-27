@@ -65,7 +65,8 @@ func (app *Application) ensure_tweet(id scraper.TweetID, is_forced bool, is_conv
 	if is_needing_scrape && !app.IsScrapingDisabled {
 		trove, err := scraper.GetTweetFullAPIV2(id, 50) // TODO: parameterizable
 		if err == nil {
-			app.Profile.SaveTweetTrove(trove)
+			app.Profile.SaveTweetTrove(trove, false)
+			go app.Profile.SaveTweetTrove(trove, true) // Download the content in the background
 			is_available = true
 		} else {
 			app.ErrorLog.Print(err)

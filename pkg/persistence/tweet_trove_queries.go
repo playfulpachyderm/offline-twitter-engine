@@ -8,7 +8,7 @@ import (
 
 // Convenience function that saves all the objects in a TweetTrove.
 // Panics if anything goes wrong.
-func (p Profile) SaveTweetTrove(trove TweetTrove) {
+func (p Profile) SaveTweetTrove(trove TweetTrove, should_download bool) {
 	for i, u := range trove.Users {
 		err := p.SaveUser(&u)
 		if err != nil {
@@ -37,10 +37,12 @@ func (p Profile) SaveTweetTrove(trove TweetTrove) {
 		}
 		trove.Users[i] = u
 
-		// Download their tiny profile image
-		err = p.DownloadUserProfileImageTiny(&u)
-		if err != nil {
-			panic(fmt.Errorf("Error downloading user content for user with ID %d and handle %s:\n  %w", u.ID, u.Handle, err))
+		if should_download {
+			// Download their tiny profile image
+			err = p.DownloadUserProfileImageTiny(&u)
+			if err != nil {
+				panic(fmt.Errorf("Error downloading user content for user with ID %d and handle %s:\n  %w", u.ID, u.Handle, err))
+			}
 		}
 	}
 
@@ -57,9 +59,11 @@ func (p Profile) SaveTweetTrove(trove TweetTrove) {
 			panic(fmt.Errorf("Error saving tweet ID %d:\n  %w", t.ID, err))
 		}
 
-		err = p.DownloadTweetContentFor(&t)
-		if err != nil {
-			panic(fmt.Errorf("Error downloading tweet content for tweet ID %d:\n  %w", t.ID, err))
+		if should_download {
+			err = p.DownloadTweetContentFor(&t)
+			if err != nil {
+				panic(fmt.Errorf("Error downloading tweet content for tweet ID %d:\n  %w", t.ID, err))
+			}
 		}
 	}
 

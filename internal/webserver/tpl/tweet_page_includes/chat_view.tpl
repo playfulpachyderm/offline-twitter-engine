@@ -8,7 +8,11 @@
         <div class="dm-message-container">
           <div class="sender-profile-image-container">
             <a class="unstyled-link" href="/{{$user.Handle}}">
-              <img class="profile-image" src="/content/{{$user.GetProfileImageLocalPath}}" />
+              {{if $user.IsContentDownloaded}}
+                <img class="profile-image" src="/content/{{$user.GetProfileImageLocalPath}}" />
+              {{else}}
+                <img class="profile-image" src="{{$user.ProfileImageUrl}}" />
+              {{end}}
             </a>
           </div>
           <div class="dm-message-content-container">

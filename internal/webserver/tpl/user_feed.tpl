@@ -4,7 +4,11 @@
   {{$user := (user .UserID)}}
   <div class="user-feed-header">
     {{if $user.BannerImageLocalPath}}
-      <img class="profile-banner-image" src="/content/profile_images/{{$user.BannerImageLocalPath}}" />
+      {{if $user.IsContentDownloaded}}
+        <img class="profile-banner-image" src="/content/profile_images/{{$user.BannerImageLocalPath}}" />
+      {{else}}
+        <img class="profile-banner-image" src="{{$user.BannerImageUrl}}" />
+      {{end}}
     {{end}}
 
     <div class="user-feed-header-info-container">

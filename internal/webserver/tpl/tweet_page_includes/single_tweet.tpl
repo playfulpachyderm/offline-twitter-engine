@@ -57,7 +57,12 @@
         {{end}}
         {{template "text-with-entities" $main_tweet.Text}}
         {{range $main_tweet.Images}}
-          <img class="tweet-image" src="/content/images/{{.LocalFilename}}"
+          <img class="tweet-image"
+            {{if .IsDownloaded}}
+              src="/content/images/{{.LocalFilename}}"
+            {{else}}
+              src="{{.RemoteURL}}"
+            {{end}}
             width="{{.Width}}" height="{{.Height}}"
             {{if (gt (len $main_tweet.Images) 1)}}
               style="max-width: 45%"
@@ -65,8 +70,18 @@
           />
         {{end}}
         {{range $main_tweet.Videos}}
-          <video controls hx-trigger="click consume" width="{{.Width}}" height="{{.Height}}">
-            <source src="/content/videos/{{.LocalFilename}}">
+          <video controls hx-trigger="click consume" width="{{.Width}}" height="{{.Height}}"
+            {{if .IsDownloaded}}
+              poster="/content/video_thumbnails/{{.ThumbnailLocalPath}}"
+            {{else}}
+              poster="{{.ThumbnailRemoteUrl}}"
+            {{end}}
+          >
+            {{if .IsDownloaded}}
+              <source src="/content/videos/{{.LocalFilename}}">
+            {{else}}
+              <source src="{{.RemoteURL}}">
+            {{end}}
           </video>
         {{end}}
         {{range $main_tweet.Urls}}
@@ -77,7 +92,12 @@
               href="{{.Text}}"
               style="max-width: {{if (ne .ThumbnailWidth 0)}}{{.ThumbnailWidth}}px {{else}}fit-content {{end}}"
             >
-              <img src="/content/link_preview_images/{{.ThumbnailLocalPath}}"
+              <img
+                {{if .IsContentDownloaded}}
+                  src="/content/link_preview_images/{{.ThumbnailLocalPath}}"
+                {{else}}
+                  src="{{.ThumbnailRemoteUrl}}"
+                {{end}}
                 class="embedded-link-preview"
                 width="{{.ThumbnailWidth}}" height="{{.ThumbnailHeight}}"
               />

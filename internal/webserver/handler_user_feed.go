@@ -63,14 +63,16 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 				app.ErrorLog.Print(err)
 				// TOOD: show error in UI
 			}
-			app.Profile.SaveTweetTrove(trove)
+			app.Profile.SaveTweetTrove(trove, false)
+			go app.Profile.SaveTweetTrove(trove, true)
 		} else if len(parts) == 2 && parts[1] == "likes" {
 			trove, err := scraper.GetUserLikes(user.ID, 50) // TODO: parameterizable
 			if err != nil {
 				app.ErrorLog.Print(err)
 				// TOOD: show error in UI
 			}
-			app.Profile.SaveTweetTrove(trove)
+			app.Profile.SaveTweetTrove(trove, false)
+			go app.Profile.SaveTweetTrove(trove, true)
 		}
 	}
 

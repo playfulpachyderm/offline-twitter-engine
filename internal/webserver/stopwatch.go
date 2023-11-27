@@ -37,7 +37,8 @@ func (app *Application) background_scrape() {
 		return
 	}
 	fmt.Println("Saving scrape results...")
-	app.Profile.SaveTweetTrove(trove)
+	app.Profile.SaveTweetTrove(trove, false)
+	go app.Profile.SaveTweetTrove(trove, true)
 	fmt.Println("Scraping succeeded.")
 	is_for_you_only = false
 }
@@ -71,7 +72,8 @@ func (app *Application) background_user_likes_scrape() {
 		return
 	}
 	fmt.Println("Saving scrape results...")
-	app.Profile.SaveTweetTrove(trove)
+	app.Profile.SaveTweetTrove(trove, false)
+	go app.Profile.SaveTweetTrove(trove, true)
 	fmt.Println("Scraping succeeded.")
 }
 
@@ -107,7 +109,8 @@ func (app *Application) background_dm_polling_scrape() {
 		trove, inbox_cursor = scraper.PollInboxUpdates(inbox_cursor)
 	}
 	fmt.Println("Saving DM results...")
-	app.Profile.SaveDMTrove(trove)
+	app.Profile.SaveDMTrove(trove, false)
+	go app.Profile.SaveDMTrove(trove, true)
 	fmt.Println("Scraping DMs succeeded.")
 }
 
