@@ -6,6 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/term"
 	"os"
+	"strconv"
 	"strings"
 	"syscall"
 
@@ -163,6 +164,16 @@ func main() {
 		fetch_inbox(*how_many)
 	case "fetch_dm":
 		fetch_dm(target, *how_many)
+	case "send_dm":
+		if len(args) == 3 {
+			send_dm(target, args[2], 0)
+		} else {
+			val, err := strconv.Atoi(args[3])
+			if err != nil {
+				panic(err)
+			}
+			send_dm(target, args[2], val)
+		}
 	default:
 		die(fmt.Sprintf("Invalid operation: %s", operation), true, 3)
 	}
@@ -413,6 +424,17 @@ func fetch_dm(id string, how_many int) {
 	}
 	max_id := scraper.DMMessageID(^uint(0) >> 1)
 	trove := scraper.GetConversation(room.ID, max_id, how_many)
+	profile.SaveDMTrove(trove)
+	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)))
+}
+
+func send_dm(room_id string, text string, in_reply_to_id int) {
+	room, err := profile.GetChatRoom(scraper.DMChatRoomID(room_id))
+	if err != nil {
+		panic(err)
+	}
+
+	trove := scraper.SendDMMessage(room.ID, text, scraper.DMMessageID(in_reply_to_id))
 	profile.SaveDMTrove(trove)
 	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)))
 }

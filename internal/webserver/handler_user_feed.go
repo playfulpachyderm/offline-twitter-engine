@@ -45,8 +45,8 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 			app.error_404(w)
 			return
 		}
-		app.Profile.SaveUser(&user)
-		app.Profile.DownloadUserContentFor(&user)
+		panic_if(app.Profile.SaveUser(&user))
+		panic_if(app.Profile.DownloadUserContentFor(&user))
 	}
 
 	if r.URL.Query().Has("scrape") {

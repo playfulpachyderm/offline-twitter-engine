@@ -100,3 +100,14 @@ func PollInboxUpdates(cursor string) (DMTrove, string) {
 
 	return dm_response.ToDMTrove(), dm_response.Cursor
 }
+
+func SendDMMessage(room_id DMChatRoomID, text string, in_reply_to_id DMMessageID) DMTrove {
+	if !the_api.IsAuthenticated {
+		log.Fatalf("Fetching DMs can only be done when authenticated.  Please provide `--session [user]`")
+	}
+	dm_response, err := the_api.SendDMMessage(room_id, text, in_reply_to_id)
+	if err != nil {
+		panic(err)
+	}
+	return dm_response.ToDMTrove()
+}

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 type APIDMReaction struct {
@@ -420,5 +422,69 @@ func (api *API) PollInboxUpdates(cursor string) (APIInbox, error) {
 
 	var result APIDMResponse
 	err = api.do_http(url.String(), "", &result)
+	return result.UserEvents, err
+}
+
+func (api *API) SendDMMessage(room_id DMChatRoomID, text string, in_reply_to_id DMMessageID) (APIInbox, error) {
+	url, err := url.Parse("https://twitter.com/i/api/1.1/dm/new2.json")
+	if err != nil {
+		panic(err)
+	}
+
+	query := url.Query()
+	query.Add("nsfw_filtering_enabled", "false")
+	query.Add("filter_low_quality", "true")
+	query.Add("include_quality", "all")
+	query.Add("dm_secret_conversations_enabled", "false")
+	query.Add("krs_registration_enabled", "true")
+	query.Add("cards_platform", "Web-12")
+	query.Add("include_cards", "1")
+	query.Add("include_ext_alt_text", "true")
+	query.Add("include_ext_limited_action_results", "true")
+	query.Add("include_quote_count", "true")
+	query.Add("include_reply_count", "1")
+	query.Add("tweet_mode", "extended")
+	query.Add("include_ext_views", "true")
+	query.Add("dm_users", "false")
+	query.Add("include_groups", "true")
+	query.Add("include_inbox_timelines", "true")
+	query.Add("include_ext_media_color", "true")
+	query.Add("supports_reactions", "true")
+	query.Add("include_ext_edit_control", "true")
+	query.Add("include_ext_business_affiliations_label", "true")
+	query.Add("ext", strings.Join([]string{
+		"mediaColor",
+		"altText",
+		"businessAffiliationsLabel",
+		"mediaStats",
+		"highlightedLabel",
+		"hasNftAvatar",
+		"voiceInfo",
+		"birdwatchPivot",
+		"enrichments",
+		"superFollowMetadata",
+		"unmentionInfo",
+		"editControl",
+		"vibe",
+	}, ","))
+	url.RawQuery = query.Encode()
+
+	request_id, err := uuid.NewUUID()
+	if err != nil {
+		panic(err)
+	}
+
+	replying_to_text := ""
+	if in_reply_to_id != 0 {
+		replying_to_text = fmt.Sprintf(`"reply_to_dm_id":"%d",`, in_reply_to_id)
+	}
+
+	post_data := `{"conversation_id":"` + string(room_id) +
+		`","recipient_ids":false,"request_id":"` + request_id.String() +
+		`","text":"` + text + `",` +
+		replying_to_text + `"cards_platform":"Web-12","include_cards":1,"include_quote_count":true,"dm_users":false}`
+
+	var result APIDMResponse
+	err = api.do_http_POST(url.String(), post_data, &result)
 	return result.UserEvents, err
 }
