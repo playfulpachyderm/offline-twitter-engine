@@ -139,24 +139,13 @@
         </div>
         {{template "likes-count" $main_tweet}}
         <div class="dummy"></div>
-        <div class="dropdown" hx-trigger="click consume">
-          <button class="dropdown-button" title="Options">
-            <img class="svg-icon" src="/static/icons/more.svg" />
-          </button>
-          <ul class="dropdown-items">
-            <a class="unstyled-link" target="_blank" href="https://twitter.com/{{$author.Handle}}/status/{{$main_tweet.ID}}">
-              <li class="quick-link">
-                <img class="svg-icon" src="/static/icons/external-link.svg" />
-                <span>Open on twitter.com</span>
-              </li>
-            </a>
-            <a class="unstyled-link" target="_blank" hx-get="/tweet/{{$main_tweet.ID}}?scrape" hx-target="body">
-              <li class="quick-link">
-                <img class="svg-icon" src="/static/icons/download.svg" />
-                <span>Re-fetch tweet</span>
-              </li>
-            </a>
-          </ul>
+        <div class="tweet-buttons-container" hx-trigger="click consume">
+          <a class="unstyled-link quick-link" target="_blank" href="https://twitter.com/{{$author.Handle}}/status/{{$main_tweet.ID}}" title="Open on twitter.com">
+            <img class="svg-icon" src="/static/icons/external-link.svg" />
+          </a>
+          <a class="unstyled-link quick-link" hx-get="/tweet/{{$main_tweet.ID}}?scrape" hx-target="body" title="Refresh">
+            <img class="svg-icon" src="/static/icons/refresh.svg" />
+          </a>
         </div>
       </div>
     </span>

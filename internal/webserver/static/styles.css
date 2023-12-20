@@ -492,9 +492,13 @@ input[type="submit"] {
 .followers-followees-container .spacer {
     flex-grow: 1;
 }
-.user-feed-buttons-container {
+.user-feed-buttons-container, .tweet-buttons-container {
     display: flex;
     flex-direction: row;
+}
+.tweet-buttons-container .quick-link {
+    margin: 0;
+    font-size: 0.8em;
 }
 
 .poll {
@@ -569,25 +573,6 @@ ul.space-participants-list li {
     font-size: 0.8em;
 }
 
-.dropdown {
-    position: relative;
-}
-ul.dropdown-items {
-    list-style: none;
-    position: absolute;
-    top: 2em;
-    width: fit-content;
-    margin: 0;
-    padding: 0.3em;
-    background-color: var(--color-twitter-off-white);
-    outline: 1px solid var(--color-outline-gray);
-    border-radius: 0.3em;
-    display: none;
-    z-index: 1; /* otherwise in quote-tweets, the dropdown button from quoting-tweet is on top of it */
-}
-.dropdown-button:focus + .dropdown-items, .dropdown-items:hover {
-    display: block;
-}
 .tombstone {
     outline: 1px solid var(--color-outline-gray);
     background-color: var(--color-twitter-off-white);
