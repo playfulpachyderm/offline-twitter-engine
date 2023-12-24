@@ -446,7 +446,6 @@ input[type="submit"] {
     background-color: var(--color-twitter-blue-light);
     width: 10em;
     padding: 1em;
-    margin-top: 1em;
     border-radius: 1em;
     font-size: 1em;
     cursor: pointer;
@@ -684,9 +683,14 @@ ul.space-participants-list li {
     flex-basis: 0;
     flex-grow: 7;
     border-left: 1px solid var(--color-outline-gray);
-    overflow-y: scroll;
     padding: 0.5em;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+.chats-container #chat-view .chat-messages {
+    flex-grow: 1;
+    overflow-y: auto;
 }
 .chats-container #chat-view .our-message {
     align-items: flex-end;
@@ -763,5 +767,24 @@ ul.space-participants-list li {
 }
 .dm-message-content-container .replying-to-label img.svg-icon {
     width: 1em;
-
+}
+.dm-composer-container {
+    padding-top: 0.5em;
+    border-top: 1px solid var(--color-outline-gray);
+/*    position: absolute;
+    bottom: 1em;
+    right: 0.5em;
+    left: 0.5em;*/
+}
+.dm-composer-container form {
+    display: flex;
+}
+span.composer {
+    flex-grow: 1;
+    border: 1px solid #ccc;
+    font-family: inherit;
+    font-size: inherit;
+    padding: 1px 6px;
+    max-height: 10em;
+    overflow-y: auto; /* scrollbar only if needed */
 }

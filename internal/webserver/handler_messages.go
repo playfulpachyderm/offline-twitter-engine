@@ -1,6 +1,8 @@
 package webserver
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
 	"strings"
 
@@ -34,10 +36,24 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	room_id := scraper.DMChatRoomID(parts[0])
+	if len(parts) == 2 && parts[1] == "send" {
+		body, err := io.ReadAll(r.Body)
+		panic_if(err)
+		var message_data struct {
+			Text string `json:"text"`
+		}
+		panic_if(json.Unmarshal(body, &message_data))
+		trove := scraper.SendDMMessage(room_id, message_data.Text, 0)
+		app.Profile.SaveDMTrove(trove, false)
+		go app.Profile.SaveDMTrove(trove, true)
+	}
+
 	chat_view := app.Profile.GetChatRoomsPreview(app.ActiveUser.ID)
 	if strings.Trim(r.URL.Path, "/") != "" {
-		chat_view.ActiveRoomID = scraper.DMChatRoomID(strings.Trim(r.URL.Path, "/"))
-		chat_contents := app.Profile.GetChatRoomContents(chat_view.ActiveRoomID)
+		chat_view.ActiveRoomID = room_id
+		chat_contents := app.Profile.GetChatRoomContents(room_id)
 		chat_view.MergeWith(chat_contents.DMTrove)
 		chat_view.MessageIDs = chat_contents.MessageIDs
 	}

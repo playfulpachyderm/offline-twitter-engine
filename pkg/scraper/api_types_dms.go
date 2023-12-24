@@ -484,7 +484,7 @@ func (api *API) SendDMMessage(room_id DMChatRoomID, text string, in_reply_to_id 
 		`","text":"` + text + `",` +
 		replying_to_text + `"cards_platform":"Web-12","include_cards":1,"include_quote_count":true,"dm_users":false}`
 
-	var result APIDMResponse
+	var result APIInbox
 	err = api.do_http_POST(url.String(), post_data, &result)
-	return result.UserEvents, err
+	return result, err
 }
