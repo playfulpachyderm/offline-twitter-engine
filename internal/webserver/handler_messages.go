@@ -29,7 +29,10 @@ func (t MessageData) FocusedTweetID() scraper.TweetID {
 func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'Messages' handler (path: %q)", r.URL.Path)
 
-	// TODO: what if no active user?
+	if app.ActiveUser.ID == 0 {
+		app.error_401(w)
+		return
+	}
 
 	chat_view := app.Profile.GetChatRoomsPreview(app.ActiveUser.ID)
 	if strings.Trim(r.URL.Path, "/") != "" {

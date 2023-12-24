@@ -25,12 +25,14 @@
           <span>Notifications</span>
         </li>
       </a>
-      <a class="unstyled-link" href="/messages">
-        <li class="quick-link">
-          <img class="svg-icon" src="/static/icons/messages.svg" />
-          <span>Messages</span>
-        </li>
-      </a>
+      {{if (not (eq (active_user).Handle "[nobody]"))}}
+        <a class="unstyled-link" href="/messages">
+          <li class="quick-link">
+            <img class="svg-icon" src="/static/icons/messages.svg" />
+            <span>Messages</span>
+          </li>
+        </a>
+      {{end}}
       <a class="unstyled-link" href="/lists">
         <li class="quick-link">
           <img class="svg-icon" src="/static/icons/lists.svg" />
