@@ -234,7 +234,7 @@ func (p Profile) GetChatRoomsPreview(id UserID) DMChatView {
 	return ret
 }
 
-func (p Profile) GetChatRoomContents(id DMChatRoomID) DMChatView {
+func (p Profile) GetChatRoomContents(id DMChatRoomID, latest_timestamp int) DMChatView {
 	ret := NewDMChatView()
 	var room DMChatRoom
 	err := p.DB.Get(&room, `
@@ -274,9 +274,10 @@ func (p Profile) GetChatRoomContents(id DMChatRoomID) DMChatView {
 		select id, chat_room_id, sender_id, sent_at, request_id, text, in_reply_to_id, embedded_tweet_id
 		  from chat_messages
 		 where chat_room_id = ?
+		   and sent_at > ?
 		 order by sent_at desc
 		 limit 50
-	`, room.ID)
+	`, room.ID, latest_timestamp)
 	if err != nil {
 		panic(err)
 	}
@@ -339,6 +340,32 @@ func (p Profile) GetChatRoomContents(id DMChatRoomID) DMChatView {
 			}
 			for _, t := range embedded_tweets {
 				ret.Tweets[t.ID] = t
+			}
+		}
+
+		// Fetch message previews
+		replied_message_ids := []interface{}{}
+		for _, m := range ret.Messages {
+			if m.InReplyToID != 0 {
+				// Don't clobber if it's already been fetched
+				if _, is_ok := ret.Messages[m.InReplyToID]; !is_ok {
+					replied_message_ids = append(replied_message_ids, m.InReplyToID)
+				}
+			}
+		}
+		if len(replied_message_ids) > 0 {
+			var replied_msgs []DMMessage
+			err = p.DB.Select(&replied_msgs, `
+				select id, chat_room_id, sender_id, sent_at, request_id, text, in_reply_to_id, embedded_tweet_id
+				  from chat_messages
+			     where id in (`+strings.Repeat("?,", len(replied_message_ids)-1)+`?)`,
+			replied_message_ids...)
+			if err != nil {
+				panic(err)
+			}
+			for _, msg := range replied_msgs {
+				msg.Reactions = make(map[UserID]DMReaction)
+				ret.Messages[msg.ID] = msg
 			}
 		}
 

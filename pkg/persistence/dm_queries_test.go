@@ -191,7 +191,7 @@ func TestGetChatRoomContents(t *testing.T) {
 	require.NoError(err)
 
 	room_id := DMChatRoomID("1458284524761075714-1488963321701171204")
-	chat_view := profile.GetChatRoomContents(room_id)
+	chat_view := profile.GetChatRoomContents(room_id, -1)
 	assert.Len(chat_view.Rooms, 1)
 	room, is_ok := chat_view.Rooms[room_id]
 	require.True(is_ok)
@@ -231,4 +231,29 @@ func TestGetChatRoomContents(t *testing.T) {
 	u, is_ok := chat_view.Users[twt.UserID]
 	require.True(is_ok)
 	assert.Equal(u.Location, "on my computer")
+}
+
+func TestGetChatRoomContentsAfterTimestamp(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+
+	room_id := DMChatRoomID("1488963321701171204-1178839081222115328")
+	chat_view := profile.GetChatRoomContents(room_id, 1686025129141)
+
+	// MessageIDs should just be the ones in the thread
+	require.Equal(chat_view.MessageIDs, []DMMessageID{1665936253483614215, 1665936253483614216, 1665936253483614217})
+
+	// Replied messages should be available, but not in the list of MessageIDs
+	require.Len(chat_view.Messages, 4)
+	msg, is_ok := chat_view.Messages[1665936253483614214]
+	assert.True(is_ok)
+	assert.Equal(msg.ID, DMMessageID(1665936253483614214))
+	for _, msg_id := range chat_view.MessageIDs {
+		msg, is_ok := chat_view.Messages[msg_id]
+		assert.True(is_ok)
+		assert.Equal(msg.ID, msg_id)
+	}
 }
