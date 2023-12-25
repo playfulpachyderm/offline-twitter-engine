@@ -359,7 +359,7 @@ func (p Profile) GetChatRoomContents(id DMChatRoomID, latest_timestamp int) DMCh
 				select id, chat_room_id, sender_id, sent_at, request_id, text, in_reply_to_id, embedded_tweet_id
 				  from chat_messages
 			     where id in (`+strings.Repeat("?,", len(replied_message_ids)-1)+`?)`,
-			replied_message_ids...)
+				replied_message_ids...)
 			if err != nil {
 				panic(err)
 			}

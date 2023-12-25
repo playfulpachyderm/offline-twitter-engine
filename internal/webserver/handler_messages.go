@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"strings"
 	"strconv"
+	"strings"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
@@ -74,7 +74,7 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 		chat_view_data.MergeWith(chat_contents.DMTrove)
 		chat_view_data.MessageIDs = chat_contents.MessageIDs
 		if len(chat_view_data.MessageIDs) > 0 {
-			last_message_id := chat_view_data.MessageIDs[len(chat_view_data.MessageIDs) - 1]
+			last_message_id := chat_view_data.MessageIDs[len(chat_view_data.MessageIDs)-1]
 			chat_view_data.LatestPollingTimestamp = int(chat_view_data.Messages[last_message_id].SentAt.Unix())
 		}
 

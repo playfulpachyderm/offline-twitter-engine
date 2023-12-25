@@ -612,10 +612,13 @@ func TestMessagesRoom(t *testing.T) {
 	// Should have the poller at the bottom
 	node := cascadia.Query(root, selector("#new-messages-poller"))
 	assert.NotNil(node)
-	assert.Contains(node.Attr, html.Attribute{Key: "hx-get", Val: "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129144"})
+	assert.Contains(node.Attr, html.Attribute{
+		Key: "hx-get",
+		Val: "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129144",
+	})
 }
 
-// Loading the page since
+// Loading the page since a given message
 func TestMessagesRoomPollForUpdates(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
@@ -634,4 +637,41 @@ func TestMessagesRoomPollForUpdates(t *testing.T) {
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".dm-message-and-reacts-container")), 3)
+
+	// Should have the poller at the bottom
+	node := cascadia.Query(root, selector("#new-messages-poller"))
+	assert.NotNil(node)
+	assert.Contains(node.Attr, html.Attribute{
+		Key: "hx-get",
+		Val: "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129144",
+	})
+}
+
+// Loading the page since latest message (no updates)
+func TestMessagesRoomPollForUpdatesEmptyResult(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	// Boilerplate for setting an active user
+	app := webserver.NewApp(profile)
+	app.IsScrapingDisabled = true
+	app.ActiveUser = scraper.User{ID: 1488963321701171204, Handle: "Offline_Twatter"} // Simulate a login
+
+	// Chat detail
+	recorder := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129144", nil)
+	req.Header.Set("HX-Request", "true")
+	app.ServeHTTP(recorder, req)
+	resp := recorder.Result()
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".dm-message-and-reacts-container")), 0)
+
+	// Should have the poller at the bottom, with the same value as previously
+	node := cascadia.Query(root, selector("#new-messages-poller"))
+	assert.NotNil(node)
+	assert.Contains(node.Attr, html.Attribute{
+		Key: "hx-get",
+		Val: "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129144",
+	})
 }
