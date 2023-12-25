@@ -53,8 +53,8 @@
   {{end}}
 
   <div id="new-messages-poller"
-    hx-swap="outerHTML"
-    hx-trigger="load delay:7s"
+    hx-swap="outerHTML scroll:.chat-messages:bottom"
+    hx-trigger="load delay:3s"
     hx-get="/messages/{{$.ActiveRoomID}}?poll&latest_timestamp={{$.LatestPollingTimestamp}}"
   ></div>
 {{end}}
@@ -68,21 +68,15 @@
     </div>
     {{if $.ActiveRoomID}}
       <div class="dm-composer-container">
-        <form hx-post="/messages/{{$.ActiveRoomID}}/send" hx-target="body" hx-ext="json-enc">
-          <span
-            class="composer"
-            role="textbox"
-            contenteditable
-            oninput="var text = this.innerText; document.querySelector('#real-input').value = text"
-            >
-          </span>
+        <form hx-post="/messages/{{$.ActiveRoomID}}/send" hx-target="#new-messages-poller" hx-swap="outerHTML scroll:.chat-messages:bottom" hx-ext="json-enc">
+          {{template "dm-composer"}}
           <input id="real-input" type="hidden" name="text" value="" />
           <input type="submit" />
         </form>
       </div>
       <script>
         // Make pasting text work for HTML as well as plain text
-        var editor = document.querySelector("span.composer");
+        var editor = document.querySelector("#composer");
         editor.addEventListener("paste", function(e) {
           // cancel paste
           e.preventDefault();
@@ -94,4 +88,26 @@
       </script>
     {{end}}
   </div>
+{{end}}
+
+{{define "dm-composer"}}
+  <span
+    id="composer"
+    role="textbox"
+    contenteditable
+    {{if .}}
+      {{/*
+        This is a separate template so it can be OOB-swapped to clear the contents of the composer
+        box after a successful DM send.  However, the chat-view itself also loads via HTMX call.
+
+        To prevent the composer from being OOB'd on the initial page load (and thus never rendering),
+        we guard the "hx-swap-oob" attr; so if this template is called with nothing as the arg, then
+        it will be inlined normally (i.e., not OOB'd), and if the arg is something (e.g., a DMTrove),
+        then it will be OOB'd, thus clearing the contents of the composer box.
+      */}}
+      hx-swap-oob="true"
+    {{end}}
+    oninput="var text = this.innerText; document.querySelector('#real-input').value = text"
+    >
+  </span>
 {{end}}

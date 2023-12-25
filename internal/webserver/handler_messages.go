@@ -43,7 +43,7 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	room_id := scraper.DMChatRoomID(parts[0])
 
-	if r.URL.Query().Has("scrape") {
+	if r.URL.Query().Has("poll") {
 		// TODO: where is this going to be used?
 		app.background_dm_polling_scrape()
 	}
@@ -61,6 +61,7 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 			panic_if(json.Unmarshal(body, &message_data))
 			trove := scraper.SendDMMessage(room_id, message_data.Text, 0)
 			app.Profile.SaveDMTrove(trove, false)
+			app.buffered_render_tweet_htmx(w, "dm-composer", chat_view_data) // Wipe the chat box
 			go app.Profile.SaveDMTrove(trove, true)
 		}
 		chat_view_data.ActiveRoomID = room_id
@@ -78,7 +79,7 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 			chat_view_data.LatestPollingTimestamp = int(chat_view_data.Messages[last_message_id].SentAt.Unix())
 		}
 
-		if r.URL.Query().Has("poll") {
+		if r.URL.Query().Has("poll") || len(parts) == 2 && parts[1] == "send" {
 			app.buffered_render_tweet_htmx(w, "messages-with-poller", chat_view_data)
 			return
 		}

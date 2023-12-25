@@ -779,7 +779,7 @@ ul.space-participants-list li {
 .dm-composer-container form {
     display: flex;
 }
-span.composer {
+#composer {
     flex-grow: 1;
     border: 1px solid #ccc;
     font-family: inherit;
