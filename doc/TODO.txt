@@ -38,20 +38,12 @@ TODO post-tweets
   - quote-tweet a tweet
 - retweet a tweet
 
-TODO fetch-DMs
-
-TODO fix-spaces-participants-duplicates
-- It is creating a new copy of the participants every time it gets scraped again
-
 TODO spaces-fetch-participants-info
 - some user information is available in a Spaces result.  Right now we just render them as null users (handle = "", id = 0) if they're not fetched already
 - distinguish whether someone was an admin in the space or not
 
 TODO spaces-fetch-sharings
 - you can fetch the stuff that was posted in the jumbotron
-
-TODO authenticated-not-fetching-images
-- Images in tweets don't fetch when you're authenticated
 
 TODO tweets-with-italics
 - https://twitter.com/exit_org/status/1656813511572443141
@@ -120,8 +112,6 @@ TODO: paste-twitter-urls-in-search-bar
 	- space
 
 TODO: ui-deuglifying
-- Download buttons ("..." dropdown)
-  - on a tweet
 - "Follow" / "Unfollow" button
 
 TODO: show-errors-in-UI
@@ -132,3 +122,12 @@ TODO: refactor-compound_queries_test-file
 
 TODO: search-bar/preserve-contents-on-search
 - When performing a search, keep the search text in the search bar
+
+TODO: features-from-qt-version
+- Add all features from the Qt app to the web UI
+  - when previous tweet in thread is missing, put a "fetch tweet" button to get it
+  - Create a default profile on first launch
+
+TODO: dms-embedded-image-and-video
+
+TODO: dms-unshorten-urls

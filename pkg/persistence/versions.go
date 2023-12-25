@@ -151,6 +151,56 @@ var MIGRATIONS = []string{
 		vacuum;`,
 	`insert into tombstone_types(rowid, short_name, tombstone_text)
 	                     values (8, 'newer-version-available', 'There’s a new version of this Tweet')`,
+	`create table chat_rooms (rowid integer primary key,
+		    id text unique not null,
+		    type text not null,
+		    last_messaged_at integer not null,
+		    is_nsfw boolean not null,
+
+		    -- Group DM info
+		    created_at integer not null,
+		    created_by_user_id integer not null,
+		    name text not null default '',
+		    avatar_image_remote_url text not null default '',
+		    avatar_image_local_path text not null default ''
+		);
+
+		create table chat_room_participants(rowid integer primary key,
+		    chat_room_id text not null,
+		    user_id integer not null,
+		    last_read_event_id integer not null,
+		    is_chat_settings_valid boolean not null default 0,
+		    is_notifications_disabled boolean not null,
+		    is_mention_notifications_disabled boolean not null,
+		    is_read_only boolean not null,
+		    is_trusted boolean not null,
+		    is_muted boolean not null,
+		    status text not null,
+		    unique(chat_room_id, user_id)
+		);
+
+		create table chat_messages (rowid integer primary key,
+		    id integer unique not null check(typeof(id) = 'integer'),
+		    chat_room_id text not null,
+		    sender_id integer not null,
+		    sent_at integer not null,
+		    request_id text not null,
+		    in_reply_to_id integer,
+		    text text not null,
+		    embedded_tweet_id integer not null default 0,
+		    foreign key(chat_room_id) references chat_rooms(id)
+		    foreign key(sender_id) references users(id)
+		);
+
+		create table chat_message_reactions (rowid integer primary key,
+		    id integer unique not null check(typeof(id) = 'integer'),
+		    message_id integer not null,
+		    sender_id integer not null,
+		    sent_at integer not null,
+		    emoji text not null,
+		    foreign key(message_id) references chat_messages(id)
+		    foreign key(sender_id) references users(id)
+		);`,
 }
 var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
 

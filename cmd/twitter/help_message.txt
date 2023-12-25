@@ -67,6 +67,23 @@ This application downloads tweets from twitter and saves them in a SQLite databa
           "Like" or un-"like" the tweet indicated by <TARGET>.
           (Requires authentication)
 
+
+    fetch_inbox
+          Update all DMs.
+          <TARGET> is ignored.
+
+    fetch_dm
+          Update a specific DM chat room.
+          <TARGET> is the chat room ID to update
+
+    send_dm
+          Send a DM.
+          <TARGET> is the chat room ID to send the DM to.
+          An additional argument is required after <TARGET>, which is the text of the message to send.
+          Another additional argument can be added, which is the message ID that this new message is
+          in reply to.
+
+
     webserver
           Start a webserver that serves a web UI to browse the tweet archive
 

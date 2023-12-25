@@ -197,3 +197,14 @@ v0.5.1
 - Add a preliminary Lists page which shows all offline-follows
 - Add search page support for searching users
 - Automatic background scraping of logged-in user's Likes
+
+v0.6.0
+------
+
+- Add DMs
+- Bugfixes:
+	- Fix crashing because of the composer button when scraping logged-in user's threads
+	- Fix crashing when loading the user feed of a user who isn't scraped yet
+- UI improvements:
+	- Make page loads much faster by moving image/video downloading to non-blocking background tasks
+	- Get rid of dropdown button on tweets (buttons are just inline now)

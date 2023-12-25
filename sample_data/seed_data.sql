@@ -416,6 +416,6 @@ insert into fake_user_sequence values(0x4000000000000000);
 create table database_version(rowid integer primary key,
     version_number integer not null unique
 );
-insert into database_version(version_number) values (24);
+insert into database_version(version_number) values (25);
 
 COMMIT;
