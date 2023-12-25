@@ -570,7 +570,8 @@ func TestLists(t *testing.T) {
 // Messages
 // --------
 
-func TestMessages(t *testing.T) {
+// Loading the index page should work if you're logged in
+func TestMessagesIndexPage(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
@@ -587,12 +588,23 @@ func TestMessages(t *testing.T) {
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".chat-list .chat")), 2)
 	assert.Len(cascadia.QueryAll(root, selector(".chat-view .dm-message-and-reacts-container")), 0) // No messages until you click on one
+}
+
+// Open a chat room
+func TestMessagesRoom(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	// Boilerplate for setting an active user
+	app := webserver.NewApp(profile)
+	app.IsScrapingDisabled = true
+	app.ActiveUser = scraper.User{ID: 1488963321701171204, Handle: "Offline_Twatter"} // Simulate a login
 
 	// Chat detail
-	recorder = httptest.NewRecorder()
+	recorder := httptest.NewRecorder()
 	app.ServeHTTP(recorder, httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328", nil))
-	resp = recorder.Result()
-	root, err = html.Parse(resp.Body)
+	resp := recorder.Result()
+	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".chat-list .chat")), 2) // Chat list still renders
 	assert.Len(cascadia.QueryAll(root, selector("#chat-view .dm-message-and-reacts-container")), 5)
