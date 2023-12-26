@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
+	"runtime"
 	"path"
 	"strconv"
 	"strings"
@@ -130,7 +132,7 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *Application) Run(address string) {
+func (app *Application) Run(address string, should_auto_open bool) {
 	srv := &http.Server{
 		Addr:     address,
 		ErrorLog: app.ErrorLog,
@@ -147,8 +149,22 @@ func (app *Application) Run(address string) {
 
 	app.start_background()
 
+	if should_auto_open {
+		go openWebPage("http://" + address)
+	}
 	err := srv.ListenAndServe()
 	app.ErrorLog.Fatal(err)
+}
+
+func openWebPage(url string) error {
+	switch runtime.GOOS {
+	case "darwin": // macOS
+		return exec.Command("open", url).Run()
+	case "windows":
+		return exec.Command("cmd", "/c", "start", url).Run()
+	default: // Linux and others
+		return exec.Command("xdg-open", url).Run()
+	}
 }
 
 func parse_cursor_value(c *persistence.Cursor, r *http.Request) error {

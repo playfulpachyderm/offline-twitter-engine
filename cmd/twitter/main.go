@@ -15,16 +15,11 @@ import (
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-/**
- * Global variable referencing the open data profile
- */
+// Global variable referencing the open data profile
 var profile persistence.Profile
 
 var version_string string
 
-/**
- * Main method
- */
 func main() {
 	profile_dir := flag.String("profile", ".", "")
 	flag.StringVar(profile_dir, "p", ".", "")
@@ -159,7 +154,10 @@ func main() {
 	case "unlike_tweet":
 		unlike_tweet(target)
 	case "webserver":
-		start_webserver(*addr)
+		fs := flag.NewFlagSet("", flag.ExitOnError)
+		should_auto_open := fs.Bool("auto-open", false, "")
+		fs.Parse(args[1:])
+		start_webserver(*addr, *should_auto_open)
 	case "fetch_inbox":
 		fetch_inbox(*how_many)
 	case "fetch_dm":
@@ -184,7 +182,6 @@ func main() {
 // args:
 // - username: twitter username or email address
 // - password: twitter account password
-
 func login(username string, password string) {
 	// Skip the scraper.the_api variable, just use a local one since no scraping is happening
 	api := scraper.NewGuestSession()
@@ -406,9 +403,9 @@ func list_followed() {
 	}
 }
 
-func start_webserver(addr string) {
+func start_webserver(addr string, should_auto_open bool) {
 	app := webserver.NewApp(profile)
-	app.Run(addr)
+	app.Run(addr, should_auto_open)
 }
 
 func fetch_inbox(how_many int) {
