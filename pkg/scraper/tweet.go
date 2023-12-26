@@ -327,37 +327,14 @@ func GetTweetFull(id TweetID, how_many int) (trove TweetTrove, err error) {
 	return
 }
 
-func GetTweetFullAPIV2(id TweetID, how_many int) (trove TweetTrove, err error) {
-	resp, err := the_api.GetTweetDetail(id, "")
-	if err != nil {
-		err = fmt.Errorf("Error getting tweet detail: %d\n  %w", id, err)
-		return
-	}
-	if len(resp.Errors) != 0 {
-		if resp.Errors[0].Message == "_Missing: No status found with that ID." {
-			trove := NewTweetTrove()
-			trove.Tweets[id] = Tweet{ID: id, TombstoneType: "deleted", IsConversationScraped: true}
-			return trove, nil
-		}
-		panic(fmt.Sprintf("Unknown error: %s", resp.Errors[0].Message))
-	}
-
-	err = the_api.GetMore(PaginatedTweetReplies{id}, &resp, how_many)
-	if err != nil && !errors.Is(err, END_OF_FEED) {
-		err = fmt.Errorf("Error getting more replies in tweet detail: %d\n  %w", id, err)
-		return
-	}
-	trove, err = resp.ToTweetTrove()
-	if err != nil {
+func GetTweetFullAPIV2(id TweetID, how_many int) (TweetTrove, error) {
+	trove, err := the_api.GetPaginatedQuery(PaginatedTweetReplies{id}, how_many)
+	if errors.Is(err, ErrDoesntExist) {
+		trove := NewTweetTrove()
+		trove.Tweets[id] = Tweet{ID: id, TombstoneType: "deleted", IsConversationScraped: true}
+		return trove, nil
+	} else if err != nil {
 		return trove, err
-	}
-
-	// Quoted tombstones need their user_id filled out from the tombstoned_users list
-	log.Debug("Running tweet trove post-processing\n")
-	err = trove.PostProcess()
-	if err != nil {
-		err = fmt.Errorf("Error getting tweet (id %d):\n  %w", id, err)
-		return
 	}
 
 	// Find the main tweet and update its "is_conversation_downloaded" and "last_scraped_at"
@@ -369,5 +346,5 @@ func GetTweetFullAPIV2(id TweetID, how_many int) (trove TweetTrove, err error) {
 	tweet.IsConversationScraped = true
 	trove.Tweets[id] = tweet
 
-	return
+	return trove, err
 }

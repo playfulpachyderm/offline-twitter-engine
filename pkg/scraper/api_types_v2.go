@@ -11,9 +11,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var ErrorIsTombstone = errors.New("tweet is a tombstone")
-var ErrTweetNotFound = errors.New("api responded 'no status found with that ID'")
-
 type CardValue struct {
 	Type        string `json:"type"`
 	StringValue string `json:"string_value"`
@@ -808,6 +805,7 @@ func (r APIV2Response) ToTweetTroveAsLikes() (TweetTrove, error) {
 
 type PaginatedQuery interface {
 	NextPage(api *API, cursor string) (APIV2Response, error)
+	ToTweetTrove(r APIV2Response) (TweetTrove, error)
 }
 
 func (api *API) GetMore(pq PaginatedQuery, response *APIV2Response, count int) error {
@@ -820,10 +818,12 @@ func (api *API) GetMore(pq PaginatedQuery, response *APIV2Response, count int) e
 
 		if fresh_response.GetCursorBottom() == last_response.GetCursorBottom() && len(fresh_response.GetMainInstruction().Entries) == 0 {
 			// Empty response, cursor same as previous: end of feed has been reached
+			fmt.Printf("Cursor repeated; EOF\n")
 			return END_OF_FEED
 		}
 		if fresh_response.IsEmpty() {
 			// Response has a pinned tweet, but no other content: end of feed has been reached
+			fmt.Printf("No non-pinned-tweet entries; EOF\n")
 			return END_OF_FEED // TODO: check that there actually is a pinned tweet and the request didn't just fail lol
 		}
 
@@ -837,6 +837,31 @@ func (api *API) GetMore(pq PaginatedQuery, response *APIV2Response, count int) e
 		fmt.Printf("Have %d entries so far\n", len(response.GetMainInstruction().Entries))
 	}
 	return nil
+}
+
+func (api *API) GetPaginatedQuery(pq PaginatedQuery, count int) (TweetTrove, error) {
+	fmt.Printf("Paginating %d count\n", count)
+	api_response, err := pq.NextPage(api, "")
+	if err != nil {
+		return TweetTrove{}, fmt.Errorf("Error calling API to fetch query %#v:\n  %w", pq, err)
+	}
+	if len(api_response.GetMainInstruction().Entries) < count && api_response.GetCursorBottom() != "" {
+		err = api.GetMore(pq, &api_response, count)
+		if errors.Is(err, END_OF_FEED) {
+			println("End of feed!")
+		} else if err != nil {
+			return TweetTrove{}, err
+		}
+	}
+
+	trove, err := pq.ToTweetTrove(api_response)
+	if err != nil {
+		return TweetTrove{}, fmt.Errorf("Error parsing the tweet trove for query %#v:\n  %w", pq, err)
+	}
+
+	fmt.Println("------------")
+	err = trove.PostProcess()
+	return trove, err
 }
 
 // Get a User feed using the new GraphQL twitter api
@@ -876,6 +901,9 @@ type PaginatedUserFeed struct {
 
 func (p PaginatedUserFeed) NextPage(api *API, cursor string) (APIV2Response, error) {
 	return api.GetGraphqlFeedFor(p.user_id, cursor)
+}
+func (p PaginatedUserFeed) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
+	return r.ToTweetTrove()
 }
 
 func (api *API) GetTweetDetail(tweet_id TweetID, cursor string) (APIV2Response, error) {
@@ -919,6 +947,12 @@ func (api *API) GetTweetDetail(tweet_id TweetID, cursor string) (APIV2Response, 
 
 	var response APIV2Response
 	err = api.do_http(url.String(), cursor, &response)
+	if len(response.Errors) != 0 {
+		if response.Errors[0].Message == "_Missing: No status found with that ID." {
+			return response, ErrDoesntExist
+		}
+		return response, fmt.Errorf("%w: %s", EXTERNAL_API_ERROR, response.Errors[0].Message)
+	}
 
 	return response, err
 }
@@ -929,6 +963,9 @@ type PaginatedTweetReplies struct {
 
 func (p PaginatedTweetReplies) NextPage(api *API, cursor string) (APIV2Response, error) {
 	return api.GetTweetDetail(p.tweet_id, cursor)
+}
+func (p PaginatedTweetReplies) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
+	return r.ToTweetTrove()
 }
 
 func (api *API) GetUserLikes(user_id UserID, cursor string) (APIV2Response, error) {
@@ -984,33 +1021,23 @@ type PaginatedUserLikes struct {
 func (p PaginatedUserLikes) NextPage(api *API, cursor string) (APIV2Response, error) {
 	return api.GetUserLikes(p.user_id, cursor)
 }
-
-func GetUserLikes(user_id UserID, how_many int) (TweetTrove, error) {
-	response, err := the_api.GetUserLikes(user_id, "")
-	if err != nil {
-		return TweetTrove{}, err
-	}
-
-	if len(response.GetMainInstruction().Entries) < how_many && response.GetCursorBottom() != "" {
-		err = the_api.GetMore(PaginatedUserLikes{user_id}, &response, how_many)
-		if errors.Is(err, END_OF_FEED) {
-			println("End of feed!")
-		} else if err != nil {
-			return TweetTrove{}, err
-		}
-	}
-	trove, err := response.ToTweetTroveAsLikes()
+func (p PaginatedUserLikes) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
+	ret, err := r.ToTweetTroveAsLikes()
 	if err != nil {
 		return TweetTrove{}, err
 	}
 
 	// Fill out the liking UserID
-	for i := range trove.Likes {
-		l := trove.Likes[i]
-		l.UserID = user_id
-		trove.Likes[i] = l
+	for i := range ret.Likes {
+		l := ret.Likes[i]
+		l.UserID = p.user_id
+		ret.Likes[i] = l
 	}
-	return trove, nil
+	return ret, nil
+}
+
+func GetUserLikes(user_id UserID, how_many int) (TweetTrove, error) {
+	return the_api.GetPaginatedQuery(PaginatedUserLikes{user_id}, how_many)
 }
 
 func (api *API) GetHomeTimeline(cursor string, is_for_you bool) (TweetTrove, error) {
@@ -1174,4 +1201,7 @@ type PaginatedSearch struct {
 
 func (p PaginatedSearch) NextPage(api *API, cursor string) (APIV2Response, error) {
 	return api.Search(p.query, cursor)
+}
+func (p PaginatedSearch) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
+	return r.ToTweetTrove()
 }

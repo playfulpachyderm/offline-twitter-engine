@@ -1,12 +1,12 @@
 package scraper
 
 import (
-	"fmt"
+	"errors"
 )
 
 var (
-	END_OF_FEED        = fmt.Errorf("End of feed")
-	DOESNT_EXIST       = fmt.Errorf("Doesn't exist")
-	EXTERNAL_API_ERROR = fmt.Errorf("Unexpected result from external API")
-	API_PARSE_ERROR    = fmt.Errorf("Couldn't parse the result returned from the API")
+	END_OF_FEED        = errors.New("End of feed")
+	ErrDoesntExist     = errors.New("Doesn't exist")
+	EXTERNAL_API_ERROR = errors.New("Unexpected result from external API")
+	ErrorIsTombstone   = errors.New("tweet is a tombstone")
 )

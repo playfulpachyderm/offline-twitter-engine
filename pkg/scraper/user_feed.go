@@ -33,25 +33,5 @@ func GetUserFeedFor(user_id UserID, min_tweets int) (trove TweetTrove, err error
 }
 
 func GetUserFeedGraphqlFor(user_id UserID, min_tweets int) (trove TweetTrove, err error) {
-	api_response, err := the_api.GetGraphqlFeedFor(user_id, "")
-	if err != nil {
-		err = fmt.Errorf("Error calling API to fetch user feed: UserID %d\n  %w", user_id, err)
-		return
-	}
-
-	if len(api_response.GetMainInstruction().Entries) < min_tweets && api_response.GetCursorBottom() != "" {
-		err = the_api.GetMore(PaginatedUserFeed{user_id}, &api_response, min_tweets)
-		if err != nil && !errors.Is(err, END_OF_FEED) {
-			return
-		}
-	}
-
-	trove, err = api_response.ToTweetTrove()
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("------------")
-	err = trove.PostProcess()
-	return trove, err
+	return the_api.GetPaginatedQuery(PaginatedUserFeed{user_id}, min_tweets)
 }
