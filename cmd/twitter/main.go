@@ -156,7 +156,9 @@ func main() {
 	case "webserver":
 		fs := flag.NewFlagSet("", flag.ExitOnError)
 		should_auto_open := fs.Bool("auto-open", false, "")
-		fs.Parse(args[1:])
+		if err := fs.Parse(args[1:]); err != nil {
+			panic(err)
+		}
 		start_webserver(*addr, *should_auto_open)
 	case "fetch_inbox":
 		fetch_inbox(*how_many)

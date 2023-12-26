@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"runtime"
 	"path"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -156,14 +156,18 @@ func (app *Application) Run(address string, should_auto_open bool) {
 	app.ErrorLog.Fatal(err)
 }
 
-func openWebPage(url string) error {
+func openWebPage(url string) {
+	var cmd *exec.Cmd
 	switch runtime.GOOS {
 	case "darwin": // macOS
-		return exec.Command("open", url).Run()
+		cmd = exec.Command("open", url)
 	case "windows":
-		return exec.Command("cmd", "/c", "start", url).Run()
+		cmd = exec.Command("cmd", "/c", "start", url)
 	default: // Linux and others
-		return exec.Command("xdg-open", url).Run()
+		cmd = exec.Command("xdg-open", url)
+	}
+	if err := cmd.Run(); err != nil {
+		log.Printf("Failed to open homepage: %s", err.Error())
 	}
 }
 
