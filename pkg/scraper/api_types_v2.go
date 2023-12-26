@@ -806,6 +806,39 @@ func (r APIV2Response) ToTweetTroveAsLikes() (TweetTrove, error) {
 	return ret, err
 }
 
+type PaginatedQuery interface {
+	NextPage(api *API, cursor string) (APIV2Response, error)
+}
+
+func (api *API) GetMore(pq PaginatedQuery, response *APIV2Response, count int) error {
+	last_response := response
+	for last_response.GetCursorBottom() != "" && len(response.GetMainInstruction().Entries) < count {
+		fresh_response, err := pq.NextPage(api, last_response.GetCursorBottom())
+		if err != nil {
+			return fmt.Errorf("error getting next page for %#v: %w", pq, err)
+		}
+
+		if fresh_response.GetCursorBottom() == last_response.GetCursorBottom() && len(fresh_response.GetMainInstruction().Entries) == 0 {
+			// Empty response, cursor same as previous: end of feed has been reached
+			return END_OF_FEED
+		}
+		if fresh_response.IsEmpty() {
+			// Response has a pinned tweet, but no other content: end of feed has been reached
+			return END_OF_FEED // TODO: check that there actually is a pinned tweet and the request didn't just fail lol
+		}
+
+		last_response = &fresh_response
+
+		// Copy over the entries
+		response.GetMainInstruction().Entries = append(
+			response.GetMainInstruction().Entries,
+			last_response.GetMainInstruction().Entries...)
+
+		fmt.Printf("Have %d entries so far\n", len(response.GetMainInstruction().Entries))
+	}
+	return nil
+}
+
 // Get a User feed using the new GraphQL twitter api
 func (api *API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response, error) {
 	url, err := url.Parse(GraphqlURL{
@@ -837,43 +870,12 @@ func (api *API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response,
 	return response, err
 }
 
-/**
- * Resend the request to get more tweets if necessary
- *
- * args:
- * - user_id: the user's UserID
- * - response: an "out" parameter; the APIV2Response that tweets, RTs and users will be appended to
- * - min_tweets: the desired minimum amount of tweets to get
- */
-func (api *API) GetMoreTweetsFromGraphqlFeed(user_id UserID, response *APIV2Response, min_tweets int) error {
-	// TODO user-feed-infinite-fetch: what if you reach the end of the user's timeline?  Might loop
-	// forever getting no new tweets
-	last_response := response
-	for last_response.GetCursorBottom() != "" && len(response.GetMainInstruction().Entries) < min_tweets {
-		fresh_response, err := api.GetGraphqlFeedFor(user_id, last_response.GetCursorBottom())
-		if err != nil {
-			return err
-		}
+type PaginatedUserFeed struct {
+	user_id UserID
+}
 
-		if fresh_response.GetCursorBottom() == last_response.GetCursorBottom() && len(fresh_response.GetMainInstruction().Entries) == 0 {
-			// Empty response, cursor same as previous: end of feed has been reached
-			return END_OF_FEED
-		}
-		if fresh_response.IsEmpty() {
-			// Response has a pinned tweet, but no other content: end of feed has been reached
-			return END_OF_FEED // TODO: check that there actually is a pinned tweet and the request didn't just fail lol
-		}
-
-		last_response = &fresh_response
-
-		// Copy over the entries
-		response.GetMainInstruction().Entries = append(
-			response.GetMainInstruction().Entries,
-			last_response.GetMainInstruction().Entries...)
-
-		fmt.Printf("Have %d entries so far\n", len(response.GetMainInstruction().Entries))
-	}
-	return nil
+func (p PaginatedUserFeed) NextPage(api *API, cursor string) (APIV2Response, error) {
+	return api.GetGraphqlFeedFor(p.user_id, cursor)
 }
 
 func (api *API) GetTweetDetail(tweet_id TweetID, cursor string) (APIV2Response, error) {
@@ -921,40 +923,12 @@ func (api *API) GetTweetDetail(tweet_id TweetID, cursor string) (APIV2Response, 
 	return response, err
 }
 
-func (api *API) GetMoreTweetReplies(tweet_id TweetID, response *APIV2Response, min_tweets int) error {
-	if len(response.Errors) != 0 {
-		if response.Errors[0].Message == "_Missing: No status found with that ID." {
-			return ErrTweetNotFound
-		}
-		panic(fmt.Sprintf("Unknown error: %s", response.Errors[0].Message))
-	}
+type PaginatedTweetReplies struct {
+	tweet_id TweetID
+}
 
-	last_response := response
-	for last_response.GetCursorBottom() != "" && len(response.GetMainInstruction().Entries) < min_tweets {
-		fresh_response, err := api.GetTweetDetail(tweet_id, last_response.GetCursorBottom())
-		if err != nil {
-			return err
-		}
-
-		if fresh_response.GetCursorBottom() == last_response.GetCursorBottom() && len(fresh_response.GetMainInstruction().Entries) == 0 {
-			// Empty response, cursor same as previous: end of feed has been reached
-			return END_OF_FEED
-		}
-		if fresh_response.IsEmpty() {
-			// Response has a pinned tweet, but no other content: end of feed has been reached
-			return END_OF_FEED // TODO: check that there actually is a pinned tweet and the request didn't just fail lol
-		}
-
-		last_response = &fresh_response
-
-		// Copy over the entries
-		response.GetMainInstruction().Entries = append(
-			response.GetMainInstruction().Entries,
-			last_response.GetMainInstruction().Entries...)
-
-		fmt.Printf("Have %d entries so far\n", len(response.GetMainInstruction().Entries))
-	}
-	return nil
+func (p PaginatedTweetReplies) NextPage(api *API, cursor string) (APIV2Response, error) {
+	return api.GetTweetDetail(p.tweet_id, cursor)
 }
 
 func (api *API) GetUserLikes(user_id UserID, cursor string) (APIV2Response, error) {
@@ -1003,32 +977,12 @@ func (api *API) GetUserLikes(user_id UserID, cursor string) (APIV2Response, erro
 	return response, nil
 }
 
-func (api *API) GetMoreUserLikes(user_id UserID, response *APIV2Response, max_results int) error {
-	last_response := response
-	for last_response.GetCursorBottom() != "" && len(response.GetMainInstruction().Entries) < max_results {
-		fresh_response, err := api.GetUserLikes(user_id, last_response.GetCursorBottom())
-		if err != nil {
-			return err
-		}
-		if fresh_response.GetCursorBottom() == last_response.GetCursorBottom() || len(fresh_response.GetMainInstruction().Entries) == 0 {
-			// Empty response, cursor same as previous: end of feed has been reached
-			return END_OF_FEED
-		}
+type PaginatedUserLikes struct {
+	user_id UserID
+}
 
-		last_response = &fresh_response
-
-		// Copy the results over
-		// Copy over the entries
-		response.GetMainInstruction().Entries = append(
-			response.GetMainInstruction().Entries,
-			last_response.GetMainInstruction().Entries...)
-
-		fmt.Printf("Have %d tweets\n", len(response.GetMainInstruction().Entries))
-	}
-	fmt.Println()
-	fmt.Printf("Cursor bottom: %q\n", last_response.GetCursorBottom())
-	fmt.Printf("Entries count: %d\n", len(response.GetMainInstruction().Entries))
-	return nil
+func (p PaginatedUserLikes) NextPage(api *API, cursor string) (APIV2Response, error) {
+	return api.GetUserLikes(p.user_id, cursor)
 }
 
 func GetUserLikes(user_id UserID, how_many int) (TweetTrove, error) {
@@ -1038,7 +992,7 @@ func GetUserLikes(user_id UserID, how_many int) (TweetTrove, error) {
 	}
 
 	if len(response.GetMainInstruction().Entries) < how_many && response.GetCursorBottom() != "" {
-		err = the_api.GetMoreUserLikes(user_id, &response, how_many)
+		err = the_api.GetMore(PaginatedUserLikes{user_id}, &response, how_many)
 		if errors.Is(err, END_OF_FEED) {
 			println("End of feed!")
 		} else if err != nil {
@@ -1214,30 +1168,10 @@ func (api *API) Search(query string, cursor string) (APIV2Response, error) {
 	return result, err
 }
 
-func (api *API) GetMoreTweetsFromSearch(query string, response *APIV2Response, max_results int) error {
-	last_response := response
-	for last_response.GetCursorBottom() != "" && len(response.GetMainInstruction().Entries) < max_results {
-		fresh_response, err := api.Search(query, last_response.GetCursorBottom())
-		if err != nil {
-			return err
-		}
-		if fresh_response.GetCursorBottom() == last_response.GetCursorBottom() || len(fresh_response.GetMainInstruction().Entries) == 0 {
-			// Empty response, cursor same as previous: end of feed has been reached
-			return END_OF_FEED
-		}
+type PaginatedSearch struct {
+	query string
+}
 
-		last_response = &fresh_response
-
-		// Copy the results over
-		// Copy over the entries
-		response.GetMainInstruction().Entries = append(
-			response.GetMainInstruction().Entries,
-			last_response.GetMainInstruction().Entries...)
-
-		fmt.Printf("Have %d tweets\n", len(response.GetMainInstruction().Entries))
-	}
-	fmt.Println()
-	fmt.Printf("Cursor bottom: %q\n", last_response.GetCursorBottom())
-	fmt.Printf("Entries count: %d\n", len(response.GetMainInstruction().Entries))
-	return nil
+func (p PaginatedSearch) NextPage(api *API, cursor string) (APIV2Response, error) {
+	return api.Search(p.query, cursor)
 }

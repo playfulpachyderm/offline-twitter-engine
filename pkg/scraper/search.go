@@ -24,7 +24,7 @@ func Search(query string, min_results int) (trove TweetTrove, err error) {
 	}
 
 	if len(api_response.GetMainInstruction().Entries) < min_results && api_response.GetCursorBottom() != "" {
-		err = the_api.GetMoreTweetsFromSearch(query, &api_response, min_results)
+		err = the_api.GetMore(PaginatedSearch{query}, &api_response, min_results)
 		if errors.Is(err, END_OF_FEED) {
 			println("End of feed!")
 		} else if err != nil {

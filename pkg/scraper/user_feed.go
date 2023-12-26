@@ -40,7 +40,7 @@ func GetUserFeedGraphqlFor(user_id UserID, min_tweets int) (trove TweetTrove, er
 	}
 
 	if len(api_response.GetMainInstruction().Entries) < min_tweets && api_response.GetCursorBottom() != "" {
-		err = the_api.GetMoreTweetsFromGraphqlFeed(user_id, &api_response, min_tweets)
+		err = the_api.GetMore(PaginatedUserFeed{user_id}, &api_response, min_tweets)
 		if err != nil && !errors.Is(err, END_OF_FEED) {
 			return
 		}

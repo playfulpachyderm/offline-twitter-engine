@@ -333,12 +333,16 @@ func GetTweetFullAPIV2(id TweetID, how_many int) (trove TweetTrove, err error) {
 		err = fmt.Errorf("Error getting tweet detail: %d\n  %w", id, err)
 		return
 	}
-	err = the_api.GetMoreTweetReplies(id, &resp, how_many)
-	if errors.Is(err, ErrTweetNotFound) {
-		trove := NewTweetTrove()
-		trove.Tweets[id] = Tweet{ID: id, TombstoneType: "deleted", IsConversationScraped: true}
-		return trove, nil
+	if len(resp.Errors) != 0 {
+		if resp.Errors[0].Message == "_Missing: No status found with that ID." {
+			trove := NewTweetTrove()
+			trove.Tweets[id] = Tweet{ID: id, TombstoneType: "deleted", IsConversationScraped: true}
+			return trove, nil
+		}
+		panic(fmt.Sprintf("Unknown error: %s", resp.Errors[0].Message))
 	}
+
+	err = the_api.GetMore(PaginatedTweetReplies{id}, &resp, how_many)
 	if err != nil && !errors.Is(err, END_OF_FEED) {
 		err = fmt.Errorf("Error getting more replies in tweet detail: %d\n  %w", id, err)
 		return
