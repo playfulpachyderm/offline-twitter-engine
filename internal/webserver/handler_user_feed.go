@@ -1,8 +1,8 @@
 package webserver
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 

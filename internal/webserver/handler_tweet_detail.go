@@ -1,12 +1,12 @@
 package webserver
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
-	"context"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"

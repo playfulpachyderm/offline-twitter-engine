@@ -196,7 +196,6 @@ func TestUserFollowers(t *testing.T) {
 	assert.Len(cascadia.QueryAll(root, selector(".users-list-container > .user")), 2)
 }
 
-
 func TestUserFollowees(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
