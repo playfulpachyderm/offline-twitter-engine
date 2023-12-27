@@ -135,6 +135,10 @@ func main() {
 		fetch_user_feed(target, 999999999)
 	case "get_user_likes":
 		get_user_likes(target, *how_many)
+	case "get_followers":
+		get_followers(target, *how_many)
+	case "get_followees":
+		get_followees(target, *how_many)
 	case "fetch_timeline":
 		fetch_timeline(false)
 	case "fetch_timeline_for_you":
@@ -308,6 +312,36 @@ func get_user_likes(handle string, how_many int) {
 	profile.SaveTweetTrove(trove, true)
 
 	happy_exit(fmt.Sprintf("Saved %d tweets, %d retweets and %d users", len(trove.Tweets), len(trove.Retweets), len(trove.Users)))
+}
+
+func get_followees(handle string, how_many int) {
+	user, err := profile.GetUserByHandle(scraper.UserHandle(handle))
+	if err != nil {
+		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
+	}
+
+	trove, err := scraper.GetFollowees(user.ID, how_many)
+	if err != nil {
+		die(fmt.Sprintf("Error getting followees: %s\n  %s", handle, err.Error()), false, -2)
+	}
+	profile.SaveTweetTrove(trove, true)
+	profile.SaveAsFolloweesList(user.ID, trove)
+
+	happy_exit(fmt.Sprintf("Saved %d followees", len(trove.Users)))
+}
+func get_followers(handle string, how_many int) {
+	user, err := profile.GetUserByHandle(scraper.UserHandle(handle))
+	if err != nil {
+		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
+	}
+	trove, err := scraper.GetFollowers(user.ID, how_many)
+	if err != nil {
+		die(fmt.Sprintf("Error getting followees: %s\n  %s", handle, err.Error()), false, -2)
+	}
+	profile.SaveTweetTrove(trove, true)
+	profile.SaveAsFollowersList(user.ID, trove)
+
+	happy_exit(fmt.Sprintf("Saved %d followers", len(trove.Users)))
 }
 
 func fetch_timeline(is_for_you bool) {

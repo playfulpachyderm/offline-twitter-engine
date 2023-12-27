@@ -406,6 +406,7 @@ func (api_v2_tweet APIV2Tweet) ToTweetTrove() (TweetTrove, error) {
 type ItemContent struct {
 	ItemType     string      `json:"itemType"`
 	TweetResults APIV2Result `json:"tweet_results"`
+	APIV2UserResult
 
 	// Cursors (conversation view format)
 	CursorType string `json:"cursorType"`
@@ -548,7 +549,13 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 			}
 			ret.Tweets[parsed_tombstone_tweet.ID] = parsed_tombstone_tweet
 		} else if err != nil {
-			panic(err)
+			if e.Content.ItemContent.APIV2UserResult.UserResults.Result.ID != 0 {
+				user := e.Content.ItemContent.APIV2UserResult.ToUser()
+				ret = NewTweetTrove()
+				ret.Users[user.ID] = user
+			} else {
+				panic(err)
+			}
 		}
 		return ret
 	}
@@ -793,7 +800,13 @@ func (r APIV2Response) ToTweetTroveAsLikes() (TweetTrove, error) {
 		// Generate a "Like" from the entry
 		tweet, is_ok := ret.Tweets[TweetID(entry.Content.ItemContent.TweetResults.Result._Result.ID)]
 		if !is_ok {
-			panic(entry)
+			// For TweetWithVisibilityResults
+			tweet, is_ok = ret.Tweets[TweetID(entry.Content.ItemContent.TweetResults.Result.Tweet.ID)]
+			if !is_ok {
+				log.Warnf("ID: %d", entry.Content.ItemContent.TweetResults.Result._Result.ID)
+				log.Warnf("Entry JSON: %s", entry.OriginalJSON)
+				panic(ret.Tweets)
+			}
 		}
 		ret.Likes[LikeSortID(entry.SortIndex)] = Like{
 			SortID:  LikeSortID(entry.SortIndex),

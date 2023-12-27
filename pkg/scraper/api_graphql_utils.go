@@ -68,6 +68,8 @@ type GraphqlFeatures struct {
 	HiddenProfileSubscriptionsEnabled                              bool `json:"hidden_profile_subscriptions_enabled"`
 	HighlightsTweetsTabUIEnabled                                   bool `json:"highlights_tweets_tab_ui_enabled"`
 	SubscriptionsVerificationInfoIsIdentityVerifiedEnabled         bool `json:"subscriptions_verification_info_is_identity_verified_enabled"` //nolint:lll // I didn't choose this field name
+	C9sTweetAnatomyModeratorBadgeEnabled                           bool `json:"c9s_tweet_anatomy_moderator_badge_enabled"`
+	RwebVideoTimestampsEnabled                                     bool `json:"rweb_video_timestamps_enabled"`
 
 	// Spaces
 	Spaces2022H2Clipping          bool `json:"spaces_2022_h2_clipping,omitempty"`

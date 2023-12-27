@@ -410,6 +410,20 @@ INSERT INTO chat_message_reactions VALUES
     (3,1665936253834578774,1665936253483614216,1178839081222115328,1686075343331,'🤔');
 
 
+create table follows(rowid integer primary key,
+    follower_id integer not null,
+    followee_id integer not null,
+    unique(follower_id, followee_id),
+    foreign key(follower_id) references users(id)
+    foreign key(followee_id) references users(id)
+);
+create index if not exists index_follows_followee_id on follows (followee_id);
+create index if not exists index_follows_follower_id on follows (follower_id);
+insert into follows values
+    (1, 1178839081222115328, 1488963321701171204),
+    (2, 1032468021485293568, 1488963321701171204);
+
+
 create table fake_user_sequence(latest_fake_id integer not null);
 insert into fake_user_sequence values(0x4000000000000000);
 

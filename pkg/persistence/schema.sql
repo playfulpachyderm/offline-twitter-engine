@@ -203,6 +203,18 @@ create table likes(rowid integer primary key,
 create index if not exists index_likes_user_id on likes (user_id);
 create index if not exists index_likes_tweet_id on likes (tweet_id);
 
+
+create table follows(rowid integer primary key,
+    follower_id integer not null,
+    followee_id integer not null,
+    unique(follower_id, followee_id),
+    foreign key(follower_id) references users(id)
+    foreign key(followee_id) references users(id)
+);
+create index if not exists index_follows_followee_id on follows (followee_id);
+create index if not exists index_follows_follower_id on follows (follower_id);
+
+
 create table fake_user_sequence(latest_fake_id integer not null);
 insert into fake_user_sequence values(0x4000000000000000);
 
