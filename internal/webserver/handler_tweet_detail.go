@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"context"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
@@ -150,4 +151,20 @@ func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 	// fmt.Println(to_json(data))
 
 	app.buffered_render_tweet_page(w, "tpl/tweet_detail.tpl", data)
+}
+
+type key string
+
+const TWEET_KEY = key("tweet")
+
+func add_tweet_to_context(ctx context.Context, tweet scraper.Tweet) context.Context {
+	return context.WithValue(ctx, TWEET_KEY, tweet)
+}
+
+func get_tweet_from_context(ctx context.Context) scraper.Tweet {
+	tweet, is_ok := ctx.Value(TWEET_KEY).(scraper.Tweet)
+	if !is_ok {
+		panic("Tweet not found in context")
+	}
+	return tweet
 }

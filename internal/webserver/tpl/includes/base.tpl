@@ -3,7 +3,7 @@
   <html lang='en'>
     <head>
       <meta charset='utf-8'>
-      <title>Offline Twitter | {{template "title" .}}</title>
+      <title>{{template "title" .}} | Offline Twitter</title>
       <link rel='stylesheet' href='/static/styles.css'>
       <link rel='shortcut icon' href='/static/img/favicon.ico' type='image/x-icon'>
       <link rel='stylesheet' href='/static/vendor/fonts.css'>

@@ -421,7 +421,8 @@ create index if not exists index_follows_followee_id on follows (followee_id);
 create index if not exists index_follows_follower_id on follows (follower_id);
 insert into follows values
     (1, 1178839081222115328, 1488963321701171204),
-    (2, 1032468021485293568, 1488963321701171204);
+    (2, 1032468021485293568, 1488963321701171204),
+    (3, 1488963321701171204, 1240784920831762433);
 
 
 create table fake_user_sequence(latest_fake_id integer not null);

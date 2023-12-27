@@ -79,7 +79,7 @@ func TestUserFeed(t *testing.T) {
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	title_node := cascadia.Query(root, selector("title"))
-	assert.Equal(title_node.FirstChild.Data, "Offline Twitter | @Cernovich")
+	assert.Equal(title_node.FirstChild.Data, "@Cernovich | Offline Twitter")
 
 	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
 	assert.Len(tweet_nodes, 7)
@@ -119,7 +119,7 @@ func TestUserFeedWithCursor(t *testing.T) {
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	title_node := cascadia.Query(root, selector("title"))
-	assert.Equal(title_node.FirstChild.Data, "Offline Twitter | @Cernovich")
+	assert.Equal(title_node.FirstChild.Data, "@Cernovich | Offline Twitter")
 
 	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
 	assert.Len(tweet_nodes, 2)
@@ -181,6 +181,34 @@ func TestUserFeedLikesTab(t *testing.T) {
 	assert.Len(tweets, 4)
 }
 
+// Followers and followees
+// -----------------------
+
+func TestUserFollowers(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/Offline_Twatter/followers", nil))
+	require.Equal(resp.StatusCode, 200)
+
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".users-list-container > .user")), 2)
+}
+
+
+func TestUserFollowees(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/Offline_Twatter/followees", nil))
+	require.Equal(resp.StatusCode, 200)
+
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".users-list-container > .user")), 1)
+}
+
 // Timeline page
 // -------------
 
@@ -194,7 +222,7 @@ func TestTimeline(t *testing.T) {
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	title_node := cascadia.Query(root, selector("title"))
-	assert.Equal(title_node.FirstChild.Data, "Offline Twitter | Timeline")
+	assert.Equal(title_node.FirstChild.Data, "Timeline | Offline Twitter")
 
 	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
 	assert.Len(tweet_nodes, 18)
@@ -210,7 +238,7 @@ func TestTimelineWithCursor(t *testing.T) {
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	title_node := cascadia.Query(root, selector("title"))
-	assert.Equal(title_node.FirstChild.Data, "Offline Twitter | Timeline")
+	assert.Equal(title_node.FirstChild.Data, "Timeline | Offline Twitter")
 
 	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
 	assert.Len(tweet_nodes, 10)
@@ -245,7 +273,7 @@ func TestSearch(t *testing.T) {
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	title_node := cascadia.Query(root, selector("title"))
-	assert.Equal(title_node.FirstChild.Data, "Offline Twitter | Search")
+	assert.Equal(title_node.FirstChild.Data, "Search | Offline Twitter")
 
 	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
 	assert.Len(tweet_nodes, 1)

@@ -1,5 +1,5 @@
-{{define "title"}}Followed Users{{end}}
+{{define "title"}}{{.Title}}{{end}}
 
 {{define "main"}}
-  {{template "list" .}}
+  {{template "list" .Users}}
 {{end}}

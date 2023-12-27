@@ -34,11 +34,11 @@ func TestSaveAndLoadFollows(t *testing.T) {
 
 	// Save and reload it
 	profile.SaveAsFolloweesList(follower.ID, trove)
-	new_followee_ids := profile.GetFollowees(follower.ID)
+	new_followees := profile.GetFollowees(follower.ID)
 
-	assert.Len(new_followee_ids, len(followee_ids))
-	for _, id := range new_followee_ids {
-		_, is_ok := trove.Users[id]
+	assert.Len(new_followees, len(followee_ids))
+	for _, followee := range new_followees {
+		_, is_ok := trove.Users[followee.ID]
 		assert.True(is_ok)
 	}
 }

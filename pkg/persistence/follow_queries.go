@@ -39,18 +39,26 @@ func (p Profile) IsXFollowingY(follower_id UserID, followee_id UserID) bool {
 	return rows.Next() // true if there is a row, false otherwise
 }
 
-func (p Profile) GetFollowers(followee_id UserID) []UserID {
-	var ret []UserID
-	err := p.DB.Select(&ret, `select follower_id from follows where followee_id = ?`, followee_id)
+func (p Profile) GetFollowers(followee_id UserID) []User {
+	var ret []User
+	err := p.DB.Select(&ret, `
+	    select `+USERS_ALL_SQL_FIELDS+`
+	      from users
+	     where id in (select follower_id from follows where followee_id = ?)
+	`, followee_id)
 	if err != nil {
 		panic(err)
 	}
 	return ret
 }
 
-func (p Profile) GetFollowees(follower_id UserID) []UserID {
-	var ret []UserID
-	err := p.DB.Select(&ret, `select followee_id from follows where follower_id = ?`, follower_id)
+func (p Profile) GetFollowees(follower_id UserID) []User {
+	var ret []User
+	err := p.DB.Select(&ret, `
+	    select `+USERS_ALL_SQL_FIELDS+`
+	      from users
+	     where id in (select followee_id from follows where follower_id = ?)
+	`, follower_id)
 	if err != nil {
 		panic(err)
 	}

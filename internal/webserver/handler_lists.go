@@ -18,5 +18,5 @@ func (app *Application) Lists(w http.ResponseWriter, r *http.Request) {
 	     where is_followed = 1`)
 	panic_if(err)
 
-	app.buffered_render_basic_page(w, "tpl/list.tpl", users)
+	app.buffered_render_basic_page(w, "tpl/list.tpl", ListData{Title: "Offline Follows", Users: users})
 }

@@ -37,14 +37,14 @@
       </div>
 
       <div class="followers-followees-container row">
-        <div class="followers-container">
+        <a href="/{{$user.Handle}}/followers" class="followers-container unstyled-link">
           <span class="followers-count">{{$user.FollowersCount}}</span>
           <span class="followers-label">followers</span>
-        </div>
-        <div class="followees-container">
+        </a>
+        <a href="/{{$user.Handle}}/followees" class="followers-container unstyled-link">
           <span class="following-label">is following</span>
           <span class="following-count">{{$user.FollowingCount}}</span>
-        </div>
+        </a>
 
         <div class="spacer"></div>
 

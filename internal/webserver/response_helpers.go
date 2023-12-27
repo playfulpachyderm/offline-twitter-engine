@@ -2,7 +2,6 @@ package webserver
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"html/template"
 	"io"
@@ -248,20 +247,4 @@ func cursor_to_query_params(c persistence.Cursor) string {
 	result.Set("cursor", fmt.Sprint(c.CursorValue))
 	result.Set("sort-order", c.SortOrder.String())
 	return result.Encode()
-}
-
-type key string
-
-const TWEET_KEY = key("tweet")
-
-func add_tweet_to_context(ctx context.Context, tweet scraper.Tweet) context.Context {
-	return context.WithValue(ctx, TWEET_KEY, tweet)
-}
-
-func get_tweet_from_context(ctx context.Context) scraper.Tweet {
-	tweet, is_ok := ctx.Value(TWEET_KEY).(scraper.Tweet)
-	if !is_ok {
-		panic("Tweet not found in context")
-	}
-	return tweet
 }

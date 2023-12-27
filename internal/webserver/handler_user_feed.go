@@ -1,6 +1,7 @@
 package webserver
 
 import (
+	"fmt"
 	"errors"
 	"net/http"
 	"strings"
@@ -47,6 +48,15 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 		}
 		panic_if(app.Profile.SaveUser(&user))
 		panic_if(app.Profile.DownloadUserContentFor(&user))
+	}
+
+	if len(parts) > 1 && parts[1] == "followers" {
+		app.UserFollowers(w, r, user)
+		return
+	}
+	if len(parts) > 1 && parts[1] == "followees" {
+		app.UserFollowees(w, r, user)
+		return
 	}
 
 	if r.URL.Query().Has("scrape") {
@@ -117,4 +127,22 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	} else {
 		app.buffered_render_tweet_page(w, "tpl/user_feed.tpl", data)
 	}
+}
+
+type ListData struct {
+	Title string
+	Users []scraper.User
+}
+
+func (app *Application) UserFollowees(w http.ResponseWriter, r *http.Request, user scraper.User) {
+	app.buffered_render_basic_page(w, "tpl/list.tpl", ListData{
+		Title: fmt.Sprintf("Followed by @%s", user.Handle),
+		Users: app.Profile.GetFollowees(user.ID),
+	})
+}
+func (app *Application) UserFollowers(w http.ResponseWriter, r *http.Request, user scraper.User) {
+	app.buffered_render_basic_page(w, "tpl/list.tpl", ListData{
+		Title: fmt.Sprintf("Followers of @%s", user.Handle),
+		Users: app.Profile.GetFollowers(user.ID),
+	})
 }
