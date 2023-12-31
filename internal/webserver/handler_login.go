@@ -57,7 +57,7 @@ func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
 		LoginForm:        form,
 		ExistingSessions: app.Profile.ListSessions(),
 	}
-	app.buffered_render_basic_page(w, "tpl/login.tpl", &data)
+	app.buffered_render_page(w, "tpl/login.tpl", PageGlobalData{}, &data)
 }
 
 func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
@@ -76,5 +76,5 @@ func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
 		app.error_400_with_message(w, fmt.Sprintf("User not in database: %s", form.AccountName))
 		return
 	}
-	app.buffered_render_basic_htmx(w, "nav-sidebar", nil)
+	app.buffered_render_htmx(w, "nav-sidebar", PageGlobalData{}, nil)
 }

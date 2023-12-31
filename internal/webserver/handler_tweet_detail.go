@@ -24,21 +24,6 @@ func NewTweetDetailData() TweetDetailData {
 		TweetDetailView: persistence.NewTweetDetailView(),
 	}
 }
-func (t TweetDetailData) Tweet(id scraper.TweetID) scraper.Tweet {
-	return t.Tweets[id]
-}
-func (t TweetDetailData) User(id scraper.UserID) scraper.User {
-	return t.Users[id]
-}
-func (t TweetDetailData) Retweet(id scraper.TweetID) scraper.Retweet {
-	return t.Retweets[id]
-}
-func (t TweetDetailData) Space(id scraper.SpaceID) scraper.Space {
-	return t.Spaces[id]
-}
-func (t TweetDetailData) FocusedTweetID() scraper.TweetID {
-	return t.MainTweetID
-}
 
 func (app *Application) ensure_tweet(id scraper.TweetID, is_forced bool, is_conversation_required bool) (scraper.Tweet, error) {
 	is_available := false
@@ -95,7 +80,7 @@ func (app *Application) LikeTweet(w http.ResponseWriter, r *http.Request) {
 	panic_if(err)
 	tweet.IsLikedByCurrentUser = true
 
-	app.buffered_render_basic_htmx(w, "likes-count", tweet)
+	app.buffered_render_htmx(w, "likes-count", PageGlobalData{}, tweet)
 }
 func (app *Application) UnlikeTweet(w http.ResponseWriter, r *http.Request) {
 	tweet := get_tweet_from_context(r.Context())
@@ -109,7 +94,7 @@ func (app *Application) UnlikeTweet(w http.ResponseWriter, r *http.Request) {
 	panic_if(err)
 	tweet.IsLikedByCurrentUser = false
 
-	app.buffered_render_basic_htmx(w, "likes-count", tweet)
+	app.buffered_render_htmx(w, "likes-count", PageGlobalData{}, tweet)
 }
 
 func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
@@ -144,13 +129,12 @@ func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	trove, err := app.Profile.GetTweetDetail(data.MainTweetID, app.ActiveUser.ID)
+	twt_detail, err := app.Profile.GetTweetDetail(data.MainTweetID, app.ActiveUser.ID)
 	panic_if(err) // ErrNotInDB should be impossible, since we already fetched the single tweet successfully
 
-	data.TweetDetailView = trove
-	// fmt.Println(to_json(data))
+	data.TweetDetailView = twt_detail
 
-	app.buffered_render_tweet_page(w, "tpl/tweet_detail.tpl", data)
+	app.buffered_render_page(w, "tpl/tweet_detail.tpl", PageGlobalData{TweetTrove: twt_detail.TweetTrove}, data)
 }
 
 type key string

@@ -28,7 +28,7 @@ func (app *Application) UserFollow(w http.ResponseWriter, r *http.Request) {
 
 	app.Profile.SetUserFollowed(&user, true)
 
-	app.buffered_render_basic_htmx(w, "following-button", user)
+	app.buffered_render_htmx(w, "following-button", PageGlobalData{}, user)
 }
 
 func (app *Application) UserUnfollow(w http.ResponseWriter, r *http.Request) {
@@ -51,5 +51,5 @@ func (app *Application) UserUnfollow(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.Profile.SetUserFollowed(&user, false)
-	app.buffered_render_basic_htmx(w, "following-button", user)
+	app.buffered_render_htmx(w, "following-button", PageGlobalData{}, user)
 }

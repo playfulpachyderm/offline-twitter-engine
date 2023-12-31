@@ -26,12 +26,10 @@ func (app *Application) Timeline(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	data := UserProfileData{Feed: feed} // TODO: wrong struct
-
 	if r.Header.Get("HX-Request") == "true" && c.CursorPosition == persistence.CURSOR_MIDDLE {
 		// It's a Show More request
-		app.buffered_render_tweet_htmx(w, "timeline", data)
+		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
 	} else {
-		app.buffered_render_tweet_page(w, "tpl/offline_timeline.tpl", data)
+		app.buffered_render_page(w, "tpl/offline_timeline.tpl", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
 	}
 }

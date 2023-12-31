@@ -16,22 +16,6 @@ type MessageData struct {
 	LatestPollingTimestamp int
 }
 
-func (t MessageData) Tweet(id scraper.TweetID) scraper.Tweet {
-	return t.Tweets[id]
-}
-func (t MessageData) User(id scraper.UserID) scraper.User {
-	return t.Users[id]
-}
-func (t MessageData) Retweet(id scraper.TweetID) scraper.Retweet {
-	return t.Retweets[id]
-}
-func (t MessageData) Space(id scraper.SpaceID) scraper.Space {
-	return t.Spaces[id]
-}
-func (t MessageData) FocusedTweetID() scraper.TweetID {
-	return scraper.TweetID(0)
-}
-
 func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'Messages' handler (path: %q)", r.URL.Path)
 
@@ -49,6 +33,7 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 	}
 
 	chat_view_data := MessageData{DMChatView: app.Profile.GetChatRoomsPreview(app.ActiveUser.ID)} // Get message list previews
+	global_data := PageGlobalData{TweetTrove: chat_view_data.DMChatView.TweetTrove}
 
 	if room_id != "" {
 		// First send a message, if applicable
@@ -61,7 +46,7 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 			panic_if(json.Unmarshal(body, &message_data))
 			trove := scraper.SendDMMessage(room_id, message_data.Text, 0)
 			app.Profile.SaveDMTrove(trove, false)
-			app.buffered_render_tweet_htmx(w, "dm-composer", chat_view_data) // Wipe the chat box
+			app.buffered_render_htmx(w, "dm-composer", global_data, chat_view_data) // Wipe the chat box
 			go app.Profile.SaveDMTrove(trove, true)
 		}
 		chat_view_data.ActiveRoomID = room_id
@@ -80,10 +65,10 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if r.URL.Query().Has("poll") || len(parts) == 2 && parts[1] == "send" {
-			app.buffered_render_tweet_htmx(w, "messages-with-poller", chat_view_data)
+			app.buffered_render_htmx(w, "messages-with-poller", global_data, chat_view_data)
 			return
 		}
 	}
 
-	app.buffered_render_tweet_page(w, "tpl/messages.tpl", chat_view_data)
+	app.buffered_render_page(w, "tpl/messages.tpl", global_data, chat_view_data)
 }

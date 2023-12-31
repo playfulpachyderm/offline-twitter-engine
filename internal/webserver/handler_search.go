@@ -18,40 +18,28 @@ type SearchPageData struct {
 	SortOrder        persistence.SortOrder
 	SortOrderOptions []string
 	IsUsersSearch    bool
-	UsersList        []scraper.User
+	UserIDs          []scraper.UserID
 	// TODO: fill out the search text in the search bar as well (needs modifying the base template)
 }
 
 func NewSearchPageData() SearchPageData {
-	ret := SearchPageData{SortOrderOptions: []string{}}
+	ret := SearchPageData{SortOrderOptions: []string{}, Feed: persistence.NewFeed()}
 	for i := 0; i < 4; i++ { // Don't include "Liked At" option which is #4
 		ret.SortOrderOptions = append(ret.SortOrderOptions, persistence.SortOrder(i).String())
 	}
 	return ret
 }
 
-func (t SearchPageData) Tweet(id scraper.TweetID) scraper.Tweet {
-	return t.Tweets[id]
-}
-func (t SearchPageData) User(id scraper.UserID) scraper.User {
-	return t.Users[id]
-}
-func (t SearchPageData) Retweet(id scraper.TweetID) scraper.Retweet {
-	return t.Retweets[id]
-}
-func (t SearchPageData) Space(id scraper.SpaceID) scraper.Space {
-	return t.Spaces[id]
-}
-func (t SearchPageData) FocusedTweetID() scraper.TweetID {
-	return scraper.TweetID(0)
-}
-
 func (app *Application) SearchUsers(w http.ResponseWriter, r *http.Request) {
 	ret := NewSearchPageData()
 	ret.IsUsersSearch = true
 	ret.SearchText = strings.Trim(r.URL.Path, "/")
-	ret.UsersList = app.Profile.SearchUsers(ret.SearchText)
-	app.buffered_render_tweet_page(w, "tpl/search.tpl", ret)
+	ret.UserIDs = []scraper.UserID{}
+	for _, u := range app.Profile.SearchUsers(ret.SearchText) {
+		ret.TweetTrove.Users[u.ID] = u
+		ret.UserIDs = append(ret.UserIDs, u.ID)
+	}
+	app.buffered_render_page(w, "tpl/search.tpl", PageGlobalData{TweetTrove: ret.Feed.TweetTrove, SearchText: ret.SearchText}, ret)
 }
 
 func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
@@ -138,8 +126,8 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 
 	if r.Header.Get("HX-Request") == "true" && c.CursorPosition == persistence.CURSOR_MIDDLE {
 		// It's a Show More request
-		app.buffered_render_tweet_htmx(w, "timeline", data)
+		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: data.Feed.TweetTrove, SearchText: search_text}, data)
 	} else {
-		app.buffered_render_tweet_page(w, "tpl/search.tpl", data)
+		app.buffered_render_page(w, "tpl/search.tpl", PageGlobalData{TweetTrove: data.Feed.TweetTrove, SearchText: search_text}, data)
 	}
 }

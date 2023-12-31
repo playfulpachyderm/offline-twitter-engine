@@ -10,28 +10,6 @@ import (
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-type UserProfileData struct {
-	persistence.Feed
-	scraper.UserID
-	FeedType string
-}
-
-func (t UserProfileData) Tweet(id scraper.TweetID) scraper.Tweet {
-	return t.Tweets[id]
-}
-func (t UserProfileData) User(id scraper.UserID) scraper.User {
-	return t.Users[id]
-}
-func (t UserProfileData) Retweet(id scraper.TweetID) scraper.Retweet {
-	return t.Retweets[id]
-}
-func (t UserProfileData) Space(id scraper.SpaceID) scraper.Space {
-	return t.Spaces[id]
-}
-func (t UserProfileData) FocusedTweetID() scraper.TweetID {
-	return scraper.TweetID(0)
-}
-
 func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'UserFeed' handler (path: %q)", r.URL.Path)
 
@@ -114,7 +92,12 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	}
 	feed.Users[user.ID] = user
 
-	data := UserProfileData{Feed: feed, UserID: user.ID}
+	data := struct {
+		persistence.Feed
+		scraper.UserID
+		FeedType string
+	}{Feed: feed, UserID: user.ID}
+
 	if len(parts) == 2 {
 		data.FeedType = parts[1]
 	} else {
@@ -123,26 +106,21 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 
 	if r.Header.Get("HX-Request") == "true" && c.CursorPosition == persistence.CURSOR_MIDDLE {
 		// It's a Show More request
-		app.buffered_render_tweet_htmx(w, "timeline", data)
+		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, data)
 	} else {
-		app.buffered_render_tweet_page(w, "tpl/user_feed.tpl", data)
+		app.buffered_render_page(w, "tpl/user_feed.tpl", PageGlobalData{TweetTrove: feed.TweetTrove}, data)
 	}
 }
 
-type ListData struct {
-	Title string
-	Users []scraper.User
-}
-
 func (app *Application) UserFollowees(w http.ResponseWriter, r *http.Request, user scraper.User) {
-	app.buffered_render_basic_page(w, "tpl/list.tpl", ListData{
-		Title: fmt.Sprintf("Followed by @%s", user.Handle),
-		Users: app.Profile.GetFollowees(user.ID),
-	})
+	data, trove := NewListData(app.Profile.GetFollowees(user.ID))
+	trove.Users[user.ID] = user // Not loaded otherwise; needed to profile image in the login button on the sidebar
+	data.Title = fmt.Sprintf("Followed by @%s", user.Handle)
+	app.buffered_render_page(w, "tpl/list.tpl", PageGlobalData{TweetTrove: trove}, data)
 }
 func (app *Application) UserFollowers(w http.ResponseWriter, r *http.Request, user scraper.User) {
-	app.buffered_render_basic_page(w, "tpl/list.tpl", ListData{
-		Title: fmt.Sprintf("Followers of @%s", user.Handle),
-		Users: app.Profile.GetFollowers(user.ID),
-	})
+	data, trove := NewListData(app.Profile.GetFollowers(user.ID))
+	trove.Users[user.ID] = user
+	data.Title = fmt.Sprintf("@%s's followers", user.Handle)
+	app.buffered_render_page(w, "tpl/list.tpl", PageGlobalData{TweetTrove: trove}, data)
 }

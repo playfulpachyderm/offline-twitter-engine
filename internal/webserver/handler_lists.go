@@ -6,6 +6,23 @@ import (
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
+type ListData struct {
+	Title         string
+	UserIDs       []scraper.UserID
+}
+
+func NewListData(users []scraper.User) (ListData, scraper.TweetTrove) {
+	trove := scraper.NewTweetTrove()
+	data := ListData{
+		UserIDs: []scraper.UserID{},
+	}
+	for _, u := range users {
+		trove.Users[u.ID] = u
+		data.UserIDs = append(data.UserIDs, u.ID)
+	}
+	return data, trove
+}
+
 func (app *Application) Lists(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'Lists' handler (path: %q)", r.URL.Path)
 
@@ -18,5 +35,7 @@ func (app *Application) Lists(w http.ResponseWriter, r *http.Request) {
 	     where is_followed = 1`)
 	panic_if(err)
 
-	app.buffered_render_basic_page(w, "tpl/list.tpl", ListData{Title: "Offline Follows", Users: users})
+	data, trove := NewListData(users)
+	data.Title = "Offline Follows"
+	app.buffered_render_page(w, "tpl/list.tpl", PageGlobalData{TweetTrove: trove}, data)
 }

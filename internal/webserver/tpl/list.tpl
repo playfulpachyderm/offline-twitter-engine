@@ -1,5 +1,5 @@
 {{define "title"}}{{.Title}}{{end}}
 
 {{define "main"}}
-  {{template "list" .Users}}
+  {{template "list" .UserIDs}}
 {{end}}
