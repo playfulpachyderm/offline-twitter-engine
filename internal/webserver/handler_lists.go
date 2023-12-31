@@ -8,6 +8,8 @@ import (
 
 type ListData struct {
 	Title         string
+	HeaderUserID  scraper.UserID
+	HeaderTweetID scraper.TweetID
 	UserIDs       []scraper.UserID
 }
 

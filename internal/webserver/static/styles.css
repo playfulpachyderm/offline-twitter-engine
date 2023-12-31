@@ -216,14 +216,14 @@ h3 {
     border: 1px solid var(--color-outline-gray);
 }
 
-.user-feed-header {
+.user-header {
     border-bottom: 1px solid var(--color-outline-gray);
 }
-.user-feed-header .author-info {
+.user-header .author-info {
     font-size: 1.3em;
     padding: 1em;
 }
-.user-feed-header .profile-image {
+.user-header .profile-image {
     width: 8em;
     height: 8em;
 }
@@ -354,7 +354,7 @@ ul.quick-links {
     align-items: center;
     gap: 0.3em;
 }
-.user-feed-header-info-container {
+.user-header-info-container {
     padding: 2em;
     border-bottom: 1px solid var(--color-outline-gray);
 }

@@ -116,11 +116,13 @@ func (app *Application) UserFollowees(w http.ResponseWriter, r *http.Request, us
 	data, trove := NewListData(app.Profile.GetFollowees(user.ID))
 	trove.Users[user.ID] = user // Not loaded otherwise; needed to profile image in the login button on the sidebar
 	data.Title = fmt.Sprintf("Followed by @%s", user.Handle)
+	data.HeaderUserID = user.ID
 	app.buffered_render_page(w, "tpl/list.tpl", PageGlobalData{TweetTrove: trove}, data)
 }
 func (app *Application) UserFollowers(w http.ResponseWriter, r *http.Request, user scraper.User) {
 	data, trove := NewListData(app.Profile.GetFollowers(user.ID))
 	trove.Users[user.ID] = user
 	data.Title = fmt.Sprintf("@%s's followers", user.Handle)
+	data.HeaderUserID = user.ID
 	app.buffered_render_page(w, "tpl/list.tpl", PageGlobalData{TweetTrove: trove}, data)
 }
