@@ -5,13 +5,9 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"io/fs"
 	"net/http"
 	"net/url"
-	"path"
-	"path/filepath"
 	"regexp"
-	"runtime"
 
 	"github.com/Masterminds/sprig/v3"
 
@@ -19,30 +15,31 @@ import (
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-var this_dir string
-
-func init() {
-	_, this_file, _, _ := runtime.Caller(0) // `this_file` is absolute path to this source file
-	this_dir = path.Dir(this_file)
+// TODO: this name sucks
+type PageGlobalData struct {
+	scraper.TweetTrove
+	SearchText     string
+	FocusedTweetID scraper.TweetID
 }
 
-func get_filepath(s string) string {
-	if use_embedded == "true" {
-		return s
-	}
-	return path.Join(this_dir, s)
+func (d PageGlobalData) Tweet(id scraper.TweetID) scraper.Tweet {
+	return d.Tweets[id]
 }
-
-func glob(path string) []string {
-	var ret []string
-	var err error
-	if use_embedded == "true" {
-		ret, err = fs.Glob(embedded_files, get_filepath(path))
-	} else {
-		ret, err = filepath.Glob(get_filepath(path))
-	}
-	panic_if(err)
-	return ret
+func (d PageGlobalData) User(id scraper.UserID) scraper.User {
+	return d.Users[id]
+}
+func (d PageGlobalData) Retweet(id scraper.TweetID) scraper.Retweet {
+	return d.Retweets[id]
+}
+func (d PageGlobalData) Space(id scraper.SpaceID) scraper.Space {
+	return d.Spaces[id]
+}
+func (d PageGlobalData) GetFocusedTweetID() scraper.TweetID {
+	return d.FocusedTweetID
+}
+func (d PageGlobalData) GetSearchText() string {
+	fmt.Println(d.SearchText)
+	return d.SearchText
 }
 
 // Config object for buffered rendering
@@ -84,18 +81,7 @@ func (app *Application) buffered_render_page(w http.ResponseWriter, tpl_file str
 	partials := append(glob("tpl/includes/*.tpl"), glob("tpl/tweet_page_includes/*.tpl")...)
 
 	r := renderer{
-		Funcs: template.FuncMap{
-			"tweet":                  global_data.Tweet,
-			"user":                   global_data.User,
-			"retweet":                global_data.Retweet,
-			"space":                  global_data.Space,
-			"active_user":            app.get_active_user,
-			"focused_tweet_id":       global_data.GetFocusedTweetID,
-			"search_text":            global_data.GetSearchText,
-			"get_entities":           get_entities,
-			"get_tombstone_text":     get_tombstone_text,
-			"cursor_to_query_params": cursor_to_query_params,
-		},
+		Funcs:     app.make_funcmap(global_data),
 		Filenames: append(partials, get_filepath(tpl_file)),
 		TplName:   "base",
 		Data:      tpl_data,
@@ -108,18 +94,7 @@ func (app *Application) buffered_render_htmx(w http.ResponseWriter, tpl_name str
 	partials := append(glob("tpl/includes/*.tpl"), glob("tpl/tweet_page_includes/*.tpl")...)
 
 	r := renderer{
-		Funcs: template.FuncMap{
-			"tweet":                  global_data.Tweet,
-			"user":                   global_data.User,
-			"retweet":                global_data.Retweet,
-			"space":                  global_data.Space,
-			"active_user":            app.get_active_user,
-			"focused_tweet_id":       global_data.GetFocusedTweetID,
-			"search_text":            global_data.GetSearchText,
-			"get_entities":           get_entities,
-			"get_tombstone_text":     get_tombstone_text,
-			"cursor_to_query_params": cursor_to_query_params,
-		},
+		Funcs:     app.make_funcmap(global_data),
 		Filenames: partials,
 		TplName:   tpl_name,
 		Data:      tpl_data,
@@ -127,15 +102,35 @@ func (app *Application) buffered_render_htmx(w http.ResponseWriter, tpl_name str
 	r.BufferedRender(w)
 }
 
-func (app *Application) get_active_user() scraper.User {
-	return app.ActiveUser
-}
+// Assemble the list of funcs that can be used in the templates
+func (app *Application) make_funcmap(global_data PageGlobalData) template.FuncMap {
+	return template.FuncMap{
+		// Get data from the global objects
+		"tweet":            global_data.Tweet,
+		"user":             global_data.User,
+		"retweet":          global_data.Retweet,
+		"space":            global_data.Space,
+		"focused_tweet_id": global_data.GetFocusedTweetID,
+		"search_text":      global_data.GetSearchText,
+		"active_user": func() scraper.User {
+			return app.ActiveUser
+		},
 
-func cursor_to_query_params(c persistence.Cursor) string {
-	result := url.Values{}
-	result.Set("cursor", fmt.Sprint(c.CursorValue))
-	result.Set("sort-order", c.SortOrder.String())
-	return result.Encode()
+		// Utility functions
+		"get_tombstone_text": func(t scraper.Tweet) string {
+			if t.TombstoneText != "" {
+				return t.TombstoneText
+			}
+			return t.TombstoneType
+		},
+		"cursor_to_query_params": func(c persistence.Cursor) string {
+			result := url.Values{}
+			result.Set("cursor", fmt.Sprint(c.CursorValue))
+			result.Set("sort-order", c.SortOrder.String())
+			return result.Encode()
+		},
+		"get_entities": get_entities, //
+	}
 }
 
 type EntityType int
@@ -175,38 +170,4 @@ func get_entities(text string) []Entity {
 	}
 
 	return ret
-}
-
-func get_tombstone_text(t scraper.Tweet) string {
-	if t.TombstoneText != "" {
-		return t.TombstoneText
-	}
-	return t.TombstoneType
-}
-
-// TODO: this name sucks
-type PageGlobalData struct {
-	scraper.TweetTrove
-	SearchText     string
-	FocusedTweetID scraper.TweetID
-}
-
-func (d PageGlobalData) Tweet(id scraper.TweetID) scraper.Tweet {
-	return d.Tweets[id]
-}
-func (d PageGlobalData) User(id scraper.UserID) scraper.User {
-	return d.Users[id]
-}
-func (d PageGlobalData) Retweet(id scraper.TweetID) scraper.Retweet {
-	return d.Retweets[id]
-}
-func (d PageGlobalData) Space(id scraper.SpaceID) scraper.Space {
-	return d.Spaces[id]
-}
-func (d PageGlobalData) GetFocusedTweetID() scraper.TweetID {
-	return d.FocusedTweetID
-}
-func (d PageGlobalData) GetSearchText() string {
-	fmt.Println(d.SearchText)
-	return d.SearchText
 }
