@@ -412,7 +412,7 @@ svg {
     flex-grow: 1;
     display: flex;
 }
-.search-bar {
+#search-bar {
     flex-grow: 1;
 }
 

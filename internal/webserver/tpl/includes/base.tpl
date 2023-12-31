@@ -16,7 +16,11 @@
           <img class="svg-icon" src="/static/icons/back.svg" />
         </a>
         <form hx-get="/search" hx-push-url="true" hx-target="body" hx-swap="inner-html show:window:top">
-          <input id="search-bar" name="q" class="search-bar" placeholder="Search" type="text" />
+          <input id="search-bar"
+            name="q"
+            placeholder="Search" type="text"
+            {{with (search_text)}} value="{{.}}" {{end}}
+          />
         </form>
       </div>
       {{template "nav-sidebar"}}

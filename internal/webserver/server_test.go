@@ -266,13 +266,16 @@ func TestSearch(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	resp := do_request(httptest.NewRequest("GET", fmt.Sprintf("/search/%s", url.PathEscape("to:spacex to:covfefeanon")), nil))
+	search_txt := "to:spacex to:covfefeanon"
+
+	resp := do_request(httptest.NewRequest("GET", fmt.Sprintf("/search/%s", url.PathEscape(search_txt)), nil))
 	require.Equal(resp.StatusCode, 200)
 
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	title_node := cascadia.Query(root, selector("title"))
 	assert.Equal(title_node.FirstChild.Data, "Search | Offline Twitter")
+	assert.Contains(cascadia.Query(root, selector("#search-bar")).Attr, html.Attribute{Key: "value", Val: search_txt})
 
 	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
 	assert.Len(tweet_nodes, 1)
@@ -339,6 +342,7 @@ func TestSearchUsers(t *testing.T) {
 	require.NoError(err)
 	user_elements := cascadia.QueryAll(root, selector(".users-list-container .user"))
 	assert.Len(user_elements, 2)
+	assert.Contains(cascadia.Query(root, selector("#search-bar")).Attr, html.Attribute{Key: "value", Val: "no"})
 }
 
 // Search bar pasted link redirects
