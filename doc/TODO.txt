@@ -113,6 +113,7 @@ TODO: paste-twitter-urls-in-search-bar
 
 TODO: ui-deuglifying
 - "Follow" / "Unfollow" button
+- "End of feed" indicator
 
 TODO: show-errors-in-UI
 - if an HTTP request fails, show an error in the UI somehow

@@ -151,6 +151,8 @@ var MIGRATIONS = []string{
 		vacuum;`,
 	`insert into tombstone_types(rowid, short_name, tombstone_text)
 	                     values (8, 'newer-version-available', 'There’s a new version of this Tweet')`,
+
+	// 25
 	`create table chat_rooms (rowid integer primary key,
 		    id text unique not null,
 		    type text not null,
@@ -201,6 +203,15 @@ var MIGRATIONS = []string{
 		    foreign key(message_id) references chat_messages(id)
 		    foreign key(sender_id) references users(id)
 		);`,
+	`create table follows(rowid integer primary key,
+		    follower_id integer not null,
+		    followee_id integer not null,
+		    unique(follower_id, followee_id),
+		    foreign key(follower_id) references users(id)
+		    foreign key(followee_id) references users(id)
+		);
+		create index if not exists index_follows_followee_id on follows (followee_id);
+		create index if not exists index_follows_follower_id on follows (follower_id);`,
 }
 var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
 

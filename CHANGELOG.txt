@@ -208,3 +208,13 @@ v0.6.0
 - UI improvements:
 	- Make page loads much faster by moving image/video downloading to non-blocking background tasks
 	- Get rid of dropdown button on tweets (buttons are just inline now)
+
+v0.6.1
+------
+
+- UI improvements:
+	- add the `--auto-open` flag for `twitter webserver` which opens the homepage in a browser on launch
+	- search bar preserves its text between searches
+	- spinner now shows when loading / fetching tweets
+	- on errors, an error toast notification now shows
+- Add followers/followees pages and queries
