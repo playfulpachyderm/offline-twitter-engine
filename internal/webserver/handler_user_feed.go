@@ -113,13 +113,50 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) UserFollowees(w http.ResponseWriter, r *http.Request, user scraper.User) {
+	if r.URL.Query().Has("scrape") {
+		if app.IsScrapingDisabled {
+			app.InfoLog.Printf("Would have scraped: %s", r.URL.Path)
+			http.Error(w, "Scraping is disabled (are you logged in?)", 401)
+			return
+		}
+
+		// Run scraper
+		trove, err := scraper.GetFollowees(user.ID, 200) // TODO: parameterizable
+		if err != nil {
+			app.ErrorLog.Print(err)
+			// TOOD: show error in UI
+		}
+		app.Profile.SaveTweetTrove(trove, false)
+		app.Profile.SaveAsFolloweesList(user.ID, trove)
+		go app.Profile.SaveTweetTrove(trove, true)
+	}
+
 	data, trove := NewListData(app.Profile.GetFollowees(user.ID))
 	trove.Users[user.ID] = user // Not loaded otherwise; needed to profile image in the login button on the sidebar
 	data.Title = fmt.Sprintf("Followed by @%s", user.Handle)
 	data.HeaderUserID = user.ID
 	app.buffered_render_page(w, "tpl/list.tpl", PageGlobalData{TweetTrove: trove}, data)
 }
+
 func (app *Application) UserFollowers(w http.ResponseWriter, r *http.Request, user scraper.User) {
+	if r.URL.Query().Has("scrape") {
+		if app.IsScrapingDisabled {
+			app.InfoLog.Printf("Would have scraped: %s", r.URL.Path)
+			http.Error(w, "Scraping is disabled (are you logged in?)", 401)
+			return
+		}
+
+		// Run scraper
+		trove, err := scraper.GetFollowers(user.ID, 200) // TODO: parameterizable
+		if err != nil {
+			app.ErrorLog.Print(err)
+			// TOOD: show error in UI
+		}
+		app.Profile.SaveTweetTrove(trove, false)
+		app.Profile.SaveAsFollowersList(user.ID, trove)
+		go app.Profile.SaveTweetTrove(trove, true)
+	}
+
 	data, trove := NewListData(app.Profile.GetFollowers(user.ID))
 	trove.Users[user.ID] = user
 	data.Title = fmt.Sprintf("@%s's followers", user.Handle)
