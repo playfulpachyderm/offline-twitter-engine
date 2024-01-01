@@ -150,5 +150,9 @@
       </div>
     </span>
   </div>
+  <div class="htmx-spinner-container">
+    <div class="htmx-spinner-background"></div>
+    <img class="svg-icon htmx-spinner" src="/static/icons/spinner.svg" />
+  </div>
 </div>
 {{end}}

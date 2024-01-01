@@ -34,5 +34,17 @@ func (app *Application) error_500(w http.ResponseWriter, err error) {
 	if err2 != nil {
 		panic(err2)
 	}
-	http.Error(w, "Server error :(", 500)
+
+	w.Header().Set("HX-Reswap", "beforeend")
+	w.Header().Set("HX-Retarget", "main")
+	w.Header().Set("HX-Push-Url", "false")
+
+	r := renderer{
+		Filenames: []string{get_filepath("tpl/http_500.tpl")},
+		TplName: "error-toast",
+		Data: struct{
+			ErrorMsg string
+		}{err.Error()},
+	}
+	r.BufferedRender(w)
 }
