@@ -41,8 +41,8 @@ func (app *Application) error_500(w http.ResponseWriter, err error) {
 
 	r := renderer{
 		Filenames: []string{get_filepath("tpl/http_500.tpl")},
-		TplName: "error-toast",
-		Data: struct{
+		TplName:   "error-toast",
+		Data: struct {
 			ErrorMsg string
 		}{err.Error()},
 	}
