@@ -417,6 +417,12 @@ ul.quick-links {
     /* not for nested (i.e., quoted) tweets */
     border-bottom: 1px solid var(--color-twitter-off-white-dark);
 }
+.timeline .eof-indicator {
+    text-align: center;
+    color: var(--color-twitter-text-gray);
+    font-size: 1.2em;
+    margin: 1em 0;
+}
 
 .top-bar {
     display: flex;

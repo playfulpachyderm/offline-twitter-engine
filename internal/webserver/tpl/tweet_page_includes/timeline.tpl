@@ -3,7 +3,7 @@
     {{template "tweet" .}}
   {{end}}
   {{if .CursorBottom.CursorPosition.IsEnd}}
-    <p>End of feed</p>
+    <div class="eof-indicator">End of feed</div>
   {{else}}
     <button class="show-more"
       hx-get="?{{(cursor_to_query_params .CursorBottom)}}"
