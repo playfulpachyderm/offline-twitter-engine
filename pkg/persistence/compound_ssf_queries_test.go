@@ -39,7 +39,7 @@ func TestCursorSearchByNewest(t *testing.T) {
 	assert.Equal(next_cursor.SortOrder, c.SortOrder)
 	assert.Equal(next_cursor.Keywords, c.Keywords)
 	assert.Equal(next_cursor.PageSize, c.PageSize)
-	assert.Equal(next_cursor.CursorValue, 1629520619)
+	assert.Equal(next_cursor.CursorValue, 1629520619000)
 
 	feed, err = profile.NextPage(next_cursor, UserID(0))
 	require.NoError(err)
@@ -81,7 +81,7 @@ func TestCursorSearchWithRetweets(t *testing.T) {
 	assert.Equal(next_cursor.SortOrder, c.SortOrder)
 	assert.Equal(next_cursor.Keywords, c.Keywords)
 	assert.Equal(next_cursor.PageSize, c.PageSize)
-	assert.Equal(next_cursor.CursorValue, 1644111031)
+	assert.Equal(next_cursor.CursorValue, 1644111031000)
 
 	feed, err = profile.NextPage(next_cursor, UserID(0))
 	require.NoError(err)
@@ -118,9 +118,9 @@ func TestTimeline(t *testing.T) {
 	assert.Equal(next_cursor.SortOrder, c.SortOrder)
 	assert.Equal(next_cursor.Keywords, c.Keywords)
 	assert.Equal(next_cursor.PageSize, c.PageSize)
-	assert.Equal(next_cursor.CursorValue, 1635367140)
+	assert.Equal(next_cursor.CursorValue, 1635367140000)
 
-	next_cursor.CursorValue = 1631935323 // Scroll down a bit, kind of randomly
+	next_cursor.CursorValue = 1631935323000 // Scroll down a bit, kind of randomly
 	feed, err = profile.NextPage(next_cursor, UserID(0))
 	require.NoError(err)
 

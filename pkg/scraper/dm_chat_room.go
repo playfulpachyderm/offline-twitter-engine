@@ -49,11 +49,11 @@ func ParseAPIDMChatRoom(api_room APIDMConversation) DMChatRoom {
 	ret := DMChatRoom{}
 	ret.ID = DMChatRoomID(api_room.ConversationID)
 	ret.Type = api_room.Type
-	ret.LastMessagedAt = TimestampFromUnix(int64(api_room.SortTimestamp))
+	ret.LastMessagedAt = TimestampFromUnixMilli(int64(api_room.SortTimestamp))
 	ret.IsNSFW = api_room.NSFW
 
 	if ret.Type == "GROUP_DM" {
-		ret.CreatedAt = TimestampFromUnix(int64(api_room.CreateTime / 1000))
+		ret.CreatedAt = TimestampFromUnixMilli(int64(api_room.CreateTime))
 		ret.CreatedByUserID = UserID(api_room.CreatedByUserID)
 		ret.Name = api_room.Name
 		ret.AvatarImageRemoteURL = api_room.AvatarImage

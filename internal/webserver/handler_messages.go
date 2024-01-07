@@ -61,7 +61,7 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 		chat_view_data.MessageIDs = chat_contents.MessageIDs
 		if len(chat_view_data.MessageIDs) > 0 {
 			last_message_id := chat_view_data.MessageIDs[len(chat_view_data.MessageIDs)-1]
-			chat_view_data.LatestPollingTimestamp = int(chat_view_data.Messages[last_message_id].SentAt.Unix())
+			chat_view_data.LatestPollingTimestamp = int(chat_view_data.Messages[last_message_id].SentAt.UnixMilli())
 		}
 
 		if r.URL.Query().Has("poll") || len(parts) == 2 && parts[1] == "send" {

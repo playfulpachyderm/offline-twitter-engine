@@ -14,7 +14,7 @@ func ParseAPIDMReaction(reacc APIDMReaction) DMReaction {
 	ret := DMReaction{}
 	ret.ID = DMMessageID(reacc.ID)
 	ret.SenderID = UserID(reacc.SenderID)
-	ret.SentAt = TimestampFromUnix(int64(reacc.Time))
+	ret.SentAt = TimestampFromUnixMilli(int64(reacc.Time))
 	ret.Emoji = reacc.Emoji
 	return ret
 }
@@ -34,7 +34,7 @@ type DMMessage struct {
 func ParseAPIDMMessage(message APIDMMessage) DMMessage {
 	ret := DMMessage{}
 	ret.ID = DMMessageID(message.ID)
-	ret.SentAt = TimestampFromUnix(int64(message.Time))
+	ret.SentAt = TimestampFromUnixMilli(int64(message.Time))
 	ret.DMChatRoomID = DMChatRoomID(message.ConversationID)
 	ret.SenderID = UserID(message.MessageData.SenderID)
 	ret.Text = message.MessageData.Text

@@ -212,6 +212,20 @@ var MIGRATIONS = []string{
 		);
 		create index if not exists index_follows_followee_id on follows (followee_id);
 		create index if not exists index_follows_follower_id on follows (follower_id);`,
+	`update tweets set
+		    posted_at = posted_at * 1000,
+		    last_scraped_at = last_scraped_at * 1000;
+		update users set join_date = join_date * 1000;
+		update spaces set
+		    created_at = created_at * 1000,
+		    started_at = started_at * 1000,
+		    ended_at = ended_at * 1000,
+		    updated_at = updated_at * 1000;
+		update retweets set retweeted_at = retweeted_at * 1000;
+		update polls set
+		    voting_ends_at = voting_ends_at * 1000,
+		    last_scraped_at = last_scraped_at * 1000;
+		update chat_rooms set created_at = created_at * 1000;`,
 }
 var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
 

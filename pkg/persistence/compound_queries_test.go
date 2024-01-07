@@ -48,7 +48,7 @@ func TestBuildUserFeed(t *testing.T) {
 	assert.Equal(feed.Items[1].TweetID, TweetID(1490116725395927042))
 	assert.Equal(feed.Items[1].RetweetID, TweetID(1490119308692766723))
 
-	assert.Equal(feed.CursorBottom.CursorValue, 1644107102)
+	assert.Equal(feed.CursorBottom.CursorValue, 1644107102000)
 }
 
 // Should load a feed in the middle (i.e., after some timestamp)
@@ -62,7 +62,7 @@ func TestBuildUserFeedPage2(t *testing.T) {
 	c := persistence.NewUserFeedCursor(UserHandle("cernovich"))
 	c.PageSize = 2
 	c.CursorPosition = persistence.CURSOR_MIDDLE
-	c.CursorValue = 1644107102
+	c.CursorValue = 1644107102000
 	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
 
@@ -88,7 +88,7 @@ func TestBuildUserFeedPage2(t *testing.T) {
 	assert.Equal(feed.Items[1].TweetID, TweetID(1453461248142495744))
 	assert.Equal(feed.Items[1].RetweetID, TweetID(0))
 
-	assert.Equal(feed.CursorBottom.CursorValue, 1635367140)
+	assert.Equal(feed.CursorBottom.CursorValue, 1635367140000)
 }
 
 // When the end of the feed is reached, an "End of feed" error should be raised

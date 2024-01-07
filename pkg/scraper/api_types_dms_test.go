@@ -23,7 +23,7 @@ func TestParseAPIDMMessage(t *testing.T) {
 
 	message := ParseAPIDMMessage(api_message)
 	assert.Equal(message.ID, DMMessageID(1663623203644751885))
-	assert.Equal(message.SentAt, TimestampFromUnix(1685473655064))
+	assert.Equal(message.SentAt, TimestampFromUnixMilli(1685473655064))
 	assert.Equal(message.DMChatRoomID, DMChatRoomID("1458284524761075714-1488963321701171204"))
 	assert.Equal(message.SenderID, UserID(1458284524761075714))
 	assert.Equal(message.Text, "Yeah i know who you are lol")
@@ -48,7 +48,7 @@ func TestParseAPIDMMessageWithReaction(t *testing.T) {
 	reacc, is_ok := message.Reactions[UserID(1458284524761075714)]
 	require.True(t, is_ok)
 	assert.Equal(reacc.ID, DMMessageID(1665914315742781440))
-	assert.Equal(reacc.SentAt, TimestampFromUnix(1686019898732))
+	assert.Equal(reacc.SentAt, TimestampFromUnixMilli(1686019898732))
 	assert.Equal(reacc.DMMessageID, DMMessageID(1663623062195957773))
 	assert.Equal(reacc.SenderID, UserID(1458284524761075714))
 	assert.Equal(reacc.Emoji, "😂")
@@ -96,7 +96,7 @@ func TestParseAPIDMConversation(t *testing.T) {
 	chat_room := ParseAPIDMChatRoom(api_room)
 	assert.Equal(DMChatRoomID("1458284524761075714-1488963321701171204"), chat_room.ID)
 	assert.Equal("ONE_TO_ONE", chat_room.Type)
-	assert.Equal(TimestampFromUnix(1686025129086), chat_room.LastMessagedAt)
+	assert.Equal(TimestampFromUnixMilli(1686025129086), chat_room.LastMessagedAt)
 	assert.False(chat_room.IsNSFW)
 
 	assert.Len(chat_room.Participants, 2)
@@ -132,11 +132,11 @@ func TestParseAPIDMGroupChat(t *testing.T) {
 	chat_room := ParseAPIDMChatRoom(api_room)
 	assert.Equal(DMChatRoomID("1710215025518948715"), chat_room.ID)
 	assert.Equal("GROUP_DM", chat_room.Type)
-	assert.Equal(TimestampFromUnix(1700112789457), chat_room.LastMessagedAt)
+	assert.Equal(TimestampFromUnixMilli(1700112789457), chat_room.LastMessagedAt)
 	assert.False(chat_room.IsNSFW)
 
 	// Group DM settings
-	assert.Equal(chat_room.CreatedAt, TimestampFromUnix(1696582011))
+	assert.Equal(chat_room.CreatedAt, TimestampFromUnixMilli(1696582011037))
 	assert.Equal(chat_room.CreatedByUserID, UserID(2694459866))
 	assert.Equal(chat_room.Name, "Schön ist die Welt")
 	assert.Equal(chat_room.AvatarImageRemoteURL,

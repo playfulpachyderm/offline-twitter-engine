@@ -113,7 +113,7 @@ func TestUserFeedWithCursor(t *testing.T) {
 	require := require.New(t)
 
 	// With a cursor
-	resp := do_request(httptest.NewRequest("GET", "/cernovich?cursor=1631935701", nil))
+	resp := do_request(httptest.NewRequest("GET", "/cernovich?cursor=1631935701000", nil))
 	require.Equal(resp.StatusCode, 200)
 
 	root, err := html.Parse(resp.Body)
@@ -231,7 +231,7 @@ func TestTimelineWithCursor(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	resp := do_request(httptest.NewRequest("GET", "/timeline?cursor=1631935701", nil))
+	resp := do_request(httptest.NewRequest("GET", "/timeline?cursor=1631935701000", nil))
 	require.Equal(resp.StatusCode, 200)
 
 	root, err := html.Parse(resp.Body)
@@ -293,7 +293,7 @@ func TestSearchWithCursor(t *testing.T) {
 	assert.Len(cascadia.QueryAll(root, selector(".timeline > .tweet")), 3)
 
 	// Add a cursor with the 1st tweet's posted_at time
-	resp = do_request(httptest.NewRequest("GET", "/search/who%20are?cursor=1628979529", nil))
+	resp = do_request(httptest.NewRequest("GET", "/search/who%20are?cursor=1628979529000", nil))
 	require.Equal(resp.StatusCode, 200)
 	root, err = html.Parse(resp.Body)
 	require.NoError(err)
