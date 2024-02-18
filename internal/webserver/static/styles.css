@@ -97,7 +97,7 @@ ul.inline-dotted-list li:last-child:after {
 .htmx-spinner-container {
     display: none;
 }
-.tweet.htmx-request .htmx-spinner-container {
+.tweet.htmx-request > .htmx-spinner-container {
     display: revert;
     font-size: 3em;
     position: absolute;
@@ -184,8 +184,10 @@ ul.inline-dotted-list li:last-child:after {
 .reply-mentions-container {
     display: flex;
     align-items: center;
-    margin: 0 5em;
     cursor: default;
+    flex-grow: 1;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 .reply-mentions {
     padding: 0 0.5em;
@@ -325,6 +327,7 @@ p.posted-at {
     float: right;
     color: var(--color-twitter-text-gray);
     font-size: 0.875em;
+    white-space: nowrap;
 }
 
 .interactions-bar {
@@ -421,7 +424,7 @@ ul.quick-links {
     text-align: center;
     color: var(--color-twitter-text-gray);
     font-size: 1.2em;
-    margin: 1em 0;
+    padding: 1em 0;
 }
 
 .top-bar {
@@ -453,6 +456,7 @@ ul.quick-links {
 
 img.svg-icon {
     width: 1.5em;
+    height: auto;
 }
 
 svg {
@@ -785,6 +789,7 @@ ul.space-participants-list li {
 .dm-message-reactions {
     display: flex;
     padding: 0 4em;
+    cursor: default;
 }
 .our-message .dm-message-reactions {
     flex-direction: row-reverse;

@@ -142,7 +142,7 @@ func main() {
 	case "get_followees":
 		get_followees(target, *how_many)
 	case "fetch_timeline":
-		fetch_timeline(false)  // TODO: *how_many
+		fetch_timeline(false) // TODO: *how_many
 	case "fetch_timeline_following_only":
 		fetch_timeline(true)
 	case "download_tweet_content":
