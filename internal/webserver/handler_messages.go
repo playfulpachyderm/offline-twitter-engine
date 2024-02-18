@@ -49,6 +49,7 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 			app.buffered_render_htmx(w, "dm-composer", global_data, chat_view_data) // Wipe the chat box
 			go app.Profile.SaveDMTrove(trove, true)
 		}
+
 		chat_view_data.ActiveRoomID = room_id
 		chat_view_data.LatestPollingTimestamp = -1
 		if latest_timestamp_str := r.URL.Query().Get("latest_timestamp"); latest_timestamp_str != "" {
