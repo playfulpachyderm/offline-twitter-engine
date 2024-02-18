@@ -1053,7 +1053,7 @@ func GetUserLikes(user_id UserID, how_many int) (TweetTrove, error) {
 	return the_api.GetPaginatedQuery(PaginatedUserLikes{user_id}, how_many)
 }
 
-func (api *API) GetHomeTimeline(cursor string, is_for_you bool) (TweetTrove, error) {
+func (api *API) GetHomeTimeline(cursor string, is_following_only bool) (TweetTrove, error) {
 	var url string
 	body_struct := struct {
 		Variables GraphqlVariables `json:"variables"`
@@ -1091,7 +1091,7 @@ func (api *API) GetHomeTimeline(cursor string, is_for_you bool) (TweetTrove, err
 			ResponsiveWebMediaDownloadVideoEnabled:                         false,
 		},
 	}
-	if is_for_you {
+	if is_following_only {
 		body_struct.QueryID = "iMKdg5Vq-ldwmiqCbvX1QA"
 		url = "https://twitter.com/i/api/graphql/iMKdg5Vq-ldwmiqCbvX1QA/HomeLatestTimeline"
 	} else {
@@ -1114,8 +1114,8 @@ func (api *API) GetHomeTimeline(cursor string, is_for_you bool) (TweetTrove, err
 	return trove, err
 }
 
-func GetHomeTimeline(cursor string, is_for_you bool) (TweetTrove, error) {
-	return the_api.GetHomeTimeline(cursor, is_for_you)
+func GetHomeTimeline(cursor string, is_following_only bool) (TweetTrove, error) {
+	return the_api.GetHomeTimeline(cursor, is_following_only)
 }
 
 func (api API) GetUser(handle UserHandle) (APIUser, error) {

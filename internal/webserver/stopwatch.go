@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var is_for_you_only = true // Do one initial scrape of the "for you" feed and then just regular feed after that
+var is_following_only = true // Do one initial scrape of the "following_only" feed and then just regular feed after that
 
 func (app *Application) background_scrape() {
 	// Avoid crashing the thread if a scrape fails
@@ -31,7 +31,7 @@ func (app *Application) background_scrape() {
 	}
 
 	fmt.Println("Scraping home timeline...")
-	trove, err := scraper.GetHomeTimeline("", is_for_you_only)
+	trove, err := scraper.GetHomeTimeline("", is_following_only)
 	if err != nil {
 		app.ErrorLog.Printf("Background scrape failed: %s", err.Error())
 		return
@@ -40,7 +40,7 @@ func (app *Application) background_scrape() {
 	app.Profile.SaveTweetTrove(trove, false)
 	go app.Profile.SaveTweetTrove(trove, true)
 	fmt.Println("Scraping succeeded.")
-	is_for_you_only = false
+	is_following_only = false
 }
 
 func (app *Application) background_user_likes_scrape() {

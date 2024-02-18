@@ -72,7 +72,7 @@ func main() {
 
 	if len(args) < 2 {
 		if len(args) == 1 && (args[0] == "list_followed" || args[0] == "webserver" || args[0] == "fetch_timeline" ||
-			args[0] == "fetch_timeline_for_you" || args[0] == "fetch_inbox") {
+			args[0] == "fetch_timeline_following_only" || args[0] == "fetch_inbox") {
 			// Doesn't need a target, so create a fake second arg
 			args = append(args, "")
 		} else {
@@ -135,13 +135,15 @@ func main() {
 		fetch_user_feed(target, 999999999)
 	case "get_user_likes":
 		get_user_likes(target, *how_many)
+	case "get_user_likes_all":
+		get_user_likes(target, 999999999)
 	case "get_followers":
 		get_followers(target, *how_many)
 	case "get_followees":
 		get_followees(target, *how_many)
 	case "fetch_timeline":
-		fetch_timeline(false)
-	case "fetch_timeline_for_you":
+		fetch_timeline(false)  // TODO: *how_many
+	case "fetch_timeline_following_only":
 		fetch_timeline(true)
 	case "download_tweet_content":
 		download_tweet_content(target)
@@ -344,8 +346,8 @@ func get_followers(handle string, how_many int) {
 	happy_exit(fmt.Sprintf("Saved %d followers", len(trove.Users)))
 }
 
-func fetch_timeline(is_for_you bool) {
-	trove, err := scraper.GetHomeTimeline("", is_for_you)
+func fetch_timeline(is_following_only bool) {
+	trove, err := scraper.GetHomeTimeline("", is_following_only)
 	if err != nil {
 		die(fmt.Sprintf("Error fetching timeline:\n  %s", err.Error()), false, -2)
 	}

@@ -50,6 +50,21 @@ This application downloads tweets from twitter and saves them in a SQLite databa
           Gets the most recent ~50 tweets.
           If "get_user_tweets_all" is used, gets up to ~3200 tweets (API limit).
 
+    get_user_likes
+    get_user_likes_all
+          <TARGET> is the user handle.
+          Gets the most recent ~50 "likes".
+          If "get_user_tweets_all" is used, gets up to ~3200 "liked" tweets (API limit).
+
+    fetch_timeline
+    fetch_timeline_following_only
+          Fetch the logged-in user's timeline (home feed).
+          No <TARGET> is needed; will be ignored if given.
+          Twitter keeps renaming the feeds, but the two options are:
+          - "fetch_timeline" uses Twitter's "algorithm", including recommendations, promoted content, etc
+          - "fetch_timeline_following_only" is just tweets from people you follow, in the order they were
+            posted (skips the "algorithm")
+
     follow
     unfollow
           <TARGET> is the user handle
