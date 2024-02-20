@@ -80,7 +80,8 @@ pipeline:
   windows_package:
     image: offline-twitter/innosetup
     commands:
-      - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^release-)\d+\.\d+\.\d+")
+      # - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^release-)\d+\.\d+\.\d+")
+      - export version=60.43.53
       - iscc.sh /Dversion=$version /Dexe_path=`winepath -w cmd/twitter.exe` build/windows/setup.iss
 
 
