@@ -2,12 +2,26 @@
 # https://woodpecker-ci.org/docs/usage/volumes
 
 pipeline:
-  docker-go:
+  docker-build-go:
     image: docker
     commands:
       - cd .woodpecker/docker
       - docker build -f go.dockerfile -t offline-twitter/go .
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  docker-build-go-mingw:
+    image: docker
+    commands:
+      - cd .woodpecker/docker
       - docker build -f go-mingw.dockerfile -t offline-twitter/go-mingw .
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  docker-build-innosetup:
+    image: docker
+    commands:
+      - cd .woodpecker/docker
       - docker build -f innosetup.dockerfile -t offline-twitter/innosetup .
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
