@@ -49,11 +49,16 @@
           <a class="unstyled-link quick-link" target="_blank" href="https://twitter.com/{{.Handle}}" title="Open on twitter.com">
             <img class="svg-icon" src="/static/icons/external-link.svg" />
           </a>
-          <a class="unstyled-link quick-link" hx-get="?scrape" hx-target="body" title="Refresh">
+          <a class="unstyled-link quick-link" hx-get="?scrape" hx-target="body" hx-indicator=".user-header" title="Refresh">
             <img class="svg-icon" src="/static/icons/refresh.svg" />
           </a>
         </div>
       </div>
+    </div>
+
+    <div class="htmx-spinner-container">
+      <div class="htmx-spinner-background"></div>
+      <img class="svg-icon htmx-spinner" src="/static/icons/spinner.svg" />
     </div>
   </div>
 {{end}}

@@ -97,7 +97,7 @@ ul.inline-dotted-list li:last-child:after {
 .htmx-spinner-container {
     display: none;
 }
-.tweet.htmx-request > .htmx-spinner-container {
+.htmx-request > .htmx-spinner-container {
     display: revert;
     font-size: 3em;
     position: absolute;
@@ -107,13 +107,13 @@ ul.inline-dotted-list li:last-child:after {
     right: 0;
 }
 
-.tweet .htmx-spinner-container .htmx-spinner-background {
+.htmx-spinner-container .htmx-spinner-background {
     opacity: 0.3;
     background-color: #7cc5f6;
     width: 100%;
     height: 100%;
 }
-.tweet .htmx-spinner-container .htmx-spinner {
+.htmx-spinner-container .htmx-spinner {
     position: absolute;
     top: 50%;
     left: 50%;
