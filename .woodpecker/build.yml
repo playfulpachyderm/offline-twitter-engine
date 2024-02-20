@@ -42,7 +42,9 @@ pipeline:
     image: offline-twitter/go-mingw
     commands:
       - cd cmd
-      - ./windows-compile.sh
+      # - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^release-)\d+\.\d+\.\d+")
+      - export version=60.43.53
+      - ./windows-compile.sh $version
 
   version_bump_test:
     image: offline-twitter/go
