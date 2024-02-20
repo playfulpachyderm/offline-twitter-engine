@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 
 	sql "github.com/jmoiron/sqlx"
@@ -41,13 +40,13 @@ func NewProfile(target_dir string) (Profile, error) {
 		return Profile{}, fmt.Errorf("Could not create target %q:\n  %w", target_dir, ErrTargetAlreadyExists)
 	}
 
-	settings_file := path.Join(target_dir, "settings.yaml")
-	sqlite_file := path.Join(target_dir, "twitter.db")
-	profile_images_dir := path.Join(target_dir, "profile_images")
-	link_thumbnails_dir := path.Join(target_dir, "link_preview_images")
-	images_dir := path.Join(target_dir, "images")
-	videos_dir := path.Join(target_dir, "videos")
-	video_thumbnails_dir := path.Join(target_dir, "video_thumbnails")
+	settings_file := filepath.Join(target_dir, "settings.yaml")
+	sqlite_file := filepath.Join(target_dir, "twitter.db")
+	profile_images_dir := filepath.Join(target_dir, "profile_images")
+	link_thumbnails_dir := filepath.Join(target_dir, "link_preview_images")
+	images_dir := filepath.Join(target_dir, "images")
+	videos_dir := filepath.Join(target_dir, "videos")
+	video_thumbnails_dir := filepath.Join(target_dir, "video_thumbnails")
 
 	// Create the directory
 	fmt.Printf("Creating new profile: %s\n", target_dir)
@@ -121,8 +120,8 @@ func NewProfile(target_dir string) (Profile, error) {
 // returns:
 // - the loaded Profile
 func LoadProfile(profile_dir string) (Profile, error) {
-	settings_file := path.Join(profile_dir, "settings.yaml")
-	sqlite_file := path.Join(profile_dir, "twitter.db")
+	settings_file := filepath.Join(profile_dir, "settings.yaml")
+	sqlite_file := filepath.Join(profile_dir, "twitter.db")
 
 	for _, file := range []string{
 		settings_file,
@@ -157,13 +156,13 @@ func LoadProfile(profile_dir string) (Profile, error) {
 }
 
 func (p Profile) ListSessions() []scraper.UserHandle {
-	result, err := filepath.Glob(path.Join(p.ProfileDir, "*.session"))
+	result, err := filepath.Glob(filepath.Join(p.ProfileDir, "*.session"))
 	if err != nil {
 		panic(err)
 	}
 	ret := []scraper.UserHandle{}
 	for _, filename := range result {
-		ret = append(ret, scraper.UserHandle(path.Base(filename[:len(filename)-len(".session")])))
+		ret = append(ret, scraper.UserHandle(filepath.Base(filename[:len(filename)-len(".session")])))
 	}
 	return ret
 }
