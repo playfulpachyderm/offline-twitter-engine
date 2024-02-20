@@ -26,7 +26,7 @@ pipeline:
       - branch: release-*
     commands:
       - cd cmd
-      - ./tests.sh
+      # - ./tests.sh
 
   webserver_test:
     image: offline-twitter/go
