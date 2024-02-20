@@ -87,6 +87,12 @@ TODO: scrape-followed-users-list
 TODO: newer-version-tombstone
 - Preserve tombstone after re-scraping
 
+TODO: failed-tweets
+- https://twitter.com/_HARVEY__DENT_/status/1755665502385377720
+
+TODO: new-content-type
+- https://twitter.com/itsbackwereover/status/1757947530506043872
+
 Webserver
 ---------
 
@@ -113,7 +119,7 @@ TODO: paste-twitter-urls-in-search-bar
 
 TODO: ui-deuglifying
 - "Follow" / "Unfollow" button
-- "End of feed" indicator
+- "Show more" button at end of feed
 
 TODO: show-errors-in-UI
 - if an HTTP request fails, show an error in the UI somehow
@@ -121,14 +127,19 @@ TODO: show-errors-in-UI
 TODO: refactor-compound_queries_test-file
 - Move the tests for user feeds into the compound_queries_ssf_test file
 
-TODO: search-bar/preserve-contents-on-search
-- When performing a search, keep the search text in the search bar
-
 TODO: features-from-qt-version
 - Add all features from the Qt app to the web UI
   - when previous tweet in thread is missing, put a "fetch tweet" button to get it
   - Create a default profile on first launch
 
-TODO: dms-embedded-image-and-video
+TODO: dms
+- embedded image and video
+- unshorten URLs / show previews
+- remove empty text bubble for no text-content posts, e.g., shared tweets
+- fetch chat room history on opening
 
-TODO: dms-unshorten-urls
+TODO: search-terms-highlighted
+- on Search page, highlight matches for the search keywords
+
+TODO: htmx-spinner-user-feed
+- should cover the user profile header?  whole visible page?

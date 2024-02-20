@@ -218,3 +218,16 @@ v0.6.1
 	- spinner now shows when loading / fetching tweets
 	- on errors, an error toast notification now shows
 - Add followers/followees pages and queries
+
+v0.6.2
+------
+
+- make all timestamps across the app use milliseconds (previously used both seconds or milliseconds in different places)
+- add `get_user_likes_all` subcommand
+- UI improvements:
+	- make end-of-feed indicator look better
+	- add favicon
+- Bugfixes:
+	- fix clobbering of interaction stats if a tweet is deleted (previously they'd all get set to 0)
+	- fix double HTMX spinner on tweets with quoted tweet
+	- fix focused tweets being clickable
