@@ -96,6 +96,7 @@ ul.inline-dotted-list li:last-child:after {
 }
 .htmx-spinner-container {
     display: none;
+    z-index: 2;  /* On top of the search bar, which is z-index of 1 */
 }
 .htmx-request > .htmx-spinner-container {
     display: revert;
