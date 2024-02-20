@@ -38,6 +38,12 @@ pipeline:
       - curl localhost:1000/cernovich > webserver_test_output.html
       - jobs -p | xargs -I{} kill -- -{}
 
+  windows_build:
+    image: offline-twitter/go-mingw
+    commands:
+      - cd cmd
+      - ./windows-compile.sh
+
   version_bump_test:
     image: offline-twitter/go
     when:
@@ -70,6 +76,13 @@ pipeline:
       - ./build_dpkg.sh $version
       - scp offline-twitter-engine_$${version}_all.deb aptrepo@apt.playfulpachyderm.com:/apt-repo/test-repo
       - ssh aptrepo@apt.playfulpachyderm.com "cd ~/test-repo && ./update.sh"
+
+  windows_package:
+    image: offline-twitter/innosetup
+    commands:
+      - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^release-)\d+\.\d+\.\d+")
+      - iscc.sh /Dversion=$version /Dexe_path=`winepath -w cmd/twitter.exe` build/windows/setup.iss
+
 
 depends_on:
   - build-docker

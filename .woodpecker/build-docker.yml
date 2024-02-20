@@ -7,5 +7,7 @@ pipeline:
     commands:
       - cd .woodpecker/docker
       - docker build -f go.dockerfile -t offline-twitter/go .
+      - docker build -f go-mingw.dockerfile -t offline-twitter/go-mingw .
+      - docker build -f innosetup.dockerfile -t offline-twitter/innosetup .
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
