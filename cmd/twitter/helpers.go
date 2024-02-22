@@ -4,6 +4,8 @@ import (
 	_ "embed"
 	"fmt"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strconv"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
@@ -55,4 +57,28 @@ func extract_id_from(url string) (scraper.TweetID, error) {
 
 	num, err := strconv.Atoi(url)
 	return scraper.TweetID(num), err
+}
+
+// Get a sensible default path to create a default profile.  Uses `XDG_DATA_HOME` if available
+//
+// Defaults:
+//   - Unix: `~/.local/share`
+//   - Windows: %APPDATA%
+//   - MacOS:  ~/Library
+func get_default_profile() string {
+	app_data_dir := os.Getenv("XDG_DATA_HOME")
+	if app_data_dir == "" {
+		switch runtime.GOOS {
+		case "windows":
+			app_data_dir = os.Getenv("AppData")
+			if app_data_dir == "" {
+				panic("%AppData% is undefined")
+			}
+		case "darwin":
+			app_data_dir = filepath.Join(os.Getenv("HOME"), "Library")
+		default: // Unix
+			app_data_dir = filepath.Join(os.Getenv("HOME"), ".local", "share")
+		}
+	}
+	return filepath.Join(app_data_dir, "twitter")
 }

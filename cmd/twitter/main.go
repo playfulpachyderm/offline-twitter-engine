@@ -5,6 +5,8 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/term"
+	"errors"
+	"io/fs"
 	"os"
 	"strconv"
 	"strings"
@@ -23,6 +25,8 @@ var version_string string
 func main() {
 	profile_dir := flag.String("profile", ".", "")
 	flag.StringVar(profile_dir, "p", ".", "")
+
+	use_default_profile := flag.Bool("default-profile", false, "")
 
 	show_version_flag := flag.Bool("version", false, "")
 	flag.BoolVar(show_version_flag, "v", false, "")
@@ -88,9 +92,33 @@ func main() {
 		return
 	}
 
+	if *use_default_profile {
+		if *profile_dir != "." {
+			die(fmt.Sprintf("Invalid flags: either `--profile [...]` or `--default-profile` can be used, but not both"), true, 2)
+		}
+		*profile_dir = get_default_profile()
+
+		// Create default profile if necessary
+		fileinfo, err := os.Stat(*profile_dir)
+		if errors.Is(err, fs.ErrNotExist) {
+			// Doesn't exist; create it
+			create_profile(*profile_dir)
+		} else if err != nil {
+			// Unexpected error
+			die(fmt.Sprintf("Default profile path (%s) is weird: %s", *profile_dir, err.Error()), false, 2)
+		} else if !fileinfo.IsDir() {
+			// It exists but it's not a directory
+			die(fmt.Sprintf("Default profile path (%s) already exists and is not a directory", *profile_dir), false, 2)
+		}
+		// Path exists and is a directory; safe to continue
+	}
 	profile, err = persistence.LoadProfile(*profile_dir)
 	if err != nil {
-		die(fmt.Sprintf("Could not load profile: %s", err.Error()), true, 2)
+		if *use_default_profile {
+			create_profile(*profile_dir)
+		} else {
+			die(fmt.Sprintf("Could not load profile: %s", err.Error()), true, 2)
+		}
 	}
 
 	if *session_name != "" {
@@ -105,8 +133,6 @@ func main() {
 	}
 
 	switch operation {
-	case "create_profile":
-		create_profile(target)
 	case "login":
 		var password string
 		if len(args) == 2 {
