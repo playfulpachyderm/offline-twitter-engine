@@ -1,11 +1,11 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/term"
-	"errors"
 	"io/fs"
 	"os"
 	"strconv"
@@ -94,7 +94,7 @@ func main() {
 
 	if *use_default_profile {
 		if *profile_dir != "." {
-			die(fmt.Sprintf("Invalid flags: either `--profile [...]` or `--default-profile` can be used, but not both"), true, 2)
+			die("Invalid flags: either `--profile [...]` or `--default-profile` can be used, but not both", true, 2)
 		}
 		*profile_dir = get_default_profile()
 
