@@ -53,9 +53,9 @@
   {{end}}
 
   <div id="new-messages-poller"
-    hx-swap="outerHTML scroll:.chat-messages:bottom"
+    hx-swap="outerHTML {{if $.ScrollBottom}}scroll:.chat-messages:bottom{{end}}"
     hx-trigger="load delay:3s"
-    hx-get="/messages/{{$.ActiveRoomID}}?poll&latest_timestamp={{$.LatestPollingTimestamp}}"
+    hx-get="/messages/{{$.ActiveRoomID}}?poll&latest_timestamp={{$.LatestPollingTimestamp}}&scroll_bottom={{if $.ScrollBottom}}1{{else}}0{{end}}"
   ></div>
 {{end}}
 
@@ -88,6 +88,43 @@
       </script>
     {{end}}
   </div>
+
+  <script>
+    (function () {  // Wrap it all in an IIFE to avoid namespace pollution
+      const chat_messages = document.querySelector('.chat-messages');
+
+      // Disable auto-scroll-bottom on new message loads if the user has scrolled up
+      chat_messages.addEventListener('scroll', function() {
+        const _node = document.querySelector("#new-messages-poller");
+        const node = _node.cloneNode()
+        _node.remove(); // Removing and re-inserting the element cancels the HTMX polling, otherwise it will use the old values
+
+        const scrollPosition = chat_messages.scrollTop;
+        var bottomOfElement = chat_messages.scrollHeight - chat_messages.clientHeight;
+
+        var [path, qs] = node.attributes["hx-get"].value.split("?")
+        var params = new URLSearchParams(qs)
+
+        if (scrollPosition === bottomOfElement) {
+          // At bottom; new messages should be scrolled into view
+          node.setAttribute("hx-swap", "outerHTML scroll:.chat-messages:bottom");
+          params.set("scroll_bottom", "1")
+          node.setAttribute("hx-get", [path, params.toString()].join("?"))
+        } else {
+          // User has scrolled up; disable auto-scrolling when new messages arrive
+          node.setAttribute("hx-swap", "outerHTML");
+          params.set("scroll_bottom", "0")
+          node.setAttribute("hx-get", [path, params.toString()].join("?"))
+        }
+
+        chat_messages.appendChild(node);
+        htmx.process(node); // Manually enable HTMX on the manually-added node
+      });
+
+      // Scroll to the bottom of the chat window on initial page load
+      chat_messages.scrollTop = chat_messages.scrollHeight;
+    })();
+  </script>
 {{end}}
 
 {{define "dm-composer"}}

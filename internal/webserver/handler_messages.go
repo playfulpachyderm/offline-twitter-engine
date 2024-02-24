@@ -14,6 +14,7 @@ import (
 type MessageData struct {
 	persistence.DMChatView
 	LatestPollingTimestamp int
+	ScrollBottom           bool
 }
 
 func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +29,7 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 	room_id := scraper.DMChatRoomID(parts[0])
 
 	if r.URL.Query().Has("poll") {
-		// TODO: where is this going to be used?
+		// Not run as a goroutine; this call blocks.  It's not actually "background"
 		app.background_dm_polling_scrape()
 	}
 
@@ -56,6 +57,9 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 			var err error
 			chat_view_data.LatestPollingTimestamp, err = strconv.Atoi(latest_timestamp_str)
 			panic_if(err)
+		}
+		if r.URL.Query().Get("scroll_bottom") != "0" {
+			chat_view_data.ScrollBottom = true
 		}
 		chat_contents := app.Profile.GetChatRoomContents(room_id, chat_view_data.LatestPollingTimestamp)
 		chat_view_data.MergeWith(chat_contents.DMTrove)

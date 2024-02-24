@@ -1,4 +1,4 @@
-{{define "title"}}Followed Users{{end}}
+{{define "title"}}Messages{{end}}
 
 {{define "main"}}
   <div class="chats-container">
