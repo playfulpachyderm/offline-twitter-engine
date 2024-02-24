@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Offline Twitter
+Comment=Twitter client that auto-archives as you go
+Exec=/usr/local/bin/twitter --default-profile --addr localhost:1400 webserver --auto-open
+Icon=/usr/share/pixmaps/twitter.png
+Terminal=true
+Type=Application
+Categories=Application;Network
+StartupNotify=true

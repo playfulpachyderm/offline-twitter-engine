@@ -20,9 +20,18 @@ mkdir dpkg_tmp
 mkdir -p dpkg_tmp/usr/local/bin
 cp ../cmd/tw dpkg_tmp/usr/local/bin/twitter
 
+# Create the Desktop files
+mkdir -p dpkg_tmp/usr/share/pixmaps
+cp twitter.png dpkg_tmp/usr/share/pixmaps
+
+mkdir -p dpkg_tmp/usr/share/applications
+cp Twitter.desktop dpkg_tmp/usr/share/applications/Twitter.desktop
+
+
+
 # Create the `DEBIAN/control` file
 mkdir dpkg_tmp/DEBIAN
-echo "Package: offline-twitter-engine
+echo "Package: offline-twitter
 Version: $1
 Architecture: all
 Maintainer: alex@playfulpachyderm.com
