@@ -645,7 +645,7 @@ func TestMessagesRoom(t *testing.T) {
 	assert.NotNil(node)
 	assert.Contains(node.Attr, html.Attribute{
 		Key: "hx-get",
-		Val: "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129144",
+		Val: "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129144&scroll_bottom=1",
 	})
 }
 
@@ -674,7 +674,7 @@ func TestMessagesRoomPollForUpdates(t *testing.T) {
 	assert.NotNil(node)
 	assert.Contains(node.Attr, html.Attribute{
 		Key: "hx-get",
-		Val: "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129144",
+		Val: "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129144&scroll_bottom=1",
 	})
 }
 
@@ -703,6 +703,6 @@ func TestMessagesRoomPollForUpdatesEmptyResult(t *testing.T) {
 	assert.NotNil(node)
 	assert.Contains(node.Attr, html.Attribute{
 		Key: "hx-get",
-		Val: "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129144",
+		Val: "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129144&scroll_bottom=1",
 	})
 }
