@@ -55,6 +55,26 @@ INSERT INTO users VALUES
     (1680,1458284524761075714,'wispem-wantex','wispem_wantex',replace('~wispem-wantex\n\nCurrently looking for work (DMs open)','\n',char(10)),136,483,'on my computer','https://offline-twitter.com/',1636517116000,0,0,0,'https://pbs.twimg.com/profile_images/1462880679687954433/dXJN4Bo4.jpg','wispem_wantex_profile_dXJN4Bo4.jpg','','',1695221528617468324,1,0,0,0),
     (27398,1488963321701171204,'Offline Twatter','Offline_Twatter',replace('Offline Twitter is an open source twitter client and tweet-archiving app all in one.  Try it out!\n\nSource code: https://t.co/2PMumKSxFO','\n',char(10)),4,2,'','https://offline-twitter.com',1643831522000,0,0,0,'https://pbs.twimg.com/profile_images/1507883049853210626/TytFbk_3.jpg','Offline_Twatter_profile_TytFbk_3.jpg','','',1507883724615999488,1,1,0,0);
 
+create table lists(rowid integer primary key,
+    is_online boolean not null default 0,
+    online_list_id integer not null default 0, -- Will be 0 for lists that aren't Twitter Lists
+    name text not null,
+    check ((is_online = 0 and online_list_id = 0) or (is_online != 0 and online_list_id != 0))
+    check (rowid != 0)
+);
+create table list_users(rowid integer primary key,
+    list_id integer not null,
+    user_id integer not null,
+    unique(list_id, user_id)
+    foreign key(list_id) references lists(rowid)
+    foreign key(user_id) references users(id)
+);
+create index if not exists index_list_users_list_id on list_users (list_id);
+create index if not exists index_list_users_user_id on list_users (user_id);
+insert into lists(rowid, name) values (1, "Offline Follows");
+insert into list_users(list_id, user_id) select 1, id from users where is_followed = 1;
+
+
 create table tombstone_types (rowid integer primary key,
     short_name text not null unique,
     tombstone_text text not null unique

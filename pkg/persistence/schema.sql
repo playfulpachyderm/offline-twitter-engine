@@ -1,5 +1,9 @@
 PRAGMA foreign_keys = on;
 
+
+-- Users
+-- -----
+
 create table users (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
     display_name text not null,
@@ -25,6 +29,42 @@ create table users (rowid integer primary key,
     is_content_downloaded boolean default 0
 );
 
+create table fake_user_sequence(latest_fake_id integer not null);
+insert into fake_user_sequence values(0x4000000000000000);
+
+create table lists(rowid integer primary key,
+    is_online boolean not null default 0,
+    online_list_id integer not null default 0, -- Will be 0 for lists that aren't Twitter Lists
+    name text not null,
+    check ((is_online = 0 and online_list_id = 0) or (is_online != 0 and online_list_id != 0))
+    check (rowid != 0)
+);
+create table list_users(rowid integer primary key,
+    list_id integer not null,
+    user_id integer not null,
+    unique(list_id, user_id)
+    foreign key(list_id) references lists(rowid)
+    foreign key(user_id) references users(id)
+);
+create index if not exists index_list_users_list_id on list_users (list_id);
+create index if not exists index_list_users_user_id on list_users (user_id);
+insert into lists(rowid, name) values (1, "Offline Follows");
+insert into list_users(list_id, user_id) select 1, id from users where is_followed = 1;
+
+create table follows(rowid integer primary key,
+    follower_id integer not null,
+    followee_id integer not null,
+    unique(follower_id, followee_id),
+    foreign key(follower_id) references users(id)
+    foreign key(followee_id) references users(id)
+);
+create index if not exists index_follows_followee_id on follows (followee_id);
+create index if not exists index_follows_follower_id on follows (follower_id);
+
+
+-- Tweets
+-- ------
+
 create table tombstone_types (rowid integer primary key,
     short_name text not null unique,
     tombstone_text text not null unique
@@ -38,7 +78,6 @@ insert into tombstone_types(rowid, short_name, tombstone_text) values
     (6, 'no longer exists', 'This Tweet is from an account that no longer exists'),
     (7, 'age-restricted', 'Age-restricted adult content. This content might not be appropriate for people under 18 years old. To view this media, you’ll need to log in to Twitter'),
     (8, 'newer-version-available', 'There’s a new version of this Tweet');
-
 
 create table tweets (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
@@ -69,15 +108,9 @@ create index if not exists index_tweets_in_reply_to_id on tweets (in_reply_to_id
 create index if not exists index_tweets_user_id        on tweets (user_id);
 create index if not exists index_tweets_posted_at      on tweets (posted_at);
 
-create table retweets(rowid integer primary key,
-    retweet_id integer not null unique,
-    tweet_id integer not null,
-    retweeted_by integer not null,
-    retweeted_at integer not null,
-    foreign key(tweet_id) references tweets(id)
-    foreign key(retweeted_by) references users(id)
-);
-create index if not exists index_retweets_retweeted_at on retweets (retweeted_at);
+
+-- Tweet content
+-- -------------
 
 create table urls (rowid integer primary key,
     tweet_id integer not null,
@@ -124,33 +157,6 @@ create table polls (rowid integer primary key,
 );
 create index if not exists index_polls_tweet_id on polls (tweet_id);
 
-create table spaces(rowid integer primary key,
-    id text unique not null,
-    created_by_id integer,
-    short_url text not null,
-    state text not null,
-    title text not null,
-    created_at integer not null,
-    started_at integer not null,
-    ended_at integer not null,
-    updated_at integer not null,
-    is_available_for_replay boolean not null,
-    replay_watch_count integer,
-    live_listeners_count integer,
-    is_details_fetched boolean not null default 0,
-
-    foreign key(created_by_id) references users(id)
-);
-
-create table space_participants(rowid integer primary key,
-    user_id integer not null,
-    space_id not null,
-
-    unique(user_id, space_id)
-    foreign key(space_id) references spaces(id)
-    -- No foreign key for users, since they may not be downloaded yet and I don't want to
-    -- download every user who joins a space
-);
 
 create table images (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
@@ -192,6 +198,56 @@ create table hashtags (rowid integer primary key,
     foreign key(tweet_id) references tweets(id)
 );
 
+
+-- Retweets
+-- --------
+
+create table retweets(rowid integer primary key,
+    retweet_id integer not null unique,
+    tweet_id integer not null,
+    retweeted_by integer not null,
+    retweeted_at integer not null,
+    foreign key(tweet_id) references tweets(id)
+    foreign key(retweeted_by) references users(id)
+);
+create index if not exists index_retweets_retweeted_at on retweets (retweeted_at);
+
+
+-- Spaces
+-- ------
+
+create table spaces(rowid integer primary key,
+    id text unique not null,
+    created_by_id integer,
+    short_url text not null,
+    state text not null,
+    title text not null,
+    created_at integer not null,
+    started_at integer not null,
+    ended_at integer not null,
+    updated_at integer not null,
+    is_available_for_replay boolean not null,
+    replay_watch_count integer,
+    live_listeners_count integer,
+    is_details_fetched boolean not null default 0,
+
+    foreign key(created_by_id) references users(id)
+);
+
+create table space_participants(rowid integer primary key,
+    user_id integer not null,
+    space_id not null,
+
+    unique(user_id, space_id)
+    foreign key(space_id) references spaces(id)
+    -- No foreign key for users, since they may not be downloaded yet and I don't want to
+    -- download every user who joins a space
+);
+
+
+-- Likes
+-- -----
+
 create table likes(rowid integer primary key,
     sort_order integer not null, -- Can't be unique because "-1" is used as "unknown" value
     user_id integer not null,
@@ -204,19 +260,8 @@ create index if not exists index_likes_user_id on likes (user_id);
 create index if not exists index_likes_tweet_id on likes (tweet_id);
 
 
-create table follows(rowid integer primary key,
-    follower_id integer not null,
-    followee_id integer not null,
-    unique(follower_id, followee_id),
-    foreign key(follower_id) references users(id)
-    foreign key(followee_id) references users(id)
-);
-create index if not exists index_follows_followee_id on follows (followee_id);
-create index if not exists index_follows_follower_id on follows (follower_id);
-
-
-create table fake_user_sequence(latest_fake_id integer not null);
-insert into fake_user_sequence values(0x4000000000000000);
+-- Direct Messages (DMs)
+-- ---------------------
 
 create table chat_rooms (rowid integer primary key,
     id text unique not null,
@@ -268,6 +313,10 @@ create table chat_message_reactions (rowid integer primary key,
     foreign key(message_id) references chat_messages(id)
     foreign key(sender_id) references users(id)
 );
+
+
+-- Meta
+-- ----
 
 create table database_version(rowid integer primary key,
     version_number integer not null unique
