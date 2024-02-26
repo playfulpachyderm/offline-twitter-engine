@@ -10,5 +10,5 @@ type List struct {
 	Name     string       `db:"name"`
 
 	UserIDs []UserID
-	Users   []*User
+	Users   []User
 }
