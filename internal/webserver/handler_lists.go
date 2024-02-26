@@ -100,7 +100,7 @@ func (app *Application) ListAddUser(w http.ResponseWriter, r *http.Request) {
 	}
 	list := get_list_from_context(r.Context())
 	app.Profile.SaveListUser(list.ID, user.ID)
-	http.Redirect(w, r, fmt.Sprintf("/lists/%d", list.ID), 302)
+	http.Redirect(w, r, fmt.Sprintf("/lists/%d/users", list.ID), 302)
 }
 
 func (app *Application) ListRemoveUser(w http.ResponseWriter, r *http.Request) {
@@ -115,7 +115,7 @@ func (app *Application) ListRemoveUser(w http.ResponseWriter, r *http.Request) {
 	}
 	list := get_list_from_context(r.Context())
 	app.Profile.DeleteListUser(list.ID, user.ID)
-	http.Redirect(w, r, fmt.Sprintf("/lists/%d", list.ID), 302)
+	http.Redirect(w, r, fmt.Sprintf("/lists/%d/users", list.ID), 302)
 }
 
 func (app *Application) Lists(w http.ResponseWriter, r *http.Request) {

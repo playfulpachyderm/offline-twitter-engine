@@ -630,6 +630,42 @@ func TestListDetailInvalidId(t *testing.T) {
 	require.Equal(t, resp.StatusCode, 400)
 }
 
+func TestListAddAndDeleteUser(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	// Initial
+	resp := do_request(httptest.NewRequest("GET", "/lists/2/users", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".users-list-container .author-info")), 2)
+
+	// Add a user
+	resp_add := do_request(httptest.NewRequest("GET", "/lists/2/add_user?user_handle=cernovich", nil))
+	require.Equal(resp_add.StatusCode, 302)
+	require.Equal("/lists/2/users", resp_add.Header.Get("Location"))
+
+	// Should be +1 user now
+	resp = do_request(httptest.NewRequest("GET", "/lists/2/users", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err = html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".users-list-container .author-info")), 3)
+
+	// Delete a user
+	resp_remove := do_request(httptest.NewRequest("GET", "/lists/2/remove_user?user_handle=cernovich", nil))
+	require.Equal(resp_remove.StatusCode, 302)
+	require.Equal("/lists/2/users", resp_remove.Header.Get("Location"))
+
+	// Should be +1 user now
+	resp = do_request(httptest.NewRequest("GET", "/lists/2/users", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err = html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".users-list-container .author-info")), 2)
+}
+
 // Messages
 // --------
 

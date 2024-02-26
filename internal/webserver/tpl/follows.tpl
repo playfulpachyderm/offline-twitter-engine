@@ -7,5 +7,5 @@
     {{.Title}}
   </h1>
 
-  {{template "list" .UserIDs}}
+  {{template "list" (dict "UserIDs" .UserIDs)}}
 {{end}}

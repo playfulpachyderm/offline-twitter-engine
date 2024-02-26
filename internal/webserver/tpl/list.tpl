@@ -21,11 +21,11 @@
   {{else}}
     <div class="add-users-container">
       <form action="/lists/{{.List.ID}}/add_user">
-        <input type="text" name="user_handle" placeholder="@some_user_handle" />
+        <input type="text" name="user_handle" placeholder="@some_user_handle" style="width: 15em" />
         <input type="submit" value="Add user" />
       </form>
     </div>
 
-    {{template "list" .UserIDs}}
+    {{template "list" (dict "UserIDs" .UserIDs "button_text" "Remove" "button_url" (printf "/lists/%d/remove_user" .List.ID))}}
   {{end}}
 {{end}}

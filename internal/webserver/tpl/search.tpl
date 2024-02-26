@@ -20,7 +20,7 @@
     </div>
   </div>
   {{if .IsUsersSearch}}
-    {{template "list" .UserIDs}}
+    {{template "list" (dict "UserIDs" .UserIDs)}}
   {{else}}
     <div class="sort-order-container">
       <span class="sort-order-label">order:</span>
