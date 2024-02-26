@@ -83,12 +83,8 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	}
 
 	feed, err := app.Profile.NextPage(c, app.ActiveUser.ID)
-	if err != nil {
-		if errors.Is(err, persistence.ErrEndOfFeed) {
-			// TODO
-		} else {
-			panic(err)
-		}
+	if err != nil && !errors.Is(err, persistence.ErrEndOfFeed) {
+		panic(err)
 	}
 	feed.Users[user.ID] = user
 
@@ -112,6 +108,24 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type FollowsData struct {
+	Title        string
+	HeaderUserID scraper.UserID
+	UserIDs      []scraper.UserID
+}
+
+func NewFollowsData(users []scraper.User) (FollowsData, scraper.TweetTrove) {
+	trove := scraper.NewTweetTrove()
+	data := FollowsData{
+		UserIDs: []scraper.UserID{},
+	}
+	for _, u := range users {
+		trove.Users[u.ID] = u
+		data.UserIDs = append(data.UserIDs, u.ID)
+	}
+	return data, trove
+}
+
 func (app *Application) UserFollowees(w http.ResponseWriter, r *http.Request, user scraper.User) {
 	if r.URL.Query().Has("scrape") {
 		if app.IsScrapingDisabled {
@@ -131,11 +145,11 @@ func (app *Application) UserFollowees(w http.ResponseWriter, r *http.Request, us
 		go app.Profile.SaveTweetTrove(trove, true)
 	}
 
-	data, trove := NewListData(app.Profile.GetFollowees(user.ID))
+	data, trove := NewFollowsData(app.Profile.GetFollowees(user.ID))
 	trove.Users[user.ID] = user // Not loaded otherwise; needed to profile image in the login button on the sidebar
 	data.Title = fmt.Sprintf("Followed by @%s", user.Handle)
 	data.HeaderUserID = user.ID
-	app.buffered_render_page(w, "tpl/list.tpl", PageGlobalData{TweetTrove: trove}, data)
+	app.buffered_render_page(w, "tpl/follows.tpl", PageGlobalData{TweetTrove: trove}, data)
 }
 
 func (app *Application) UserFollowers(w http.ResponseWriter, r *http.Request, user scraper.User) {
@@ -157,9 +171,9 @@ func (app *Application) UserFollowers(w http.ResponseWriter, r *http.Request, us
 		go app.Profile.SaveTweetTrove(trove, true)
 	}
 
-	data, trove := NewListData(app.Profile.GetFollowers(user.ID))
+	data, trove := NewFollowsData(app.Profile.GetFollowers(user.ID))
 	trove.Users[user.ID] = user
 	data.Title = fmt.Sprintf("@%s's followers", user.Handle)
 	data.HeaderUserID = user.ID
-	app.buffered_render_page(w, "tpl/list.tpl", PageGlobalData{TweetTrove: trove}, data)
+	app.buffered_render_page(w, "tpl/follows.tpl", PageGlobalData{TweetTrove: trove}, data)
 }

@@ -18,12 +18,8 @@ func (app *Application) Timeline(w http.ResponseWriter, r *http.Request) {
 	}
 
 	feed, err := app.Profile.NextPage(c, app.ActiveUser.ID)
-	if err != nil {
-		if errors.Is(err, persistence.ErrEndOfFeed) {
-			// TODO
-		} else {
-			panic(err)
-		}
+	if err != nil && !errors.Is(err, persistence.ErrEndOfFeed) {
+		panic(err)
 	}
 
 	if r.Header.Get("HX-Request") == "true" && c.CursorPosition == persistence.CURSOR_MIDDLE {
