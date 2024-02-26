@@ -73,13 +73,15 @@ func (p Profile) DeleteListUser(list_id ListID, user_id UserID) {
 	}
 }
 
-func (p Profile) GetListById(list_id ListID) List {
+func (p Profile) GetListById(list_id ListID) (List, error) {
 	var ret List
 	err := p.DB.Get(&ret, `select rowid, is_online, online_list_id, name from lists where rowid = ?`, list_id)
-	if err != nil {
+	if errors.Is(err, sql.ErrNoRows) {
+		return List{}, ErrNotInDatabase{"List", list_id}
+	} else if err != nil {
 		panic(err)
 	}
-	return ret
+	return ret, nil
 }
 
 func (p Profile) GetListUsers(list_id ListID) []User {

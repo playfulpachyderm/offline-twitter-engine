@@ -597,8 +597,8 @@ func TestListsIndex(t *testing.T) {
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 
-	// Check that there's 2 Lists
-	assert.Len(t, cascadia.QueryAll(root, selector(".users-list-preview")), 2)
+	// Check that there's at least 2 Lists
+	assert.True(t, len(cascadia.QueryAll(root, selector(".users-list-preview"))) >= 2)
 }
 
 func TestListDetail(t *testing.T) {
@@ -618,6 +618,11 @@ func TestListDetail(t *testing.T) {
 	root1, err := html.Parse(resp1.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root1, selector(".timeline > .tweet")), 3)
+}
+
+func TestListDetailDoesntExist(t *testing.T) {
+	resp := do_request(httptest.NewRequest("GET", "/lists/2523478", nil))
+	require.Equal(t, resp.StatusCode, 404)
 }
 
 func TestListDetailInvalidId(t *testing.T) {

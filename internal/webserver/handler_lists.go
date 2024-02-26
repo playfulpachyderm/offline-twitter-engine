@@ -130,9 +130,11 @@ func (app *Application) Lists(w http.ResponseWriter, r *http.Request) {
 			app.error_400_with_message(w, "List ID must be a number")
 			return
 		}
-		// XXX: Check that the list exists
-		// Need to modify signature to return an error, because it might be ErrNoRows
-		list := app.Profile.GetListById(ListID(_list_id))
+		list, err := app.Profile.GetListById(ListID(_list_id))
+		if err != nil {
+			app.error_404(w)
+			return
+		}
 		req_with_ctx := r.WithContext(add_list_to_context(r.Context(), list))
 		http.StripPrefix(fmt.Sprintf("/%d", list.ID), http.HandlerFunc(app.ListDetail)).ServeHTTP(w, req_with_ctx)
 		return

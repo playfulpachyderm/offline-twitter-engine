@@ -27,7 +27,8 @@ func TestSaveAndLoadOfflineList(t *testing.T) {
 	require.NotEqual(l.ID, ListID(0)) // ID should be assigned when it's saved
 
 	// Check it comes back the same
-	new_l := profile.GetListById(l.ID)
+	new_l, err := profile.GetListById(l.ID)
+	require.NoError(err)
 	assert.Equal(l.ID, new_l.ID)
 	assert.Equal(l.IsOnline, new_l.IsOnline)
 	assert.Equal(l.Name, new_l.Name)
@@ -50,7 +51,8 @@ func TestRenameOfflineList(t *testing.T) {
 	profile.SaveList(&l)
 
 	// Rename should be effective
-	new_l := profile.GetListById(l.ID)
+	new_l, err := profile.GetListById(l.ID)
+	require.NoError(err)
 	assert.Equal(l.ID, new_l.ID)
 	assert.Equal(l.IsOnline, new_l.IsOnline)
 	assert.Equal(l.Name, new_l.Name)
@@ -70,7 +72,8 @@ func TestSaveAndLoadOnlineList(t *testing.T) {
 	require.NotEqual(l.ID, ListID(0)) // ID should be assigned when it's saved
 
 	// Check it comes back the same
-	new_l := profile.GetListById(l.ID)
+	new_l, err := profile.GetListById(l.ID)
+	require.NoError(err)
 	assert.Equal(l.ID, new_l.ID)
 	assert.Equal(l.IsOnline, new_l.IsOnline)
 	assert.Equal(l.OnlineID, new_l.OnlineID) // Check OnlineID for online lists
@@ -94,7 +97,8 @@ func TestRenameOnlineList(t *testing.T) {
 	profile.SaveList(&l)
 
 	// Rename should be effective
-	new_l := profile.GetListById(l.ID)
+	new_l, err := profile.GetListById(l.ID)
+	require.NoError(err)
 	assert.Equal(l.ID, new_l.ID)
 	assert.Equal(l.IsOnline, new_l.IsOnline)
 	assert.Equal(l.OnlineID, new_l.OnlineID) // Check OnlineID for online lists
