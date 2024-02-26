@@ -2,13 +2,13 @@ package webserver
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
-	"io"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
-	"encoding/json"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
