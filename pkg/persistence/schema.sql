@@ -43,7 +43,7 @@ create table list_users(rowid integer primary key,
     list_id integer not null,
     user_id integer not null,
     unique(list_id, user_id)
-    foreign key(list_id) references lists(rowid)
+    foreign key(list_id) references lists(rowid) on delete cascade
     foreign key(user_id) references users(id)
 );
 create index if not exists index_list_users_list_id on list_users (list_id);

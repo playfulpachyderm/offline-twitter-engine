@@ -693,30 +693,32 @@ ul.space-participants-list li {
 }
 
 .users-list-preview {
-    cursor: pointer;
-    display: flex;
-    font-size: 1.5em;
+    padding: 0.5em 1em;
     border-color: var(--color-twitter-off-white-dark);
     border-bottom-style: solid;
     border-width: 1px;
-    padding: 0.5em 1em;
-    align-items: center;
 }
-.users-list-preview span.num-users {
+.users-list-preview .list-info-container{
+    display: flex;
+    align-items: center;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+.users-list-preview .list-info-container span.num-users {
     margin-left: 1em;
     color: var(--color-twitter-text-gray);
 }
-.users-list-preview .first-N-profile-images {
+.users-list-preview .list-info-container .first-N-profile-images {
     display: flex;
     align-items: flex-end;
     margin-left: 1.5em;
 }
-.users-list-preview .first-N-profile-images a {
+.users-list-preview .list-info-container .first-N-profile-images a {
     margin-right: -1.2em;
     line-height: 0; /* TODO: This is duplicated from `.author-info a` and possibly others */
 }
 
-.users-list-preview .first-N-profile-images .ellipsis {
+.users-list-preview .list-info-container .first-N-profile-images .ellipsis {
     margin-left: 1.5em;
 }
 

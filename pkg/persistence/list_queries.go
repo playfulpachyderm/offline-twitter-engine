@@ -53,6 +53,13 @@ func (p Profile) SaveList(l *List) {
 	}
 }
 
+func (p Profile) DeleteList(list_id ListID) {
+	_, err := p.DB.Exec(`delete from lists where rowid = ?`, list_id)
+	if err != nil {
+		panic(fmt.Errorf("Error executing DeleteList(%d):\n  %w", list_id, err).Error())
+	}
+}
+
 func (p Profile) SaveListUsers(list_id ListID, trove TweetTrove) {
 	for user_id := range trove.Users {
 		p.SaveListUser(list_id, user_id)

@@ -69,13 +69,25 @@ func (app *Application) ListDetailUsers(w http.ResponseWriter, r *http.Request) 
 	app.buffered_render_page(w, "tpl/list.tpl", PageGlobalData{TweetTrove: trove}, data)
 }
 
+func (app *Application) ListDelete(w http.ResponseWriter, r *http.Request) {
+	list := get_list_from_context(r.Context())
+	app.Profile.DeleteList(list.ID)
+	http.Redirect(w, r, "/lists", 302)
+}
+
 func (app *Application) ListDetail(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'ListDetail' handler (path: %q)", r.URL.Path)
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 
 	if len(parts) == 1 && parts[0] == "" {
-		// No further path; just show the feed
-		app.ListDetailFeed(w, r)
+		switch r.Method {
+		case "DELETE":
+			app.ListDelete(w, r)
+		default:
+			// No further path; just show the feed
+			app.ListDetailFeed(w, r)
+		}
+		return
 	}
 
 	switch parts[0] {
