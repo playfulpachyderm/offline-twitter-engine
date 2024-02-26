@@ -68,7 +68,7 @@ pipeline:
       - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^release-)\d+\.\d+\.\d+")
       - cd build
       - ./build_dpkg.sh $version
-      - scp offline-twitter-engine_$${version}_all.deb aptrepo@apt.playfulpachyderm.com:/apt-repo/test-repo
+      - scp offline-twitter_$${version}_all.deb aptrepo@apt.playfulpachyderm.com:/apt-repo/test-repo
       - ssh aptrepo@apt.playfulpachyderm.com "cd ~/test-repo && ./update.sh"
 
   windows_build:
