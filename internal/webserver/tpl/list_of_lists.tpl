@@ -2,6 +2,18 @@
 
 {{define "main"}}
   <h1>Lists</h1>
+
+  <button onclick="document.querySelector('#newListDialog').showModal()">New list</button>
+  <dialog id="newListDialog">
+    <h3>Create new list</h3>
+    <form hx-post="/lists" hx-ext="json-enc" hx-target="body" hx-push-url="true">
+      <label for="name">Name</label>
+      <input name="name" />
+      <input type="submit" value="Create" />
+    </form>
+    <button onclick="document.querySelector('#newListDialog').close()">Cancel</button>
+  </dialog>
+
   <div class="users-list-previews">
     {{range .}}
       {{$max_display_users := 10}}

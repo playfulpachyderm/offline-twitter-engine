@@ -666,6 +666,30 @@ func TestListAddAndDeleteUser(t *testing.T) {
 	assert.Len(cascadia.QueryAll(root, selector(".users-list-container .author-info")), 2)
 }
 
+func TestCreateNewList(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	// Initial list-of-lists
+	resp := do_request(httptest.NewRequest("GET", "/lists", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	num_lists := len(cascadia.QueryAll(root, selector(".users-list-preview")))
+
+	// Create a new list
+	resp_add := do_request(httptest.NewRequest("POST", "/lists", strings.NewReader(`{"name": "My New List"}`)))
+	require.Equal(resp_add.StatusCode, 302)
+	require.Equal(fmt.Sprintf("/lists/%d/users", num_lists + 1), resp_add.Header.Get("Location"))
+
+	// Should be N+1 lists now
+	resp = do_request(httptest.NewRequest("GET", "/lists", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err = html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".users-list-preview")), num_lists + 1)
+}
+
 // Messages
 // --------
 

@@ -3,10 +3,12 @@ package webserver
 import (
 	"context"
 	"errors"
+	"io"
 	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
+	"encoding/json"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
@@ -137,6 +139,21 @@ func (app *Application) Lists(w http.ResponseWriter, r *http.Request) {
 		}
 		req_with_ctx := r.WithContext(add_list_to_context(r.Context(), list))
 		http.StripPrefix(fmt.Sprintf("/%d", list.ID), http.HandlerFunc(app.ListDetail)).ServeHTTP(w, req_with_ctx)
+		return
+	}
+
+	// New list
+	if r.Method == "POST" {
+		var formdata struct {
+			Name string `json:"name"`
+		}
+		data, err := io.ReadAll(r.Body)
+		panic_if(err)
+		err = json.Unmarshal(data, &formdata)
+		panic_if(err)
+		new_list := List{Name: formdata.Name}
+		app.Profile.SaveList(&new_list)
+		http.Redirect(w, r, fmt.Sprintf("/lists/%d/users", new_list.ID), 302)
 		return
 	}
 
