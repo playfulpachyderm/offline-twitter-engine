@@ -129,11 +129,12 @@ type Cursor struct {
 
 	// Search params
 	Keywords              []string
-	FromUserHandle        scraper.UserHandle
-	RetweetedByUserHandle scraper.UserHandle
-	ByUserHandle          scraper.UserHandle
-	ToUserHandles         []scraper.UserHandle
-	LikedByUserHandle     scraper.UserHandle
+	FromUserHandle        scraper.UserHandle   // Tweeted by this user
+	RetweetedByUserHandle scraper.UserHandle   // Retweeted by this user
+	ByUserHandle          scraper.UserHandle   // Either tweeted or retweeted by this user
+	ToUserHandles         []scraper.UserHandle // In reply to these users
+	LikedByUserHandle     scraper.UserHandle   // Liked by this user
+	ListID                scraper.ListID       // Either tweeted or retweeted by users from this List
 	SinceTimestamp        scraper.Timestamp
 	UntilTimestamp        scraper.Timestamp
 	FilterLinks           Filter
@@ -176,6 +177,21 @@ func NewTimelineCursor() Cursor {
 		PageSize:       50,
 
 		FilterOfflineFollowed: REQUIRE,
+	}
+}
+
+// Generate a cursor appropriate for showing a List feed
+func NewListCursor(list_id scraper.ListID) Cursor {
+	return Cursor{
+		Keywords:       []string{},
+		ToUserHandles:  []scraper.UserHandle{},
+		ListID:         list_id,
+		SinceTimestamp: scraper.TimestampFromUnix(0),
+		UntilTimestamp: scraper.TimestampFromUnix(0),
+		CursorPosition: CURSOR_START,
+		CursorValue:    0,
+		SortOrder:      SORT_ORDER_NEWEST,
+		PageSize:       50,
 	}
 }
 
@@ -374,6 +390,10 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
 	if c.ByUserHandle != "" {
 		where_clauses = append(where_clauses, "by_user_id = (select id from users where handle like ?)")
 		bind_values = append(bind_values, c.ByUserHandle)
+	}
+	if c.ListID != 0 {
+		where_clauses = append(where_clauses, "by_user_id in (select user_id from list_users where list_id = ?)")
+		bind_values = append(bind_values, c.ListID)
 	}
 
 	// Since and until timestamps

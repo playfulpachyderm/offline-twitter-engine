@@ -51,6 +51,11 @@ input, select {
     border-radius: 0.5em;
 }
 
+h1 {
+    margin: 0.5em 0;
+    text-align: center;
+}
+
 .server-error-msg {
     position: fixed;
     margin: 6em 0;
@@ -267,7 +272,7 @@ h3 {
     width: 3em;
     height: 3em;
     display: inline;
-    border: 1px solid var(--color-outline-gray);
+    border: 0.1em solid var(--color-outline-gray);
 }
 
 .user-header {
@@ -657,9 +662,46 @@ ul.space-participants-list li {
     filter: invert(20%) sepia(97%) saturate(4383%) hue-rotate(321deg) brightness(101%) contrast(95%);
 }
 
+.users-list-previews {
+    border-color: var(--color-twitter-off-white-dark);
+    border-top-style: double;
+    border-width: 4px;
+}
+
+.users-list-preview {
+    cursor: pointer;
+    display: flex;
+    font-size: 1.5em;
+    border-color: var(--color-twitter-off-white-dark);
+    border-bottom-style: solid;
+    border-width: 1px;
+    padding: 0.5em 1em;
+    align-items: center;
+}
+.users-list-preview span.num-users {
+    margin-left: 1em;
+    color: var(--color-twitter-text-gray);
+}
+.users-list-preview .first-N-profile-images {
+    display: flex;
+    align-items: flex-end;
+    margin-left: 1.5em;
+}
+.users-list-preview .first-N-profile-images a {
+    margin-right: -1.2em;
+    line-height: 0; /* TODO: This is duplicated from `.author-info a` and possibly others */
+}
+
+.users-list-preview .first-N-profile-images .ellipsis {
+    margin-left: 1.5em;
+}
+
 .users-list-container {
     display: flex;
     flex-direction: column;
+    border-color: var(--color-twitter-off-white-dark);
+    border-top-style: double;
+    border-width: 4px;
 }
 .users-list-container .author-info .profile-image {
     width: 4em;

@@ -590,12 +590,39 @@ func TestStaticFileNonexistent(t *testing.T) {
 // Lists
 // -----
 
-func TestLists(t *testing.T) {
-	assert := assert.New(t)
+func TestListsIndex(t *testing.T) {
+	require := require.New(t)
 	resp := do_request(httptest.NewRequest("GET", "/lists", nil))
+	require.Equal(resp.StatusCode, 200)
 	root, err := html.Parse(resp.Body)
-	assert.NoError(err)
+	require.NoError(err)
+
+	// Check that there's 2 Lists
+	assert.Len(t, cascadia.QueryAll(root, selector(".users-list-preview")), 2)
+}
+
+func TestListDetail(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	// Users
+	resp := do_request(httptest.NewRequest("GET", "/lists/1/users", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".users-list-container .author-info")), 5)
+
+	// Feed
+	resp1 := do_request(httptest.NewRequest("GET", "/lists/2", nil))
+	require.Equal(resp1.StatusCode, 200)
+	root1, err := html.Parse(resp1.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root1, selector(".timeline > .tweet")), 3)
+}
+
+func TestListDetailInvalidId(t *testing.T) {
+	resp := do_request(httptest.NewRequest("GET", "/lists/asd", nil))
+	require.Equal(t, resp.StatusCode, 400)
 }
 
 // Messages

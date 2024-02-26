@@ -1,22 +1,28 @@
 package webserver
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 type ListData struct {
-	Title         string
-	HeaderUserID  scraper.UserID
-	HeaderTweetID scraper.TweetID
-	UserIDs       []scraper.UserID
+	List
+	Feed      persistence.Feed
+	UserIDs   []UserID
+	ActiveTab string
 }
 
-func NewListData(users []scraper.User) (ListData, scraper.TweetTrove) {
-	trove := scraper.NewTweetTrove()
+func NewListData(users []User) (ListData, TweetTrove) {
+	trove := NewTweetTrove()
 	data := ListData{
-		UserIDs: []scraper.UserID{},
+		UserIDs: []UserID{},
 	}
 	for _, u := range users {
 		trove.Users[u.ID] = u
@@ -25,19 +31,139 @@ func NewListData(users []scraper.User) (ListData, scraper.TweetTrove) {
 	return data, trove
 }
 
+func (app *Application) ListDetailFeed(w http.ResponseWriter, r *http.Request) {
+	list := get_list_from_context(r.Context())
+
+	c := persistence.NewListCursor(list.ID)
+	err := parse_cursor_value(&c, r)
+	if err != nil {
+		app.error_400_with_message(w, "invalid cursor (must be a number)")
+		return
+	}
+	feed, err := app.Profile.NextPage(c, app.ActiveUser.ID)
+	if err != nil && !errors.Is(err, persistence.ErrEndOfFeed) {
+		panic(err)
+	}
+	if r.Header.Get("HX-Request") == "true" && c.CursorPosition == persistence.CURSOR_MIDDLE {
+		// It's a Show More request
+		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
+	} else {
+		app.buffered_render_page(
+			w,
+			"tpl/list.tpl",
+			PageGlobalData{TweetTrove: feed.TweetTrove},
+			ListData{Feed: feed, List: list, ActiveTab: "feed"},
+		)
+	}
+}
+
+func (app *Application) ListDetailUsers(w http.ResponseWriter, r *http.Request) {
+	list := get_list_from_context(r.Context())
+	users := app.Profile.GetListUsers(list.ID)
+
+	data, trove := NewListData(users)
+	data.List = list
+	data.ActiveTab = "users"
+	app.buffered_render_page(w, "tpl/list.tpl", PageGlobalData{TweetTrove: trove}, data)
+}
+
+func (app *Application) ListDetail(w http.ResponseWriter, r *http.Request) {
+	app.traceLog.Printf("'ListDetail' handler (path: %q)", r.URL.Path)
+	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+
+	if len(parts) == 1 && parts[0] == "" {
+		// No further path; just show the feed
+		app.ListDetailFeed(w, r)
+	}
+
+	switch parts[0] {
+	case "users":
+		app.ListDetailUsers(w, r)
+	case "add_user":
+		app.ListAddUser(w, r)
+	case "remove_user":
+		app.ListRemoveUser(w, r)
+	default:
+		app.error_404(w)
+	}
+}
+
+func (app *Application) ListAddUser(w http.ResponseWriter, r *http.Request) {
+	handle := r.URL.Query().Get("user_handle")
+	if handle[0] == '@' {
+		handle = handle[1:]
+	}
+	user, err := app.Profile.GetUserByHandle(UserHandle(handle))
+	if err != nil {
+		app.error_400_with_message(w, "Fetch user: "+err.Error())
+		return
+	}
+	list := get_list_from_context(r.Context())
+	app.Profile.SaveListUser(list.ID, user.ID)
+	http.Redirect(w, r, fmt.Sprintf("/lists/%d", list.ID), 302)
+}
+
+func (app *Application) ListRemoveUser(w http.ResponseWriter, r *http.Request) {
+	handle := r.URL.Query().Get("user_handle")
+	if handle[0] == '@' {
+		handle = handle[1:]
+	}
+	user, err := app.Profile.GetUserByHandle(UserHandle(handle))
+	if err != nil {
+		app.error_400_with_message(w, "Fetch user: "+err.Error())
+		return
+	}
+	list := get_list_from_context(r.Context())
+	app.Profile.DeleteListUser(list.ID, user.ID)
+	http.Redirect(w, r, fmt.Sprintf("/lists/%d", list.ID), 302)
+}
+
 func (app *Application) Lists(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'Lists' handler (path: %q)", r.URL.Path)
 
-	var users []scraper.User
-	err := app.Profile.DB.Select(&users, `
-		select id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified,
-	           is_banned, is_deleted, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path,
-	           pinned_tweet_id, is_content_downloaded, is_followed
-	      from users
-	     where is_followed = 1`)
-	panic_if(err)
+	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 
-	data, trove := NewListData(users)
-	data.Title = "Offline Follows"
-	app.buffered_render_page(w, "tpl/list.tpl", PageGlobalData{TweetTrove: trove}, data)
+	// List detail
+	if parts[0] != "" { // If there's an ID param
+		_list_id, err := strconv.Atoi(parts[0])
+		if err != nil {
+			app.error_400_with_message(w, "List ID must be a number")
+			return
+		}
+		// XXX: Check that the list exists
+		// Need to modify signature to return an error, because it might be ErrNoRows
+		list := app.Profile.GetListById(ListID(_list_id))
+		req_with_ctx := r.WithContext(add_list_to_context(r.Context(), list))
+		http.StripPrefix(fmt.Sprintf("/%d", list.ID), http.HandlerFunc(app.ListDetail)).ServeHTTP(w, req_with_ctx)
+		return
+	}
+
+	// List index
+	lists := app.Profile.GetAllLists()
+	trove := NewTweetTrove()
+	for _, l := range lists {
+		for _, u := range l.Users {
+			trove.Users[u.ID] = u
+		}
+	}
+	app.buffered_render_page(
+		w,
+		"tpl/list_of_lists.tpl",
+		PageGlobalData{TweetTrove: trove},
+		lists,
+	)
+}
+
+const LIST_KEY = key("list") // type `key` is defined in "handler_tweet_detail"
+
+func add_list_to_context(ctx context.Context, list List) context.Context {
+	return context.WithValue(ctx, LIST_KEY, list)
+}
+
+func get_list_from_context(ctx context.Context) List {
+	list, is_ok := ctx.Value(LIST_KEY).(List)
+	if !is_ok {
+		panic("List not found in context")
+	}
+	return list
 }

@@ -73,6 +73,8 @@ create index if not exists index_list_users_list_id on list_users (list_id);
 create index if not exists index_list_users_user_id on list_users (user_id);
 insert into lists(rowid, name) values (1, "Offline Follows");
 insert into list_users(list_id, user_id) select 1, id from users where is_followed = 1;
+insert into lists(rowid, name) values (2, "Bronze Age");
+insert into list_users(list_id, user_id) select 2, id from users where display_name like "%bronze age%";
 
 
 create table tombstone_types (rowid integer primary key,

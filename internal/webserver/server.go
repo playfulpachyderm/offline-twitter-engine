@@ -124,7 +124,7 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "search":
 		http.StripPrefix("/search", http.HandlerFunc(app.Search)).ServeHTTP(w, r)
 	case "lists":
-		app.Lists(w, r)
+		http.StripPrefix("/lists", http.HandlerFunc(app.Lists)).ServeHTTP(w, r)
 	case "messages":
 		http.StripPrefix("/messages", http.HandlerFunc(app.Messages)).ServeHTTP(w, r)
 	default:

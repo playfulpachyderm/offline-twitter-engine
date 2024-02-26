@@ -2,7 +2,7 @@
 
 {{define "main"}}
   <div class="search-header">
-    <h2 style="text-align: center">Search results: {{.SearchText}}</h2>
+    <h1>Search results: {{.SearchText}}</h1>
 
     <div class="row tabs-container">
       <a
