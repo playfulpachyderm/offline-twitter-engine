@@ -152,3 +152,20 @@ func TestAddAndRemoveUserToList(t *testing.T) {
 	// Should be gone
 	require.Len(profile.GetListUsers(l.ID), 0)
 }
+
+func TestGetAllLists(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+
+	// Create a list
+	l := List{IsOnline: false, Name: fmt.Sprintf("Test List %d", rand.Int())}
+	profile.SaveList(&l)
+
+	// Get all the lists
+	lists := profile.GetAllLists()
+	assert.True(len(lists) > 1) // Should be at least Offline Follows and `l`
+	assert.Contains(lists, l)
+}

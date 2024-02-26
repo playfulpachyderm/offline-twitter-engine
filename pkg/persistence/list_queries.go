@@ -95,7 +95,14 @@ func (p Profile) GetListUsers(list_id ListID) []User {
 	return ret
 }
 
-// XXX
-// func (p Profile) GetFollowedUsers() List {
-// 	err =
-// }
+func (p Profile) GetAllLists() []List {
+	var lists []List
+	err := p.DB.Select(&lists, `select rowid, is_online, online_list_id, name from lists`)
+	if err != nil {
+		panic(err)
+	}
+	for i := range lists {
+		lists[i].Users = p.GetListUsers(lists[i].ID)
+	}
+	return lists
+}
