@@ -2,7 +2,7 @@
 # Pinning version 1.21.4 because 1.22 crashes when compiling go-sqlite3 on something in `sqlite3-binding.c`.
 from golang:1.21.4-alpine
 
-run apk add --no-cache git sqlite-libs sqlite-dev build-base mingw-w64-gcc curl vim
+run apk add --no-cache git sqlite-libs sqlite-dev build-base mingw-w64-gcc curl vim grep
 
 # Install golangci-lint
 run curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/go/bin v1.53.1
