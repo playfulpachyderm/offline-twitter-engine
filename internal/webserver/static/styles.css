@@ -99,6 +99,10 @@ ul.inline-dotted-list li:last-child:after {
 .tweet {
     padding: 0 1.5em;
     position: relative;
+    z-index: 0;  /* Dunno why, but without it, hovering a tweet with a Poll hides the poll fill bars */
+}
+:not(#focused-tweet) > .tweet:hover:not(:has(.tweet:hover)) {
+    background-color: var(--color-twitter-off-white);
 }
 :not(#focused-tweet) > .tweet {
     cursor: pointer;
@@ -141,6 +145,8 @@ ul.inline-dotted-list li:last-child:after {
     outline-color: lightgray;
     outline-style: solid;
     outline-width: 1px;
+}
+.rounded-gray-outline, .rounded-gray-outline > .tweet {
     border-radius: 20px;
 }
 
