@@ -76,19 +76,12 @@ TODO: search-bottom-cursor
 - As first step, need helper function that returns the []Instruction element in a APIV2Response (not just the MainInstruction which is TimelineAddEntries)
 	- since different requests have different paths to the Instructions, e.g., Data.User.Result.Timeline.Timeline.Instructions vs Data.Home.HomeTimelineUrt.Instructions, etc
 
-TODO: lists
-- List types:
-  - offline follows
-  - followed by twitter user
-  - user-created
-
-TODO: scrape-followed-users-list
-
 TODO: newer-version-tombstone
 - Preserve tombstone after re-scraping
 
 TODO: failed-tweets
 - https://twitter.com/_HARVEY__DENT_/status/1755665502385377720
+- "Empty tweet": https://twitter.com/wispem_wantex/status/1581333495393107968
 
 TODO: new-content-type
 - https://twitter.com/itsbackwereover/status/1757947530506043872
@@ -123,6 +116,8 @@ TODO: ui-deuglifying
 
 TODO: show-errors-in-UI
 - if an HTTP request fails, show an error in the UI somehow
+  - scrape failed due to rate limiting
+  - non-HTMX 500 errors now show a weird HTML page
 
 TODO: refactor-compound_queries_test-file
 - Move the tests for user feeds into the compound_queries_ssf_test file
@@ -130,7 +125,6 @@ TODO: refactor-compound_queries_test-file
 TODO: features-from-qt-version
 - Add all features from the Qt app to the web UI
   - when previous tweet in thread is missing, put a "fetch tweet" button to get it
-  - Create a default profile on first launch
 
 TODO: dms
 - embedded image and video
@@ -141,5 +135,12 @@ TODO: dms
 TODO: search-terms-highlighted
 - on Search page, highlight matches for the search keywords
 
-TODO: htmx-spinner-user-feed
-- should cover the user profile header?  whole visible page?
+
+Windows Build
+-------------
+
+TODO: windows-session-list
+- Check that sessions load as @Offline_Twatter instead of @test\Offline_Twatter on Windows
+
+TODO: windows-automated-build
+- build and upload to offline-twitter.org on release branches

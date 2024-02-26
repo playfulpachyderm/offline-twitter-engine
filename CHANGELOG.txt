@@ -231,3 +231,13 @@ v0.6.2
 	- fix clobbering of interaction stats if a tweet is deleted (previously they'd all get set to 0)
 	- fix double HTMX spinner on tweets with quoted tweet
 	- fix focused tweets being clickable
+
+v0.6.3
+------
+
+- Add Lists
+- Add `--default-profile` flag which will use and create a profile in a default location (based on OS)
+- UI improvements:
+	- make scrolling in DMs work way better
+	- hovering over a tweet now highlights it with a light background color
+- Create a `Twitter.desktop` file in dpkg build

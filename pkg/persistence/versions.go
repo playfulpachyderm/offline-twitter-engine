@@ -226,6 +226,24 @@ var MIGRATIONS = []string{
 		    voting_ends_at = voting_ends_at * 1000,
 		    last_scraped_at = last_scraped_at * 1000;
 		update chat_rooms set created_at = created_at * 1000;`,
+	`create table lists(rowid integer primary key,
+		    is_online boolean not null default 0,
+		    online_list_id integer not null default 0, -- Will be 0 for lists that aren't Twitter Lists
+		    name text not null,
+		    check ((is_online = 0 and online_list_id = 0) or (is_online != 0 and online_list_id != 0))
+		    check (rowid != 0)
+		);
+		create table list_users(rowid integer primary key,
+		    list_id integer not null,
+		    user_id integer not null,
+		    unique(list_id, user_id)
+		    foreign key(list_id) references lists(rowid) on delete cascade
+		    foreign key(user_id) references users(id)
+		);
+		create index if not exists index_list_users_list_id on list_users (list_id);
+		create index if not exists index_list_users_user_id on list_users (user_id);
+		insert into lists(rowid, name) values (1, "Offline Follows");
+		insert into list_users(list_id, user_id) select 1, id from users where is_followed = 1;`,
 }
 var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
 
