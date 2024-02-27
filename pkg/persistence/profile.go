@@ -9,7 +9,6 @@ import (
 	sql "github.com/jmoiron/sqlx"
 	"github.com/jmoiron/sqlx/reflectx"
 	_ "github.com/mattn/go-sqlite3"
-	"gopkg.in/yaml.v2"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
@@ -17,11 +16,11 @@ import (
 //go:embed schema.sql
 var sql_init string
 
-type Settings struct{}
+//go:embed default_profile.png
+var default_profile_image []byte
 
 type Profile struct {
 	ProfileDir string
-	Settings   Settings
 	DB         *sql.DB
 }
 
@@ -40,9 +39,9 @@ func NewProfile(target_dir string) (Profile, error) {
 		return Profile{}, fmt.Errorf("Could not create target %q:\n  %w", target_dir, ErrTargetAlreadyExists)
 	}
 
-	settings_file := filepath.Join(target_dir, "settings.yaml")
 	sqlite_file := filepath.Join(target_dir, "twitter.db")
 	profile_images_dir := filepath.Join(target_dir, "profile_images")
+	default_profile_image_file := filepath.Join(target_dir, "profile_images/default_profile.png")
 	link_thumbnails_dir := filepath.Join(target_dir, "link_preview_images")
 	images_dir := filepath.Join(target_dir, "images")
 	videos_dir := filepath.Join(target_dir, "videos")
@@ -62,23 +61,17 @@ func NewProfile(target_dir string) (Profile, error) {
 	InitializeDatabaseVersion(db)
 	db.Mapper = reflectx.NewMapperFunc("db", ToSnakeCase)
 
-	// Create `settings.yaml`
-	fmt.Printf("Creating............. %s\n", settings_file)
-	settings := Settings{}
-	data, err := yaml.Marshal(&settings)
-	if err != nil {
-		return Profile{}, fmt.Errorf("Error YAML-marshalling [empty!] settings file:\n  %w", err)
-	}
-	err = os.WriteFile(settings_file, data, os.FileMode(0644))
-	if err != nil {
-		return Profile{}, fmt.Errorf("Error creating settings file %q:\n  %w", settings_file, err)
-	}
-
 	// Create `profile_images`
 	fmt.Printf("Creating............. %s/\n", profile_images_dir)
 	err = os.Mkdir(profile_images_dir, os.FileMode(0755))
 	if err != nil {
 		return Profile{}, fmt.Errorf("Error creating %q:\n  %w", profile_images_dir, err)
+	}
+	// Put the default profile image in it
+	fmt.Printf("Creating............. %s/\n", default_profile_image_file)
+	err = os.WriteFile(default_profile_image_file, default_profile_image, os.FileMode(0644))
+	if err != nil {
+		return Profile{}, fmt.Errorf("Error creating default profile image file %q:\n  %w", default_profile_image, err)
 	}
 
 	// Create `link_thumbnail_images`
@@ -109,7 +102,7 @@ func NewProfile(target_dir string) (Profile, error) {
 		return Profile{}, fmt.Errorf("Error creating %q:\n  %w", video_thumbnails_dir, err)
 	}
 
-	return Profile{target_dir, settings, db}, nil
+	return Profile{ProfileDir: target_dir, DB: db}, nil
 }
 
 // Loads the profile at the given location.  Fails if the given directory is not a Profile.
@@ -120,26 +113,9 @@ func NewProfile(target_dir string) (Profile, error) {
 // returns:
 // - the loaded Profile
 func LoadProfile(profile_dir string) (Profile, error) {
-	settings_file := filepath.Join(profile_dir, "settings.yaml")
 	sqlite_file := filepath.Join(profile_dir, "twitter.db")
-
-	for _, file := range []string{
-		settings_file,
-		sqlite_file,
-	} {
-		if !file_exists(file) {
-			return Profile{}, fmt.Errorf("Invalid profile, could not find file: %s", file)
-		}
-	}
-
-	settings_data, err := os.ReadFile(settings_file)
-	if err != nil {
-		return Profile{}, fmt.Errorf("Error reading %q:\n  %w", settings_file, err)
-	}
-	settings := Settings{}
-	err = yaml.Unmarshal(settings_data, &settings)
-	if err != nil {
-		return Profile{}, fmt.Errorf("Error YAML-unmarshalling %q:\n  %w", settings_file, err)
+	if !file_exists(sqlite_file) {
+		return Profile{}, fmt.Errorf("Invalid profile, could not find file: %s", sqlite_file)
 	}
 
 	db := sql.MustOpen("sqlite3", fmt.Sprintf("%s?_foreign_keys=on&_journal_mode=WAL", sqlite_file))
@@ -147,11 +123,9 @@ func LoadProfile(profile_dir string) (Profile, error) {
 
 	ret := Profile{
 		ProfileDir: profile_dir,
-		Settings:   settings,
 		DB:         db,
 	}
-	err = ret.check_and_update_version()
-
+	err := ret.check_and_update_version()
 	return ret, err
 }
 

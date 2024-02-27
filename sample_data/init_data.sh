@@ -9,14 +9,12 @@ if [[ -e "$THIS_DIR/profile" ]]; then
 fi
 mkdir $THIS_DIR/profile
 
-touch $THIS_DIR/profile/settings.yaml
-touch $THIS_DIR/profile/users.yaml
-
 test -e $THIS_DIR/profile/twitter.db && rm $THIS_DIR/profile/twitter.db
 sqlite3 $THIS_DIR/profile/twitter.db < $THIS_DIR/seed_data.sql
 
 mkdir $THIS_DIR/profile/profile_images
 cp $THIS_DIR/kwamurai_* $THIS_DIR/profile/profile_images
+cp $THIS_DIR/../pkg/persistence/default_profile.png $THIS_DIR/profile/profile_images
 
 mkdir $THIS_DIR/profile/images
 cp $THIS_DIR/EYG* $THIS_DIR/profile/images

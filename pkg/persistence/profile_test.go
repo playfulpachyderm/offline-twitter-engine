@@ -60,7 +60,7 @@ func TestNewProfile(t *testing.T) {
 	// Check files were created
 	contents, err := os.ReadDir(profile_path)
 	require.NoError(err)
-	assert.Len(contents, 7)
+	assert.Len(contents, 6)
 
 	expected_files := []struct {
 		filename string
@@ -69,7 +69,6 @@ func TestNewProfile(t *testing.T) {
 		{"images", true},
 		{"link_preview_images", true},
 		{"profile_images", true},
-		{"settings.yaml", false},
 		{"twitter.db", false},
 		{"video_thumbnails", true},
 		{"videos", true},
