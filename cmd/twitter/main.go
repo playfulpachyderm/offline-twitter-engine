@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"flag"
 	"fmt"
@@ -219,7 +220,18 @@ func main() {
 func login(username string, password string) {
 	// Skip the scraper.the_api variable, just use a local one since no scraping is happening
 	api := scraper.NewGuestSession()
-	api.LogIn(username, password)
+	challenge := api.LogIn(username, password)
+	if challenge != nil {
+		fmt.Printf("Secondary challenge issued:\n")
+		fmt.Printf("    >>> %s\n", challenge.PrimaryText)
+		fmt.Printf("    >>> %s\n", challenge.SecondaryText)
+		fmt.Printf("Response: ")
+		phone_number, err := bufio.NewReader(os.Stdin).ReadString('\n')
+		if err != nil {
+			panic(err)
+		}
+		api.LoginVerifyPhone(*challenge, phone_number)
+	}
 
 	profile.SaveSession(api)
 	happy_exit("Logged in as " + string(api.UserHandle))
