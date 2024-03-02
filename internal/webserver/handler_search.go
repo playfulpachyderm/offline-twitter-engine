@@ -93,6 +93,25 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Actual search
+	// Scrape if needed
+	if r.URL.Query().Has("scrape") {
+		if app.IsScrapingDisabled {
+			app.InfoLog.Printf("Would have scraped: %s", r.URL.Path)
+			http.Error(w, "Scraping is disabled (are you logged in?)", 401)
+			return
+		}
+
+		// Run scraper
+		trove, err := scraper.Search(search_text, 1) // TODO: parameterizable
+		if err != nil {
+			app.ErrorLog.Print(err)
+			// TOOD: show error in UI
+		}
+		app.Profile.SaveTweetTrove(trove, false)
+		go app.Profile.SaveTweetTrove(trove, true)
+	}
+
 	c, err := persistence.NewCursorFromSearchQuery(search_text)
 	if err != nil {
 		app.error_400_with_message(w, err.Error())
