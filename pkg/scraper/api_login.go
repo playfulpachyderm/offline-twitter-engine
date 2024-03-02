@@ -79,7 +79,7 @@ func (api *API) do_login_task(flow_token string, task_id string, data map[string
 			data["phone"])
 	case "LoginEnterAlternateIdentifierSubtask":
 		body = fmt.Sprintf(
-			`{"flow_token":"%s","subtask_inputs":[{"subtask_id":"LoginEnterAlternateIdentifierSubtask","enter_text":{"text":"%s","link":"next_link"}}]}`,
+			`{"flow_token":"%s","subtask_inputs":[{"subtask_id":"LoginEnterAlternateIdentifierSubtask","enter_text":{"text":"%s","link":"next_link"}}]}`, //nolint:lll  // json body
 			flow_token,
 			data["phone"])
 
