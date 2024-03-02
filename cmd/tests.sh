@@ -24,6 +24,11 @@ test $? -eq 0
 tw create_profile data
 cd data
 
+# Should only contain default profile image
+test $(find profile_images | wc -l) = "2"
+test -f profile_images/default_profile.png
+
+
 
 # Print an error message in red before exiting if a test fails
 trap 'echo -e "\033[31mTEST FAILURE.  Aborting\033[0m"' ERR
@@ -39,12 +44,12 @@ shopt -s expand_aliases
 alias tw="tw --session Offline_Twatter"
 
 # Fetch a user
-test $(find profile_images | wc -l) = "1"                      # should be empty to begin
+initial_profile_images_count=$(find profile_images | wc -l)
 tw fetch_user wrathofgnon
 test "$(sqlite3 twitter.db "select handle from users")" = "wrathofgnon"
 test $(sqlite3 twitter.db "select count(*) from users") = "1"
 test $(sqlite3 twitter.db "select is_content_downloaded from users where handle = 'wrathofgnon'") = "1"
-test $(find profile_images | wc -l) = "3"                      # should have gotten 2 images
+test $(find profile_images | wc -l) = "$(($initial_profile_images_count + 2))"    # should have gotten 2 images
 test -f profile_images/wrathofgnon_profile_fB-3BRin.jpg
 test -f profile_images/wrathofgnon_banner_1503908468.jpg
 tw fetch_user wrathofgnon                                      # try to double-download it
@@ -166,14 +171,12 @@ test $(sqlite3 twitter.db "select count(*) from spaces") = "1"
 test $(sqlite3 twitter.db "select space_id from tweets where id = 1569875562784608256") = "1dRJZMzeDpNGB"
 
 # Download a full thread
-test ! -e profile_images/default_profile.png
 tw fetch_tweet https://twitter.com/RememberAfghan1/status/1429585423702052867
 test $(sqlite3 twitter.db "select handle from tweets join users on tweets.user_id = users.id where tweets.id=1429585423702052867") = "RememberAfghan1"
 test $(sqlite3 twitter.db "select is_conversation_scraped, abs(last_scraped_at - strftime('%s','now') || substr(strftime('%f','now'),4)) < 30000 from tweets where id = 1429585423702052867") = "1|1"
 test $(sqlite3 twitter.db "select handle from tweets join users on tweets.user_id = users.id where tweets.id=1429584239570391042") = "michaelmalice"
 test $(sqlite3 twitter.db "select is_conversation_scraped from tweets where id = 1429584239570391042") = "0"
 test "$(sqlite3 twitter.db "select handle, is_banned from tweets join users on tweets.user_id = users.id where tweets.id=1429583672827465730")" = "kanesays23|1"  # This guy got banned
-test -e profile_images/default_profile.png
 test $(sqlite3 twitter.db "select handle from tweets join users on tweets.user_id = users.id where tweets.id=1429616911315345414") = "NovaValentis"
 test $(sqlite3 twitter.db "select reply_mentions from tweets where id = 1429585423702052867") = "michaelmalice"
 test $(sqlite3 twitter.db "select reply_mentions from tweets where id = 1429616911315345414") = "RememberAfghan1,michaelmalice"
@@ -306,10 +309,8 @@ test $(sqlite3 twitter.db "select count(*) from tweets where user_id = (select i
 
 
 # Test fetching a banned user
-rm profile_images/default_profile.png
 tw fetch_user nancytracker
 test "$(sqlite3 twitter.db "select is_content_downloaded, is_banned from users where handle='nancytracker'")" = "1|1"
-test -e profile_images/default_profile.png
 
 
 # Fetch a user with "600x200" banner image
