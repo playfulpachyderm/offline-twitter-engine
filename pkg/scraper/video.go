@@ -26,6 +26,7 @@ type Video struct {
 
 	IsDownloaded    bool `db:"is_downloaded"`
 	IsBlockedByDMCA bool `db:"is_blocked_by_dmca"`
+	IsGeoblocked    bool `db:"is_geoblocked"`
 	IsGif           bool `db:"is_gif"`
 }
 
@@ -78,6 +79,7 @@ func ParseAPIVideo(apiVideo APIExtendedMedia, tweet_id TweetID) Video {
 
 		IsDownloaded:    false,
 		IsBlockedByDMCA: false,
+		IsGeoblocked:    apiVideo.ExtMediaAvailability.Reason == "Geoblocked",
 		IsGif:           apiVideo.Type == "animated_gif",
 	}
 }

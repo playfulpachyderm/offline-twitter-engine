@@ -38,6 +38,10 @@ type APIExtendedMedia struct {
 		Variants SortableVariants `json:"variants"`
 		Duration int              `json:"duration_millis"`
 	} `json:"video_info"`
+	ExtMediaAvailability struct {
+		Status string `json:"status"`
+		Reason string `json:"reason"`
+	} `json:"ext_media_availability"`
 	OriginalInfo struct {
 		Width  int `json:"width"`
 		Height int `json:"height"`

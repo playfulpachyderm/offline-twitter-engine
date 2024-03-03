@@ -27,7 +27,7 @@ var ErrorDMCA error = errors.New("video is DMCAed, unable to download (HTTP 403 
 // - url: the remote file to download
 // - outpath: the path on disk to save it to
 func (d DefaultDownloader) Curl(url string, outpath string) error {
-	println(url)
+	fmt.Println(url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return fmt.Errorf("Error executing HTTP GET(%q):\n  %w", url, err)
@@ -150,6 +150,11 @@ func (p Profile) DownloadTweetContentWithInjector(t *scraper.Tweet, downloader M
 	}
 
 	for i := range t.Videos {
+		// Videos can be geoblocked, and the HTTP response isn't in JSON so it's hard to capture
+		if t.Videos[i].IsGeoblocked {
+			continue
+		}
+
 		err := p.download_tweet_video(&t.Videos[i], downloader)
 		if err != nil {
 			return err

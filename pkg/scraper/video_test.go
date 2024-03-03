@@ -13,13 +13,13 @@ import (
 
 func TestParseAPIVideo(t *testing.T) {
 	assert := assert.New(t)
+	require := require.New(t)
 	data, err := os.ReadFile("test_responses/tweet_content/video.json")
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(err)
+
 	var apivideo APIExtendedMedia
 	err = json.Unmarshal(data, &apivideo)
-	require.NoError(t, err)
+	require.NoError(err)
 
 	tweet_id := TweetID(28)
 	video := ParseAPIVideo(apivideo, tweet_id)
@@ -34,4 +34,19 @@ func TestParseAPIVideo(t *testing.T) {
 	assert.Equal(275952, video.ViewCount)
 	assert.Equal(88300, video.Duration)
 	assert.False(video.IsDownloaded)
+}
+
+func TestParseGeoblockedVideo(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+	data, err := os.ReadFile("test_responses/tweet_content/video_geoblocked.json")
+	require.NoError(err)
+
+	var apivideo APIExtendedMedia
+	err = json.Unmarshal(data, &apivideo)
+	require.NoError(err)
+
+	tweet_id := TweetID(28)
+	video := ParseAPIVideo(apivideo, tweet_id)
+	assert.True(video.IsGeoblocked)
 }
