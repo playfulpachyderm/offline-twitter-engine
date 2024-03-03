@@ -135,6 +135,7 @@ type Cursor struct {
 	ToUserHandles         []scraper.UserHandle // In reply to these users
 	LikedByUserHandle     scraper.UserHandle   // Liked by this user
 	ListID                scraper.ListID       // Either tweeted or retweeted by users from this List
+	FollowedByUserHandle  scraper.UserHandle   // Either tweeted or retweeted by users followed by this user
 	SinceTimestamp        scraper.Timestamp
 	UntilTimestamp        scraper.Timestamp
 	FilterLinks           Filter
@@ -394,6 +395,11 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
 	if c.ListID != 0 {
 		where_clauses = append(where_clauses, "by_user_id in (select user_id from list_users where list_id = ?)")
 		bind_values = append(bind_values, c.ListID)
+	}
+	if c.FollowedByUserHandle != "" {
+		where_clauses = append(where_clauses,
+			"by_user_id in (select followee_id from follows where follower_id = (select id from users where handle like ?))")
+		bind_values = append(bind_values, c.FollowedByUserHandle)
 	}
 
 	// Since and until timestamps
