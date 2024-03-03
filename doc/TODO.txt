@@ -82,6 +82,7 @@ TODO: newer-version-tombstone
 TODO: failed-tweets
 - https://twitter.com/_HARVEY__DENT_/status/1755665502385377720
 - "Empty tweet": https://twitter.com/wispem_wantex/status/1581333495393107968
+- "video not available in your location" (geoblock) (this one should be fixed, but check it): https://twitter.com/espnmma/status/1764026985775333761
 
 TODO: new-content-type
 - https://twitter.com/itsbackwereover/status/1757947530506043872
@@ -110,10 +111,6 @@ TODO: paste-twitter-urls-in-search-bar
 - pasting a link from twitter.com into the search bar should handle it properly
 	- space
 
-TODO: ui-deuglifying
-- "Follow" / "Unfollow" button
-- "Show more" button at end of feed
-
 TODO: show-errors-in-UI
 - if an HTTP request fails, show an error in the UI somehow
   - scrape failed due to rate limiting
@@ -135,6 +132,8 @@ TODO: dms
 TODO: search-terms-highlighted
 - on Search page, highlight matches for the search keywords
 
+TODO: profile-image-template
+- There are a lot of places that use a circle profile image aside from author-infos
 
 Windows Build
 -------------

@@ -241,3 +241,16 @@ v0.6.3
 	- make scrolling in DMs work way better
 	- hovering over a tweet now highlights it with a light background color
 - Create a `Twitter.desktop` file in dpkg build
+
+v0.6.4
+------
+
+- Can now re-scrape search results from the web UI
+- UI improvements:
+	- feed "Show More" button looks nicer
+	- online-login form now has a HTMX spinner
+- Login flow improved:
+	- now auto-scrapes timeline and list of people you follow after logging in
+	- command-line supports 2FA challenges
+	- web UI notifies login failure if challenged for 2FA instead of failing silently
+- Home page now has a "User Feed" timeline (shows people logged-in user follows) in addition to the "Offline Timeline"

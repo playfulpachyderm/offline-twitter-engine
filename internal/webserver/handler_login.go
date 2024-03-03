@@ -53,7 +53,7 @@ func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// method = "GET"
+	// method == "GET"
 	data := LoginData{
 		LoginForm:        form,
 		ExistingSessions: app.Profile.ListSessions(),
