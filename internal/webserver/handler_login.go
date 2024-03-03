@@ -42,12 +42,13 @@ func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
 		form.Validate()
 		if len(form.FormErrors) == 0 {
 			api := scraper.NewGuestSession()
-			api.LogIn(form.Username, form.Password)
-			app.Profile.SaveSession(api)
-			if err := app.SetActiveUser(api.UserHandle); err != nil {
-				app.ErrorLog.Printf(err.Error())
+			challenge := api.LogIn(form.Username, form.Password)
+			if challenge != nil {
+				panic( // Middleware will trap this panic and return an HTMX error toast
+					"Twitter challenged your login.  Make sure your username is your user handle (not email).  " +
+						"If you're logging in from a new device, try doing it on the official Twitter site first, then try again here.")
 			}
-			http.Redirect(w, r, "/login", 303)
+			app.after_login(w, r, api)
 		}
 		return
 	}
@@ -58,6 +59,46 @@ func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
 		ExistingSessions: app.Profile.ListSessions(),
 	}
 	app.buffered_render_page(w, "tpl/login.tpl", PageGlobalData{}, &data)
+}
+
+func (app *Application) after_login(w http.ResponseWriter, r *http.Request, api scraper.API) {
+	app.Profile.SaveSession(api)
+
+	// Ensure the user is downloaded
+	user, err := scraper.GetUser(api.UserHandle)
+	if err != nil {
+		app.error_404(w)
+		return
+	}
+	panic_if(app.Profile.SaveUser(&user))
+	panic_if(app.Profile.DownloadUserContentFor(&user))
+
+	// Now that the user is scraped for sure, set them as the logged-in user
+	err = app.SetActiveUser(api.UserHandle)
+	panic_if(err)
+
+	// Scrape the user's feed
+	trove, err := scraper.GetHomeTimeline("", true)
+	if err != nil {
+		app.ErrorLog.Printf("Initial timeline scrape failed: %s", err.Error())
+		http.Redirect(w, r, "/", 303)
+	}
+	fmt.Println("Saving initial feed results...")
+	app.Profile.SaveTweetTrove(trove, false)
+	go app.Profile.SaveTweetTrove(trove, true)
+
+	// Scrape the user's followers
+	trove, err = scraper.GetFollowees(user.ID, 1000)
+	if err != nil {
+		app.ErrorLog.Printf("Failed to scrape followers: %s", err.Error())
+		http.Redirect(w, r, "/", 303)
+	}
+	app.Profile.SaveTweetTrove(trove, false)
+	app.Profile.SaveAsFolloweesList(user.ID, trove)
+	go app.Profile.SaveTweetTrove(trove, true)
+
+	// Redirect to Timeline
+	http.Redirect(w, r, "/", 303)
 }
 
 func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {

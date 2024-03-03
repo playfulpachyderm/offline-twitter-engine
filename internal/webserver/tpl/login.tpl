@@ -35,6 +35,11 @@
     <div class="field-container submit-container">
       <input type='submit' value='Login'>
     </div>
+
+    <div class="htmx-spinner-container">
+      <div class="htmx-spinner-background"></div>
+      <img class="svg-icon htmx-spinner" src="/static/icons/spinner.svg" />
+    </div>
   </form>
 </div>
 {{end}}
