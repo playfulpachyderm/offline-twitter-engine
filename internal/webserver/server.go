@@ -3,7 +3,6 @@ package webserver
 import (
 	"crypto/tls"
 	// "encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,8 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/go-playground/form/v4"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
@@ -180,26 +177,6 @@ func parse_cursor_value(c *persistence.Cursor, r *http.Request) error {
 			return fmt.Errorf("attempted to parse cursor value %q as int: %w", c.CursorValue, err)
 		}
 		c.CursorPosition = persistence.CURSOR_MIDDLE
-	}
-	return nil
-}
-
-type FormErrors map[string]string
-
-var formDecoder = form.NewDecoder()
-var (
-	ErrCorruptedFormData   = errors.New("corrupted form data")
-	ErrIncorrectFormParams = errors.New("incorrect form parameters")
-)
-
-func parse_form(req *http.Request, result interface{}) error {
-	err := req.ParseForm()
-	if err != nil {
-		return ErrCorruptedFormData
-	}
-
-	if err = formDecoder.Decode(result, req.PostForm); err != nil {
-		return ErrIncorrectFormParams
 	}
 	return nil
 }

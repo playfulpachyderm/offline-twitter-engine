@@ -2,7 +2,7 @@
 
 {{define "main"}}
 <div class="login">
-  <form hx-post="/change-session" hx-target=".nav-sidebar" hx-swap="outerHTML">
+  <form hx-post="/change-session" hx-target=".nav-sidebar" hx-swap="outerHTML" hx-ext="json-enc">
     <label for="select-account">Choose account:</label>
     <select name="account" id="select-account">
       {{range .ExistingSessions}}
@@ -17,7 +17,7 @@
 
   <p>Or log in</p>
 
-  <form class="login-form" hx-post="/login" hx-target="body">
+  <form class="login-form" hx-post="/login" hx-target="body" hx-ext="json-enc">
     <div class="field-container">
       <label>Username</label>
       {{with .FormErrors.username}}

@@ -2,6 +2,8 @@ package webserver
 
 import (
 	"fmt"
+	"encoding/json"
+	"io"
 	"net/http"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
@@ -13,10 +15,11 @@ type LoginData struct {
 }
 
 type LoginForm struct {
-	Username string `form:"username"`
-	Password string `form:"password"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 	FormErrors
 }
+type FormErrors map[string]string
 
 func (f *LoginForm) Validate() {
 	if f.FormErrors == nil {
@@ -34,11 +37,9 @@ func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'Login' handler (path: %q)", r.URL.Path)
 	var form LoginForm
 	if r.Method == "POST" {
-		err := parse_form(r, &form)
-		if err != nil {
-			app.InfoLog.Print("Form error parse: " + err.Error())
-			app.error_400_with_message(w, err.Error())
-		}
+		data, err := io.ReadAll(r.Body)
+		panic_if(err)
+		panic_if(json.Unmarshal(data, &form)) // TODO: HTTP 400 not 500
 		form.Validate()
 		if len(form.FormErrors) == 0 {
 			api := scraper.NewGuestSession()
@@ -104,14 +105,11 @@ func (app *Application) after_login(w http.ResponseWriter, r *http.Request, api 
 func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'change-session' handler (path: %q)", r.URL.Path)
 	form := struct {
-		AccountName string `form:"account"`
+		AccountName string `json:"account"`
 	}{}
-	err := parse_form(r, &form)
-	if err != nil {
-		app.InfoLog.Print("Form error parse: " + err.Error())
-		app.error_400_with_message(w, err.Error())
-		return
-	}
+	data, err := io.ReadAll(r.Body)
+	panic_if(err)
+	panic_if(json.Unmarshal(data, &form)) // TODO: HTTP 400 not 500
 	err = app.SetActiveUser(scraper.UserHandle(form.AccountName))
 	if err != nil {
 		app.error_400_with_message(w, fmt.Sprintf("User not in database: %s", form.AccountName))
