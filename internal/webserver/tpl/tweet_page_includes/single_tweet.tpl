@@ -67,6 +67,8 @@
             {{if (gt (len $main_tweet.Images) 1)}}
               style="max-width: 45%"
             {{end}}
+            hx-trigger="click consume"
+            onclick="image_carousel.querySelector('img').src = this.src; image_carousel.showModal();"
           />
         {{end}}
         {{range $main_tweet.Videos}}

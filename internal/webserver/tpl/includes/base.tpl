@@ -27,6 +27,10 @@
       <main>
         {{template "main" .}}
       </main>
+      <dialog id="image_carousel">
+        <a class="quick-link close-button" onclick="image_carousel.close()">X</a>
+        <img src="">
+      </dialog>
     </body>
   </html>
 {{end}}

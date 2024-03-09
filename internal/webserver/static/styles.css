@@ -2,7 +2,7 @@
     --color-twitter-text-gray: #536171;
     --color-twitter-blue: #1b95e0;  /* hsl(203, 78%, 49%) */
     --color-twitter-blue-light: #7cc5f6; /* hsl(204, 87%, 73%) */
-    --color-twitter-blue-extra-light: hsl(204, 95%, 92%);
+    --color-twitter-blue-extra-light: hsl(204, 95%, 85%);
     --color-twitter-off-white: #f7f9f9; /* hsl(180, 14%, 97%) */
     --color-twitter-off-white-dark: #dae5e5; /* hsl(180, 17%, 88%) */
     --color-outline-gray: #dcdcdc;
@@ -136,6 +136,32 @@ ul.inline-dotted-list li:last-child:after {
 
     /* https://codepen.io/sosuke/pen/Pjoqqp */
     filter: invert(54%) sepia(17%) saturate(4210%) hue-rotate(176deg) brightness(89%) contrast(98%);
+}
+
+dialog#image_carousel {
+    border-radius: 2em;
+    border: 0.3em solid var(--color-twitter-blue);
+    box-shadow: 0 0 1em var(--color-twitter-blue);
+    outline: none;
+    overflow: visible;
+    padding: 1.4em;
+}
+dialog#image_carousel a.close-button {
+    position: absolute;
+    right: -1.3em;
+    top: -1.5em;
+
+    width: 1em;
+    line-height: 1em;
+    font-size: 2em;
+    justify-content: center;
+    border: 0.1em solid black;
+}
+dialog#image_carousel a.close-button:not(:hover):not(:active) {
+    background-color: var(--color-twitter-blue-extra-light);
+}
+dialog::backdrop {
+    background: hsla(204, 87%, 73%, 0.3); /* based on --color-twitter-blue-light */
 }
 
 .quoted-tweet {
