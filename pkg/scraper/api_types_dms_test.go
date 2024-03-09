@@ -71,6 +71,7 @@ func TestParseAPIDMMessageWithEmbeddedTweet(t *testing.T) {
 	assert.True(is_ok)
 	assert.Equal(m.EmbeddedTweetID, TweetID(1665509126737129472))
 	assert.Equal(m.Text, "Check this out")
+	assert.Len(m.Urls, 0) // Embedded tweets should not parse as URLs
 
 	assert.Len(trove.Tweets, 1)
 	_, is_ok = trove.Tweets[TweetID(1665509126737129472)]
@@ -96,6 +97,7 @@ func TestParseAPIDMMessageWithEmbeddedImage(t *testing.T) {
 	assert.Len(trove.Messages, 1)
 	m, is_ok := trove.Messages[DMMessageID(1766224476729995648)]
 	assert.True(is_ok)
+	assert.Len(m.Urls, 0) // Embedded images should not parse as URLs
 
 	// Check that the short-URL is stripped
 	assert.Equal("A gastropub staffed by white college girls and the chefs are all Latino", m.Text)
@@ -120,6 +122,7 @@ func TestParseAPIDMMessageWithEmbeddedVideo(t *testing.T) {
 	assert.Len(trove.Messages, 1)
 	m, is_ok := trove.Messages[DMMessageID(1766248283901776125)]
 	assert.True(is_ok)
+	assert.Len(m.Urls, 0) // Embedded videos should not parse as URLs
 
 	// Check the short-URL is stripped
 	assert.Equal("", m.Text)

@@ -67,6 +67,20 @@ func ParseAPIDMMessage(message APIDMMessage) DMMessage {
 
 	// Process URLs and link previews
 	for _, url := range message.MessageData.Entities.URLs {
+		// Skip it if it's an embedded tweet
+		_, id, is_ok := TryParseTweetUrl(url.ExpandedURL)
+		if is_ok && id == TweetID(message.MessageData.Attachment.Tweet.Status.ID) {
+			continue
+		}
+		// Skip it if it's an embedded image
+		if message.MessageData.Attachment.Photo.URL == url.ShortenedUrl {
+			continue
+		}
+		// Skip it if it's an embedded video
+		if message.MessageData.Attachment.Video.URL == url.ShortenedUrl {
+			continue
+		}
+
 		var new_url Url
 		if message.MessageData.Attachment.Card.ShortenedUrl == url.ShortenedUrl {
 			if message.MessageData.Attachment.Card.Name == "3691233323:audiospace" {
