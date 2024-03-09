@@ -203,7 +203,8 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 			continue
 		}
 
-		new_video := ParseAPIVideo(entity, ret.ID) // This assigns TweetID
+		new_video := ParseAPIVideo(entity)
+		new_video.TweetID = ret.ID
 		ret.Videos = append(ret.Videos, new_video)
 
 		// Remove the thumbnail from the Images list

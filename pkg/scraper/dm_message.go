@@ -29,6 +29,10 @@ type DMMessage struct {
 	InReplyToID     DMMessageID  `db:"in_reply_to_id"`
 	EmbeddedTweetID TweetID      `db:"embedded_tweet_id"`
 	Reactions       map[UserID]DMReaction
+
+	Images []Image
+	Videos []Video
+	Urls   []Url
 }
 
 func ParseAPIDMMessage(message APIDMMessage) DMMessage {
@@ -47,5 +51,35 @@ func ParseAPIDMMessage(message APIDMMessage) DMMessage {
 		reacc.DMMessageID = ret.ID
 		ret.Reactions[reacc.SenderID] = reacc
 	}
+	if message.MessageData.Attachment.Photo.ID != 0 {
+		new_image := ParseAPIMedia(message.MessageData.Attachment.Photo)
+		new_image.DMMessageID = ret.ID
+		ret.Images = []Image{new_image}
+	}
+	if message.MessageData.Attachment.Video.ID != 0 {
+		entity := message.MessageData.Attachment.Video
+		if entity.Type == "video" || entity.Type == "animated_gif" {
+			new_video := ParseAPIVideo(entity)
+			new_video.DMMessageID = ret.ID
+			ret.Videos = append(ret.Videos, new_video)
+		}
+	}
+
+	// Process URLs and link previews
+	for _, url := range message.MessageData.Entities.URLs {
+		var new_url Url
+		if message.MessageData.Attachment.Card.ShortenedUrl == url.ShortenedUrl {
+			if message.MessageData.Attachment.Card.Name == "3691233323:audiospace" {
+				// This "url" is just a link to a Space.  Don't process it as a Url
+				continue
+			}
+			new_url = ParseAPIUrlCard(message.MessageData.Attachment.Card)
+		}
+		new_url.Text = url.ExpandedURL
+		new_url.ShortText = url.ShortenedUrl
+		new_url.DMMessageID = ret.ID
+		ret.Urls = append(ret.Urls, new_url)
+	}
+
 	return ret
 }

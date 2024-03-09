@@ -12,12 +12,13 @@ type VideoID int64
 // from someone else).
 
 type Video struct {
-	ID            VideoID `db:"id"`
-	TweetID       TweetID `db:"tweet_id"`
-	Width         int     `db:"width"`
-	Height        int     `db:"height"`
-	RemoteURL     string  `db:"remote_url"`
-	LocalFilename string  `db:"local_filename"`
+	ID            VideoID     `db:"id"`
+	TweetID       TweetID     `db:"tweet_id"`
+	DMMessageID   DMMessageID `db:"chat_message_id"`
+	Width         int         `db:"width"`
+	Height        int         `db:"height"`
+	RemoteURL     string      `db:"remote_url"`
+	LocalFilename string      `db:"local_filename"`
 
 	ThumbnailRemoteUrl string `db:"thumbnail_remote_url"`
 	ThumbnailLocalPath string `db:"thumbnail_local_filename"`
@@ -38,7 +39,7 @@ func get_filename(remote_url string) string {
 	return path.Base(u.Path)
 }
 
-func ParseAPIVideo(apiVideo APIExtendedMedia, tweet_id TweetID) Video {
+func ParseAPIVideo(apiVideo APIExtendedMedia) Video {
 	variants := apiVideo.VideoInfo.Variants
 	sort.Sort(variants)
 	video_remote_url := variants[0].URL
@@ -66,7 +67,6 @@ func ParseAPIVideo(apiVideo APIExtendedMedia, tweet_id TweetID) Video {
 
 	return Video{
 		ID:            VideoID(apiVideo.ID),
-		TweetID:       tweet_id,
 		Width:         apiVideo.OriginalInfo.Width,
 		Height:        apiVideo.OriginalInfo.Height,
 		RemoteURL:     video_remote_url,

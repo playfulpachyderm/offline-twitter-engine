@@ -21,10 +21,8 @@ func TestParseAPIVideo(t *testing.T) {
 	err = json.Unmarshal(data, &apivideo)
 	require.NoError(err)
 
-	tweet_id := TweetID(28)
-	video := ParseAPIVideo(apivideo, tweet_id)
+	video := ParseAPIVideo(apivideo)
 	assert.Equal(VideoID(1418951950020845568), video.ID)
-	assert.Equal(tweet_id, video.TweetID)
 	assert.Equal(1280, video.Height)
 	assert.Equal(720, video.Width)
 	assert.Equal("https://video.twimg.com/ext_tw_video/1418951950020845568/pu/vid/720x1280/sm4iL9_f8Lclh0aa.mp4?tag=12", video.RemoteURL)
@@ -46,7 +44,6 @@ func TestParseGeoblockedVideo(t *testing.T) {
 	err = json.Unmarshal(data, &apivideo)
 	require.NoError(err)
 
-	tweet_id := TweetID(28)
-	video := ParseAPIVideo(apivideo, tweet_id)
+	video := ParseAPIVideo(apivideo)
 	assert.True(video.IsGeoblocked)
 }

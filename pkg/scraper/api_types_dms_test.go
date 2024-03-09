@@ -81,6 +81,80 @@ func TestParseAPIDMMessageWithEmbeddedTweet(t *testing.T) {
 	assert.True(is_ok)
 }
 
+func TestParseAPIDMMessageWithEmbeddedImage(t *testing.T) {
+	assert := assert.New(t)
+	data, err := os.ReadFile("test_responses/dms/dm_message_with_image.json")
+	if err != nil {
+		panic(err)
+	}
+	var api_message APIDMMessage
+	err = json.Unmarshal(data, &api_message)
+	require.NoError(t, err)
+
+	trove := api_message.ToDMTrove()
+
+	assert.Len(trove.Messages, 1)
+	m, is_ok := trove.Messages[DMMessageID(1766224476729995648)]
+	assert.True(is_ok)
+
+	// Check that the short-URL is stripped
+	assert.Equal("A gastropub staffed by white college girls and the chefs are all Latino", m.Text)
+
+	assert.Len(m.Images, 1)
+	assert.Equal(m.ID, m.Images[0].DMMessageID)
+	assert.Equal("https://ton.twitter.com/1.1/ton/data/dm/1766224476729995648/1766224374648958976/L4Ah1GSh.jpg", m.Images[0].RemoteURL)
+}
+
+func TestParseAPIDMMessageWithEmbeddedVideo(t *testing.T) {
+	assert := assert.New(t)
+	data, err := os.ReadFile("test_responses/dms/dm_message_with_video.json")
+	if err != nil {
+		panic(err)
+	}
+	var api_message APIDMMessage
+	err = json.Unmarshal(data, &api_message)
+	require.NoError(t, err)
+
+	trove := api_message.ToDMTrove()
+
+	assert.Len(trove.Messages, 1)
+	m, is_ok := trove.Messages[DMMessageID(1766248283901776125)]
+	assert.True(is_ok)
+
+	// Check the short-URL is stripped
+	assert.Equal("", m.Text)
+
+	assert.Len(m.Videos, 1)
+	assert.Equal(m.ID, m.Videos[0].DMMessageID)
+	assert.Equal(
+		"https://video.twimg.com/dm_video/1766248268416385024/vid/avc1/500x280/edFuZXtEVvem158AjvmJ3SZ_1DdG9cbSoW4fm6cDF1k.mp4?tag=1",
+		m.Videos[0].RemoteURL)
+}
+
+func TestParseAPIDMMessageWithUrlCard(t *testing.T) {
+	assert := assert.New(t)
+	data, err := os.ReadFile("test_responses/dms/dm_message_with_url_card.json")
+	if err != nil {
+		panic(err)
+	}
+	var api_message APIDMMessage
+	err = json.Unmarshal(data, &api_message)
+	require.NoError(t, err)
+
+	trove := api_message.ToDMTrove()
+
+	assert.Len(trove.Messages, 1)
+	m, is_ok := trove.Messages[DMMessageID(1766255994668191902)]
+	assert.True(is_ok)
+	assert.Len(m.Urls, 1)
+	assert.Equal("You wrote this?", m.Text)
+	url := m.Urls[0]
+	assert.Equal(m.ID, url.DMMessageID)
+	assert.Equal("https://offline-twitter.com/introduction/data-ownership-and-composability/", url.Text)
+	assert.Equal("offline-twitter.com", url.Domain)
+	assert.Equal("Data ownership and composability", url.Title)
+}
+
 func TestParseAPIDMConversation(t *testing.T) {
 	assert := assert.New(t)
 	data, err := os.ReadFile("test_responses/dms/dm_chat_room.json")

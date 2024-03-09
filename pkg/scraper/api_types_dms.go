@@ -28,10 +28,12 @@ type APIDMMessage struct {
 		ReplyData struct {
 			ID int `json:"id,string"`
 		} `json:"reply_data"`
-		URLs []struct {
-			Url     string `json:"url"`
-			Indices []int  `json:"indices"`
-		} `json:"urls"`
+		Entities struct {
+			URLs []struct {
+				ExpandedURL  string `json:"expanded_url"`
+				ShortenedUrl string `json:"url"`
+			} `json:"urls"`
+		} `json:"entities"`
 		Attachment struct {
 			Tweet struct {
 				Url    string `json:"url"`
@@ -40,6 +42,9 @@ type APIDMMessage struct {
 					User APIUser `json:"user"`
 				} `json:"status"`
 			} `json:"tweet"`
+			Photo APIMedia         `json:"photo"`
+			Video APIExtendedMedia `json:"video"`
+			Card  APICard          `json:"card"`
 		} `json:"attachment"`
 	} `json:"message_data"`
 	MessageReactions []APIDMReaction `json:"message_reactions"`
@@ -47,9 +52,25 @@ type APIDMMessage struct {
 
 // Remove embedded tweet short-URLs
 func (m *APIDMMessage) NormalizeContent() {
+	// All URLs
+	for _, url := range m.MessageData.Entities.URLs {
+		index := strings.Index(m.MessageData.Text, url.ShortenedUrl)
+		if index == (len(m.MessageData.Text) - len(url.ShortenedUrl)) {
+			m.MessageData.Text = strings.TrimSpace(m.MessageData.Text[0:index])
+		}
+	}
+
+	// Specific items
 	if m.MessageData.Attachment.Tweet.Status.ID != 0 {
 		m.MessageData.Text = strings.Replace(m.MessageData.Text, m.MessageData.Attachment.Tweet.Url, "", 1)
 	}
+	if m.MessageData.Attachment.Photo.ID != 0 {
+		m.MessageData.Text = strings.Replace(m.MessageData.Text, m.MessageData.Attachment.Photo.URL, "", 1)
+	}
+	if m.MessageData.Attachment.Video.ID != 0 {
+		m.MessageData.Text = strings.Replace(m.MessageData.Text, m.MessageData.Attachment.Video.URL, "", 1)
+	}
+
 	m.MessageData.Text = strings.TrimSpace(m.MessageData.Text)
 }
 

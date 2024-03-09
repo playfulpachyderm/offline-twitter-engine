@@ -51,6 +51,7 @@ type APIExtendedMedia struct {
 			R interface{} `json:"r"`
 		} `json:"mediaStats"`
 	} `json:"ext"`
+	URL string `json:"url"` // For DM videos
 }
 
 type APICard struct {
