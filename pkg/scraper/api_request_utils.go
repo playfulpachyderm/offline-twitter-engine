@@ -415,7 +415,11 @@ func (api *API) DownloadMedia(remote_url string) ([]byte, error) {
 	}
 
 	if resp.StatusCode != 200 {
-		print_curl_cmd(req, api.Client.Jar.Cookies(url))
+		url, err := url.Parse(remote_url)
+		if err != nil {
+			panic(err)
+		}
+		print_curl_cmd(*req, api.Client.Jar.Cookies(url))
 
 		responseHeaders := ""
 		for header := range resp.Header {
