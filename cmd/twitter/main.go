@@ -33,7 +33,6 @@ func main() {
 	flag.BoolVar(show_version_flag, "v", false, "")
 
 	session_name := flag.String("session", "", "Name of session file to use")
-	addr := flag.String("addr", "localhost:1973", "port to listen on") // Random port that's probably not in use
 
 	how_many := flag.Int("n", 50, "")
 	flag.IntVar(how_many, "number", 50, "")
@@ -189,6 +188,8 @@ func main() {
 	case "webserver":
 		fs := flag.NewFlagSet("", flag.ExitOnError)
 		should_auto_open := fs.Bool("auto-open", false, "")
+		addr := fs.String("addr", "localhost:1973", "port to listen on") // Random port that's probably not in use
+
 		if err := fs.Parse(args[1:]); err != nil {
 			panic(err)
 		}

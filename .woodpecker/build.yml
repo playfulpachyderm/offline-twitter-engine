@@ -33,7 +33,7 @@ pipeline:
     commands:
       - cd cmd
       - ./compile.sh
-      - ./tw --profile ../sample_data/profile --addr localhost:1000 webserver &
+      - ./tw --profile ../sample_data/profile webserver --addr localhost:1000 &
       - sleep 1
       - curl localhost:1000/cernovich > webserver_test_output.html
       - jobs -p | xargs -I{} kill -- -{}
