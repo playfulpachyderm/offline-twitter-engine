@@ -462,7 +462,7 @@ func (e *APIV2Entry) ParseID() (string, TweetID) {
 func (e APIV2Entry) ToTweetTrove() TweetTrove {
 	defer func() {
 		if obj := recover(); obj != nil {
-			log.Warn(fmt.Sprintf("Panic while decoding entry: %s\n", e.OriginalJSON))
+			log.Warnf("Panic while decoding entry: %s\n", e.OriginalJSON)
 			panic(obj)
 		}
 	}()
@@ -506,7 +506,7 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 		} else if parts[0] == "whoToFollow" || parts[0] == "TopicsModule" || parts[0] == "tweetdetailrelatedtweets" {
 			// Ignore "Who to follow", "Topics" and "Related Tweets" modules.
 			// TODO: maybe we can capture these eventually
-			log.Debug(fmt.Sprintf("Skipping %s entry", e.EntryID))
+			log.Debugf("Skipping %s entry", e.EntryID)
 		} else {
 			log.Warn("TimelineTimelineModule with unknown EntryID: " + e.EntryID)
 		}

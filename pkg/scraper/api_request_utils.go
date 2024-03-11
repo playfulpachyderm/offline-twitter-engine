@@ -151,9 +151,9 @@ func (api *API) do_http_POST(url string, body string, result interface{}) error 
 
 	api.add_authentication_headers(req)
 
-	log.Debug(fmt.Sprintf("POST: %s\n", req.URL.String()))
+	log.Debugf("POST: %s\n", req.URL.String())
 	for header := range req.Header {
-		log.Debug(fmt.Sprintf("    %s: %s\n", header, req.Header.Get(header)))
+		log.Debugf("    %s: %s\n", header, req.Header.Get(header))
 	}
 	log.Debug("    " + body)
 
@@ -205,9 +205,9 @@ func (api *API) do_http(url string, cursor string, result interface{}) error {
 
 	api.add_authentication_headers(req)
 
-	log.Debug(fmt.Sprintf("GET: %s\n", req.URL.String()))
+	log.Debugf("GET: %s\n", req.URL.String())
 	for header := range req.Header {
-		log.Debug(fmt.Sprintf("    %s: %s\n", header, req.Header.Get(header)))
+		log.Debugf("    %s: %s\n", header, req.Header.Get(header))
 	}
 
 	resp, err := api.Client.Do(req)
