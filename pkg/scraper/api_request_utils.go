@@ -165,23 +165,19 @@ func (api *API) do_http_POST(url string, body string, result interface{}) error 
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
-		content, err := io.ReadAll(resp.Body)
-		if err != nil {
-			panic(err)
-		}
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
 
+	if resp.StatusCode != 200 {
 		responseHeaders := ""
 		for header := range resp.Header {
 			responseHeaders += fmt.Sprintf("    %s: %s\n", header, resp.Header.Get(header))
 		}
-		return fmt.Errorf("HTTP %s\n%s\n%s", resp.Status, responseHeaders, content)
+		return fmt.Errorf("HTTP %s\n%s\n%s", resp.Status, responseHeaders, respBody)
 	}
 
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("Error reading response body:\n  %w", err)
-	}
 	log.Debug(string(respBody))
 
 	err = json.Unmarshal(respBody, result)
@@ -221,23 +217,25 @@ func (api *API) do_http(url string, cursor string, result interface{}) error {
 		api.update_csrf_token()
 	}
 
-	if resp.StatusCode != 200 && resp.StatusCode != 403 {
-		content, err := io.ReadAll(resp.Body)
-		if err != nil {
-			panic(err)
-		}
-
-		responseHeaders := ""
-		for header := range resp.Header {
-			responseHeaders += fmt.Sprintf("    %s: %s\n", header, resp.Header.Get(header))
-		}
-		return fmt.Errorf("HTTP Error.  HTTP %s\n%s\nbody: %s", resp.Status, responseHeaders, content)
+	if resp.StatusCode == 429 {
+		// "Too many requests" => rate limited
+		reset_at := TimestampFromUnix(int64(int_or_panic(resp.Header.Get("X-Rate-Limit-Reset"))))
+		return fmt.Errorf("%w (resets at %d, which is in %s)", ErrRateLimited, reset_at.Unix(), time.Until(reset_at.Time).String())
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("Error reading response body:\n  %w", err)
+		panic(err)
 	}
+
+	if resp.StatusCode != 200 && resp.StatusCode != 403 {
+		responseHeaders := ""
+		for header := range resp.Header {
+			responseHeaders += fmt.Sprintf("    %s: %s\n", header, resp.Header.Get(header))
+		}
+		return fmt.Errorf("HTTP Error.  HTTP %s\n%s\nbody: %s", resp.Status, responseHeaders, body)
+	}
+
 	log.Debug(string(body))
 
 	err = json.Unmarshal(body, result)
@@ -369,4 +367,77 @@ func (api *API) GetMoreReplies(tweet_id TweetID, response *TweetResponse, max_re
 		}
 	}
 	return nil
+}
+
+func DownloadMedia(url string) ([]byte, error) {
+	return the_api.DownloadMedia(url)
+}
+
+func (api *API) DownloadMedia(remote_url string) ([]byte, error) {
+	fmt.Printf("Downloading: %s\n", remote_url)
+	req, err := http.NewRequest("GET", remote_url, nil)
+	if err != nil {
+		panic(err)
+	}
+	// api.add_authentication_headers(req)
+	// req.Header.Set("Referer", "https://twitter.com/") // DM embedded images require this header
+
+	resp, err := api.Client.Do(req)
+	if err != nil {
+		return []byte{}, fmt.Errorf("Error executing HTTP request:\n  %w", err)
+	}
+	defer resp.Body.Close()
+
+	if api.IsAuthenticated {
+		// New request has been made, so the cookie will be changed; update the csrf to match
+		api.update_csrf_token()
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	if resp.StatusCode == 403 {
+		var response struct {
+			Error_response string `json:"error_response"`
+		}
+		fmt.Println(string(body))
+
+		err = json.Unmarshal(body, &response)
+		if err != nil {
+			panic(err)
+		}
+		if response.Error_response == "Dmcaed" {
+			return body, ErrorDMCA
+		}
+		// Not a DCMA; fall through
+	}
+
+	if resp.StatusCode != 200 {
+		print_curl_cmd(req, api.Client.Jar.Cookies(url))
+
+		responseHeaders := ""
+		for header := range resp.Header {
+			responseHeaders += fmt.Sprintf("    %s: %s\n", header, resp.Header.Get(header))
+		}
+		log.Debug(responseHeaders)
+		return body, fmt.Errorf("HTTP Error.  HTTP %s\n%s\nbody: %s", resp.Status, responseHeaders, body)
+	}
+
+	// Status code is HTTP 200
+	return body, nil
+}
+
+func print_curl_cmd(r http.Request, cookies []*http.Cookie) {
+	fmt.Printf("curl -X %s %q \\\n", r.Method, r.URL.String())
+	for header := range r.Header {
+		fmt.Printf("  -H '%s: %s' \\\n", header, r.Header.Get(header))
+	}
+	fmt.Printf("  -H 'Cookie: ")
+	for _, c := range cookies {
+		fmt.Printf("%s=%s;", c.Name, c.Value)
+	}
+	fmt.Printf("' \\\n")
+	fmt.Printf("  --compressed\n")
 }

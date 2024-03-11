@@ -1,11 +1,8 @@
 package persistence
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"path"
 	"strings"
@@ -19,47 +16,15 @@ type MediaDownloader interface {
 
 type DefaultDownloader struct{}
 
-var ErrorDMCA error = errors.New("video is DMCAed, unable to download (HTTP 403 Forbidden)")
-
 // Download a file over HTTP and save it.
 //
 // args:
 // - url: the remote file to download
 // - outpath: the path on disk to save it to
 func (d DefaultDownloader) Curl(url string, outpath string) error {
-	fmt.Println(url)
-	resp, err := http.Get(url)
+	data, err := scraper.DownloadMedia(url)
 	if err != nil {
-		return fmt.Errorf("Error executing HTTP GET(%q):\n  %w", url, err)
-	}
-
-	if resp.StatusCode == 403 {
-		var response struct {
-			Error_response string `json:"error_response"`
-		}
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(string(body))
-
-		err = json.Unmarshal(body, &response)
-		if err != nil {
-			panic(err)
-		}
-		if response.Error_response == "Dmcaed" {
-			return ErrorDMCA
-		}
-		// Not a DCMA; fall through
-	}
-
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("Error %s: %s", url, resp.Status)
-	}
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("Error downloading image %s:\n  %w", url, err)
+		return fmt.Errorf("downloading %q:\n  %w", url, err)
 	}
 
 	// Ensure the output directory exists
@@ -96,7 +61,7 @@ func (p Profile) download_tweet_video(v *scraper.Video, downloader MediaDownload
 	outfile := path.Join(p.ProfileDir, "videos", v.LocalFilename)
 	err := downloader.Curl(v.RemoteURL, outfile)
 
-	if errors.Is(err, ErrorDMCA) {
+	if errors.Is(err, scraper.ErrorDMCA) {
 		v.IsDownloaded = false
 		v.IsBlockedByDMCA = true
 	} else if err != nil {
