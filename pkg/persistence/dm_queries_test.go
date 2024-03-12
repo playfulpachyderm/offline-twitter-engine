@@ -167,11 +167,11 @@ func TestGetChatRoomsPreview(t *testing.T) {
 
 	room, is_ok := chat_view.Rooms[chat_view.RoomIDs[0]]
 	require.True(is_ok)
-	assert.Equal(room.LastMessageID, DMMessageID(1665936253483614212))
+	assert.Equal(room.LastMessageID, DMMessageID(1766595519000760325))
 
 	msg, is_ok := chat_view.Messages[room.LastMessageID]
 	require.True(is_ok)
-	assert.Equal(msg.Text, "Check this out")
+	assert.Equal(msg.Text, "This looks pretty good huh")
 
 	require.Len(room.Participants, 2)
 	for _, user_id := range []UserID{1458284524761075714, 1488963321701171204} {
@@ -207,13 +207,30 @@ func TestGetChatRoomContents(t *testing.T) {
 	}
 
 	// Messages
-	require.Equal(chat_view.MessageIDs, []DMMessageID{1663623062195957773, 1663623203644751885, 1665922180176044037, 1665936253483614212})
-	require.Len(chat_view.Messages, 4)
+	expected_message_ids := []DMMessageID{
+		1663623062195957773, 1663623203644751885, 1665922180176044037, 1665936253483614212,
+		1766248283901776125, 1766255994668191902, 1766595519000760325,
+	}
+	require.Equal(chat_view.MessageIDs, expected_message_ids)
+	require.Len(chat_view.Messages, len(expected_message_ids))
 	for _, msg_id := range chat_view.MessageIDs {
 		msg, is_ok := chat_view.Messages[msg_id]
 		assert.True(is_ok)
 		assert.Equal(msg.ID, msg_id)
 	}
+
+	// Attachments
+	m_img := chat_view.Messages[DMMessageID(1766595519000760325)]
+	require.Len(m_img.Images, 1)
+	assert.Equal(m_img.Images[0].RemoteURL,
+		"https://ton.twitter.com/1.1/ton/data/dm/1766595519000760325/1766595500407459840/ML6pC79A.png")
+	m_vid := chat_view.Messages[DMMessageID(1766248283901776125)]
+	require.Len(m_vid.Videos, 1)
+	assert.Equal(m_vid.Videos[0].RemoteURL,
+		"https://video.twimg.com/dm_video/1766248268416385024/vid/avc1/500x280/edFuZXtEVvem158AjvmJ3SZ_1DdG9cbSoW4fm6cDF1k.mp4?tag=1")
+	m_url := chat_view.Messages[DMMessageID(1766255994668191902)]
+	require.Len(m_url.Urls, 1)
+	assert.Equal(m_url.Urls[0].Text, "https://offline-twitter.com/introduction/data-ownership-and-composability/")
 
 	// Reactions
 	msg_with_reacc := chat_view.Messages[DMMessageID(1663623062195957773)]

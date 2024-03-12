@@ -413,8 +413,10 @@ INSERT INTO chat_messages VALUES
     (6,1665936253483614214,'1488963321701171204-1178839081222115328',1178839081222115328,1686025129141,'',0,'bruh2',0),
     (7,1665936253483614215,'1488963321701171204-1178839081222115328',1178839081222115328,1686025129142,'',1665936253483614214,'replying to bruh2',0),
     (8,1665936253483614216,'1488963321701171204-1178839081222115328',1488963321701171204,1686025129143,'',0,'This conversation is totally fake lol',0),
-    (9,1665936253483614217,'1488963321701171204-1178839081222115328',1178839081222115328,1686025129144,'',0,'exactly',0);
-
+    (9,1665936253483614217,'1488963321701171204-1178839081222115328',1178839081222115328,1686025129144,'',0,'exactly',0),
+    (36,1766248283901776125,'1458284524761075714-1488963321701171204',1458284524761075714,1709941380913,'',0,'',0),
+    (15,1766255994668191902,'1458284524761075714-1488963321701171204',1458284524761075714,1709943219300,'',0,'You wrote this?',0),
+    (46,1766595519000760325,'1458284524761075714-1488963321701171204',1458284524761075714,1710024168245,'',0,'This looks pretty good huh',0);
 
 
 create table chat_message_reactions (rowid integer primary key,
@@ -431,6 +433,64 @@ INSERT INTO chat_message_reactions VALUES
     (2,1665936253487546456,1665936253483614216,1488963321701171204,1686063453455,'🤔'),
     (3,1665936253834578774,1665936253483614216,1178839081222115328,1686075343331,'🤔');
 
+create table chat_message_images (rowid integer primary key,
+    id integer unique not null check(typeof(id) = 'integer'),
+    chat_message_id integer not null,
+    width integer not null,
+    height integer not null,
+    remote_url text not null unique,
+    local_filename text not null unique,
+    is_downloaded boolean default 0,
+
+    foreign key(chat_message_id) references chat_messages(id)
+);
+create index if not exists index_chat_message_images_chat_message_id on chat_message_images (chat_message_id);
+INSERT INTO chat_message_images VALUES(1,1766595500407459840,1766595519000760325,680,597,'https://ton.twitter.com/1.1/ton/data/dm/1766595519000760325/1766595500407459840/ML6pC79A.png','ML/ML6pC79A.png',0);
+
+create table chat_message_videos (rowid integer primary key,
+    id integer unique not null check(typeof(id) = 'integer'),
+    chat_message_id integer not null,
+    width integer not null,
+    height integer not null,
+    remote_url text not null unique,
+    local_filename text not null unique,
+    thumbnail_remote_url text not null default "missing",
+    thumbnail_local_filename text not null default "missing",
+    duration integer not null default 0,
+    view_count integer not null default 0,
+    is_gif boolean default 0,
+    is_downloaded boolean default 0,
+    is_blocked_by_dmca boolean not null default 0,
+
+    foreign key(chat_message_id) references chat_messages(id)
+);
+create index if not exists index_chat_message_videos_chat_message_id on chat_message_videos (chat_message_id);
+INSERT INTO chat_message_videos VALUES
+    (1,1766248268416385024,1766248283901776125,500,280,'https://video.twimg.com/dm_video/1766248268416385024/vid/avc1/500x280/edFuZXtEVvem158AjvmJ3SZ_1DdG9cbSoW4fm6cDF1k.mp4?tag=1','ed/edFuZXtEVvem158AjvmJ3SZ_1DdG9cbSoW4fm6cDF1k.mp4','https://pbs.twimg.com/dm_video_preview/1766248268416385024/img/Ph7CCqISQxFE40Yy-uJAis-WiYhBbexFe_czkN5ytzI.jpg','Ph/Ph7CCqISQxFE40Yy-uJAis-WiYhBbexFe_czkN5ytzI.jpg',1980,0,0,0,0);
+
+create table chat_message_urls (rowid integer primary key,
+    chat_message_id integer not null,
+    domain text,
+    text text not null,
+    short_text text not null default "",
+    title text,
+    description text,
+    creator_id integer,
+    site_id integer,
+    thumbnail_width integer not null,
+    thumbnail_height integer not null,
+    thumbnail_remote_url text,
+    thumbnail_local_path text,
+    has_card boolean,
+    has_thumbnail boolean,
+    is_content_downloaded boolean default 0,
+
+    unique (chat_message_id, text)
+    foreign key(chat_message_id) references chat_messages(id)
+);
+create index if not exists index_chat_message_urls_chat_message_id on chat_message_urls (chat_message_id);
+INSERT INTO chat_message_urls VALUES
+    (1,1766255994668191902,'offline-twitter.com','https://offline-twitter.com/introduction/data-ownership-and-composability/','https://t.co/V3iiSYyrQx','Data ownership and composability','Data and Composability # What does it mean to own data? It means: You have a full copy of it It lasts until you decide to delete it You can do whatever you want with it, including opening it with...',0,0,0,0,'','',1,0,0);
 
 create table follows(rowid integer primary key,
     follower_id integer not null,
@@ -453,6 +513,6 @@ insert into fake_user_sequence values(0x4000000000000000);
 create table database_version(rowid integer primary key,
     version_number integer not null unique
 );
-insert into database_version(version_number) values (28);
+insert into database_version(version_number) values (29);
 
 COMMIT;

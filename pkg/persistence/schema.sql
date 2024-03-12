@@ -314,6 +314,60 @@ create table chat_message_reactions (rowid integer primary key,
     foreign key(sender_id) references users(id)
 );
 
+create table chat_message_images (rowid integer primary key,
+    id integer unique not null check(typeof(id) = 'integer'),
+    chat_message_id integer not null,
+    width integer not null,
+    height integer not null,
+    remote_url text not null unique,
+    local_filename text not null unique,
+    is_downloaded boolean default 0,
+
+    foreign key(chat_message_id) references chat_messages(id)
+);
+create index if not exists index_chat_message_images_chat_message_id on chat_message_images (chat_message_id);
+
+create table chat_message_videos (rowid integer primary key,
+    id integer unique not null check(typeof(id) = 'integer'),
+    chat_message_id integer not null,
+    width integer not null,
+    height integer not null,
+    remote_url text not null unique,
+    local_filename text not null unique,
+    thumbnail_remote_url text not null default "missing",
+    thumbnail_local_filename text not null default "missing",
+    duration integer not null default 0,
+    view_count integer not null default 0,
+    is_gif boolean default 0,
+    is_downloaded boolean default 0,
+    is_blocked_by_dmca boolean not null default 0,
+
+    foreign key(chat_message_id) references chat_messages(id)
+);
+create index if not exists index_chat_message_videos_chat_message_id on chat_message_videos (chat_message_id);
+
+create table chat_message_urls (rowid integer primary key,
+    chat_message_id integer not null,
+    domain text,
+    text text not null,
+    short_text text not null default "",
+    title text,
+    description text,
+    creator_id integer,
+    site_id integer,
+    thumbnail_width integer not null,
+    thumbnail_height integer not null,
+    thumbnail_remote_url text,
+    thumbnail_local_path text,
+    has_card boolean,
+    has_thumbnail boolean,
+    is_content_downloaded boolean default 0,
+
+    unique (chat_message_id, text)
+    foreign key(chat_message_id) references chat_messages(id)
+);
+create index if not exists index_chat_message_urls_chat_message_id on chat_message_urls (chat_message_id);
+
 
 -- Meta
 -- ----

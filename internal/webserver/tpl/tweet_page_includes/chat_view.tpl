@@ -35,9 +35,61 @@
               }}
             </div>
           {{end}}
-          <div class="dm-message-text-container">
-            {{template "text-with-entities" $message.Text}}
-          </div>
+          {{range $message.Images}}
+            <img class="dm-embedded-image"
+              {{if .IsDownloaded}}
+                src="/content/images/{{.LocalFilename}}"
+              {{else}}
+                src="{{.RemoteURL}}"
+              {{end}}
+              width="{{.Width}}" height="{{.Height}}"
+              onclick="image_carousel.querySelector('img').src = this.src; image_carousel.showModal();"
+            >
+          {{end}}
+          {{range $message.Videos}}
+            <video controls width="{{.Width}}" height="{{.Height}}"
+              {{if .IsDownloaded}}
+                poster="/content/video_thumbnails/{{.ThumbnailLocalPath}}"
+              {{else}}
+                poster="{{.ThumbnailRemoteUrl}}"
+              {{end}}
+            >
+              {{if .IsDownloaded}}
+                <source src="/content/videos/{{.LocalFilename}}">
+              {{else}}
+                <source src="{{.RemoteURL}}">
+              {{end}}
+            </video>
+          {{end}}
+          {{range $message.Urls}}
+            <a
+              class="embedded-link rounded-gray-outline unstyled-link"
+              target="_blank"
+              href="{{.Text}}"
+              style="max-width: {{if (ne .ThumbnailWidth 0)}}{{.ThumbnailWidth}}px {{else}}fit-content {{end}}"
+            >
+              <img
+                {{if .IsContentDownloaded}}
+                  src="/content/link_preview_images/{{.ThumbnailLocalPath}}"
+                {{else}}
+                  src="{{.ThumbnailRemoteUrl}}"
+                {{end}}
+                class="embedded-link-preview"
+                width="{{.ThumbnailWidth}}" height="{{.ThumbnailHeight}}"
+              />
+              <h3 class="embedded-link-title">{{.Title}}</h3>
+              <p class="embedded-link-description">{{.Description}}</p>
+              <span class="row embedded-link-domain-container">
+                <img class="svg-icon" src="/static/icons/link3.svg" width="24" height="24" />
+                <span class="embedded-link-domain">{{(.GetDomain)}}</span>
+              </span>
+            </a>
+          {{end}}
+          {{if $message.Text}}
+            <div class="dm-message-text-container">
+              {{template "text-with-entities" $message.Text}}
+            </div>
+          {{end}}
         </div>
       </div>
       <div class="dm-message-reactions">

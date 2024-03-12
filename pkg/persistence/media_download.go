@@ -45,6 +45,7 @@ func (d DefaultDownloader) Curl(url string, outpath string) error {
 }
 
 // Downloads an Image, and if successful, marks it as downloaded in the DB
+// DUPE: download-image
 func (p Profile) download_tweet_image(img *scraper.Image, downloader MediaDownloader) error {
 	outfile := path.Join(p.ProfileDir, "images", img.LocalFilename)
 	err := downloader.Curl(img.RemoteURL, outfile)
@@ -56,6 +57,7 @@ func (p Profile) download_tweet_image(img *scraper.Image, downloader MediaDownlo
 }
 
 // Downloads a Video and its thumbnail, and if successful, marks it as downloaded in the DB
+// DUPE: download-video
 func (p Profile) download_tweet_video(v *scraper.Video, downloader MediaDownloader) error {
 	// Download the video
 	outfile := path.Join(p.ProfileDir, "videos", v.LocalFilename)
@@ -82,6 +84,7 @@ func (p Profile) download_tweet_video(v *scraper.Video, downloader MediaDownload
 }
 
 // Downloads an URL thumbnail image, and if successful, marks it as downloaded in the DB
+// DUPE: download-link-thumbnail
 func (p Profile) download_link_thumbnail(url *scraper.Url, downloader MediaDownloader) error {
 	if url.HasCard && url.HasThumbnail {
 		outfile := path.Join(p.ProfileDir, "link_preview_images", url.ThumbnailLocalPath)

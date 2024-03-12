@@ -73,6 +73,9 @@ func (api *API) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		panic(err)
 	}
+	for i := range in_struct.Cookies {
+		in_struct.Cookies[i].Domain = ".twitter.com"
+	}
 	cookie_jar.SetCookies(&TWITTER_BASE_URL, in_struct.Cookies)
 	api.IsAuthenticated = in_struct.IsAuthenticated
 	api.GuestToken = in_struct.GuestToken

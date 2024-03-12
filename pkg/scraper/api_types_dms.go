@@ -76,6 +76,9 @@ func (m *APIDMMessage) NormalizeContent() {
 
 func (m APIDMMessage) ToDMTrove() DMTrove {
 	ret := NewDMTrove()
+	if m.ID == 0 {
+		return ret
+	}
 
 	m.NormalizeContent()
 	result := ParseAPIDMMessage(m)

@@ -358,6 +358,15 @@ func create_dummy_chat_room() DMChatRoom {
 func create_dummy_chat_message() DMMessage {
 	rand.Seed(time.Now().UnixNano())
 	id := DMMessageID(rand.Int())
+	vid := create_video_from_id(int(id))
+	vid.TweetID = TweetID(0)
+	vid.DMMessageID = id
+	img := create_image_from_id(int(id))
+	img.TweetID = TweetID(0)
+	img.DMMessageID = id
+	url := create_url_from_id(int(id))
+	url.TweetID = TweetID(0)
+	url.DMMessageID = id
 	return DMMessage{
 		ID:           id,
 		DMChatRoomID: create_stable_chat_room().ID,
@@ -374,5 +383,8 @@ func create_dummy_chat_message() DMMessage {
 				Emoji:       "🤔",
 			},
 		},
+		Videos: []Video{vid},
+		Images: []Image{img},
+		Urls:   []Url{url},
 	}
 }
