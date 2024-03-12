@@ -215,7 +215,7 @@ tw get_user_tweets covfefeanon
 
 # Check that there are some retweets
 rts_count=$(sqlite3 twitter.db "select count(*) from retweets")
-# test $rts_count -gt "0"
+test $rts_count -gt "0"
 
 # Check that new retweets plus new tweets > 50
 tweet_count_2=$(sqlite3 twitter.db "select count(*) from tweets")
