@@ -124,9 +124,7 @@ TODO: features-from-qt-version
   - when previous tweet in thread is missing, put a "fetch tweet" button to get it
 
 TODO: dms
-- embedded image and video
-- unshorten URLs / show previews
-- remove empty text bubble for no text-content posts, e.g., shared tweets
+- unshorten URLs
 - fetch chat room history on opening
 
 TODO: search-terms-highlighted
