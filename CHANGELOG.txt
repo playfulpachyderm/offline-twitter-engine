@@ -254,3 +254,10 @@ v0.6.4
 	- command-line supports 2FA challenges
 	- web UI notifies login failure if challenged for 2FA instead of failing silently
 - Home page now has a "User Feed" timeline (shows people logged-in user follows) in addition to the "Offline Timeline"
+
+v0.6.5
+------
+
+- UI improvements:
+	- Add image full-size on-click viewer
+- Add images, videos and links to DMs
