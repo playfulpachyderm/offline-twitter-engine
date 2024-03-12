@@ -121,7 +121,7 @@ func (p Profile) SaveDMTrove(trove DMTrove, should_download bool) {
 				url.IsContentDownloaded = true
 
 				// Update it in the DB
-				_, err = p.DB.NamedExec(`update chat_message_urls set is_downloaded = :is_downloaded where id = :id`, url)
+				_, err = p.DB.NamedExec(`update chat_message_urls set is_content_downloaded = :is_content_downloaded where id = :id`, url)
 				if err != nil {
 					panic(err)
 				}
