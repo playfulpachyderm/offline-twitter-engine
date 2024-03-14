@@ -80,13 +80,18 @@ pipeline:
       - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^release-)\d+\.\d+\.\d+")
       - ./windows-compile.sh $version
 
-  windows_package:
+  windows_package_and_upload:
     when:
       branch: release-*
     image: offline-twitter/innosetup
+    secrets:
+      - offline_twatter_id_ecdsa
     commands:
       - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^release-)\d+\.\d+\.\d+")
       - iscc.sh /Dversion=$version /Dexe_path=`winepath -w cmd/twitter.exe` build/windows/setup.iss
+      - eval $(ssh-agent)
+      - echo "$OFFLINE_TWATTER_ID_ECDSA" | ssh-add -
+      - scp build/windows/Output/mysetup.exe offline-twitter@offline-twitter.com:/var/www/offline-twitter.com/downloads/offline-twitter-for-windows.exe
 
 
 depends_on:

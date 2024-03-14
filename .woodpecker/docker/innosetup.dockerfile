@@ -10,3 +10,6 @@ env DISPLAY ":99"
 env WINEDEBUG "-all,err+all"
 run xvfb-run wine is.exe /SP- /VERYSILENT /ALLUSERS /SUPPRESSMSGBOXES /DOWNLOADISCRYPT=1
 copy iscc.sh /usr/bin/iscc.sh
+
+# For SSH upload
+copy known_hosts /root/.ssh/known_hosts
