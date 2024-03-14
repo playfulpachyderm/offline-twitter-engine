@@ -1,6 +1,7 @@
 # Inspired by: https://github.com/amake/innosetup-docker/
 
 from ubuntu:jammy
+shell ["/bin/bash", "-c"]
 run dpkg --add-architecture i386
 run apt update
 run apt install -y curl ssh wine wine32 xvfb
