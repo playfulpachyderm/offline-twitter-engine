@@ -4,7 +4,7 @@ from ubuntu:jammy
 shell ["/bin/bash", "-c"]
 run dpkg --add-architecture i386
 run apt update
-run apt install -y curl ssh wine wine32 xvfb
+run apt install -y curl ssh wine wine32 xvfb winbind
 
 run curl -SL "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe" -o is.exe
 env DISPLAY ":99"
