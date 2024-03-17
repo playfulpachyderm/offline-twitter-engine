@@ -144,8 +144,8 @@ func (api *API) update_csrf_token() {
 	}
 }
 
-func (api *API) do_http_POST(url string, body string, result interface{}) error {
-	req, err := http.NewRequest("POST", url, strings.NewReader(body))
+func (api *API) do_http_POST(remote_url string, body string, result interface{}) error {
+	req, err := http.NewRequest("POST", remote_url, strings.NewReader(body))
 	if err != nil {
 		return fmt.Errorf("Error initializing HTTP POST request:\n  %w", err)
 	}
@@ -161,7 +161,9 @@ func (api *API) do_http_POST(url string, body string, result interface{}) error 
 	log.Debug("    " + body)
 
 	resp, err := api.Client.Do(req)
-	if err != nil {
+	if urlErr, ok := err.(*url.Error); ok && urlErr.Timeout() {
+		return fmt.Errorf("POST %q:\n  %w", remote_url, ErrRequestTimeout)
+	} else if err != nil {
 		return fmt.Errorf("Error executing HTTP POST request:\n  %w", err)
 	}
 	api.update_csrf_token()
@@ -190,8 +192,8 @@ func (api *API) do_http_POST(url string, body string, result interface{}) error 
 	return nil
 }
 
-func (api *API) do_http(url string, cursor string, result interface{}) error {
-	req, err := http.NewRequest("GET", url, nil)
+func (api *API) do_http(remote_url string, cursor string, result interface{}) error {
+	req, err := http.NewRequest("GET", remote_url, nil)
 	if err != nil {
 		return fmt.Errorf("Error initializing HTTP GET request:\n  %w", err)
 	}
@@ -210,7 +212,9 @@ func (api *API) do_http(url string, cursor string, result interface{}) error {
 	}
 
 	resp, err := api.Client.Do(req)
-	if err != nil {
+	if urlErr, ok := err.(*url.Error); ok && urlErr.Timeout() {
+		return fmt.Errorf("GET %q:\n  %w", remote_url, ErrRequestTimeout)
+	} else if err != nil {
 		return fmt.Errorf("Error executing HTTP request:\n  %w", err)
 	}
 	defer resp.Body.Close()
@@ -386,7 +390,9 @@ func (api *API) DownloadMedia(remote_url string) ([]byte, error) {
 	// req.Header.Set("Referer", "https://twitter.com/") // DM embedded images require this header
 
 	resp, err := api.Client.Do(req)
-	if err != nil {
+	if urlErr, ok := err.(*url.Error); ok && urlErr.Timeout() {
+		return []byte{}, fmt.Errorf("GET %q:\n  %w", remote_url, ErrRequestTimeout)
+	} else if err != nil {
 		return []byte{}, fmt.Errorf("Error executing HTTP request:\n  %w", err)
 	}
 	defer resp.Body.Close()

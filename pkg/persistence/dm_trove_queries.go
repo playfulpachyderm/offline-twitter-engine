@@ -53,7 +53,10 @@ func (p Profile) SaveDMTrove(trove DMTrove, should_download bool) {
 				// DUPE: download-image
 				outfile := path.Join(p.ProfileDir, "images", img.LocalFilename)
 				err = downloader.Curl(img.RemoteURL, outfile)
-				if err != nil {
+				if errors.Is(err, ErrRequestTimeout) {
+					// Forget about it; if it's important someone will try again
+					fmt.Printf("Failed to download image %q: %s\n", img.RemoteURL, err.Error())
+				} else if err != nil {
 					panic(fmt.Errorf("downloading image %q on DM message %d:\n  %w", img.RemoteURL, m.ID, err))
 				}
 				_, err = p.DB.NamedExec(`update chat_message_images set is_downloaded = 1 where id = :id`, img)
@@ -84,7 +87,10 @@ func (p Profile) SaveDMTrove(trove DMTrove, should_download bool) {
 				outfile := path.Join(p.ProfileDir, "videos", vid.LocalFilename)
 				err = downloader.Curl(vid.RemoteURL, outfile)
 
-				if errors.Is(err, ErrorDMCA) {
+				if errors.Is(err, ErrRequestTimeout) {
+					// Forget about it; if it's important someone will try again
+					fmt.Printf("Failed to download video %q: %s\n", vid.RemoteURL, err.Error())
+				} else if errors.Is(err, ErrorDMCA) {
 					vid.IsDownloaded = false
 					vid.IsBlockedByDMCA = true
 				} else if err != nil {
@@ -96,7 +102,10 @@ func (p Profile) SaveDMTrove(trove DMTrove, should_download bool) {
 				// Download the thumbnail
 				outfile = path.Join(p.ProfileDir, "video_thumbnails", vid.ThumbnailLocalPath)
 				err = downloader.Curl(vid.ThumbnailRemoteUrl, outfile)
-				if err != nil {
+				if errors.Is(err, ErrRequestTimeout) {
+					// Forget about it; if it's important someone will try again
+					fmt.Printf("Failed to download video thumbnail %q: %s\n", vid.ThumbnailRemoteUrl, err.Error())
+				} else if err != nil {
 					panic(fmt.Errorf("Error downloading video thumbnail (DMMessageID %d):\n  %w", vid.DMMessageID, err))
 				}
 
@@ -114,7 +123,10 @@ func (p Profile) SaveDMTrove(trove DMTrove, should_download bool) {
 				if url.HasCard && url.HasThumbnail {
 					outfile := path.Join(p.ProfileDir, "link_preview_images", url.ThumbnailLocalPath)
 					err := downloader.Curl(url.ThumbnailRemoteUrl, outfile)
-					if err != nil {
+					if errors.Is(err, ErrRequestTimeout) {
+						// Forget about it; if it's important someone will try again
+						fmt.Printf("Failed to download link thumbnail %q: %s\n", url.ThumbnailRemoteUrl, err.Error())
+					} else if err != nil {
 						panic(fmt.Errorf("downloading link thumbnail %q on DM message %d:\n  %w", url.ThumbnailRemoteUrl, m.ID, err))
 					}
 				}

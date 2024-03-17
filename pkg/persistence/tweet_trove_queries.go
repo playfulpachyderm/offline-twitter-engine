@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"fmt"
+	"errors"
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
@@ -40,7 +41,10 @@ func (p Profile) SaveTweetTrove(trove TweetTrove, should_download bool) {
 		if should_download {
 			// Download their tiny profile image
 			err = p.DownloadUserProfileImageTiny(&u)
-			if err != nil {
+			if errors.Is(err, ErrRequestTimeout) {
+				// Forget about it; if it's important someone will try again
+				fmt.Printf("Failed to @%s's tiny profile image (%q): %s\n", u.Handle, u.ProfileImageUrl, err.Error())
+			} else if err != nil {
 				panic(fmt.Errorf("Error downloading user content for user with ID %d and handle %s:\n  %w", u.ID, u.Handle, err))
 			}
 		}
@@ -61,7 +65,10 @@ func (p Profile) SaveTweetTrove(trove TweetTrove, should_download bool) {
 
 		if should_download {
 			err = p.DownloadTweetContentFor(&t)
-			if err != nil {
+			if errors.Is(err, ErrRequestTimeout) {
+				// Forget about it; if it's important someone will try again
+				fmt.Printf("Failed to download tweet ID %d: %s\n", t.ID, err.Error())
+			} else if err != nil {
 				panic(fmt.Errorf("Error downloading tweet content for tweet ID %d:\n  %w", t.ID, err))
 			}
 		}
