@@ -273,6 +273,7 @@ a.entity {
 img.embedded-link-preview {
     border-radius: 1em;
     max-width: 100%;
+    height: auto; /* preserve aspect ratio */
 }
 .embedded-link-description {
     color: var(--color-twitter-text-gray);
@@ -944,6 +945,10 @@ ul.space-participants-list li {
 }
 .dm-message-content-container .replying-to-label img.svg-icon {
     width: 1em;
+}
+.dm-embedded-image {
+    max-width: 100%;
+    height: auto; /* preserve aspect ratio */
 }
 .dm-composer-container {
     padding-top: 0.5em;
