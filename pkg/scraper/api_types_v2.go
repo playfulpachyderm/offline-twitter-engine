@@ -565,7 +565,7 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 type APIV2Instruction struct {
 	Type    string       `json:"type"`
 	Entries []APIV2Entry `json:"entries"`
-	Entry   APIV2Entry `json:"entry"`
+	Entry   APIV2Entry   `json:"entry"`
 }
 
 type APIV2Response struct {
