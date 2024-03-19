@@ -1,8 +1,8 @@
 package persistence
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
