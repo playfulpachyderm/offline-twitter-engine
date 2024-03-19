@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/cookiejar"
-	"net/http/httputil"
 	"net/url"
 	"strings"
 	"time"
