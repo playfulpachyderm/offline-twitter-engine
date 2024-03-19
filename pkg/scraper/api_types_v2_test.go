@@ -489,13 +489,15 @@ func TestParseAPIV2UserFeed(t *testing.T) {
 	err = json.Unmarshal(data, &feed)
 	require.NoError(err)
 
-	tweet_trove, err := feed.ToTweetTrove()
+	_p := PaginatedUserFeed{}
+	tweet_trove, err := _p.ToTweetTrove(feed)
 	require.NoError(err)
 
 	// Check users
 	user := tweet_trove.Users[44067298]
 	assert.Equal(UserID(44067298), user.ID)
 	assert.Equal("Michael Malice", user.DisplayName)
+	assert.Equal(TweetID(1477347403023982596), user.PinnedTweetID)
 
 	retweeted_user := tweet_trove.Users[1326229737551912960]
 	assert.Equal(UserID(1326229737551912960), retweeted_user.ID)
@@ -506,6 +508,11 @@ func TestParseAPIV2UserFeed(t *testing.T) {
 
 	// Check retweets
 	assert.Len(tweet_trove.Retweets, 2)
+
+	// Check pinned tweet
+	pinned_tweet, is_ok := tweet_trove.Tweets[user.PinnedTweetID]
+	require.True(is_ok)
+	assert.Equal(856, pinned_tweet.NumLikes)
 
 	// Test cursor-bottom
 	bottom_cursor := feed.GetCursorBottom()

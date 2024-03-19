@@ -565,6 +565,7 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 type APIV2Instruction struct {
 	Type    string       `json:"type"`
 	Entries []APIV2Entry `json:"entries"`
+	Entry   APIV2Entry `json:"entry"`
 }
 
 type APIV2Response struct {
@@ -777,6 +778,20 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 	return ret, nil // TODO: This doesn't need to return an error, it's always nil
 }
 
+func (r APIV2Response) GetPinnedTweetAsTweetTrove() TweetTrove {
+	for _, instr := range r.Data.User.Result.Timeline.Timeline.Instructions {
+		if instr.Type == "TimelinePinEntry" {
+			return instr.Entry.ToTweetTrove()
+		}
+	}
+	for _, instr := range r.Data.User.Result.TimelineV2.Timeline.Instructions {
+		if instr.Type == "TimelinePinEntry" {
+			return instr.Entry.ToTweetTrove()
+		}
+	}
+	return NewTweetTrove()
+}
+
 func (r APIV2Response) ToTweetTroveAsLikes() (TweetTrove, error) {
 	ret, err := r.ToTweetTrove()
 	if err != nil {
@@ -916,7 +931,10 @@ func (p PaginatedUserFeed) NextPage(api *API, cursor string) (APIV2Response, err
 	return api.GetGraphqlFeedFor(p.user_id, cursor)
 }
 func (p PaginatedUserFeed) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
-	return r.ToTweetTrove()
+	ret, err := r.ToTweetTrove()
+	// Add the pinned tweet, if applicable
+	ret.MergeWith(r.GetPinnedTweetAsTweetTrove())
+	return ret, err
 }
 
 func (api *API) GetTweetDetail(tweet_id TweetID, cursor string) (APIV2Response, error) {
