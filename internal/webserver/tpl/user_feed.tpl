@@ -22,6 +22,15 @@
   </div>
 
   <div class="timeline user-feed-timeline">
+    {{if .PinnedTweet.ID}}
+      <div class="pinned-tweet">
+        <div class="row pinned-tweet__pin-container">
+          <img class="svg-icon pinned-tweet__pin-icon" src="/static/icons/pin.svg" width="24" height="24" />
+          <span>Pinned</span>
+        </div>
+        {{template "tweet" (dict "TweetID" .PinnedTweet.ID "RetweetID" 0)}}
+      </div>
+    {{end}}
     {{template "timeline" .}}
   </div>
 {{end}}

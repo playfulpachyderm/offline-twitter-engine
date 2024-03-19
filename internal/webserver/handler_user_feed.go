@@ -91,13 +91,24 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		persistence.Feed
 		scraper.UserID
-		FeedType string
+		PinnedTweet scraper.Tweet
+		FeedType    string
 	}{Feed: feed, UserID: user.ID}
 
 	if len(parts) == 2 {
 		data.FeedType = parts[1]
 	} else {
 		data.FeedType = ""
+	}
+
+	// Add a pinned tweet if there is one and it's in the DB; otherwise skip
+	if user.PinnedTweetID != scraper.TweetID(0) && len(parts) <= 1 || parts[1] == "without_replies" {
+		data.PinnedTweet, err = app.Profile.GetTweetById(user.PinnedTweetID)
+		if err == nil {
+			feed.TweetTrove.Tweets[data.PinnedTweet.ID] = data.PinnedTweet
+		} else if !errors.Is(err, persistence.ErrNotInDB) {
+			panic(err)
+		}
 	}
 
 	if r.Header.Get("HX-Request") == "true" && c.CursorPosition == persistence.CURSOR_MIDDLE {

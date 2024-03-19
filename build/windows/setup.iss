@@ -1,10 +1,11 @@
 #define NAME "Offline Twitter"
 #define EXE_NAME "twitter.exe"
+; The `version` macro should be passed from command line using `/Dversion=[...]`
 
 [Setup]
 
 AppName={#NAME}
-AppVersion={#VERSION}
+AppVersion={#version}
 WizardStyle=modern
 DefaultDirName={autopf}/offline-twitter
 DefaultGroupName={#NAME}

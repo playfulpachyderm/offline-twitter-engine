@@ -207,10 +207,11 @@ func TestSearchDateFilters(t *testing.T) {
 	c.UntilTimestamp.Time = time.Date(2021, 10, 1, 0, 0, 0, 0, time.UTC)
 	feed, err = profile.NextPage(c, UserID(0))
 	require.NoError(err)
-	assert.Len(feed.Items, 3)
-	assert.Equal(feed.Items[0].TweetID, TweetID(1439027915404939265))
-	assert.Equal(feed.Items[1].TweetID, TweetID(1439068749336748043))
-	assert.Equal(feed.Items[2].TweetID, TweetID(1439067163508150272))
+	assert.Len(feed.Items, 4)
+	assert.Equal(feed.Items[0].TweetID, TweetID(1439747634277740546))
+	assert.Equal(feed.Items[1].TweetID, TweetID(1439027915404939265))
+	assert.Equal(feed.Items[2].TweetID, TweetID(1439068749336748043))
+	assert.Equal(feed.Items[3].TweetID, TweetID(1439067163508150272))
 }
 
 func TestSearchMediaFilters(t *testing.T) {

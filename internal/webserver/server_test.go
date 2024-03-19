@@ -81,10 +81,9 @@ func TestUserFeed(t *testing.T) {
 	title_node := cascadia.Query(root, selector("title"))
 	assert.Equal(title_node.FirstChild.Data, "@Cernovich | Offline Twitter")
 
-	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
-	assert.Len(tweet_nodes, 7)
-	including_quote_tweets := cascadia.QueryAll(root, selector(".tweet"))
-	assert.Len(including_quote_tweets, 10)
+	assert.Len(cascadia.QueryAll(root, selector(".timeline > .tweet")), 8)
+	assert.Len(cascadia.QueryAll(root, selector(".timeline > .pinned-tweet")), 1)
+	assert.Len(cascadia.QueryAll(root, selector(".tweet")), 12) // Pinned tweet appears again
 }
 
 func TestUserFeedWithEntityInBio(t *testing.T) {
@@ -224,7 +223,7 @@ func TestTimeline(t *testing.T) {
 	assert.Equal(title_node.FirstChild.Data, "Timeline | Offline Twitter")
 
 	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
-	assert.Len(tweet_nodes, 18)
+	assert.Len(tweet_nodes, 19)
 }
 
 func TestTimelineWithCursor(t *testing.T) {
