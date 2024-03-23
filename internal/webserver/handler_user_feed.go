@@ -102,7 +102,8 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add a pinned tweet if there is one and it's in the DB; otherwise skip
-	if user.PinnedTweetID != scraper.TweetID(0) && len(parts) <= 1 || parts[1] == "without_replies" {
+	// Also, only show pinned tweets on default tab (tweets+replies) or "without_replies" tab
+	if user.PinnedTweetID != scraper.TweetID(0) && (len(parts) <= 1 || parts[1] == "without_replies") {
 		data.PinnedTweet, err = app.Profile.GetTweetById(user.PinnedTweetID)
 		if err == nil {
 			feed.TweetTrove.Tweets[data.PinnedTweet.ID] = data.PinnedTweet
