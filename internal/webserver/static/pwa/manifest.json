@@ -1,0 +1,13 @@
+{
+  "name": "Offline Twitter - A privacy-focused client for Twitter",
+  "short_name": "Offline Twitter",
+  "start_url": ".",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/static/pwa/icon-583x583.png",
+      "sizes": "583x583",
+      "type": "image/png"
+    }
+  ]
+}

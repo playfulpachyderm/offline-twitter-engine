@@ -14,7 +14,7 @@
     {{$retweet := (retweet .RetweetID)}}
     {{$retweet_user := (user $retweet.RetweetedByID)}}
     <div class="retweet-info-container" hx-trigger="click consume">
-      <img class="svg-icon" src="/static/icons/retweet.svg" />
+      <img class="svg-icon" src="/static/icons/retweet.svg" width="24" height="24" />
       <span class="retweeted-by-label">Retweeted by</span>
       <a class="retweeted-by-user" hx-get="/{{$retweet_user.Handle}}" hx-target="body" hx-swap="outerHTML" hx-push-url="true">
         {{$retweet_user.DisplayName}}
@@ -106,7 +106,7 @@
               <h3 class="embedded-link-title">{{.Title}}</h3>
               <p class="embedded-link-description">{{.Description}}</p>
               <span class="row embedded-link-domain-container">
-                <img class="svg-icon" src="/static/icons/link3.svg" />
+                <img class="svg-icon" src="/static/icons/link3.svg" width="24" height="24" />
                 <span class="embedded-link-domain">{{(.GetDomain)}}</span>
               </span>
             </a>
@@ -128,25 +128,25 @@
 
       <div class="interactions-bar row">
         <div class="interaction-stat">
-          <img class="svg-icon" src="/static/icons/quote.svg" />
+          <img class="svg-icon" src="/static/icons/quote.svg" width="24" height="24" />
           <span>{{$main_tweet.NumQuoteTweets}}</span>
         </div>
         <div class="interaction-stat">
-          <img class="svg-icon" src="/static/icons/reply.svg" />
+          <img class="svg-icon" src="/static/icons/reply.svg" width="24" height="24" />
           <span>{{$main_tweet.NumReplies}}</span>
         </div>
         <div class="interaction-stat">
-          <img class="svg-icon" src="/static/icons/retweet.svg" />
+          <img class="svg-icon" src="/static/icons/retweet.svg" width="24" height="24" />
           <span>{{$main_tweet.NumRetweets}}</span>
         </div>
         {{template "likes-count" $main_tweet}}
         <div class="dummy"></div>
         <div class="tweet-buttons-container" hx-trigger="click consume">
           <a class="unstyled-link quick-link" target="_blank" href="https://twitter.com/{{$author.Handle}}/status/{{$main_tweet.ID}}" title="Open on twitter.com">
-            <img class="svg-icon" src="/static/icons/external-link.svg" />
+            <img class="svg-icon" src="/static/icons/external-link.svg" width="24" height="24" />
           </a>
           <a class="unstyled-link quick-link" hx-get="/tweet/{{$main_tweet.ID}}?scrape" hx-target="body" title="Refresh">
-            <img class="svg-icon" src="/static/icons/refresh.svg" />
+            <img class="svg-icon" src="/static/icons/refresh.svg" width="24" height="24" />
           </a>
         </div>
       </div>

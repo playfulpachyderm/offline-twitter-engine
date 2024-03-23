@@ -13,7 +13,7 @@
         {{end}}
       {{else}}
         <div class="groupchat-profile-image-container">
-          <img class="profile-image" src="{{$room.AvatarImageRemoteURL}}" />
+          <img class="profile-image" src="{{$room.AvatarImageRemoteURL}}" width="48" height="48" />
           <div class="display-name row">{{$room.Name}}</div>
         </div>
       {{end}}

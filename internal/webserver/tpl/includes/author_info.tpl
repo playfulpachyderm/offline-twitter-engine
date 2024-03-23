@@ -15,7 +15,7 @@
       {{.DisplayName}}
       {{if .IsPrivate}}
         <div class="circle-outline">
-          <img class="svg-icon" src="/static/icons/lock.svg" />
+          <img class="svg-icon" src="/static/icons/lock.svg" width="24" height="24" />
         </div>
       {{end}}
     </div>

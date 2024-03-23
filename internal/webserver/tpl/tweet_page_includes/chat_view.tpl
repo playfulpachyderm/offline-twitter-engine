@@ -18,7 +18,7 @@
           {{if (ne $message.InReplyToID 0)}}
             <div class="replying-to-container">
               <div class="replying-to-label row">
-                <img class="svg-icon" src="/static/icons/replying_to.svg" />
+                <img class="svg-icon" src="/static/icons/replying_to.svg" width="24" height="24" />
                 <span>Replying to</span>
               </div>
               <div class="replying-to-message">
