@@ -138,6 +138,7 @@ type Cursor struct {
 	FollowedByUserHandle  scraper.UserHandle   // Either tweeted or retweeted by users followed by this user
 	SinceTimestamp        scraper.Timestamp
 	UntilTimestamp        scraper.Timestamp
+	TombstoneType         string
 	FilterLinks           Filter
 	FilterImages          Filter
 	FilterVideos          Filter
@@ -315,10 +316,14 @@ func (c *Cursor) apply_token(token string) error {
 		c.FilterRetweets = NONE // Clear the "exclude retweets" filter set by default in NewCursor
 	case "liked_by":
 		c.LikedByUserHandle = scraper.UserHandle(parts[1])
+	case "followed_by":
+		c.FollowedByUserHandle = scraper.UserHandle(parts[1])
 	case "since":
 		c.SinceTimestamp.Time, err = time.Parse("2006-01-02", parts[1])
 	case "until":
 		c.UntilTimestamp.Time, err = time.Parse("2006-01-02", parts[1])
+	case "tombstone":
+		c.TombstoneType = parts[1]
 	case "filter":
 		switch parts[1] {
 		case "links":
@@ -410,6 +415,14 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
 	if c.UntilTimestamp.Unix() != 0 {
 		where_clauses = append(where_clauses, "posted_at < ?")
 		bind_values = append(bind_values, c.UntilTimestamp)
+	}
+
+	// Tombstone filter
+	if c.TombstoneType == "true" {
+		where_clauses = append(where_clauses, "tombstone_type != 0")
+	} else if c.TombstoneType != "" {
+		where_clauses = append(where_clauses, "tombstone_type = (select rowid from tombstone_types where short_name like ?)")
+		bind_values = append(bind_values, c.TombstoneType)
 	}
 
 	// Media filters
