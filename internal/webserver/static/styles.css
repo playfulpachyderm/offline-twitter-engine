@@ -174,7 +174,8 @@ dialog::backdrop {
     outline-width: 1px;
 }
 .rounded-gray-outline, .rounded-gray-outline > .tweet {
-    border-radius: 20px;
+    border-radius: 1.5em;
+    overflow: hidden;
 }
 
 .profile-banner-image {
