@@ -261,3 +261,14 @@ v0.6.5
 - UI improvements:
 	- Add image full-size on-click viewer
 - Add images, videos and links to DMs
+
+v0.6.6
+------
+
+- BUGFIX: fix server crashing if a media download HTTP request times out
+- BUGFIX: scraping user feeds now gets long tweets properly
+- UI improvements:
+	- Fix image sizing issues in link preview images and DM images
+- Add support for pinned tweets (both fetching and displaying)
+- New search bar filters: "tombstone:<tombstone_type>" and "followed_by:<userhandle>"
+- Add boilerplate for Progressive Web App

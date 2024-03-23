@@ -14,9 +14,6 @@ TODO video-bitrates
 TODO: videos-view-count
 - videos don't parse properly in APIv2
 
-TODO: APIv2-pinned-tweets
-- feed with pinned tweet
-
 TODO video-not-downloading: https://twitter.com/JustinPulitzer/status/1496709662602932224
 
 TODO get-user-tweets-user-doesn't-exist
@@ -50,6 +47,7 @@ TODO tweets-with-italics
 
 TODO authenticated-only-request-warning
 - warn when attempting to run requests which require authentication without a session active
+  - right now it will try and then produce an HTTP error (404)
 
 TODO unknown-user-upgrading
 - if an unknown user (created to satisfy SQLite integrity check on user_id foreign key) has user details fetched, the "Join Date" and other zero-value fields should update with the new value
@@ -82,7 +80,6 @@ TODO: newer-version-tombstone
 TODO: failed-tweets
 - https://twitter.com/_HARVEY__DENT_/status/1755665502385377720
 - "Empty tweet": https://twitter.com/wispem_wantex/status/1581333495393107968
-- "video not available in your location" (geoblock) (this one should be fixed, but check it): https://twitter.com/espnmma/status/1764026985775333761
 
 TODO: new-content-type
 - https://twitter.com/itsbackwereover/status/1757947530506043872
@@ -105,8 +102,6 @@ TODO: login-routes-tests
 TODO: webserver-session-arg-active-user
 - make the active user get set on initializing the Application object if a --session flag is given
 
-TODO: progressive-web-app
-
 TODO: paste-twitter-urls-in-search-bar
 - pasting a link from twitter.com into the search bar should handle it properly
 	- space
@@ -124,8 +119,9 @@ TODO: features-from-qt-version
   - when previous tweet in thread is missing, put a "fetch tweet" button to get it
 
 TODO: dms
-- unshorten URLs
 - fetch chat room history on opening
+- add scrollback / pagination
+- add search
 
 TODO: search-terms-highlighted
 - on Search page, highlight matches for the search keywords
