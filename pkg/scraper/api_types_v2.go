@@ -895,7 +895,7 @@ func (api *API) GetPaginatedQuery(pq PaginatedQuery, count int) (TweetTrove, err
 // Get a User feed using the new GraphQL twitter api
 func (api *API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response, error) {
 	url, err := url.Parse(GraphqlURL{
-		BaseUrl: "https://twitter.com/i/api/graphql/CwLU7qTfeu0doqhSr6tW4A/UserTweetsAndReplies",
+		BaseUrl: "https://twitter.com/i/api/graphql/Q6aAvPw7azXZbqXzuqTALA/UserTweetsAndReplies",
 		Variables: GraphqlVariables{
 			UserID:                      user_id,
 			Count:                       40,
@@ -910,7 +910,21 @@ func (api *API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response,
 			WithSuperFollowsTweetFields: true,
 			WithBirdwatchNotes:          false,
 			WithVoice:                   true,
-			WithV2Timeline:              false,
+			WithV2Timeline:              true,
+		},
+		Features: GraphqlFeatures{
+			ResponsiveWebGraphqlExcludeDirectiveEnabled:                    true,
+			CreatorSubscriptionsTweetPreviewApiEnabled:                     true,
+			ResponsiveWebGraphqlTimelineNavigationEnabled:                  true,
+			ResponsiveWebGraphqlSkipUserProfileImageExtensionsEnabled:      true,
+			ResponsiveWebEditTweetApiEnabled:                               true,
+			LongformNotetweetsConsumptionEnabled:                           true,
+			FreedomOfSpeechNotReachFetchEnabled:                            false,
+			TweetWithVisibilityResultsPreferGqlLimitedActionsPolicyEnabled: true,
+			LongformNotetweetsRichTextReadEnabled:                          true,
+			LongformNotetweetsInlineMediaEnabled:                           false,
+			ResponsiveWebMediaDownloadVideoEnabled:                         true,
+			ResponsiveWebEnhanceCardsEnabled:                               true,
 		},
 	}.String())
 	if err != nil {
