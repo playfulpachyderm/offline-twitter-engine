@@ -460,7 +460,3 @@ func (p Profile) fill_dm_contents(trove *DMTrove) {
 
 	p.fill_content(&trove.TweetTrove, UserID(0))
 }
-
-
-	}
-}
