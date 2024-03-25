@@ -12,9 +12,11 @@ import (
 )
 
 const (
-	CHAT_MESSAGES_ALL_SQL_FIELDS = "id, chat_room_id, sender_id, sent_at, request_id, text, in_reply_to_id, embedded_tweet_id"
-	CHAT_ROOMS_ALL_SQL_FIELDS    = "id, type, last_messaged_at, is_nsfw, created_at, created_by_user_id, name, avatar_image_remote_url, avatar_image_local_path"
-	CHAT_ROOM_PARTICIPANTS_ALL_SQL_FIELDS = "chat_room_id, user_id, last_read_event_id, is_chat_settings_valid, is_notifications_disabled, is_mention_notifications_disabled, is_read_only, is_trusted, is_muted, status"
+	CHAT_MESSAGES_ALL_SQL_FIELDS = `id, chat_room_id, sender_id, sent_at, request_id, text, in_reply_to_id, embedded_tweet_id`
+	CHAT_ROOMS_ALL_SQL_FIELDS    = `id, type, last_messaged_at, is_nsfw, created_at, created_by_user_id, name,
+	                                             avatar_image_remote_url, avatar_image_local_path`
+	CHAT_ROOM_PARTICIPANTS_ALL_SQL_FIELDS = `chat_room_id, user_id, last_read_event_id, is_chat_settings_valid, is_notifications_disabled,
+	                                             is_mention_notifications_disabled, is_read_only, is_trusted, is_muted, status`
 )
 
 func (p Profile) SaveChatRoom(r DMChatRoom) error {
@@ -314,7 +316,7 @@ func (p Profile) fill_chat_room_participants(room *DMChatRoom, trove *DMTrove) {
 		User
 	}
 	err := p.DB.Select(&participants, `
-		select ` + CHAT_ROOM_PARTICIPANTS_ALL_SQL_FIELDS + `, `+USERS_ALL_SQL_FIELDS+`
+		select `+CHAT_ROOM_PARTICIPANTS_ALL_SQL_FIELDS+`, `+USERS_ALL_SQL_FIELDS+`
 		  from chat_room_participants join users on chat_room_participants.user_id = users.id
 		 where chat_room_id = ?
 	`, room.ID)
