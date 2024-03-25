@@ -173,13 +173,16 @@ func TestGetChatRoomsPreview(t *testing.T) {
 	require.True(is_ok)
 	assert.Equal(msg.Text, "This looks pretty good huh")
 
+	// Participants
 	require.Len(room.Participants, 2)
 	for _, user_id := range []UserID{1458284524761075714, 1488963321701171204} {
 		participant, is_ok := room.Participants[user_id]
 		require.True(is_ok)
 		assert.Equal(participant.IsChatSettingsValid, participant.UserID == 1488963321701171204)
-		_, is_ok = chat_view.Users[user_id]
+		u, is_ok := chat_view.Users[user_id]
 		require.True(is_ok)
+		assert.Equal(u.ID, user_id)
+		assert.NotEqual(u.Handle, "") // Make sure it's filled out
 	}
 }
 
@@ -202,8 +205,10 @@ func TestGetChatRoomContents(t *testing.T) {
 		participant, is_ok := room.Participants[user_id]
 		require.True(is_ok)
 		assert.Equal(participant.IsChatSettingsValid, participant.UserID == 1488963321701171204)
-		_, is_ok = chat_view.Users[user_id]
+		u, is_ok := chat_view.Users[user_id]
 		require.True(is_ok)
+		assert.Equal(u.ID, user_id)
+		assert.NotEqual(u.Handle, "") // Make sure it's filled out
 	}
 
 	// Messages
