@@ -105,10 +105,21 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	// Also, only show pinned tweets on default tab (tweets+replies) or "without_replies" tab
 	if user.PinnedTweetID != scraper.TweetID(0) && (len(parts) <= 1 || parts[1] == "without_replies") {
 		data.PinnedTweet, err = app.Profile.GetTweetById(user.PinnedTweetID)
-		if err == nil {
-			feed.TweetTrove.Tweets[data.PinnedTweet.ID] = data.PinnedTweet
-		} else if !errors.Is(err, persistence.ErrNotInDB) {
+		if err != nil && !errors.Is(err, persistence.ErrNotInDB) {
 			panic(err)
+		}
+		feed.TweetTrove.Tweets[data.PinnedTweet.ID] = data.PinnedTweet
+
+		// Fetch quoted tweet if necessary
+		if data.PinnedTweet.QuotedTweetID != scraper.TweetID(0) {
+			feed.TweetTrove.Tweets[data.PinnedTweet.QuotedTweetID], err = app.Profile.GetTweetById(data.PinnedTweet.QuotedTweetID)
+			if err != nil && !errors.Is(err, persistence.ErrNotInDB) {
+				panic(err)
+			}
+			// And the user
+			qt_user_id := feed.TweetTrove.Tweets[data.PinnedTweet.QuotedTweetID].UserID
+			feed.TweetTrove.Users[qt_user_id], err = app.Profile.GetUserByID(qt_user_id)
+			panic_if(err)
 		}
 	}
 
