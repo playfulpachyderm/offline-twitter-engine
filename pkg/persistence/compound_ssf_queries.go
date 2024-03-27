@@ -3,6 +3,7 @@ package persistence
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -318,6 +319,12 @@ func (c *Cursor) apply_token(token string) error {
 		c.LikedByUserHandle = scraper.UserHandle(parts[1])
 	case "followed_by":
 		c.FollowedByUserHandle = scraper.UserHandle(parts[1])
+	case "list":
+		i, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return fmt.Errorf("%w: filter 'list:' must be a number (list ID), got %q", ErrInvalidQuery, parts[1])
+		}
+		c.ListID = scraper.ListID(i)
 	case "since":
 		c.SinceTimestamp.Time, err = time.Parse("2006-01-02", parts[1])
 	case "until":
@@ -504,6 +511,7 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
 		bind_values = append(bind_values, c.CursorValue)
 	}
 
+	// Assemble the full where-clause
 	where_clause := ""
 	if len(where_clauses) > 0 {
 		where_clause = "where " + strings.Join(where_clauses, " and ")
@@ -563,9 +571,8 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
 
 	p.fill_content(&ret.TweetTrove, current_user_id)
 
-	ret.CursorBottom = c
-
 	// Set the new cursor position and value
+	ret.CursorBottom = c // Copy cursor values over
 	if len(results) < c.PageSize {
 		ret.CursorBottom.CursorPosition = CURSOR_END
 	} else {
