@@ -2,7 +2,7 @@
 
 {{define "main"}}
 <div class="login">
-  <form hx-post="/change-session" hx-target=".nav-sidebar" hx-swap="outerHTML" hx-ext="json-enc">
+  <form hx-post="/change-session" hx-target="#nav-sidebar" hx-swap="outerHTML" hx-ext="json-enc">
     <label for="select-account">Choose account:</label>
     <select name="account" id="select-account">
       {{range .ExistingSessions}}

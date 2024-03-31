@@ -2,7 +2,7 @@
 
 {{define "main"}}
   <div class="search-header">
-    <div class="row spread">
+    <div class="row row--spread">
       <div class="dummy"></div> {{/* Extra div to take up a slot in the `row` */}}
       <h1>Search results: {{.SearchText}}</h1>
       <div class="user-feed-buttons-container">

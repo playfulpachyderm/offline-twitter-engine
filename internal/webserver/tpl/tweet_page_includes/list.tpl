@@ -3,7 +3,7 @@
     {{range .UserIDs}}
       {{$user := (user .)}}
       <div class="user">
-        <div class="row spread">
+        <div class="row row--spread">
           {{template "author-info" $user}}
           {{if $.button_text}}
             <a class="unstyled-link quick-link danger" href="{{$.button_url}}?user_handle={{$user.Handle}}"onclick="return confirm('{{$.button_text}} this user?  Are you sure?')">

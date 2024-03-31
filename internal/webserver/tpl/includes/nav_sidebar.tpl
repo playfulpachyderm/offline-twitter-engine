@@ -1,5 +1,5 @@
 {{define "nav-sidebar"}}
-  <div class="nav-sidebar">
+  <nav id="nav-sidebar">
     <div id="logged-in-user-info">
       <div class="quick-link" hx-get="/login" hx-trigger="click" hx-target="body" hx-push-url="true">
         {{template "author-info" active_user}}
@@ -72,5 +72,5 @@
         </li>
       </a>
     </ul>
-  </div>
+  </nav>
 {{end}}

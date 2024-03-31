@@ -21,21 +21,20 @@
             });
         }
       </script>
-
     </head>
     <body>
-      <div class="top-bar">
+      <header class="row search-bar">
         <a onclick="window.history.back()" class="back-button quick-link">
           <img class="svg-icon" src="/static/icons/back.svg" width="24" height="24"/>
         </a>
-        <form hx-get="/search" hx-push-url="true" hx-target="body" hx-swap="inner-html show:window:top">
+        <form class="search-form" hx-get="/search" hx-push-url="true" hx-target="body" hx-swap="inner-html show:window:top">
           <input id="search-bar"
             name="q"
             placeholder="Search" type="text"
             {{with (search_text)}} value="{{.}}" {{end}}
           />
         </form>
-      </div>
+      </header>
       {{template "nav-sidebar"}}
       <main>
         {{template "main" .}}

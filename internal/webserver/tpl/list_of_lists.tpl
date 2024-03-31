@@ -17,7 +17,7 @@
   <div class="users-list-previews">
     {{range .}}
       {{$max_display_users := 10}}
-      <div class="users-list-preview row spread">
+      <div class="users-list-preview row row--spread">
         <div class="list-info-container" hx-get="/lists/{{.ID}}" hx-trigger="click" hx-target="body" hx-push-url="true">
           <span class="list-name">{{.Name}}</span>
           <span class="num-users">({{(len .Users)}})</span>

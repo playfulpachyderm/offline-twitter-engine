@@ -31,22 +31,34 @@ const QColor COLOR_SPACE_PURPLE_OUTLINE = QColor(100, 82, 252);
 */
 }
 
+
+/***************************************************************************************************
+ *
+ * Base styles
+ * -----------
+ *
+ * Page global / default styles.  Should only use tag selectors or attribute selectors.  No ID or
+ * class selectors; those are purpose-specific, i.e., non-default.
+ *
+ ***************************************************************************************************/
+
 html {
-    /* Force scrollbar, even when it fits on 1 page.  Prevents viewport from resizing -> flickering / stuff moving btw page loads */
+    /*
+     * Force scrollbar, even when it fits on 1 page.  Prevents viewport from resizing -> flickering
+     * and stuff moving between page loads
+     */
     overflow-y: scroll;
 }
 body {
     margin: 0 30%;
+    min-height: 100vh;
+
     border-color: var(--color-twitter-off-white-dark);
     border-right-style: solid;
     border-left-style: solid;
     border-width: 1px;
-    min-height: 100vh;
 
     font-family: "Titillium Web";
-}
-main {
-    padding-top: 4em;
 }
 input, select {
     font-family: inherit;
@@ -55,11 +67,117 @@ input, select {
     box-sizing: border-box;
     border-radius: 0.5em;
 }
-
+input[type="submit"] {
+    background-color: var(--color-twitter-blue-light);
+    width: 10em;
+    padding: 1em;
+    border-radius: 1em;
+    font-size: 1em;
+    cursor: pointer;
+}
+a {
+    text-decoration: none;
+    color: inherit;
+}
 h1 {
     margin: 0.5em 0;
     text-align: center;
 }
+h3 {
+    margin: 0.5em 0;
+}
+
+
+/***************************************************************************************************
+ *
+ * Utility styles
+ * --------------
+ *
+ * Generic or reusable styles.  Should use only class selectors.  Should *not* actually be modules
+ * (anything application specific).
+ *
+ ***************************************************************************************************/
+
+.row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.row--spread {
+    justify-content: space-between;
+}
+
+/* A list of items separated by interpuncts */
+.inline-dotted-list {
+    list-style: none;
+    margin: 0;
+}
+.inline-dotted-list > * {
+    display: inline;
+}
+.inline-dotted-list > *:after {
+    content: " ⋅";
+}
+.inline-dotted-list > *:last-child:after {
+    content: "";
+}
+
+.rounded-gray-outline {
+    outline-color: lightgray;
+    outline-style: solid;
+    outline-width: 1px;
+    overflow: hidden;
+    border-radius: 1.5em;
+}
+
+/***************************************************************************************************
+ *
+ * Layout styles
+ * -------------
+ *
+ * Major page elements.  Can use semantic HTML tag names and IDs.  Class selectors are for modules.
+ *
+ ***************************************************************************************************/
+
+header {
+    /* Sticky to top of page */
+    position: fixed;
+    z-index: 1;
+
+    /* Match layout width of `body` */
+    left: 30%;
+    right: 30%;
+
+    height: 4em;
+    padding: 0.5em 1em;
+    border: 1px solid var(--color-outline-gray);
+    box-sizing: border-box;
+
+    background-color: white;
+}
+
+main {
+    /* Space taken up by the header search bar */
+    padding-top: 4em;
+}
+
+#nav-sidebar {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    transform: translate(-100%, 0);
+    font-size: 1.4em;
+}
+
+
+/*******************************************************************************
+ *
+ * Module styles
+ * -------------
+ *
+ * Normal page elements.  Should only use classes; no IDs or tag names.
+ *
+ *******************************************************************************/
 
 .server-error-msg {
     position: fixed;
@@ -83,24 +201,11 @@ h1 {
     text-align: center;
 }
 
-ul.inline-dotted-list {
-    list-style: none;
-    margin: 0;
-}
-ul.inline-dotted-list li {
-    display: inline;
-}
-ul.inline-dotted-list li:after {
-    content: " ⋅";
-}
-ul.inline-dotted-list li:last-child:after {
-    content: "";
-}
-
 .tweet {
     padding: 0 1.5em;
     position: relative;
     z-index: 0;  /* Dunno why, but without it, hovering a tweet with a Poll hides the poll fill bars */
+    overflow: hidden; /* Otherwise HTMX spinner sticks over the rounded edges in a quoted tweet */
 }
 :not(#focused-tweet) > .tweet:hover:not(:has(.tweet:hover)) {
     background-color: var(--color-twitter-off-white);
@@ -168,23 +273,8 @@ dialog::backdrop {
     margin: 1em 0;
 }
 
-.rounded-gray-outline {
-    outline-color: lightgray;
-    outline-style: solid;
-    outline-width: 1px;
-}
-.rounded-gray-outline, .rounded-gray-outline > .tweet {
-    border-radius: 1.5em;
-    overflow: hidden;
-}
-
 .profile-banner-image {
     width: 100%;
-}
-
-.unstyled-link {
-    text-decoration: none;
-    color: inherit;
 }
 
 .author-info {
@@ -241,7 +331,6 @@ dialog::backdrop {
     color: var(--color-twitter-text-gray);
 }
 a.entity {
-    text-decoration: none;
     color: var(--color-twitter-blue);
 }
 
@@ -280,9 +369,6 @@ img.embedded-link-preview {
     color: var(--color-twitter-text-gray);
     font-size: 0.8em;
     margin: 0;
-}
-h3 {
-    margin: 0.5em 0;
 }
 .embedded-link-domain-container {
     margin-top: 0.2em
@@ -356,15 +442,6 @@ img.svg-icon.pinned-tweet__pin-icon {
     height: auto;
 }
 
-.row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-.row.spread {
-    justify-content: space-between;
-}
-
 .vertical-reply-line-container {
     flex-grow: 0;
     flex-shrink: 0;
@@ -420,13 +497,6 @@ p.posted-at {
 .reply-chain > :last-child {
     padding-bottom: 1em;
     border-bottom: 1px solid var(--color-twitter-off-white-dark);
-}
-.nav-sidebar {
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    transform: translate(-100%, 0);
-    font-size: 1.4em;
 }
 ul.quick-links {
     display: flex;
@@ -511,22 +581,6 @@ ul.quick-links {
     background-color: var(--color-twitter-blue-extra-light);
 }
 
-.top-bar {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    height: 4em;
-    padding: 0.5em 1em;
-    gap: 1em;
-    border: 1px solid var(--color-outline-gray);
-    position: fixed;
-    background-color: white;
-    width: 40%;
-    left: 30%;
-    box-sizing: border-box;
-    z-index: 1;
-}
-
 .back-button {
     flex-grow: 0;
     border-radius: 50%;
@@ -553,7 +607,8 @@ svg {
     left: 50%;
     transform: translate(-50%, -50%);
 }
-.top-bar form {
+.search-form {
+    margin-left: 1em;
     flex-grow: 1;
     display: flex;
 }
@@ -587,14 +642,7 @@ svg {
 .submit-container {
     text-align: right;
 }
-input[type="submit"] {
-    background-color: var(--color-twitter-blue-light);
-    width: 10em;
-    padding: 1em;
-    border-radius: 1em;
-    font-size: 1em;
-    cursor: pointer;
-}
+
 .change-session-form select {
     display: block;
     width: 100%;
