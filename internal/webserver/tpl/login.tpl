@@ -1,44 +1,49 @@
 {{define "title"}}Login{{end}}
 
 {{define "main"}}
-<div class="login">
-  <form hx-post="/change-session" hx-target="#nav-sidebar" hx-swap="outerHTML" hx-ext="json-enc">
-    <label for="select-account">Choose account:</label>
-    <select name="account" id="select-account">
-      {{range .ExistingSessions}}
-        <option value="{{.}}">@{{.}}</option>
-      {{end}}
-      <option value="no account">[no account (don't log in)]</option>
-    </select>
-    <div class="field-container submit-container">
-      <input type='submit' value='Use account'>
+<div class="login-page">
+  <h1>Login</h1>
+
+  <form class="choose-session" hx-post="/change-session" hx-target="#nav-sidebar" hx-swap="outerHTML" hx-ext="json-enc">
+    <h3>Open existing session</h3>
+    <div class="row row--spread choose-session__form-contents">
+      <select name="account" class="choose-session__dropdown">
+        {{range .ExistingSessions}}
+          <option value="{{.}}">@{{.}}</option>
+        {{end}}
+        <option value="no account">[no account (don't log in)]</option>
+      </select>
+      <div class="login-form__field-container login-form__submit-container">
+        <input type='submit' value='Go'>
+      </div>
     </div>
   </form>
 
-  <p>Or log in</p>
+  <hr>
 
   <form class="login-form" hx-post="/login" hx-target="body" hx-ext="json-enc">
-    <div class="field-container">
+    <h3>Log in (new session)</h3>
+    <div class="login-form__field-container">
       <label>Username</label>
       {{with .FormErrors.username}}
-        <label class='error'>({{.}})</label>
+        <label class='login-form__error-label'>({{.}})</label>
       {{end}}
-      <input name='username' value='{{.Username}}'>
+      <input name='username' value='{{.Username}}' class="login-form__input">
     </div>
-    <div class="field-container">
+    <div class="login-form__field-container">
       <label>Password:</label>
       {{with .FormErrors.password}}
-        <label class='error'>({{.}})</label>
+        <label class='login-form__error-label'>({{.}})</label>
       {{end}}
-      <input type='password' name='password'>
+      <input type='password' name='password' class="login-form__input">
     </div>
-    <div class="field-container submit-container">
+    <div class="login-form__field-container login-form__submit-container">
       <input type='submit' value='Login'>
     </div>
 
-    <div class="htmx-spinner-container">
-      <div class="htmx-spinner-background"></div>
-      <img class="svg-icon htmx-spinner" src="/static/icons/spinner.svg" />
+    <div class="htmx-spinner">
+      <div class="htmx-spinner__background"></div>
+      <img class="svg-icon htmx-spinner__icon" src="/static/icons/spinner.svg" />
     </div>
   </form>
 </div>

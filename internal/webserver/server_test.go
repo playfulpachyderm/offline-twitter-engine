@@ -95,7 +95,7 @@ func TestUserFeedWithEntityInBio(t *testing.T) {
 
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	bio_entities := cascadia.QueryAll(root, selector(".user-bio .entity"))
+	bio_entities := cascadia.QueryAll(root, selector(".user-header__bio .entity"))
 	require.Len(bio_entities, 1)
 	assert.Equal(bio_entities[0].FirstChild.Data, "@SheathUnderwear")
 }
@@ -192,7 +192,7 @@ func TestUserFollowers(t *testing.T) {
 
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	assert.Len(cascadia.QueryAll(root, selector(".users-list-container > .user")), 2)
+	assert.Len(cascadia.QueryAll(root, selector(".users-list > .user")), 2)
 }
 
 func TestUserFollowees(t *testing.T) {
@@ -204,7 +204,7 @@ func TestUserFollowees(t *testing.T) {
 
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	assert.Len(cascadia.QueryAll(root, selector(".users-list-container > .user")), 1)
+	assert.Len(cascadia.QueryAll(root, selector(".users-list > .user")), 1)
 }
 
 // Timeline page
@@ -363,7 +363,7 @@ func TestSearchUsers(t *testing.T) {
 	require.Equal(resp.StatusCode, 200)
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	user_elements := cascadia.QueryAll(root, selector(".users-list-container .user"))
+	user_elements := cascadia.QueryAll(root, selector(".users-list .user"))
 	assert.Len(user_elements, 2)
 	assert.Contains(cascadia.Query(root, selector("#search-bar")).Attr, html.Attribute{Key: "value", Val: "no"})
 }
@@ -456,7 +456,7 @@ func TestTweetsWithContent(t *testing.T) {
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".poll")), 1)
-	assert.Len(cascadia.QueryAll(root, selector(".poll-choice")), 4)
+	assert.Len(cascadia.QueryAll(root, selector(".poll__choice")), 4)
 
 	// Video
 	resp = do_request(httptest.NewRequest("GET", "/tweet/1453461248142495744", nil))
@@ -478,7 +478,7 @@ func TestTweetsWithContent(t *testing.T) {
 	root, err = html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".space")), 1)
-	assert.Len(cascadia.QueryAll(root, selector("ul.space-participants-list li")), 9)
+	assert.Len(cascadia.QueryAll(root, selector("ul.space__participants-list li")), 9)
 }
 
 func TestTweetWithEntities(t *testing.T) {
@@ -621,7 +621,7 @@ func TestListsIndex(t *testing.T) {
 	require.NoError(err)
 
 	// Check that there's at least 2 Lists
-	assert.True(t, len(cascadia.QueryAll(root, selector(".users-list-preview"))) >= 2)
+	assert.True(t, len(cascadia.QueryAll(root, selector(".list-preview"))) >= 2)
 }
 
 func TestListDetail(t *testing.T) {
@@ -633,7 +633,7 @@ func TestListDetail(t *testing.T) {
 	require.Equal(resp.StatusCode, 200)
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	assert.Len(cascadia.QueryAll(root, selector(".users-list-container .author-info")), 5)
+	assert.Len(cascadia.QueryAll(root, selector(".users-list .author-info")), 5)
 
 	// Feed
 	resp1 := do_request(httptest.NewRequest("GET", "/lists/2", nil))
@@ -662,7 +662,7 @@ func TestListAddAndDeleteUser(t *testing.T) {
 	require.Equal(resp.StatusCode, 200)
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	assert.Len(cascadia.QueryAll(root, selector(".users-list-container .author-info")), 2)
+	assert.Len(cascadia.QueryAll(root, selector(".users-list .author-info")), 2)
 
 	// Add a user
 	resp_add := do_request(httptest.NewRequest("GET", "/lists/2/add_user?user_handle=cernovich", nil))
@@ -674,7 +674,7 @@ func TestListAddAndDeleteUser(t *testing.T) {
 	require.Equal(resp.StatusCode, 200)
 	root, err = html.Parse(resp.Body)
 	require.NoError(err)
-	assert.Len(cascadia.QueryAll(root, selector(".users-list-container .author-info")), 3)
+	assert.Len(cascadia.QueryAll(root, selector(".users-list .author-info")), 3)
 
 	// Delete a user
 	resp_remove := do_request(httptest.NewRequest("GET", "/lists/2/remove_user?user_handle=cernovich", nil))
@@ -686,7 +686,7 @@ func TestListAddAndDeleteUser(t *testing.T) {
 	require.Equal(resp.StatusCode, 200)
 	root, err = html.Parse(resp.Body)
 	require.NoError(err)
-	assert.Len(cascadia.QueryAll(root, selector(".users-list-container .author-info")), 2)
+	assert.Len(cascadia.QueryAll(root, selector(".users-list .author-info")), 2)
 }
 
 func TestCreateNewList(t *testing.T) {
@@ -698,7 +698,7 @@ func TestCreateNewList(t *testing.T) {
 	require.Equal(resp.StatusCode, 200)
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	num_lists := len(cascadia.QueryAll(root, selector(".users-list-preview")))
+	num_lists := len(cascadia.QueryAll(root, selector(".list-preview")))
 
 	// Create a new list
 	resp_add := do_request(httptest.NewRequest("POST", "/lists", strings.NewReader(`{"name": "My New List"}`)))
@@ -710,7 +710,7 @@ func TestCreateNewList(t *testing.T) {
 	require.Equal(resp.StatusCode, 200)
 	root, err = html.Parse(resp.Body)
 	require.NoError(err)
-	assert.Len(cascadia.QueryAll(root, selector(".users-list-preview")), num_lists+1)
+	assert.Len(cascadia.QueryAll(root, selector(".list-preview")), num_lists+1)
 }
 
 // Messages
@@ -732,8 +732,8 @@ func TestMessagesIndexPage(t *testing.T) {
 	resp := recorder.Result()
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	assert.Len(cascadia.QueryAll(root, selector(".chat-list .chat")), 2)
-	assert.Len(cascadia.QueryAll(root, selector(".chat-view .dm-message-and-reacts-container")), 0) // No messages until you click on one
+	assert.Len(cascadia.QueryAll(root, selector(".chat-list .chat-list-entry")), 2)
+	assert.Len(cascadia.QueryAll(root, selector(".chat-view .dm-message")), 0) // No messages until you click on one
 }
 
 // Open a chat room
@@ -752,8 +752,8 @@ func TestMessagesRoom(t *testing.T) {
 	resp := recorder.Result()
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	assert.Len(cascadia.QueryAll(root, selector(".chat-list .chat")), 2) // Chat list still renders
-	assert.Len(cascadia.QueryAll(root, selector("#chat-view .dm-message-and-reacts-container")), 5)
+	assert.Len(cascadia.QueryAll(root, selector(".chat-list .chat-list-entry")), 2) // Chat list still renders
+	assert.Len(cascadia.QueryAll(root, selector("#chat-view .dm-message")), 5)
 
 	// Should have the poller at the bottom
 	node := cascadia.Query(root, selector("#new-messages-poller"))
@@ -782,7 +782,7 @@ func TestMessagesRoomPollForUpdates(t *testing.T) {
 	resp := recorder.Result()
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	assert.Len(cascadia.QueryAll(root, selector(".dm-message-and-reacts-container")), 3)
+	assert.Len(cascadia.QueryAll(root, selector(".dm-message")), 3)
 
 	// Should have the poller at the bottom
 	node := cascadia.Query(root, selector("#new-messages-poller"))
@@ -811,7 +811,7 @@ func TestMessagesRoomPollForUpdatesEmptyResult(t *testing.T) {
 	resp := recorder.Result()
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	assert.Len(cascadia.QueryAll(root, selector(".dm-message-and-reacts-container")), 0)
+	assert.Len(cascadia.QueryAll(root, selector(".dm-message")), 0)
 
 	// Should have the poller at the bottom, with the same value as previously
 	node := cascadia.Query(root, selector("#new-messages-poller"))

@@ -4,12 +4,12 @@
   <div class="list-feed-header">
     <h1>{{.List.Name}}</h1>
 
-    <div class="row tabs-container">
-      <a class="tab unstyled-link {{if (eq .ActiveTab "feed")}}active-tab{{end}}" href="/lists/{{.List.ID}}">
-        <span class="tab-inner">Feed</span>
+    <div class="tabs row">
+      <a class="tabs__tab {{if (eq .ActiveTab "feed")}}tabs__tab--active{{end}}" href="/lists/{{.List.ID}}">
+        <span class="tabs__tab-label">Feed</span>
       </a>
-      <a class="tab unstyled-link {{if (eq .ActiveTab "users")}}active-tab{{end}}" href="/lists/{{.List.ID}}/users">
-        <span class="tab-inner">Users</span>
+      <a class="tabs__tab {{if (eq .ActiveTab "users")}}tabs__tab--active{{end}}" href="/lists/{{.List.ID}}/users">
+        <span class="tabs__tab-label">Users</span>
       </a>
     </div>
   </div>

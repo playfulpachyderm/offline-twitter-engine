@@ -1,7 +1,12 @@
 {{define "chat-list-entry"}}
   {{$room := $.room}}
-  <div class="chat {{if .is_active}}active-chat{{end}}" hx-get="/messages/{{$room.ID}}" hx-push-url="true" hx-swap="outerHTML" hx-target="body">
-    <div class="chat-preview-header">
+  <div class="chat-list-entry {{if .is_active}}chat-list-entry--active-chat{{end}}"
+    hx-get="/messages/{{$room.ID}}"
+    hx-push-url="true"
+    hx-swap="outerHTML"
+    hx-target="body"
+  >
+    <div class="chat-list-entry__header">
       {{if (eq $room.Type "ONE_TO_ONE")}}
         {{range $room.Participants}}
           {{if (ne .UserID (active_user).ID)}}
@@ -12,19 +17,21 @@
           {{end}}
         {{end}}
       {{else}}
-        <div class="groupchat-profile-image-container">
-          <img class="profile-image" src="{{$room.AvatarImageRemoteURL}}" width="48" height="48" />
-          <div class="display-name row">{{$room.Name}}</div>
+        <div class="chat-list-entry__groupchat-profile-image">
+          {{template "circle-profile-img-no-link" (dict "IsContentDownloaded" false "ProfileImageUrl" $room.AvatarImageRemoteURL)}}
+          <div class="click-eater" hx-trigger="click consume" hx-target="body">
+            <div class="display-name row">{{$room.Name}}</div>
+          </div>
         </div>
       {{end}}
-      <div class="chat-preview-timestamp .posted-at-container">
-        <p class="posted-at">
+      <div class="posted-at">
+        <p class="posted-at__text">
           {{$room.LastMessagedAt.Time.Format "Jan 2, 2006"}}
           <br/>
           {{$room.LastMessagedAt.Time.Format "3:04 pm"}}
         </p>
       </div>
     </div>
-    <p class="chat-preview">{{(index $.messages $room.LastMessageID).Text}}</p>
+    <p class="chat-list-entry__message-preview">{{(index $.messages $room.LastMessageID).Text}}</p>
   </div>
 {{end}}

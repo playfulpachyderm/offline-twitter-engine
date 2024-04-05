@@ -14,27 +14,18 @@
     <button onclick="document.querySelector('#newListDialog').close()">Cancel</button>
   </dialog>
 
-  <div class="users-list-previews">
+  <div class="list-of-lists">
     {{range .}}
       {{$max_display_users := 10}}
-      <div class="users-list-preview row row--spread">
-        <div class="list-info-container" hx-get="/lists/{{.ID}}" hx-trigger="click" hx-target="body" hx-push-url="true">
+      <div class="list-preview row row--spread">
+        <div class="list-preview__info-container" hx-get="/lists/{{.ID}}" hx-trigger="click" hx-target="body" hx-push-url="true">
           <span class="list-name">{{.Name}}</span>
-          <span class="num-users">({{(len .Users)}})</span>
-          <div class="first-N-profile-images" hx-trigger="click consume">
+          <span class="list-preview__num-users">({{(len .Users)}})</span>
+          <div class="list-preview__first-N-profile-images" hx-trigger="click consume">
             {{range $i, $user := .Users}}
               {{/* Only render the first 10-ish users */}}
               {{if (lt $i $max_display_users)}}
-                <a class="unstyled-link" href="/{{$user.Handle}}">
-                  <img
-                    class="profile-image"
-                    {{if $user.IsContentDownloaded}}
-                      src="/content/{{$user.GetProfileImageLocalPath}}"
-                    {{else}}
-                      src="{{$user.ProfileImageUrl}}"
-                    {{end}}
-                  />
-                </a>
+                {{template "circle-profile-img" $user}}
               {{end}}
             {{end}}
             {{if (gt (len .Users) $max_display_users)}}
@@ -42,7 +33,7 @@
             {{end}}
           </div>
         </div>
-        <a class="unstyled-link quick-link danger"
+        <a class="button button--danger"
           hx-delete="/lists/{{.ID}}" hx-target="body"
           onclick="return confirm('Delete this list?  Are you sure?')"
         >Delete</a>

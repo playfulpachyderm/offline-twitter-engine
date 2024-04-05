@@ -1,19 +1,19 @@
 :root {
-    --color-twitter-text-gray: #536171;
-    --color-twitter-blue: #1b95e0;  /* hsl(203, 78%, 49%) */
-    --color-twitter-blue-light: #7cc5f6; /* hsl(204, 87%, 73%) */
-    --color-twitter-blue-extra-light: hsl(204, 95%, 85%);
-    --color-twitter-off-white: #f7f9f9; /* hsl(180, 14%, 97%) */
-    --color-twitter-off-white-dark: #dae5e5; /* hsl(180, 17%, 88%) */
-    --color-outline-gray: #dcdcdc;
-    --color-twitter-text-gray: #536471;
+	--color-twitter-text-gray: #536171;
+	--color-twitter-blue: #1b95e0;  /* hsl(203, 78%, 49%) */
+	--color-twitter-blue-light: #7cc5f6; /* hsl(204, 87%, 73%) */
+	--color-twitter-blue-extra-light: hsl(204, 95%, 85%);
+	--color-twitter-off-white: #f7f9f9; /* hsl(180, 14%, 97%) */
+	--color-twitter-off-white-dark: #dae5e5; /* hsl(180, 17%, 88%) */
+	--color-outline-gray: #dcdcdc;
+	--color-twitter-text-gray: #536471;
 
-    --color-twitter-danger-red: #f4212e; /* hsl(356, 91%, 54%) */
-    --color-twitter-danger-red2: #de1b28;        /* hsl(356, 78%, 49%) */
-    --color-twitter-danger-red2-light: #f67e86;  /* hsl(356, 87%, 73%) */
-    --color-twitter-danger-red2-hover: #f2a6aa;  /* hsl(357, 75%, 80%);*/
-    --color-space-purple: #a49bfd;
-    --color-space-purple-outline: #6452fc;
+	--color-twitter-danger-red: #f4212e; /* hsl(356, 91%, 54%) */
+	--color-twitter-danger-red2: #de1b28;		/* hsl(356, 78%, 49%) */
+	--color-twitter-danger-red2-light: #f67e86;  /* hsl(356, 87%, 73%) */
+	--color-twitter-danger-red2-hover: #f2a6aa;  /* hsl(357, 75%, 80%);*/
+	--color-space-purple: #a49bfd;
+	--color-space-purple-outline: #6452fc;
 /*
 const QColor COLOR_OUTLINE_GRAY = QColor(220, 220, 220);
 const QColor COLOR_TWITTER_BLUE = QColor(27, 149, 224);
@@ -24,7 +24,7 @@ const QColor COLOR_TWITTER_TEXT_GRAY = QColor(83, 100, 113);
 
 const QColor COLOR_BACKGROUND_GREEN = QColor(40, 205, 50);
 
-const QColor COLOR_RED          = QColor(255, 0, 0);
+const QColor COLOR_RED		  = QColor(255, 0, 0);
 
 const QColor COLOR_SPACE_PURPLE = QColor(164, 155, 253);
 const QColor COLOR_SPACE_PURPLE_OUTLINE = QColor(100, 82, 252);
@@ -43,48 +43,56 @@ const QColor COLOR_SPACE_PURPLE_OUTLINE = QColor(100, 82, 252);
  ***************************************************************************************************/
 
 html {
-    /*
-     * Force scrollbar, even when it fits on 1 page.  Prevents viewport from resizing -> flickering
-     * and stuff moving between page loads
-     */
-    overflow-y: scroll;
+	/*
+	 * Force scrollbar, even when it fits on 1 page.  Prevents viewport from resizing -> flickering
+	 * and stuff moving between page loads
+	 */
+	overflow-y: scroll;
 }
 body {
-    margin: 0 30%;
-    min-height: 100vh;
+	/* So that toasts can be positioned relative to `body` (rather than `html`).
+	 * This is useful because it wil then use the `body`'s width (i.e., accounting for the big fat margins).
+	 */
+	position: relative;
 
-    border-color: var(--color-twitter-off-white-dark);
-    border-right-style: solid;
-    border-left-style: solid;
-    border-width: 1px;
+	margin: 0 30%;
+	min-height: 100vh;
 
-    font-family: "Titillium Web";
+	border-color: var(--color-twitter-off-white-dark);
+	border-right-style: solid;
+	border-left-style: solid;
+	border-width: 1px;
+
+	font-family: "Titillium Web";
 }
 input, select {
-    font-family: inherit;
-    font-size: 1em;
-    padding: 0.2em 0.6em;
-    box-sizing: border-box;
-    border-radius: 0.5em;
+	font-family: inherit;
+	font-size: 1em;
+	padding: 0.2em 0.6em;
+	box-sizing: border-box;
+	border-radius: 0.5em;
 }
 input[type="submit"] {
-    background-color: var(--color-twitter-blue-light);
-    width: 10em;
-    padding: 1em;
-    border-radius: 1em;
-    font-size: 1em;
-    cursor: pointer;
+	background-color: var(--color-twitter-blue-light);
+	width: 10em;
+	border-radius: 1em;
+	font-size: 1em;
+	cursor: pointer;
 }
 a {
-    text-decoration: none;
-    color: inherit;
+	text-decoration: none;
+	color: inherit;
+	cursor: pointer;
+}
+ul {
+	list-style: none;
 }
 h1 {
-    margin: 0.5em 0;
-    text-align: center;
+	margin: 0.5em 0;
+	text-align: center;
 }
 h3 {
-    margin: 0.5em 0;
+	margin: 0.5em 0;
 }
 
 
@@ -99,36 +107,91 @@ h3 {
  ***************************************************************************************************/
 
 .row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 }
 .row--spread {
-    justify-content: space-between;
+	justify-content: space-between;
 }
 
 /* A list of items separated by interpuncts */
 .inline-dotted-list {
-    list-style: none;
-    margin: 0;
-}
-.inline-dotted-list > * {
-    display: inline;
-}
-.inline-dotted-list > *:after {
-    content: " ⋅";
-}
-.inline-dotted-list > *:last-child:after {
-    content: "";
+	margin: 0;
+
+	& > * {
+		display: inline;
+	}
+	& > *:after {
+		content: " ⋅";
+	}
+	& > *:last-child:after {
+		content: "";
+	}
 }
 
 .rounded-gray-outline {
-    outline-color: lightgray;
-    outline-style: solid;
-    outline-width: 1px;
-    overflow: hidden;
-    border-radius: 1.5em;
+	outline-color: lightgray;
+	outline-style: solid;
+	outline-width: 1px;
+	overflow: hidden;
+	border-radius: 1.5em;
 }
+
+.circle-outline {
+	display: flex;
+	border-radius: 50%;
+	outline: 1px solid #777;
+	margin: 0 0.4em;
+	font-size: 0.8em;
+	padding: 0.2em;
+	box-sizing: border-box;
+}
+
+.button {
+	display: flex; /* Prevent <a class="button"><img></a> from having extra space at the bottom, looking weird*/
+	padding: 0.5em;
+	margin: 0.2em;
+	border-radius: 100em; /* any large amount, just don't use % because then it makes an ellipse */
+	cursor: pointer;
+
+	&:hover {
+		background-color: var(--color-twitter-blue-light);
+	}
+	&:active {
+		transform: translate(0.1em, 0.1em);
+		background-color: var(--color-twitter-blue);
+	}
+
+	&.button--danger {
+		background-color: var(--color-twitter-danger-red2);
+
+		&:hover {
+			background-color: var(--color-twitter-danger-red2-light);
+		}
+		&:active {
+			background-color: var(--color-twitter-danger-red2);
+		}
+	}
+}
+
+.labelled-icon {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+
+	& label {
+		padding: 0 0.3em;
+		white-space: nowrap;
+		cursor: unset; /* <label> sets cursor to "default" by default */
+	}
+}
+
+.svg-icon {
+	width: 1.5em;
+	height: auto;
+}
+
 
 /***************************************************************************************************
  *
@@ -140,894 +203,1124 @@ h3 {
  ***************************************************************************************************/
 
 header {
-    /* Sticky to top of page */
-    position: fixed;
-    z-index: 1;
+	/* Sticky to top of page */
+	position: fixed;
+	z-index: 1;
 
-    /* Match layout width of `body` */
-    left: 30%;
-    right: 30%;
+	/* Match layout width of `body` */
+	left: 30%;
+	right: 30%;
 
-    height: 4em;
-    padding: 0.5em 1em;
-    border: 1px solid var(--color-outline-gray);
-    box-sizing: border-box;
+	height: 4em;
+	padding: 0.5em 1em;
+	border: 1px solid var(--color-outline-gray);
+	box-sizing: border-box;
 
-    background-color: white;
+	background-color: white;
 }
 
 main {
-    /* Space taken up by the header search bar */
-    padding-top: 4em;
+	/* Space taken up by the header search bar */
+	padding-top: 4em;
 }
 
 #nav-sidebar {
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    transform: translate(-100%, 0);
-    font-size: 1.4em;
+	display: flex;
+	flex-direction: column;
+	position: fixed;
+	transform: translate(-100%, 0);
+	font-size: 1.4em;
+}
+
+/**
+ * Layout for the Messages page
+ */
+.messages-page {
+	display: flex;
+	flex-direction: row;
+
+	/** Setup to allow the two panes to scroll independently **/
+	height: 100vh;
+	padding-top: 4em;
+	margin-top: -4em;
+	box-sizing: border-box;
+
+	.chat-list {
+		flex-basis: 0;
+		flex-grow: 4;
+		display: flex;
+		flex-direction: column;
+		overflow-y: scroll;
+	}
+	#chat-view {
+		flex-basis: 0;
+		flex-grow: 7;
+		border-left: 1px solid var(--color-outline-gray);
+		padding: 0.5em;
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+
+		.chat-messages {
+			flex-grow: 1;
+			overflow-y: auto;
+		}
+	}
+}
+
+/**
+ * Layout for the Login page
+ */
+.login-page {
+	width: 60%;
+	margin: 5% auto;
+
+	& hr {
+		margin: 3em 2em;
+	}
 }
 
 
-/*******************************************************************************
+/***************************************************************************************************
  *
  * Module styles
  * -------------
  *
  * Normal page elements.  Should only use classes; no IDs or tag names.
  *
- *******************************************************************************/
+ ***************************************************************************************************/
 
+
+/******************************************************
+ * General modules
+ ******************************************************/
+
+/**
+ * Toast notification popup that gets sent on HTTP 500
+ */
 .server-error-msg {
-    position: fixed;
-    margin: 6em 0;
-    left: 0;
-    top: 0;
-    z-index: 1;
-    width: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-}
-.server-error-msg .error-msg-container {
-    width: 30%;
-    background-color: #fee;
-    border: 1px solid red;
-    border-radius: 1em;
-    padding: 1em;
-    color: red;
-    text-align: center;
+	background-color: #fee;
+	border: 1px solid red;
+	border-radius: 1em;
+	padding: 1em;
+	color: red;
+	text-align: center;
+	top: 10em;
+	width: 90%;
 }
 
-.tweet {
-    padding: 0 1.5em;
-    position: relative;
-    z-index: 0;  /* Dunno why, but without it, hovering a tweet with a Poll hides the poll fill bars */
-    overflow: hidden; /* Otherwise HTMX spinner sticks over the rounded edges in a quoted tweet */
-}
-:not(#focused-tweet) > .tweet:hover:not(:has(.tweet:hover)) {
-    background-color: var(--color-twitter-off-white);
-}
-:not(#focused-tweet) > .tweet {
-    cursor: pointer;
-}
-.htmx-spinner-container {
-    display: none;
-    z-index: 2;  /* On top of the search bar, which is z-index of 1 */
-}
-.htmx-request > .htmx-spinner-container {
-    display: revert;
-    font-size: 3em;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+/**
+ * HTMX spinner module
+ */
+.htmx-spinner {
+	/* Hidden by default, unless `.htmx-request` is active on parent component */
+	display: none;
+
+	/* Cover the parent element completely */
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: 2;  /* On top of the search bar, which is z-index of 1 */
+
+	font-size: 3em;
+
+	/* When `.htmx-request` is applied to the parent element, show the spinner */
+	.htmx-request > & {
+		display: revert;
+	}
+
+	.htmx-spinner__fullscreen-forcer {
+		/*
+		 * This can optionally be stuck inside a `.htmx-spinner` to make its contents sticky to
+		 * full-screen size.  Child elements will be positioned according to this rather than to the
+		 * `.htmx-spinner` element.
+		 */
+		position: fixed;
+		top: 0;
+		height: 100vh;
+		left: 30%;
+		right: 30%;
+	}
+	.htmx-spinner__background {
+		opacity: 0.3;
+		background-color: #7cc5f6;
+		width: 100%;
+		height: 100%;
+	}
+	.htmx-spinner__icon {
+		/* Put the icon in the middle of the HTMX overlay */
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%,-50%);
+
+		/* https://codepen.io/sosuke/pen/Pjoqqp */
+		filter: invert(54%) sepia(17%) saturate(4210%) hue-rotate(176deg) brightness(89%) contrast(98%);
+	}
 }
 
-.htmx-spinner-container .htmx-spinner-background {
-    opacity: 0.3;
-    background-color: #7cc5f6;
-    width: 100%;
-    height: 100%;
-}
-.htmx-spinner-container .htmx-spinner {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%,-50%);
+/**
+ * Image carousel module
+ */
+.image-carousel {
+	border-radius: 2em;
+	border: 0.3em solid var(--color-twitter-blue);
+	box-shadow: 0 0 1em var(--color-twitter-blue);
+	outline: none;
+	overflow: visible;
+	padding: 1.4em;
 
-    /* https://codepen.io/sosuke/pen/Pjoqqp */
-    filter: invert(54%) sepia(17%) saturate(4210%) hue-rotate(176deg) brightness(89%) contrast(98%);
-}
+	&::backdrop {
+		background: hsla(204, 87%, 73%, 0.3); /* based on --color-twitter-blue-light */
+	}
+	.image-carousel__close-button {
+		position: absolute;
+		right: -1.3em;
+		top: -1.5em;
 
-dialog#image_carousel {
-    border-radius: 2em;
-    border: 0.3em solid var(--color-twitter-blue);
-    box-shadow: 0 0 1em var(--color-twitter-blue);
-    outline: none;
-    overflow: visible;
-    padding: 1.4em;
-}
-dialog#image_carousel a.close-button {
-    position: absolute;
-    right: -1.3em;
-    top: -1.5em;
-
-    width: 1em;
-    line-height: 1em;
-    font-size: 2em;
-    justify-content: center;
-    border: 0.1em solid black;
-}
-dialog#image_carousel a.close-button:not(:hover):not(:active) {
-    background-color: var(--color-twitter-blue-extra-light);
-}
-dialog::backdrop {
-    background: hsla(204, 87%, 73%, 0.3); /* based on --color-twitter-blue-light */
+		width: 1em;
+		line-height: 1em;
+		font-size: 2em;
+		justify-content: center;
+		border: 0.1em solid black;
+	}
+	.image-carousel__close-button:not(:hover):not(:active) {
+		background-color: var(--color-twitter-blue-extra-light);
+	}
+	.image-carousel__active-image {
+		max-height: 85vh;
+		max-width: 90vw;
+	}
 }
 
-.quoted-tweet {
-    margin: 1em 0;
+/**
+ * Tabs module
+ */
+.tabs {
+	margin-top: 2px;
+	border-top: 1px solid var(--color-outline-gray);
+	border-bottom: 1px solid var(--color-outline-gray);
+
+	.tabs__tab {
+		flex-grow: 1;
+		text-align: center;
+		font-size: 1.1em;
+		font-weight: bold;
+		color: var(--color-twitter-text-gray);
+		padding: 0.8em;
+
+		&:hover {
+			color: var(--color-twitter-blue);
+		}
+	}
+
+	.tabs__tab--active {
+		color: var(--color-twitter-blue);
+		border-bottom: 0.2em solid var(--color-twitter-blue);
+	}
 }
 
-.profile-banner-image {
-    width: 100%;
+/**
+ * Clickable entities
+ */
+.entity {
+	color: var(--color-twitter-blue);
 }
 
-.author-info {
-    display: flex;
-    align-items: center;
-}
-.author-info a {
-    line-height: 0;
+/**
+ * Text module.  For both Tweets and DM messages
+ */
+.text {
+	display: block;
+	margin-bottom: 0.4em;
+	margin-top: 0;
+	overflow-wrap: anywhere;
+	cursor: text;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
 }
 
-.author-info, .tweet .text {
-    cursor: default;
-}
-
-.circle-outline {
-    display: flex;
-    border-radius: 50%;
-    outline: 1px solid #777;
-    margin: 0 0.4em;
-    font-size: 0.8em;
-    padding: 0.2em;
-    box-sizing: border-box;
-}
-
-.name-and-handle {
-    padding: 0 0.6em !important; /* !important to make the ".quick-link .span" rule in the login button not overrule it */
-}
-
-.display-name {
-    font-weight: bold;
-    white-space: nowrap;
-}
-.handle {
-    color: var(--color-twitter-text-gray);
-}
-
-.tweet-header-container {
-    display: flex;
-    align-items: center;
-}
-.reply-mentions-container {
-    display: flex;
-    align-items: center;
-    cursor: default;
-    flex-grow: 1;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-.reply-mentions {
-    padding: 0 0.5em;
-}
-
-.replying-to-label {
-    color: var(--color-twitter-text-gray);
-}
-a.entity {
-    color: var(--color-twitter-blue);
-}
-
-.tweet .text, .dm-message-text-container .text {
-    display: block;
-    margin-bottom: 0.4em;
-    margin-top: 0;
-    overflow-wrap: anywhere;
-}
-.dm-message-text-container .text:last-child {
-    margin-bottom: 0;
-}
-#focused-tweet .text {
-    font-size: 1.4em;
-}
-#focused-tweet .quoted-tweet .text {
-    font-size: unset;
-}
-.tweet-content video {
-    max-width: 100%;
-    max-height: 40em;
-}
-.embedded-link {
-    padding: 1.3em;
-    margin-top: 1em;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--color-twitter-off-white);
-}
-img.embedded-link-preview {
-    border-radius: 1em;
-    max-width: 100%;
-    height: auto; /* preserve aspect ratio */
-}
-.embedded-link-description {
-    color: var(--color-twitter-text-gray);
-    font-size: 0.8em;
-    margin: 0;
-}
-.embedded-link-domain-container {
-    margin-top: 0.2em
-}
-.embedded-link-domain {
-    margin-left: 0.3em;
-}
-.thread-parent-tweet:first-child, #focused-tweet:first-child {
-    padding-top: 1em;
-}
-.thread-parent-tweet .vertical-reply-line-container,
-.reply-chain .vertical-reply-line-container {
-    width: 3em;
-    margin-right: 0.5em;
-}
-.thread-parent-tweet .vertical-reply-line:not(.quoted-tweet .vertical-reply-line),
-.reply-chain > :not(:last-child) .vertical-reply-line:not(.quoted-tweet .vertical-reply-line) {
-    width: 2px;
-    background-color: var(--color-twitter-off-white-dark);
-    flex-grow: 1;
-    margin: auto;
-}
-
+/**
+ * Profile image module
+ */
 .profile-image {
-    border-radius: 50%;
-    width: 3em;
-    height: 3em;
-    display: inline;
-    border: 0.1em solid var(--color-outline-gray);
+	line-height: 0;
+
+	.profile-image__image {
+		border-radius: 50%;
+		width: 3em;
+		height: 3em;
+		display: inline;
+		border: 0.1em solid var(--color-outline-gray);
+	}
 }
 
-.user-header {
-    border-bottom: 1px solid var(--color-outline-gray);
-}
-.user-header .author-info {
-    font-size: 1.3em;
-    padding: 1em;
-}
-.user-header .profile-image {
-    width: 8em;
-    height: 8em;
-}
-.tabs-container {
-    outline: 1px solid var(--color-outline-gray);
-}
-.tabs-container a.tab {
-    flex-grow: 1;
-    text-align: center;
-    font-size: 1.1em;
-    font-weight: bold;
-    color: var(--color-twitter-text-gray);
-    padding: 0.8em;
-}
-.tabs-container a.tab.active-tab {
-    color: var(--color-twitter-blue);
-    border-bottom: 0.2em solid var(--color-twitter-blue);
-}
-.tabs-container a.tab:hover {
-    color: var(--color-twitter-blue);
+/**
+ * Author info module
+ */
+.author-info {
+	display: flex;
+	align-items: center;
+	cursor: default;
+
+	.author-info__name-and-handle {
+		padding: 0 0.6em !important; /* !important to make the ".button .span" rule in the login button not overrule it */
+	}
+	.author-info__display-name {
+		font-weight: bold;
+		white-space: nowrap;
+	}
+	.author-info__handle {
+		color: var(--color-twitter-text-gray);
+	}
 }
 
-.pinned-tweet__pin-container {
-    margin: 0.5em 0em -1em 3em;
-    z-index: 1;
-    position: relative; /* z-index is ignored if `position` is "static" */
-    gap: 0.2em;
-}
-img.svg-icon.pinned-tweet__pin-icon {
-    filter: invert(43%) saturate(30%);
-    width: 1em;
-    height: auto;
+/**
+ * List (i.e.,, of users) module
+ */
+.users-list {
+	display: flex;
+	flex-direction: column;
+	border-color: var(--color-twitter-off-white-dark);
+	border-top-style: double;
+	border-width: 4px;
+
+	.author-info .profile-image__image {
+		width: 4em;
+		height: 4em;
+	}
+	.user {
+		border-color: var(--color-twitter-off-white-dark);
+		border-bottom-style: solid;
+		border-width: 1px;
+		padding: 1em;
+	}
+	.user p.bio {
+		margin: 0 5.3em;
+		font-size: 0.9em;
+		color: var(--color-twitter-text-gray);
+	}
 }
 
-.vertical-reply-line-container {
-    flex-grow: 0;
-    flex-shrink: 0;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-self: stretch;
-    width: 1em; /* will be overridden by, e.g., parent-thread properties */
-}
-.vertical-container-1 {
-    flex-grow: 1;
-    flex-shrink: 1;
+/******************************************************
+ * Tweets
+ ******************************************************/
+
+/**
+ * Tweet module
+ */
+.tweet {
+	padding: 0 1.5em;
+	position: relative;
+	z-index: 0;  /* Dunno why, but without it, hovering a tweet with a Poll hides the poll fill bars */
+	overflow: hidden; /* Otherwise HTMX spinner sticks over the rounded edges in a quoted tweet */
+
+	/**
+	 * Set padding and borders around the tweet based on what type of tweet it is, and where it occurs
+	 */
+	.timeline &, .tweet__quoted-tweet &, .dm-message & {
+		/* Timeline tweets and quoted tweets, but not tweets in a thread */
+		/* TODO: what about DM tweet-previews? */
+		padding-top: 0.6em;
+		padding-bottom: 0.6em;
+	}
+	.timeline > &, .pinned-tweet & {
+		/* not for nested (i.e., quoted) tweets */
+		border-bottom: 1px solid var(--color-twitter-off-white-dark);
+	}
+
+	/**
+	 * Mouse-over effects
+	 */
+	:not(.focused-tweet) > &:hover:not(:has(&:hover)) {
+		/* Add mouse-over background effect */
+		background-color: var(--color-twitter-off-white);
+	}
+	:not(.focused-tweet) > & {
+		/* Clickable tweets should make the cursor indicate an on-click action ("pointer" cursor) */
+		cursor: pointer;
+	}
+
+	.tweet__header-container {
+		display: flex;
+		align-items: center;
+	}
+
+	.tweet__vertical-container {
+		flex-grow: 1;
+		flex-shrink: 1;
+	}
+
+	/**
+	 * Tweet content
+	 */
+	.tweet__embedded-image {
+		max-width: 95%;
+		max-height: 30em;
+		width: auto;
+		height: auto;
+	}
+	& video {
+		max-height: 25em;
+		max-width: 100%;
+	}
+	.tombstone {
+		outline: 1px solid var(--color-outline-gray);
+		background-color: var(--color-twitter-off-white);
+		padding: 0.5em 1em;
+		border-radius: 0.5em;
+		color: var(--color-twitter-text-gray);
+	}
+	.tweet__quoted-tweet {
+		margin: 1em 0;
+	}
 }
 
-.posted-at-container {
-    flex-grow: 1;
-    min-width: 5em;
-}
-p.posted-at {
-    float: right;
-    color: var(--color-twitter-text-gray);
-    font-size: 0.875em;
-    white-space: nowrap;
+/**
+ * Retweet info module
+ */
+.retweet-info {
+	margin-left: 3.5em;
+	display: flex;
+	align-items: center;
+	opacity: 0.8;
+	cursor: default;
+
+	.retweet-info__retweeted-by-label {
+		margin: 0 0.2em 0 0.5em;
+	}
+	.svg-icon {
+		width: 1.2em; /* override default from .svg-icon of 1.5em */
+		opacity: 0.6; /* Probably not the right way to change the color from black to gray */
+	}
 }
 
-.interactions-bar {
-    display: flex;
-    flex-direction: row;
-    margin: 0.5em 0;
-}
-.interaction-stat {
-    flex-grow: 1;
-    display: flex;
-}
-.interaction-stat span {
-    line-height: 1.5em;
-    padding: 0 0.5em;
-}
-.interactions-bar .dummy {
-    flex-grow: 5;
+/**
+ * Reply-mentions module
+ */
+.reply-mentions {
+	display: flex;
+	align-items: center;
+	cursor: default;
+	flex-grow: 1;
+	justify-content: center;
+	flex-wrap: wrap;
+
+	.reply-mentions__list {
+		padding: 0 0.5em;
+	}
+	.reply-mentions__dm-message__replying-to-label {
+		color: var(--color-twitter-text-gray);
+	}
 }
 
-#focused-tweet {
-    border-bottom: 1px solid var(--color-twitter-off-white-dark);
-    padding-bottom: 0.5em;
+/**
+ * Embedded link module
+ */
+.embedded-link {
+	padding: 1.3em;
+	margin-top: 1em;
+	display: flex;
+	flex-direction: column;
+	background-color: var(--color-twitter-off-white);
+
+	.embedded-link__preview-image {
+		border-radius: 1em;
+		max-width: 100%;
+		height: auto; /* preserve aspect ratio */
+	}
+	.embedded-link__description {
+		color: var(--color-twitter-text-gray);
+		font-size: 0.8em;
+		margin: 0;
+	}
+	.embedded-link__domain {
+		margin-top: 0.2em;
+	}
+	.embedded-link__domain__contents {
+		margin-left: 0.3em;
+	}
 }
 
-
-.reply-chain {
-    margin-top: 1em;
-}
-.reply-chain > :last-child {
-    padding-bottom: 1em;
-    border-bottom: 1px solid var(--color-twitter-off-white-dark);
-}
-ul.quick-links {
-    display: flex;
-    flex-direction: column;
-    list-style: none;
-    align-items: flex-start;
-    padding: 0 2em;
-}
-.quick-link {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 0.5em;
-    margin: 0.2em;
-    border-radius: 100em; /* any large amount, just don't use % because then it makes an ellipse */
-    cursor: pointer;
-}
-.quick-link:hover {
-    background-color: var(--color-twitter-blue-light);
-}
-.quick-link:active {
-    transform: translate(0.1em, 0.1em);
-    background-color: var(--color-twitter-blue);
-}
-/* TODO: "quick-link" is really more of a button */
-.quick-link.danger {
-    background-color: var(--color-twitter-danger-red2);
-}
-.quick-link.danger:hover {
-    background-color: var(--color-twitter-danger-red2-light);
-}
-.quick-link.danger:active {
-    background-color: var(--color-twitter-danger-red2);
-}
-
-.quick-link span {
-    padding: 0 0.3em;
-    white-space: nowrap;
-}
-
-.followers-count, .following-count {
-    font-weight: bold;
-}
-.followers-label, .following-label {
-    color: var(--color-twitter-text-gray);
-}
-.bio-info-with-icon {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.3em;
-}
-.user-header-info-container {
-    padding: 2em;
-    border-bottom: 1px solid var(--color-outline-gray);
-}
-.timeline .tweet, .quoted-tweet .tweet {
-    padding-top: 0.8em;
-    padding-bottom: 0.8em;
-}
-.timeline > .tweet, .timeline > .pinned-tweet {
-    /* not for nested (i.e., quoted) tweets */
-    border-bottom: 1px solid var(--color-twitter-off-white-dark);
-}
-
-.timeline .timeline-bottom-container {
-    text-align: center;
-    font-size: 1.2em;
-    padding: 1em 0;
-}
-.timeline .timeline-bottom-container .eof-indicator {
-    color: var(--color-twitter-text-gray);
-}
-.timeline .timeline-bottom-container .show-more {
-    padding: 0em 0.8em;
-    display: inline-block;
-    border: 2px solid var(--color-twitter-blue);
-    color: var(--color-twitter-text-gray);
-    font-size: 0.9em;
-}
-.timeline .timeline-bottom-container .show-more:not(:hover):not(:active) {
-    background-color: var(--color-twitter-blue-extra-light);
-}
-
-.back-button {
-    flex-grow: 0;
-    border-radius: 50%;
-    border: 2px solid black;
-    width: 2em;
-    position: relative;
-    height: 2em;
-    box-sizing: border-box;
-    cursor: pointer;
-}
-
-img.svg-icon {
-    width: 1.5em;
-    height: auto;
-}
-
-svg {
-    width: 1.5em;
-}
-.back-button img {
-    color: rgb(239, 243, 244);
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-.search-form {
-    margin-left: 1em;
-    flex-grow: 1;
-    display: flex;
-}
-#search-bar {
-    flex-grow: 1;
-}
-
-.login {
-    width: 60%;
-    margin: 20% auto;
-}
-.login-form input {
-    width: 100%;
-    border-radius: 0.5em;
-
-    padding: 0.5em 0.6em;
-}
-.login-form .error {
-    color: #C0392B;
-    font-weight: bold;
-}
-
-.login-form .error + input {
-    border-color: #C0392B;
-    border-width: 2px;
-}
-
-.field-container {
-    padding: 0.5em 0;
-}
-.submit-container {
-    text-align: right;
-}
-
-.change-session-form select {
-    display: block;
-    width: 100%;
-}
-#logged-in-user-info {
-    font-size: 0.8em;
-    margin-top: 1em;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.quick-link .author-info {
-    pointer-events: none;
-}
-.retweet-info-container {
-    margin-left: 3.5em;
-    display: flex;
-    align-items: center;
-    opacity: 0.8;
-}
-.retweet-info-container .svg-icon {
-    width: 1.2em; /* override default from .svg-icon of 1.5em */
-    opacity: 0.6;
-    margin-right: 0.3em;
-}
-.retweeted-by-label {
-    margin: 0 0.2em;
-}
-
-.user-bio {
-    margin: 1.5em 0;
-}
-
-.followers-followees-container {
-    margin-top: 1em;
-    gap: 4em;
-}
-.followers-followees-container .spacer {
-    flex-grow: 1;
-}
-.user-feed-buttons-container, .tweet-buttons-container {
-    display: flex;
-    flex-direction: row;
-}
-.tweet-buttons-container .quick-link {
-    margin: 0;
-    font-size: 0.8em;
-}
-
+/**
+ * Poll module
+ */
 .poll {
-    padding: 1em;
-}
-.poll-choice {
-    position: relative;
-    margin: 0.3em 0;
-}
-.poll-fill-bar {
-    position: absolute;
-    height: 100%;
-    z-index: -1;
-    background-color: var(--color-twitter-off-white-dark);
-}
-.poll-fill-bar.poll-winner {
-    background-color: var(--color-twitter-blue-light);
-}
-.poll-info-container {
-    width: 100%;
-    line-height: 2em;
-    margin: 0 0.5em;
-}
-.poll-choice-label {
-    width: 50%;
-}
-.poll-choice-votes {
-    width: 50%;
-}
-.poll-metadata {
-    color: var(--color-twitter-text-gray);
-    margin: 0;
-    font-size: 0.9em;
+	padding: 1em;
+
+	.poll__choice {
+		position: relative;
+		margin: 0.3em 0;
+	}
+	.poll__choice-info {
+		width: 100%;
+		line-height: 2em;
+		margin: 0 0.5em;
+	}
+	.poll__choice-label {
+		width: 50%;
+	}
+	.poll__choice-votes {
+		width: 50%;
+	}
+	.poll__choice-fill-bar {
+		position: absolute;
+		height: 100%;
+		z-index: -1;
+		background-color: var(--color-twitter-off-white-dark);
+
+		&.poll__choice-fill-bar--winner {
+			background-color: var(--color-twitter-blue-light);
+		}
+	}
+	.poll__metadata {
+		color: var(--color-twitter-text-gray);
+		margin: 0;
+		font-size: 0.9em;
+	}
 }
 
+/**
+ * Space module
+ */
 .space {
-    outline: 1px solid var(--color-space-purple-outline);
-    background-color: var(--color-space-purple);
-    border-radius: 1.5em;
-    padding: 1.5em;
-}
-.space-title {
-    padding-top: 0.5em;
-}
-.space .host-label {
-    color: var(--color-space-purple-outline);
-}
-.space-date {
-    color: var(--color-space-purple-outline);
-    font-size: 0.8em;
-}
-.space-info-list {
-    padding: 0;
-}
-.space .layout-spacer {
-    flex-grow: 1;
-}
-ul.space-participants-list {
-    list-style: none;
-    padding: 0;
-}
-ul.space-participants-list li {
-    padding: 0.5em 0;
-    display: inline-block;
-    width: 24%;
-}
-.space-participants-list .author-info {
-    font-size: 0.9em;
-    line-height: 1.2em;
-}
-.space-participants-list .author-info .profile-image {
-    font-size: 0.8em;
+	outline: 1px solid var(--color-space-purple-outline);
+	background-color: var(--color-space-purple);
+	border-radius: 1.5em;
+	padding: 1.5em;
+
+	.space__title {
+		padding-top: 0.5em;
+	}
+	.space__host__label {
+		color: var(--color-space-purple-outline);
+	}
+	.space__date {
+		color: var(--color-space-purple-outline);
+		font-size: 0.8em;
+	}
+	.space__info__list {
+		padding: 0;
+	}
+	.space__layout-spacer {
+		flex-grow: 1;
+	}
+
+	.space__participants-list {
+		padding: 0;
+
+		/* List items */
+		& > * {
+			padding: 0.5em 0;
+			display: inline-block;
+			width: 24%;
+			font-size: 0.9em;
+			line-height: 1.2em;
+		}
+	}
 }
 
-.tombstone {
-    outline: 1px solid var(--color-outline-gray);
-    background-color: var(--color-twitter-off-white);
-    padding: 0.5em 1em;
-    border-radius: 0.5em;
-    color: var(--color-twitter-text-gray);
-}
-.tweet-image {
-    max-width: 95%;
-    max-height: 30em;
-    width: auto;
-    height: auto;
-}
-.tweet video {
-    max-height: 25em;
-}
-.like-icon {
-    cursor: pointer;
-}
-.like-icon.liked, .like-icon:hover {
-    filter: invert(20%) sepia(97%) saturate(4383%) hue-rotate(321deg) brightness(101%) contrast(95%);
+/**
+ * Posted-at module
+ */
+.posted-at {
+	flex-grow: 1;
+	min-width: 5em;
+	width: fit-content;
+
+	.posted-at__text {
+		float: right;
+		color: var(--color-twitter-text-gray);
+		font-size: 0.875em;
+		white-space: nowrap;
+	}
 }
 
-.users-list-previews {
-    border-color: var(--color-twitter-off-white-dark);
-    border-top-style: double;
-    border-width: 4px;
+/**
+ * Interactions bar module
+ */
+.interactions {
+	display: flex;
+	flex-direction: row;
+	margin: 0.5em 0;
+
+	.interactions__stat {
+		flex-grow: 1;
+		display: flex;
+
+		& span {
+			line-height: 1.5em;
+			padding: 0 0.5em;
+		}
+	}
+
+	/* Empty <div> used to make the spacing more good */
+	.interactions__dummy {
+		flex-grow: 5;
+	}
+
+	.interactions__like-icon {
+		cursor: pointer;
+		&.liked, &:hover {
+			filter: invert(20%) sepia(97%) saturate(4383%) hue-rotate(321deg) brightness(101%) contrast(95%);
+		}
+	}
+
+	/* Make the buttons slightly smaller */
+	.button {
+		margin: 0;
+		font-size: 0.8em;
+	}
 }
 
-.users-list-preview {
-    padding: 0.5em 1em;
-    border-color: var(--color-twitter-off-white-dark);
-    border-bottom-style: solid;
-    border-width: 1px;
-}
-.users-list-preview .list-info-container{
-    display: flex;
-    align-items: center;
-    font-size: 1.5em;
-    cursor: pointer;
-}
-.users-list-preview .list-info-container span.num-users {
-    margin-left: 1em;
-    color: var(--color-twitter-text-gray);
-}
-.users-list-preview .list-info-container .first-N-profile-images {
-    display: flex;
-    align-items: flex-end;
-    margin-left: 1.5em;
-}
-.users-list-preview .list-info-container .first-N-profile-images a {
-    margin-right: -1.2em;
-    line-height: 0; /* TODO: This is duplicated from `.author-info a` and possibly others */
+/******************************************************
+ * Conversation thread / tweet detail
+ ******************************************************/
+
+.tweet-detail {
+	& :first-child > .tweet {
+		/* The tweet at the top of a thread should have some top-padding */
+		padding-top: 1em;
+	}
 }
 
-.users-list-preview .list-info-container .first-N-profile-images .ellipsis {
-    margin-left: 1.5em;
+/**
+ * Focused tweets
+ */
+.focused-tweet {
+	& > .tweet {
+		border-bottom: 1px solid var(--color-twitter-off-white-dark);
+		padding-bottom: 0.5em;
+	}
+
+	/* Make font bigger in focused tweets, unless it's in a quoted tweet */
+	.text {
+		font-size: 1.4em;
+	}
+	.tweet__quoted-tweet .text {
+		font-size: unset;
+	}
 }
 
-.users-list-container {
-    display: flex;
-    flex-direction: column;
-    border-color: var(--color-twitter-off-white-dark);
-    border-top-style: double;
-    border-width: 4px;
+.reply-chain > :last-child > .tweet {
+	/* Last tweet in a reply chain should have bottom-padding */
+	padding-bottom: 1em;
+	border-bottom: 1px solid var(--color-twitter-off-white-dark);
 }
-.users-list-container .author-info .profile-image {
-    width: 4em;
-    height: 4em;
+
+/**
+ * Threaded conversation string (visual thread indicator) module
+ */
+.string-box {
+	width: 3em;
+	margin-right: 0.5em;
+	flex-grow: 0;
+	flex-shrink: 0;
+
+	/* Make the .string take up 100% of vertical space */
+	flex-direction: column;
+	align-self: stretch;
+
+	/* Only show it in parent threads and reply chains */
+	display: none;
+	.thread-parent-tweet &, .reply-chain & {
+		/* Not if it's in a quoted tweet */
+		&:not(.tweet__quoted-tweet &) {
+			display: flex; /* Show it */
+		}
+	}
+
+	.string {
+		width: 2px;
+		flex-grow: 1;
+		margin: auto;
+		background-color: var(--color-twitter-off-white-dark);
+
+		/* All parent tweets, and all but the last reply */
+		display: none;
+		.thread-parent-tweet &, .reply-chain > :not(:last-child) & {
+			display: revert;
+		}
+	}
 }
-.users-list-container .user {
-    border-color: var(--color-twitter-off-white-dark);
-    border-bottom-style: solid;
-    border-width: 1px;
-    padding: 1em;
+
+
+/******************************************************
+ * Timeline
+ ******************************************************/
+
+/**
+ * Timeline module
+ */
+.timeline {
+	.timeline__bottom {
+		text-align: center;
+		font-size: 1.2em;
+		padding: 1em 0;
+	}
+	.timeline__eof-label {
+		color: var(--color-twitter-text-gray);
+	}
+	.timeline__show-more-button {
+		padding: 0em 0.8em;
+		display: inline-block;
+		border: 2px solid var(--color-twitter-blue);
+		color: var(--color-twitter-text-gray);
+		font-size: 0.9em;
+
+		&:not(:hover):not(:active) {
+			/* TODO: maybe this should be a reusable button style */
+			background-color: var(--color-twitter-blue-extra-light);
+		}
+	}
 }
-.users-list-container .user p.bio {
-    margin: 0 5.3em;
-    font-size: 0.9em;
-    color: var(--color-twitter-text-gray);
+
+/******************************************************
+ * Navigation and base page
+ ******************************************************/
+
+/**
+ * Nav-sidebar module
+ */
+.nav-sidebar {
+	.nav-sidebar__buttons {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		padding: 0 2em;
+	}
+
+	#logged-in-user-info {
+		font-size: 0.8em;
+		margin-top: 1em;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.button .author-info {
+		pointer-events: none;
+	}
+}
+
+/**
+ * Search bar module
+ */
+.search-bar {
+	.search-bar__back-button {
+		flex-grow: 0;
+		border-radius: 50%;
+		border: 2px solid black;
+		width: 2em;
+		position: relative;
+		height: 2em;
+		box-sizing: border-box;
+		cursor: pointer;
+
+		& img {
+			color: rgb(239, 243, 244);
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+	}
+	.search-bar__form {
+		margin-left: 1em;
+		flex-grow: 1;
+		display: flex;
+	}
+	.search-bar__input {
+		flex-grow: 1;
+	}
+}
+
+/******************************************************
+ * User feeds
+ ******************************************************/
+
+/**
+ * User-feed header module
+ */
+.user-header {
+	border-bottom: 1px solid var(--color-outline-gray);
+
+	.user-header__profile-banner-image {
+		width: 100%;
+	}
+
+	.user-header__info-container {
+		padding: 2em;
+	}
+
+	.user-header__bio {
+		margin: 1.5em 0;
+	}
+
+	/* Special settings for profile images in user headers */
+	.author-info {
+		font-size: 1.3em;
+		padding: 1em;
+	}
+	.profile-image__image {
+		width: 8em;
+		height: 8em;
+	}
+}
+
+/**
+ * Followers + followees module
+ */
+.followers-followees {
+	margin-top: 1em;
+	gap: 4em;
+
+	.followers-followees__count {
+		font-weight: bold;
+	}
+	& label {
+		color: var(--color-twitter-text-gray);
+		cursor: unset;
+	}
+	.spacer {
+		flex-grow: 1;
+	}
+}
+
+/**
+ * Pinned tweet mini-module
+ */
+.pinned-tweet__pin-container {
+	margin: 0.5em 0em -1em 3em;
+	z-index: 1; /* Otherwise it disappears behind the tweet background color on mouse-over */
+	position: relative; /* z-index is ignored if `position` is "static" */
+
+	.pinned-tweet__pin-icon {
+		filter: invert(43%) saturate(30%);
+		width: 1em;
+		height: auto;
+	}
+}
+
+/******************************************************
+ * Search page
+ ******************************************************/
+
+/**
+ * Search page sort-order module
+ */
+.sort-order {
+	padding: 1em 1em 1em 3em;
+	border-bottom: 1px solid var(--color-outline-gray);
+	.sort-order__label {
+		font-weight: bold;
+	}
+	.sort-order__dropdown {
+		text-transform: capitalize;
+		margin: 0 1em;
+	}
+}
+
+/******************************************************
+ * Login page
+ ******************************************************/
+
+/**
+ * Login form module
+ */
+.login-form {
+	.login-form__field-container {
+		padding: 0.5em 0;
+	}
+	.login-form__submit-container {
+		text-align: right;
+	}
+	.login-form__error-label {
+		color: #C0392B;
+		font-weight: bold;
+
+		& + input {
+			border-color: #C0392B;
+			border-width: 2px;
+		}
+	}
+	.login-form__input {
+		width: 100%;
+		border-radius: 0.5em;
+		padding: 0.5em 0.6em;
+		flex-grow:;
+	}
+	& input[type="submit"] {
+		padding: 1em;
+	}
+}
+.choose-session {
+	margin-top: 2em;
+
+	.choose-session__form-contents {
+		padding-top: 1em;
+		gap: 3em;
+
+	}
+	.choose-session__dropdown {
+		flex-grow: 1;
+	}
+}
+
+/******************************************************
+ * Lists pages
+ ******************************************************/
+
+.list-of-lists {
+	border-color: var(--color-twitter-off-white-dark);
+	border-top-style: double;
+	border-width: 4px;
+}
+
+/**
+ * List preview module
+ */
+.list-preview {
+	padding: 0.5em 1em;
+	border-color: var(--color-twitter-off-white-dark);
+	border-bottom-style: solid;
+	border-width: 1px;
+
+	.list-preview__info-container{
+		display: flex;
+		align-items: center;
+		font-size: 1.5em;
+		cursor: pointer;
+	}
+	.list-preview__num-users {
+		margin-left: 1em;
+		color: var(--color-twitter-text-gray);
+	}
+	.list-preview__first-N-profile-images {
+		display: flex;
+		align-items: flex-end;
+		margin-left: 1.5em;
+
+		.profile-image {
+			/* Make profile images in the list preview stack up on each other */
+			margin-right: -1.2em;
+		}
+		.ellipsis {
+			/* Counteract the above; the ellipsis should be spaced normally */
+			margin-left: 1.5em;
+		}
+	}
 }
 
 .add-users-container {
-    padding: 1em;
-    text-align: center;
+	padding: 1em;
+	text-align: center;
 }
 
-.sort-order-container {
-    padding: 1em 1em 1em 3em;
-    margin-bottom: -0.5em;
-    border-bottom: 1px solid var(--color-outline-gray);
-}
-.sort-order-container select {
-    text-transform: capitalize;
-    margin: 0 1em;
-}
-.sort-order-container .sort-order-label {
-    font-weight: bold;
+/******************************************************
+ * DMs / Messages
+ ******************************************************/
+
+/**
+ * Chat list entry module
+ */
+.chat-list-entry {
+	border-bottom: 1px solid var(--color-outline-gray);
+	padding: 1em 1em 0 1em;
+	box-sizing: border-box;
+	cursor: pointer;
+
+	&.chat-list-entry--active-chat {
+		color: var(--color-twitter-blue);
+		border-left: 0.2em solid var(--color-twitter-blue);
+		background-color: var(--color-twitter-off-white);
+
+		.profile-image__image {
+			box-shadow: 0 0 1em 0em var(--color-twitter-blue);
+		}
+	}
+	.chat-list-entry__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+	.chat-list-entry__groupchat-profile-image {
+		display: flex;
+	}
+	.chat-list-entry__groupchat-profile-image .display-name {
+		padding: 0.6em;
+		font-style: italic;
+		font-weight: bold; /* TODO: redundancy check `.author-info__display-name` */
+		white-space: nowrap;
+		cursor: default; /* TODO: redundancy check `.author-info` */
+	}
+	.chat-list-entry__message-preview {
+		font-size: 0.9em;
+		color: var(--color-twitter-text-gray);
+		padding: 0 1em;
+		border-left: 1px solid var(--color-outline-gray);
+	}
+
+	.posted-at__text {
+		margin: 0;
+	}
 }
 
-.chats-container {
-    display: flex;
-    flex-direction: row;
+/**
+ * DM message module
+ */
+.dm-message {
+	display: flex;
+	flex-direction: column;
+	margin: 1em 0;
+	/**
+	 * Compact mode:
+	 * 		margin: 0.5em 0;
+	 */
 
-    /** Setup to allow the two panes to scroll independently **/
-    height: 100vh;
-    padding-top: 4em;
-    margin-top: -4em;
-    box-sizing: border-box;
+	.dm-message__row {
+		align-items: stretch;
+
+		.our-message & {
+			flex-direction: row-reverse;
+		}
+	}
+	.dm-message__sender-profile-img {
+		display: flex;
+		align-items: flex-end;
+	}
+	.dm-message__sender-profile-img a {
+		line-height: 0; /* TODO: This is redundant with ".author-info a" rule above */
+	}
+	.dm-message__contents {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		max-width: 80%;
+		margin: 0 0.5em;
+
+		.our-message & {
+			align-items: flex-end;
+		}
+	}
+	.dm-message__replying-to {
+		background-color: #f0f0f0f0;
+		border-radius: 1em 1em 1em 0em;
+		padding: 0.5em 1.2em 2em 1.2em;
+		margin: 0 0 -2em 0.2em;
+		font-size: 0.9em;
+
+		.our-message & {
+			border-radius: 1em 1em 0em 1em;
+			margin: 0 0.2em -2em;
+		}
+	}
+	.dm-message__replying-to-label {
+		font-size: 0.8em;
+		color: var(--color-twitter-text-gray);
+
+		& img.svg-icon {
+			width: 1em;
+		}
+	}
+	.dm-message__tweet-preview {
+		border-radius: 1em;
+		overflow: hidden; /* TODO: redundancy check-- why is this necessary?  check .rounded-gray-outline */
+		border: 1px solid var(--color-outline-gray);
+		max-width: 100%;
+	}
+	.dm-message__embedded-image, .dm-message__embedded-video {
+		max-width: 100%;
+		height: auto; /* preserve aspect ratio */
+	}
+	.dm-message__text-content {
+		display: inline-block;
+		padding: 1em;
+		background-color: #ddd;
+		border-radius: 1em;
+		margin: 0;
+
+		/**
+		 * Compact mode:
+		 *
+		    display: inline-block;
+		    padding: 0.5em 1em;
+		    background-color: #ddd;
+		    border-radius: 1em;
+		    margin: auto;
+		    min-height: 2em;
+		    display: flex;
+		    flex-direction: column;
+		    justify-content: space-around;
+		 */
+		.our-message & {
+			background-color: var(--color-twitter-blue-light);
+		}
+	}
+
+	.sent-at {
+		flex-grow: 1;
+		min-width: 5em;
+		width: fit-content;
+
+		.sent-at__text {
+			float: right;
+			color: var(--color-twitter-text-gray);
+			font-size: 0.875em;
+			white-space: nowrap;
+		}
+	}
+	.sent-at__text {
+		margin: 0 4.5em;
+	}
+	.dm-message__reactions {
+		display: flex;
+		padding: 0 4em;
+		cursor: default;
+
+		.our-message & {
+			flex-direction: row-reverse;
+		}
+	}
+
+	&.our-message {
+		align-items: flex-end;
+	}
 }
-.chats-container .chat-list {
-    flex-basis: 0;
-    flex-grow: 4;
-    display: flex;
-    flex-direction: column;
-    overflow-y: scroll;
-}
-.chats-container .chat-list .chat {
-    border-bottom: 1px solid var(--color-outline-gray);
-    padding: 1em 1em 0 1em;
-    box-sizing: border-box;
-    cursor: pointer;
-}
-.chats-container .chat-list .chat.active-chat {
-    color: var(--color-twitter-blue);
-    border-left: 0.2em solid var(--color-twitter-blue);
-    background-color: var(--color-twitter-off-white);
-}
-.chats-container .chat-list .chat.active-chat .profile-image{
-    box-shadow: 0 0 1em 0em var(--color-twitter-blue);
-}
-.chats-container .chat-list .chat .chat-preview-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.chats-container .chat-list .chat .chat-preview-header .posted-at {
-    margin: 0;
-}
-.chats-container .chat-list .chat .groupchat-profile-image-container {
-    display: flex;
-}
-.chats-container .chat-list .chat .groupchat-profile-image-container .display-name {
-    padding: 0.6em;
-    font-style: italic;
-}
-.chats-container .chat-list .chat .chat-preview {
-    font-size: 0.9em;
-    color: var(--color-twitter-text-gray);
-    padding: 0 1em;
-    border-left: 1px solid var(--color-outline-gray);
-}
-.chats-container #chat-view {
-    flex-basis: 0;
-    flex-grow: 7;
-    border-left: 1px solid var(--color-outline-gray);
-    padding: 0.5em;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-}
-.chats-container #chat-view .chat-messages {
-    flex-grow: 1;
-    overflow-y: auto;
-}
-.chats-container #chat-view .our-message {
-    align-items: flex-end;
-}
-.dm-message-and-reacts-container {
-    display: flex;
-    flex-direction: column;
-    margin: 1em 0;
-}
-.dm-message-text-container {
-    display: inline-block;
-    padding: 1em;
-    background-color: #ddd;
-    border-radius: 1em;
-    margin: 0;
-}
-.our-message .dm-message-text-container {
-    background-color: var(--color-twitter-blue-light);
-}
-.sender-profile-image-container {
-    display: flex;
-    align-items: flex-end;
-}
-.sender-profile-image-container a {
-    line-height: 0; /* TODO: This is redundant with ".author-info a" rule above */
-}
-.dm-message-container {
-    display: flex;
-    align-items: stretch;
-    gap: 0.5em;
-}
-.our-message .dm-message-container {
-    flex-direction: row-reverse;
-}
-.dm-message-reactions {
-    display: flex;
-    padding: 0 4em;
-    cursor: default;
-}
-.our-message .dm-message-reactions {
-    flex-direction: row-reverse;
-}
-.dm-message-and-reacts-container p.posted-at {
-    margin: 0 4.5em;
-}
-.dm-message-content-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    max-width: 80%;
-}
-.our-message .dm-message-content-container {
-    align-items: flex-end;
-}
-.dm-message-content-container .tweet-preview {
-    border-radius: 1em;
-    border: 1px solid var(--color-outline-gray);
-    max-width: 100%;
-}
-.dm-message-content-container .replying-to-container {
-    background-color: #f0f0f0f0;
-    border-radius: 1em 1em 1em 0em;
-    padding: 0.5em 1.2em 2em 1.2em;
-    margin: 0 0 -2em 0.2em;
-    font-size: 0.9em;
-}
-.our-message .dm-message-content-container .replying-to-container {
-    border-radius: 1em 1em 0em 1em;
-    margin: 0 0.2em -2em;
-}
-.dm-message-content-container .replying-to-label {
-    font-size: 0.8em;
-    display: flex;
-    gap: 0.2em;
-}
-.dm-message-content-container .replying-to-label img.svg-icon {
-    width: 1em;
-}
-.dm-embedded-image {
-    max-width: 100%;
-    height: auto; /* preserve aspect ratio */
-}
-.dm-composer-container {
-    padding-top: 0.5em;
-    border-top: 1px solid var(--color-outline-gray);
-/*    position: absolute;
-    bottom: 1em;
-    right: 0.5em;
-    left: 0.5em;*/
-}
-.dm-composer-container form {
-    display: flex;
-}
-#composer {
-    flex-grow: 1;
-    border: 1px solid #ccc;
-    font-family: inherit;
-    font-size: inherit;
-    padding: 1px 6px;
-    max-height: 10em;
-    overflow-y: auto; /* scrollbar only if needed */
+
+/**
+ * Messages page DM composer module
+ */
+.dm-composer {
+	padding-top: 0.5em;
+	border-top: 1px solid var(--color-outline-gray);
+
+	& form {
+		display: flex;
+	    gap: 1em;
+	    padding: 0.5em 1em;
+	    align-items: center;
+	}
+	[role="textbox"] {
+		flex-grow: 1;
+		border: 1px solid #ccc;
+		font-family: inherit;
+		font-size: inherit;
+		padding: 1px 6px;
+		max-height: 10em;
+		min-height: 3em;
+		overflow-y: auto; /* scrollbar only if needed */
+	    border: 2px solid var(--color-outline-gray);
+	    border-radius: 0.5em;
+	}
+	& input[type="submit"] {
+		flex-shrink: 0;
+		flex-grow: 0;
+		height: 3em;
+		width: 6em;
+	}
 }

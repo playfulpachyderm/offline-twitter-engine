@@ -1,12 +1,16 @@
 {{define "list"}}
-  <div class="users-list-container">
+  <div class="users-list">
     {{range .UserIDs}}
       {{$user := (user .)}}
       <div class="user">
         <div class="row row--spread">
           {{template "author-info" $user}}
           {{if $.button_text}}
-            <a class="unstyled-link quick-link danger" href="{{$.button_url}}?user_handle={{$user.Handle}}"onclick="return confirm('{{$.button_text}} this user?  Are you sure?')">
+            <a
+              href="{{$.button_url}}?user_handle={{$user.Handle}}"
+              class="button button--danger"
+              onclick="return confirm('{{$.button_text}} this user?  Are you sure?')"
+            >
               {{$.button_text}}
             </a>
           {{end}}

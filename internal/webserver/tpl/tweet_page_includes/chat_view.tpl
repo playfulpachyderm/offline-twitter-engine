@@ -1,25 +1,19 @@
-{{define "messages-with-poller"}}
+{{define "messages"}}
   {{range .MessageIDs}}
     {{$message := (index $.DMTrove.Messages .)}}
     {{$user := (user $message.SenderID)}}
     {{$is_us := (eq $message.SenderID (active_user).ID)}}
-    <div class="dm-message-and-reacts-container {{if $is_us}} our-message {{end}}">
-      <div class="dm-message-container">
-        <div class="sender-profile-image-container">
-          <a class="unstyled-link" href="/{{$user.Handle}}">
-            {{if $user.IsContentDownloaded}}
-              <img class="profile-image" src="/content/{{$user.GetProfileImageLocalPath}}" />
-            {{else}}
-              <img class="profile-image" src="{{$user.ProfileImageUrl}}" />
-            {{end}}
-          </a>
+    <div class="dm-message {{if $is_us}} our-message {{end}}">
+      <div class="dm-message__row row">
+        <div class="dm-message__sender-profile-img">
+          {{template "circle-profile-img" $user}}
         </div>
-        <div class="dm-message-content-container">
+        <div class="dm-message__contents">
           {{if (ne $message.InReplyToID 0)}}
-            <div class="replying-to-container">
-              <div class="replying-to-label row">
+            <div class="dm-message__replying-to">
+              <div class="dm-message__replying-to-label labelled-icon">
                 <img class="svg-icon" src="/static/icons/replying_to.svg" width="24" height="24" />
-                <span>Replying to</span>
+                <label>Replying to</label>
               </div>
               <div class="replying-to-message">
                 {{(index $.DMTrove.Messages $message.InReplyToID).Text}}
@@ -27,7 +21,7 @@
             </div>
           {{end}}
           {{if (ne $message.EmbeddedTweetID 0)}}
-            <div class="tweet-preview">
+            <div class="dm-message__tweet-preview">
               {{template "tweet" (dict
                 "TweetID" $message.EmbeddedTweetID
                 "RetweetID" 0
@@ -36,7 +30,7 @@
             </div>
           {{end}}
           {{range $message.Images}}
-            <img class="dm-embedded-image"
+            <img class="dm-message__embedded-image"
               {{if .IsDownloaded}}
                 src="/content/images/{{.LocalFilename}}"
               {{else}}
@@ -47,7 +41,7 @@
             >
           {{end}}
           {{range $message.Videos}}
-            <video controls width="{{.Width}}" height="{{.Height}}"
+            <video class="dm-message__embedded-video" controls width="{{.Width}}" height="{{.Height}}"
               {{if .IsDownloaded}}
                 poster="/content/video_thumbnails/{{.ThumbnailLocalPath}}"
               {{else}}
@@ -62,47 +56,32 @@
             </video>
           {{end}}
           {{range $message.Urls}}
-            <a
-              class="embedded-link rounded-gray-outline unstyled-link"
-              target="_blank"
-              href="{{.Text}}"
-              style="max-width: {{if (ne .ThumbnailWidth 0)}}{{.ThumbnailWidth}}px {{else}}fit-content {{end}}"
-            >
-              <img
-                {{if .IsContentDownloaded}}
-                  src="/content/link_preview_images/{{.ThumbnailLocalPath}}"
-                {{else}}
-                  src="{{.ThumbnailRemoteUrl}}"
-                {{end}}
-                class="embedded-link-preview"
-                width="{{.ThumbnailWidth}}" height="{{.ThumbnailHeight}}"
-              />
-              <h3 class="embedded-link-title">{{.Title}}</h3>
-              <p class="embedded-link-description">{{.Description}}</p>
-              <span class="row embedded-link-domain-container">
-                <img class="svg-icon" src="/static/icons/link3.svg" width="24" height="24" />
-                <span class="embedded-link-domain">{{(.GetDomain)}}</span>
-              </span>
-            </a>
+            {{template "embedded-link" .}}
           {{end}}
           {{if $message.Text}}
-            <div class="dm-message-text-container">
+            <div class="dm-message__text-content">
               {{template "text-with-entities" $message.Text}}
             </div>
           {{end}}
         </div>
       </div>
-      <div class="dm-message-reactions">
+      <div class="dm-message__reactions">
         {{range $message.Reactions}}
           {{$sender := (user .SenderID)}}
           <span title="{{$sender.DisplayName}} (@{{$sender.Handle}})">{{.Emoji}}</span>
         {{end}}
       </div>
-      <p class="posted-at">
-        {{$message.SentAt.Time.Format "Jan 2, 2006 @ 3:04 pm"}}
-      </p>
+      <div class="sent-at">
+        <p class="sent-at__text">
+          {{$message.SentAt.Time.Format "Jan 2, 2006 @ 3:04 pm"}}
+        </p>
+      </div>
     </div>
   {{end}}
+{{end}}
+
+{{define "messages-with-poller"}}
+  {{template "messages" .}}
 
   <div id="new-messages-poller"
     hx-swap="outerHTML {{if $.ScrollBottom}}scroll:.chat-messages:bottom{{end}}"
@@ -119,17 +98,21 @@
       {{end}}
     </div>
     {{if $.ActiveRoomID}}
-      <div class="dm-composer-container">
-        <form hx-post="/messages/{{$.ActiveRoomID}}/send" hx-target="#new-messages-poller" hx-swap="outerHTML scroll:.chat-messages:bottom" hx-ext="json-enc">
+      <div class="dm-composer">
+        <form
+          hx-post="/messages/{{$.ActiveRoomID}}/send"
+          hx-target="#new-messages-poller"
+          hx-swap="outerHTML scroll:.chat-messages:bottom"
+          hx-ext="json-enc"
+        >
           {{template "dm-composer"}}
-          <input id="real-input" type="hidden" name="text" value="" />
+          <input id="realInput" type="hidden" name="text" value="" />
           <input type="submit" />
         </form>
       </div>
       <script>
         // Make pasting text work for HTML as well as plain text
-        var editor = document.querySelector("#composer");
-        editor.addEventListener("paste", function(e) {
+        composer.addEventListener("paste", function(e) {
           // cancel paste
           e.preventDefault();
           // get text representation of clipboard
@@ -180,10 +163,7 @@
 {{end}}
 
 {{define "dm-composer"}}
-  <span
-    id="composer"
-    role="textbox"
-    contenteditable
+  <span id="composer" role="textbox" contenteditable oninput="realInput.value = this.innerText"
     {{if .}}
       {{/*
         This is a separate template so it can be OOB-swapped to clear the contents of the composer
@@ -196,7 +176,5 @@
       */}}
       hx-swap-oob="true"
     {{end}}
-    oninput="var text = this.innerText; document.querySelector('#real-input').value = text"
-    >
-  </span>
+  ></span>
 {{end}}

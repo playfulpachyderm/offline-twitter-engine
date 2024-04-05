@@ -1,18 +1,18 @@
 {{define "space"}}
   <div class="space">
-    <div class="space-host row">
+    <div class="space__host row">
       {{template "author-info" (user .CreatedById)}}
-      <span class="host-label">(Host)</span>
-      <div class="layout-spacer"></div>
-      <div class="space-date">
+      <span class="space__host__label">(Host)</span>
+      <div class="space__layout-spacer"></div>
+      <div class="space__date">
         {{.StartedAt.Format "Jan 2, 2006"}}<br>{{.StartedAt.Format "3:04pm"}}
       </div>
     </div>
-    <h3 class="space-title">{{.Title}}</h3>
-    <div class="space-info row">
+    <h3 class="space__title">{{.Title}}</h3>
+    <div class="space__info row">
       <span class="space-state">
         {{if (eq .State "Ended")}}
-          <ul class="space-info-list inline-dotted-list">
+          <ul class="space__info__list inline-dotted-list">
             <li>{{.State}}</li>
             <li>{{(len .ParticipantIds)}} participants</li>
             <li>{{.LiveListenersCount}} tuned in</li>
@@ -23,7 +23,7 @@
         {{end}}
       </span>
     </div>
-    <ul class="space-participants-list">
+    <ul class="space__participants-list">
       {{range .ParticipantIds}}
         {{if (ne . $.CreatedById)}}
           <li>{{template "author-info" (user .)}}</li>

@@ -24,11 +24,11 @@
     </head>
     <body>
       <header class="row search-bar">
-        <a onclick="window.history.back()" class="back-button quick-link">
+        <a onclick="window.history.back()" class="button search-bar__back-button">
           <img class="svg-icon" src="/static/icons/back.svg" width="24" height="24"/>
         </a>
-        <form class="search-form" hx-get="/search" hx-push-url="true" hx-target="body" hx-swap="inner-html show:window:top">
-          <input id="search-bar"
+        <form class="search-bar__form" hx-get="/search" hx-push-url="true" hx-target="body" hx-swap="inner-html show:window:top">
+          <input id="search-bar" class="search-bar__input"
             name="q"
             placeholder="Search" type="text"
             {{with (search_text)}} value="{{.}}" {{end}}
@@ -39,9 +39,9 @@
       <main>
         {{template "main" .}}
       </main>
-      <dialog id="image_carousel">
-        <a class="quick-link close-button" onclick="image_carousel.close()">X</a>
-        <img src="">
+      <dialog id="image_carousel" class="image-carousel">
+        <a class="button image-carousel__close-button" onclick="image_carousel.close()">X</a>
+        <img class="image-carousel__active-image" src="">
       </dialog>
     </body>
   </html>

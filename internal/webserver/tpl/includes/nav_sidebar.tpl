@@ -1,74 +1,74 @@
 {{define "nav-sidebar"}}
-  <nav id="nav-sidebar">
+  <nav id="nav-sidebar" class="nav-sidebar">
     <div id="logged-in-user-info">
-      <div class="quick-link" hx-get="/login" hx-trigger="click" hx-target="body" hx-push-url="true">
+      <div class="button row" hx-get="/login" hx-trigger="click" hx-target="body" hx-push-url="true">
         {{template "author-info" active_user}}
         <img class="svg-icon" src="/static/icons/dotdotdot.svg" width="24" height="24" />
       </div>
     </div>
-    <ul class="quick-links">
-      <a class="unstyled-link" href="/timeline">
-        <li class="quick-link">
+    <ul class="nav-sidebar__buttons">
+      <a href="/timeline">
+        <li class="button labelled-icon">
           <img class="svg-icon" src="/static/icons/home.svg" width="24" height="24" />
-          <span>Home</span>
+          <label class="nav-sidebar__button-label">Home</label>
         </li>
       </a>
-      <a class="unstyled-link" onclick="document.querySelector('#search-bar').focus()">
-        <li class="quick-link">
+      <a onclick="document.querySelector('#search-bar').focus()">
+        <li class="button labelled-icon">
           <img class="svg-icon" src="/static/icons/explore.svg" width="24" height="24" />
-          <span>Explore</span>
+          <label class="nav-sidebar__button-label">Explore</label>
         </li>
       </a>
-      <a class="unstyled-link" href="#">
-        <li class="quick-link">
+      <a href="#">
+        <li class="button labelled-icon">
           <img class="svg-icon" src="/static/icons/notifications.svg" width="24" height="24" />
-          <span>Notifications</span>
+          <label class="nav-sidebar__button-label">Notifications</label>
         </li>
       </a>
       {{if (not (eq (active_user).Handle "[nobody]"))}}
-        <a class="unstyled-link" href="/messages">
-          <li class="quick-link">
+        <a href="/messages">
+          <li class="button labelled-icon">
             <img class="svg-icon" src="/static/icons/messages.svg" width="24" height="24" />
-            <span>Messages</span>
+            <label class="nav-sidebar__button-label">Messages</label>
           </li>
         </a>
       {{end}}
-      <a class="unstyled-link" href="/lists">
-        <li class="quick-link">
+      <a href="/lists">
+        <li class="button labelled-icon">
           <img class="svg-icon" src="/static/icons/lists.svg" width="24" height="24" />
-          <span>Lists</span>
+          <label class="nav-sidebar__button-label">Lists</label>
         </li>
       </a>
-      <a class="unstyled-link" href="#">
-        <li class="quick-link">
+      <a href="#">
+        <li class="button labelled-icon">
           <img class="svg-icon" src="/static/icons/bookmarks.svg" width="24" height="24" />
-          <span>Bookmarks</span>
+          <label class="nav-sidebar__button-label">Bookmarks</label>
         </li>
       </a>
-      <a class="unstyled-link" href="#">
-      <li class="quick-link">
+      <a href="#">
+      <li class="button labelled-icon">
           <img class="svg-icon" src="/static/icons/communities.svg" width="24" height="24" />
-        <span>Communities</span>
+        <label class="nav-sidebar__button-label">Communities</label>
       </li>
       </a>
-      <a class="unstyled-link" href="#">
-        <li class="quick-link">
+      <a href="#">
+        <li class="button labelled-icon">
           <img class="svg-icon" src="/static/icons/verified.svg" width="24" height="24" />
-          <span>Verified</span>
+          <label class="nav-sidebar__button-label">Verified</label>
         </li>
       </a>
       {{if (not (eq (active_user).Handle "[nobody]"))}}
-        <a class="unstyled-link" href="/{{(active_user).Handle}}">
-          <li class="quick-link">
+        <a href="/{{(active_user).Handle}}">
+          <li class="button labelled-icon">
             <img class="svg-icon" src="/static/icons/profile.svg" width="24" height="24" />
-            <span>Profile</span>
+            <label class="nav-sidebar__button-label">Profile</label>
           </li>
         </a>
       {{end}}
-      <a class="unstyled-link" href="#">
-        <li class="quick-link">
+      <a href="#">
+        <li class="button labelled-icon">
           <img class="svg-icon" src="/static/icons/more.svg" width="24" height="24"/>
-          <span>More</span>
+          <label class="nav-sidebar__button-label">More</label>
         </li>
       </a>
     </ul>

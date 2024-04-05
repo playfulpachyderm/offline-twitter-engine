@@ -7,7 +7,7 @@
     {{/* Scroll the active chat into view, if there is one */}}
     {{if $.ActiveRoomID}}
       <script>
-        document.querySelector(".chat.active-chat").scrollIntoViewIfNeeded(true)
+        document.querySelector(".chat-list-entry.chat-list-entry--active-chat").scrollIntoViewIfNeeded(true)
       </script>
     {{end}}
   </div>

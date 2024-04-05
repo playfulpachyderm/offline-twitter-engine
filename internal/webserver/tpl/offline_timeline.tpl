@@ -2,12 +2,12 @@
 
 {{define "main"}}
   <div class="timeline-header">
-    <div class="row tabs-container">
-      <a class="tab unstyled-link {{if (eq .ActiveTab "User feed")}}active-tab{{end}}" href="/timeline">
-        <span class="tab-inner">User feed</span>
+    <div class="tabs row">
+      <a class="tabs__tab {{if (eq .ActiveTab "User feed")}}tabs__tab--active{{end}}" href="/timeline">
+        <span class="tabs__tab-label">User feed</span>
       </a>
-      <a class="tab unstyled-link {{if (eq .ActiveTab "Offline")}}active-tab{{end}}" href="/timeline/offline">
-        <span class="tab-inner">Offline timeline</span>
+      <a class="tabs__tab {{if (eq .ActiveTab "Offline")}}tabs__tab--active{{end}}" href="/timeline/offline">
+        <span class="tabs__tab-label">Offline timeline</span>
       </a>
     </div>
   </div>

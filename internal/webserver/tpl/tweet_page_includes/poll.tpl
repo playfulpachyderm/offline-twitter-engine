@@ -1,9 +1,9 @@
 {{define "poll-choice"}}
-  <div class="row poll-choice">
-    <div class="poll-fill-bar {{if (.poll.IsWinner .votes)}}poll-winner{{end}}" style="width: {{printf "%.1f" (.poll.VotePercentage .votes)}}%"></div>
-    <div class="poll-info-container row">
-      <span class="poll-choice-label">{{.label}}</span>
-      <span class="poll-choice-votes">{{.votes}} ({{printf "%.1f" (.poll.VotePercentage .votes)}}%)</span>
+  <div class="row poll__choice">
+    <div class="poll__choice-fill-bar {{if (.poll.IsWinner .votes)}}poll__choice-fill-bar--winner{{end}}" style="width: {{printf "%.1f" (.poll.VotePercentage .votes)}}%"></div>
+    <div class="poll__choice-info row">
+      <span class="poll__choice-label">{{.label}}</span>
+      <span class="poll__choice-votes">{{.votes}} ({{printf "%.1f" (.poll.VotePercentage .votes)}}%)</span>
     </div>
   </div>
 
@@ -21,8 +21,8 @@
       {{template "poll-choice" (dict "label" .Choice4 "votes" .Choice4_Votes "poll" .)}}
     {{end}}
 
-    <p class="poll-metadata">
-      <span class="poll-state">
+    <p class="poll__metadata">
+      <span class="poll__metadata__state">
         {{if .IsOpen}}
           Poll open, voting ends at {{.FormatEndsAt}}
         {{else}}
