@@ -83,6 +83,14 @@ func (o SortOrder) NextCursorValue(r CursorResult) int {
 		panic(fmt.Sprintf("Invalid sort order: %d", o))
 	}
 }
+func (o SortOrder) NextDMCursorValue(m scraper.DMMessage) int64 {
+	switch o {
+	case SORT_ORDER_NEWEST, SORT_ORDER_OLDEST:
+		return m.SentAt.UnixMilli()
+	default:
+		panic(fmt.Sprintf("Invalid sort order for DMs: %d", o))
+	}
+}
 
 // Position in the feed (i.e., whether scrolling up/down is possible)
 type CursorPosition int

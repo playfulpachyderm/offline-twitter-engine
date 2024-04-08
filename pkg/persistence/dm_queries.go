@@ -194,6 +194,7 @@ func (p Profile) GetChatMessage(id DMMessageID) (ret DMMessage, err error) {
 
 type DMChatView struct {
 	DMTrove
+	Cursor       DMCursor
 	RoomIDs      []DMChatRoomID
 	MessageIDs   []DMMessageID
 	ActiveRoomID DMChatRoomID
@@ -212,6 +213,7 @@ func (p Profile) GetChatRoomsPreview(id UserID) DMChatView {
 	ret := NewDMChatView()
 
 	// Get the list of rooms
+	// DUPE: get-room-list
 	var rooms []DMChatRoom
 	err := p.DB.Select(&rooms, `
 		select `+CHAT_ROOMS_ALL_SQL_FIELDS+`
@@ -260,7 +262,10 @@ func (p Profile) GetChatRoomsPreview(id UserID) DMChatView {
 
 // Get chat room detail, including participants and messages
 func (p Profile) GetChatRoomContents(id DMChatRoomID, latest_timestamp int) DMChatView {
-	ret := NewDMChatView()
+	c := NewConversationCursor(id)
+	c.SinceTimestamp = TimestampFromUnixMilli(int64(latest_timestamp))
+	ret := p.NextDMPage(c)
+
 	var room DMChatRoom
 	err := p.DB.Get(&room, `
 		select `+CHAT_ROOMS_ALL_SQL_FIELDS+`
@@ -271,28 +276,13 @@ func (p Profile) GetChatRoomContents(id DMChatRoomID, latest_timestamp int) DMCh
 		panic(err)
 	}
 
-	// Fetch all messages
-	var msgs []DMMessage
-	err = p.DB.Select(&msgs, `
-		select `+CHAT_MESSAGES_ALL_SQL_FIELDS+`
-		  from chat_messages
-		 where chat_room_id = ?
-		   and sent_at > ?
-		 order by sent_at desc
-		 limit 50
-	`, room.ID, latest_timestamp)
-	if err != nil {
-		panic(err)
+	// Reverse the order.  Can't just use `SORT_ORDER_OLDEST` because that will get the wrong messages!
+	// We want the newest messages, but with the oldest newest-message first and the newest newest-message last.
+	reverse_msg_ids := make([]DMMessageID, len(ret.MessageIDs))
+	for i := range ret.MessageIDs {
+		reverse_msg_ids[i] = ret.MessageIDs[len(ret.MessageIDs)-i-1]
 	}
-	ret.MessageIDs = make([]DMMessageID, len(msgs))
-	for i, msg := range msgs {
-		ret.MessageIDs[len(ret.MessageIDs)-i-1] = msg.ID // Reverse order
-		msg.Reactions = make(map[UserID]DMReaction)
-		ret.Messages[msg.ID] = msg
-	}
-
-	// Fetch the participants
-	p.fill_chat_room_participants(&room, &ret.DMTrove)
+	ret.MessageIDs = reverse_msg_ids
 
 	// Set last message ID on chat room
 	if len(ret.MessageIDs) > 0 {
@@ -301,9 +291,13 @@ func (p Profile) GetChatRoomContents(id DMChatRoomID, latest_timestamp int) DMCh
 		room.LastMessageID = ret.MessageIDs[len(ret.MessageIDs)-1]
 	}
 
+	// Fetch the participants
+	p.fill_chat_room_participants(&room, &ret.DMTrove)
+
 	// Put the room in the Trove
 	ret.Rooms[room.ID] = room
 
+	// Fetch reaccs, attachments, and replied-to messages
 	p.fill_dm_contents(&ret.DMTrove)
 	return ret
 }
@@ -459,4 +453,176 @@ func (p Profile) fill_dm_contents(trove *DMTrove) {
 	}
 
 	p.fill_content(&trove.TweetTrove, UserID(0))
+}
+
+type DMCursor struct {
+	CursorPosition
+	CursorValue int64
+	SortOrder
+	PageSize int
+
+	// Search params
+	Keywords            []string
+	FromUserHandle      UserHandle   // Sent by this user
+	ToUserHandle        UserHandle   // Replying to this user
+	ReaccedByUserHandle UserHandle   // Reacted to by this user
+	ConversationId      DMChatRoomID // In this conversation
+	SinceTimestamp      Timestamp
+	UntilTimestamp      Timestamp
+	FilterLinks         Filter
+	FilterImages        Filter
+	FilterVideos        Filter
+	FilterMedia         Filter
+	FilterSpaces        Filter
+	FilterReplies       Filter
+}
+
+// Generate a DMCursor for a conversation
+func NewConversationCursor(id DMChatRoomID) DMCursor {
+	return DMCursor{
+		CursorPosition: CURSOR_START,
+		CursorValue:    0,
+		SortOrder:      SORT_ORDER_NEWEST,
+		PageSize:       50,
+
+		ConversationId: id,
+		SinceTimestamp: TimestampFromUnix(0),
+		UntilTimestamp: TimestampFromUnix(0),
+	}
+}
+
+func (p Profile) NextDMPage(c DMCursor) DMChatView {
+	where_clauses := []string{}
+	bind_values := []interface{}{}
+
+	// Keywords
+	for _, kw := range c.Keywords {
+		where_clauses = append(where_clauses, "text like ?")
+		bind_values = append(bind_values, fmt.Sprintf("%%%s%%", kw))
+	}
+
+	// Conversation
+	if c.ConversationId != DMChatRoomID("") {
+		where_clauses = append(where_clauses, "chat_room_id = ?")
+		bind_values = append(bind_values, c.ConversationId)
+	}
+
+	// Since and until timestamps
+	if c.SinceTimestamp.Unix() != 0 {
+		where_clauses = append(where_clauses, "sent_at > ?")
+		bind_values = append(bind_values, c.SinceTimestamp)
+	}
+	if c.UntilTimestamp.Unix() != 0 {
+		where_clauses = append(where_clauses, "sent_at < ?")
+		bind_values = append(bind_values, c.UntilTimestamp)
+	}
+
+	// ... etc
+
+	// Pagination
+	if c.CursorPosition != CURSOR_START {
+		where_clauses = append(where_clauses, c.SortOrder.PaginationWhereClause())
+		bind_values = append(bind_values, c.CursorValue)
+	}
+
+	// Assemble the full where-clause
+	where_clause := ""
+	if len(where_clauses) > 0 {
+		where_clause = "where " + strings.Join(where_clauses, " and ")
+	}
+
+	// Add in page size parameter
+	bind_values = append(bind_values, c.PageSize)
+
+	// Fetch all messages
+	var msgs []struct {
+		DMMessage
+		Chrono int64 `db:"chrono"`
+	}
+	q := `
+		select ` + CHAT_MESSAGES_ALL_SQL_FIELDS + `, sent_at chrono
+		  from chat_messages
+		  ` + where_clause + `
+		  ` + c.SortOrder.OrderByClause() + `
+		 limit ?
+	`
+	fmt.Printf("query: %s\n", q)
+	fmt.Printf("Bind values: %#v\n", bind_values)
+
+	err := p.DB.Select(&msgs, q, bind_values...)
+	if err != nil {
+		panic(err)
+	}
+
+	ret := NewDMChatView()
+	ret.MessageIDs = []DMMessageID{}
+	for _, _msg := range msgs {
+		msg := _msg.DMMessage // XXX: this is messy
+		ret.MessageIDs = append(ret.MessageIDs, msg.ID)
+		msg.Reactions = make(map[UserID]DMReaction)
+		ret.Messages[msg.ID] = msg
+	}
+
+	// Set the new cursor position and value
+	ret.Cursor = c // Copy cursor values over
+	if len(msgs) < c.PageSize {
+		ret.Cursor.CursorPosition = CURSOR_END
+	} else {
+		ret.Cursor.CursorPosition = CURSOR_MIDDLE
+		last_item := msgs[len(msgs)-1].DMMessage
+		ret.Cursor.CursorValue = c.SortOrder.NextDMCursorValue(last_item)
+	}
+
+	// Get the list of rooms
+	var room_ids []interface{}
+	for _, msg := range ret.Messages {
+		room_ids = append(room_ids, msg.DMChatRoomID)
+	}
+	if len(room_ids) > 0 {
+		// DUPE: get-room-list
+		var rooms []DMChatRoom
+		err = p.DB.Select(&rooms, `
+			select `+CHAT_ROOMS_ALL_SQL_FIELDS+`
+			  from chat_rooms
+			 where id in (`+strings.Repeat("?,", len(room_ids)-1)+`?)
+		`, room_ids...)
+		if err != nil {
+			panic(err)
+		}
+
+		// Fill data for the rooms
+		for _, room := range rooms {
+			// // Fetch the latest message
+			// var msg DMMessage
+			// q, args, err := sqlx.Named(`
+			// 	select `+CHAT_MESSAGES_ALL_SQL_FIELDS+`
+			// 	  from chat_messages
+			// 	 where chat_room_id = :room_id
+			// 	   and sent_at = (select max(sent_at) from chat_messages where chat_room_id = :room_id)
+			// `, struct {
+			// 	ID DMChatRoomID `db:"room_id"`
+			// }{ID: room.ID})
+			// if err != nil {
+			// 	panic(err)
+			// }
+			// err = p.DB.Get(&msg, q, args...)
+			// if errors.Is(err, sql.ErrNoRows) {
+			// 	// TODO
+			// 	fmt.Printf("No messages found in chat; skipping preview\n")
+			// } else if err != nil {
+			// 	panic(err)
+			// }
+
+			// Fetch the participants
+			p.fill_chat_room_participants(&room, &ret.DMTrove)
+			// Add to the Trove
+			// room.LastMessageID = msg.ID
+			ret.Rooms[room.ID] = room
+			// Add everything to the Trove
+			// ret.Messages[msg.ID] = msg
+		}
+	}
+
+	p.fill_dm_contents(&ret.DMTrove)
+	return ret
 }
