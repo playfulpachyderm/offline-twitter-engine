@@ -557,7 +557,7 @@ func (p Profile) NextDMPage(c DMCursor) DMChatView {
 	ret := NewDMChatView()
 	ret.MessageIDs = []DMMessageID{}
 	for _, _msg := range msgs {
-		msg := _msg.DMMessage // XXX: this is messy
+		msg := _msg.DMMessage
 		ret.MessageIDs = append(ret.MessageIDs, msg.ID)
 		msg.Reactions = make(map[UserID]DMReaction)
 		ret.Messages[msg.ID] = msg
