@@ -272,3 +272,12 @@ v0.6.6
 - Add support for pinned tweets (both fetching and displaying)
 - New search bar filters: "tombstone:<tombstone_type>" and "followed_by:<userhandle>"
 - Add boilerplate for Progressive Web App
+
+v0.6.7
+------
+
+- UI improvements:
+	- various bugfixes
+	- make tweets take up less space
+- Add "list:<id>" search bar filter
+- BUGFIX: Fix pinned tweets with a quoted-tweet not showing the quoted tweet
