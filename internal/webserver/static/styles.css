@@ -197,7 +197,7 @@ h3 {
 header {
 	/* Sticky to top of page */
 	position: fixed;
-	z-index: 1;
+	z-index: 2; /* Pin icon in a pinned tweet has z-index=1 */
 
 	/* Match layout width of `body` */
 	left: var(--width-body-margins);
@@ -530,6 +530,13 @@ main {
 		/* TODO: what about DM tweet-previews? */
 		padding-top: 0.6em;
 		padding-bottom: 0.6em;
+	}
+	/**
+	 * Create some extra space for the pin icon at the top of a pinned tweet
+	 */
+	.pinned-tweet & {
+	    margin-top: -2em;
+	    padding-top: 1.5em;
 	}
 	.timeline > &, .pinned-tweet & {
 		/* not for nested (i.e., quoted) tweets */
@@ -998,9 +1005,10 @@ main {
  * Pinned tweet mini-module
  */
 .pinned-tweet__pin-container {
-	margin: 0.5em 0em -1em 3em;
+	margin: 0.5em 0em 0em 3em;
 	z-index: 1; /* Otherwise it disappears behind the tweet background color on mouse-over */
 	position: relative; /* z-index is ignored if `position` is "static" */
+	width: fit-content;
 
 	.pinned-tweet__pin-icon {
 		filter: invert(43%) saturate(30%);
