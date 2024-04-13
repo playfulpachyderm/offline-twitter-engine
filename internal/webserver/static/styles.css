@@ -1,34 +1,26 @@
 :root {
-	--color-twitter-text-gray: #536171;
-	--color-twitter-blue: #1b95e0;  /* hsl(203, 78%, 49%) */
-	--color-twitter-blue-light: #7cc5f6; /* hsl(204, 87%, 73%) */
-	--color-twitter-blue-extra-light: hsl(204, 95%, 85%);
-	--color-twitter-off-white: #f7f9f9; /* hsl(180, 14%, 97%) */
-	--color-twitter-off-white-dark: #dae5e5; /* hsl(180, 17%, 88%) */
-	--color-outline-gray: #dcdcdc;
-	--color-twitter-text-gray: #536471;
+	/* Make it easy for stuff to match the width of <body> */
+	--width-body-margins: 30%;
 
-	--color-twitter-danger-red: #f4212e; /* hsl(356, 91%, 54%) */
-	--color-twitter-danger-red2: #de1b28;		/* hsl(356, 78%, 49%) */
-	--color-twitter-danger-red2-light: #f67e86;  /* hsl(356, 87%, 73%) */
-	--color-twitter-danger-red2-hover: #f2a6aa;  /* hsl(357, 75%, 80%);*/
-	--color-space-purple: #a49bfd;
-	--color-space-purple-outline: #6452fc;
-/*
-const QColor COLOR_OUTLINE_GRAY = QColor(220, 220, 220);
-const QColor COLOR_TWITTER_BLUE = QColor(27, 149, 224);
-const QColor COLOR_TWITTER_BLUE_LIGHT = QColor(124,197,246);
-const QColor COLOR_TWITTER_OFF_WHITE = QColor(247,249,249);
-const QColor COLOR_TWITTER_OFF_WHITE_DARK = QColor(218,229,229);
-const QColor COLOR_TWITTER_TEXT_GRAY = QColor(83, 100, 113);
+	/**********
+	 * Colors
+	 **********/
+	--color-twitter-blue:              hsl(204, 78%, 49%);
+	--color-twitter-blue-light:        hsl(204, 87%, 73%);
+	--color-twitter-blue-extra-light:  hsl(204, 95%, 85%);
 
-const QColor COLOR_BACKGROUND_GREEN = QColor(40, 205, 50);
+	--color-twitter-off-white:         hsl(180, 14%, 97%);
+	--color-twitter-off-white-dark:    hsl(180, 17%, 88%);
+	--color-outline-gray:              hsl(204, 0%, 86%);
+	--color-twitter-text-gray:         hsl(204, 15%, 38%);
 
-const QColor COLOR_RED		  = QColor(255, 0, 0);
+	--color-twitter-danger-red:        hsl(356, 91%, 54%);
+	--color-twitter-danger-red2:       hsl(356, 78%, 49%);
+	--color-twitter-danger-red2-light: hsl(356, 87%, 73%);
+	--color-twitter-danger-red2-hover: hsl(356, 75%, 80%);
 
-const QColor COLOR_SPACE_PURPLE = QColor(164, 155, 253);
-const QColor COLOR_SPACE_PURPLE_OUTLINE = QColor(100, 82, 252);
-*/
+	--color-space-purple:              hsl(246, 96%, 80%);
+	--color-space-purple-outline:      hsl(246, 97%, 65%);
 }
 
 
@@ -55,7 +47,7 @@ body {
 	 */
 	position: relative;
 
-	margin: 0 30%;
+	margin: 0 var(--width-body-margins);
 	min-height: 100vh;
 
 	border-color: var(--color-twitter-off-white-dark);
@@ -208,8 +200,8 @@ header {
 	z-index: 1;
 
 	/* Match layout width of `body` */
-	left: 30%;
-	right: 30%;
+	left: var(--width-body-margins);
+	right: var(--width-body-margins);
 
 	height: 4em;
 	padding: 0.5em 1em;
@@ -298,15 +290,26 @@ main {
 /**
  * Toast notification popup that gets sent on HTTP 500
  */
-.server-error-msg {
-	background-color: #fee;
-	border: 1px solid red;
-	border-radius: 1em;
-	padding: 1em;
-	color: red;
-	text-align: center;
+.error-messages {
+	position: fixed;
+	left: var(--width-body-margins);
 	top: 10em;
-	width: 90%;
+	right: var(--width-body-margins);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	.error-messages__msg {
+		background-color: #fee;
+		border: 1px solid red;
+		border-radius: 1em;
+		padding: 1em;
+		color: red;
+		text-align: center;
+		word-wrap: break-word;
+		margin: 1em;
+		width: 90%;
+	}
 }
 
 /**
@@ -340,8 +343,8 @@ main {
 		position: fixed;
 		top: 0;
 		height: 100vh;
-		left: 30%;
-		right: 30%;
+		left: var(--width-body-margins);
+		right: var(--width-body-margins);
 	}
 	.htmx-spinner__background {
 		opacity: 0.3;
@@ -1301,9 +1304,9 @@ main {
 
 	& form {
 		display: flex;
-	    gap: 1em;
-	    padding: 0.5em 1em;
-	    align-items: center;
+		gap: 1em;
+		padding: 0.5em 1em;
+		align-items: center;
 	}
 	[role="textbox"] {
 		flex-grow: 1;
@@ -1314,8 +1317,8 @@ main {
 		max-height: 10em;
 		min-height: 3em;
 		overflow-y: auto; /* scrollbar only if needed */
-	    border: 2px solid var(--color-outline-gray);
-	    border-radius: 0.5em;
+		border: 2px solid var(--color-outline-gray);
+		border-radius: 0.5em;
 	}
 	& input[type="submit"] {
 		flex-shrink: 0;

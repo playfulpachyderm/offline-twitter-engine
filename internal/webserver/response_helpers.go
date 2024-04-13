@@ -35,8 +35,9 @@ func (app *Application) error_500(w http.ResponseWriter, err error) {
 		panic(err2)
 	}
 
+	// Reset the HTMX response to return an error toast and put it in the
 	w.Header().Set("HX-Reswap", "beforeend")
-	w.Header().Set("HX-Retarget", "main")
+	w.Header().Set("HX-Retarget", "#errorMessages")
 	w.Header().Set("HX-Push-Url", "false")
 
 	r := renderer{

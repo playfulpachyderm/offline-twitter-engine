@@ -1,6 +1,6 @@
 {{define "error-toast"}}
-  <dialog class="server-error-msg" open>
+  <div class="error-messages__msg" open>
     <span>{{.ErrorMsg}}</span>
-    <button class="suicide" onclick="htmx.remove('.server-error-msg')">X</button>
-  </dialog>
+    <button class="suicide" onclick="htmx.remove('.error-messages__msg')">X</button>
+  </div>
 {{end}}

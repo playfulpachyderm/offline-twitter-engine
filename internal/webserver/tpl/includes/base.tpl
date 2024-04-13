@@ -43,6 +43,8 @@
         <a class="button image-carousel__close-button" onclick="image_carousel.close()">X</a>
         <img class="image-carousel__active-image" src="">
       </dialog>
+      <div class="error-messages" id="errorMessages">
+      </div>
     </body>
   </html>
 {{end}}
