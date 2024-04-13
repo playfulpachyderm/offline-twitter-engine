@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -147,7 +148,14 @@ func (api *API) update_csrf_token() {
 
 func is_timeout(err error) bool {
 	var urlErr *url.Error
-	return errors.As(err, &urlErr) && urlErr.Timeout()
+	if errors.As(err, &urlErr) {
+		return urlErr.Timeout()
+	}
+	var netErr net.Error
+	if errors.As(err, &netErr) {
+		return netErr.Timeout()
+	}
+	return false
 }
 
 func (api *API) do_http_POST(remote_url string, body string, result interface{}) error {
@@ -177,7 +185,9 @@ func (api *API) do_http_POST(remote_url string, body string, result interface{})
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
+	if is_timeout(err) {
+		return fmt.Errorf("GET %q:\n  reading response body:\n  %w", remote_url, ErrRequestTimeout)
+	} else if err != nil {
 		panic(err)
 	}
 
@@ -237,7 +247,9 @@ func (api *API) do_http(remote_url string, cursor string, result interface{}) er
 	}
 
 	body, err := io.ReadAll(resp.Body)
-	if err != nil {
+	if is_timeout(err) {
+		return fmt.Errorf("GET %q:\n  reading response body:\n  %w", remote_url, ErrRequestTimeout)
+	} else if err != nil {
 		panic(err)
 	}
 
@@ -397,7 +409,7 @@ func (api *API) DownloadMedia(remote_url string) ([]byte, error) {
 
 	resp, err := api.Client.Do(req)
 	if is_timeout(err) {
-		return []byte{}, fmt.Errorf("GET %q:\n  %w", remote_url, ErrRequestTimeout)
+		return []byte{}, fmt.Errorf("GET %q:\n  waiting for headers:\n  %w", remote_url, ErrRequestTimeout)
 	} else if err != nil {
 		return []byte{}, fmt.Errorf("Error executing HTTP request:\n  %w", err)
 	}
@@ -409,7 +421,9 @@ func (api *API) DownloadMedia(remote_url string) ([]byte, error) {
 	}
 
 	body, err := io.ReadAll(resp.Body)
-	if err != nil {
+	if is_timeout(err) {
+		return []byte{}, fmt.Errorf("GET %q:\n  reading response body:\n  %w", remote_url, ErrRequestTimeout)
+	} else if err != nil {
 		panic(err)
 	}
 
