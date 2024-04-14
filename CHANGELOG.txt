@@ -281,3 +281,10 @@ v0.6.7
 	- make tweets take up less space
 - Add "list:<id>" search bar filter
 - BUGFIX: Fix pinned tweets with a quoted-tweet not showing the quoted tweet
+
+v0.6.8
+------
+
+- UI improvements:
+	- fix some buggy styling around the pin icon on pinned tweets and error toast messages
+- BUGFIX: fix scraper crashing when a media download times out (e.g., long video)
