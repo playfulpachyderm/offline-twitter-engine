@@ -591,6 +591,32 @@ main {
 }
 
 /**
+ * Video module
+ */
+.video {
+	position: relative;
+	display: flex;
+	width: fit-content;
+	border-radius: 1.5em;
+	overflow: hidden;
+
+	.video__gif-controls {
+		position: absolute;
+		bottom: 1.2em;
+		left: 1em;
+		background-color: #999;
+		font-weight: bold;
+		padding: 0 0.2em 0 0.4em;
+		border-radius: 0.3em;
+		border: 1px solid #444;
+
+		.svg-icon {
+			font-size: 0.6em;
+		}
+	}
+}
+
+/**
  * Retweet info module
  */
 .retweet-info {

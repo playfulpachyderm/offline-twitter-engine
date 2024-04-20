@@ -78,19 +78,43 @@
           >
         {{end}}
         {{range $main_tweet.Videos}}
-          <video controls hx-trigger="click consume" width="{{.Width}}" height="{{.Height}}"
-            {{if .IsDownloaded}}
-              poster="/content/video_thumbnails/{{.ThumbnailLocalPath}}"
-            {{else}}
-              poster="{{.ThumbnailRemoteUrl}}"
+          <div class="video">
+            {{if .IsGif}}
+              <div class="video__gif-controls labelled-icon">
+                <img class="svg-icon" src="/static/icons/play.svg" width="24" height="24" />
+                <label class="video__gif-label">GIF</label>
+              </div>
+              <script>
+                function gif_on_click(video) {
+                  if (video.paused) {
+                    video.play();
+                    video.parentElement.querySelector(".svg-icon").src = "/static/icons/pause.svg";
+                  } else {
+                    video.pause();
+                    video.parentElement.querySelector(".svg-icon").src = "/static/icons/play.svg";
+                  }
+                }
+              </script>
             {{end}}
-          >
-            {{if .IsDownloaded}}
-              <source src="/content/videos/{{.LocalFilename}}">
-            {{else}}
-              <source src="{{.RemoteURL}}">
-            {{end}}
-          </video>
+            <video hx-trigger="click consume" width="{{.Width}}" height="{{.Height}}"
+              {{if .IsGif}}
+                loop muted playsinline onclick="gif_on_click(this)" class="gif"
+              {{else}}
+                controls class="video"
+              {{end}}
+              {{if .IsDownloaded}}
+                poster="/content/video_thumbnails/{{.ThumbnailLocalPath}}"
+              {{else}}
+                poster="{{.ThumbnailRemoteUrl}}"
+              {{end}}
+            >
+              {{if .IsDownloaded}}
+                <source src="/content/videos/{{.LocalFilename}}">
+              {{else}}
+                <source src="{{.RemoteURL}}">
+              {{end}}
+            </video>
+          </div>
         {{end}}
         {{range $main_tweet.Urls}}
           <div class="click-eater" hx-trigger="click consume">
