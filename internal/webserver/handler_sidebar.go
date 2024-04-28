@@ -1,0 +1,18 @@
+package webserver
+
+import (
+	"net/http"
+)
+
+func (app *Application) NavSidebarPollUpdates(w http.ResponseWriter, r *http.Request) {
+	app.traceLog.Printf("'NavSidebarPollUpdates' handler (path: %q)", r.URL.Path)
+
+	// Must be an HTMX request, otherwise HTTP 400
+	if r.Header.Get("HX-Request") != "true" {
+		app.error_400_with_message(w, "This is an HTMX-only endpoint, not a page")
+		return
+	}
+
+	data := Notifications{NumMessageNotifications: len(app.Profile.GetUnreadConversations(app.ActiveUser.ID))}
+	app.buffered_render_htmx(w, "nav-sidebar", PageGlobalData{}, data)
+}

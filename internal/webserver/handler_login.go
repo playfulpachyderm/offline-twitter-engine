@@ -115,8 +115,6 @@ func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
 		app.error_400_with_message(w, fmt.Sprintf("User not in database: %s", form.AccountName))
 		return
 	}
-	data := Notifications{
-		NumMessageNotifications: len(app.Profile.GetUnreadConversations(app.ActiveUser.ID)),
-	}
+	data := Notifications{NumMessageNotifications: len(app.Profile.GetUnreadConversations(app.ActiveUser.ID))}
 	app.buffered_render_htmx(w, "nav-sidebar", PageGlobalData{}, data)
 }

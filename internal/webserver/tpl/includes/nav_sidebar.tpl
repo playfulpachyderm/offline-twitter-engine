@@ -1,5 +1,5 @@
 {{define "nav-sidebar"}}
-  <nav id="nav-sidebar" class="nav-sidebar">
+  <nav id="nav-sidebar" class="nav-sidebar" hx-trigger="load delay:10s" hx-get="/nav-sidebar-poll-updates" hx-swap="outerHTML">
     <div id="logged-in-user-info">
       <div class="button row" hx-get="/login" hx-trigger="click" hx-target="body" hx-push-url="true">
         {{template "author-info" active_user}}
