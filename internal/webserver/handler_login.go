@@ -107,13 +107,16 @@ func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
 	form := struct {
 		AccountName string `json:"account"`
 	}{}
-	data, err := io.ReadAll(r.Body)
+	formdata, err := io.ReadAll(r.Body)
 	panic_if(err)
-	panic_if(json.Unmarshal(data, &form)) // TODO: HTTP 400 not 500
+	panic_if(json.Unmarshal(formdata, &form)) // TODO: HTTP 400 not 500
 	err = app.SetActiveUser(scraper.UserHandle(form.AccountName))
 	if err != nil {
 		app.error_400_with_message(w, fmt.Sprintf("User not in database: %s", form.AccountName))
 		return
 	}
-	app.buffered_render_htmx(w, "nav-sidebar", PageGlobalData{}, nil)
+	data := Notifications{
+		NumMessageNotifications: len(app.Profile.GetUnreadConversations(app.ActiveUser.ID)),
+	}
+	app.buffered_render_htmx(w, "nav-sidebar", PageGlobalData{}, data)
 }

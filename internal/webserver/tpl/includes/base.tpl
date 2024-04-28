@@ -35,7 +35,7 @@
           />
         </form>
       </header>
-      {{template "nav-sidebar"}}
+      {{template "nav-sidebar" (global_data).Notifications}}
       <main>
         {{template "main" .}}
       </main>

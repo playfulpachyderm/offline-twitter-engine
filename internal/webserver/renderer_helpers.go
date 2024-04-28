@@ -15,11 +15,16 @@ import (
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
+type Notifications struct {
+	NumMessageNotifications int
+}
+
 // TODO: this name sucks
 type PageGlobalData struct {
 	scraper.TweetTrove
 	SearchText     string
 	FocusedTweetID scraper.TweetID
+	Notifications
 }
 
 func (d PageGlobalData) Tweet(id scraper.TweetID) scraper.Tweet {
@@ -40,6 +45,9 @@ func (d PageGlobalData) GetFocusedTweetID() scraper.TweetID {
 func (d PageGlobalData) GetSearchText() string {
 	fmt.Println(d.SearchText)
 	return d.SearchText
+}
+func (d PageGlobalData) GlobalData() PageGlobalData {
+	return d
 }
 
 // Config object for buffered rendering
@@ -80,6 +88,8 @@ func (r renderer) BufferedRender(w io.Writer) {
 func (app *Application) buffered_render_page(w http.ResponseWriter, tpl_file string, global_data PageGlobalData, tpl_data interface{}) {
 	partials := append(glob("tpl/includes/*.tpl"), glob("tpl/tweet_page_includes/*.tpl")...)
 
+	global_data.Notifications.NumMessageNotifications = len(app.Profile.GetUnreadConversations(app.ActiveUser.ID))
+
 	r := renderer{
 		Funcs:     app.make_funcmap(global_data),
 		Filenames: append(partials, get_filepath(tpl_file)),
@@ -112,6 +122,7 @@ func (app *Application) make_funcmap(global_data PageGlobalData) template.FuncMa
 		"space":            global_data.Space,
 		"focused_tweet_id": global_data.GetFocusedTweetID,
 		"search_text":      global_data.GetSearchText,
+		"global_data":      global_data.GlobalData, // This fucking sucks
 		"active_user": func() scraper.User {
 			return app.ActiveUser
 		},

@@ -229,6 +229,7 @@ func (p Profile) GetChatRoomsPreview(id UserID) DMChatView {
 	for _, room := range rooms {
 		// Fetch the latest message
 		var msg DMMessage
+		msg.Reactions = make(map[UserID]DMReaction)
 		q, args, err := sqlx.Named(`
 			select `+CHAT_MESSAGES_ALL_SQL_FIELDS+`
 			  from chat_messages

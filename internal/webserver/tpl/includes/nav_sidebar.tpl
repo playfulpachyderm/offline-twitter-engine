@@ -19,16 +19,19 @@
           <label class="nav-sidebar__button-label">Explore</label>
         </li>
       </a>
-      <a href="#">
-        <li class="button labelled-icon">
-          <img class="svg-icon" src="/static/icons/notifications.svg" width="24" height="24" />
-          <label class="nav-sidebar__button-label">Notifications</label>
-        </li>
-      </a>
       {{if (not (eq (active_user).Handle "[nobody]"))}}
-        <a href="/messages">
+        <a href="#">
           <li class="button labelled-icon">
+            <img class="svg-icon" src="/static/icons/notifications.svg" width="24" height="24" />
+            <label class="nav-sidebar__button-label">Notifications</label>
+          </li>
+        </a>
+        <a href="/messages">
+          <li class="nav-sidebar__messages button labelled-icon">
             <img class="svg-icon" src="/static/icons/messages.svg" width="24" height="24" />
+            {{if .NumMessageNotifications}}
+              <span class="nav-sidebar__notifications-count">{{.NumMessageNotifications}}</span>
+            {{end}}
             <label class="nav-sidebar__button-label">Messages</label>
           </li>
         </a>
