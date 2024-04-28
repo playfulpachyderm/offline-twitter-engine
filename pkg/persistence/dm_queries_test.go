@@ -266,7 +266,7 @@ func TestGetChatRoomContentsAfterTimestamp(t *testing.T) {
 	chat_view := profile.GetChatRoomContents(room_id, 1686025129141)
 
 	// MessageIDs should just be the ones in the thread
-	require.Equal(chat_view.MessageIDs, []DMMessageID{1665936253483614215, 1665936253483614216, 1665936253483614217})
+	require.Equal(chat_view.MessageIDs, []DMMessageID{1665936253483614215, 1665936253483614216, 1665937253483614217})
 
 	// Replied messages should be available, but not in the list of MessageIDs
 	require.Len(chat_view.Messages, 4)
@@ -278,4 +278,18 @@ func TestGetChatRoomContentsAfterTimestamp(t *testing.T) {
 		assert.True(is_ok)
 		assert.Equal(msg.ID, msg_id)
 	}
+}
+
+func TestGetUnreadConversations(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+
+	offline_twatter_unreads := profile.GetUnreadConversations(UserID(1488963321701171204))
+	require.Len(offline_twatter_unreads, 1)
+	assert.Equal(offline_twatter_unreads[0], DMChatRoomID("1488963321701171204-1178839081222115328"))
+	mystery_unreads := profile.GetUnreadConversations(UserID(1178839081222115328))
+	assert.Len(mystery_unreads, 0)
 }

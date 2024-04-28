@@ -626,3 +626,21 @@ func (p Profile) NextDMPage(c DMCursor) DMChatView {
 	p.fill_dm_contents(&ret.DMTrove)
 	return ret
 }
+
+func (p Profile) GetUnreadConversations(user_id UserID) (ret []DMChatRoomID) {
+	err := p.DB.Select(&ret, `
+		with latest_messages as (select chat_room_id, max(id) as latest_message_id from chat_messages group by chat_room_id),
+		     unread_room_ids as (
+		        select chat_room_participants.chat_room_id
+		          from chat_room_participants
+		          join latest_messages on latest_messages.chat_room_id = chat_room_participants.chat_room_id
+		         where chat_room_participants.user_id = ?
+		           and latest_messages.latest_message_id > chat_room_participants.last_read_event_id
+		     )
+		select id from chat_rooms where id in unread_room_ids
+	`, user_id)
+	if err != nil {
+		panic(err)
+	}
+	return
+}
