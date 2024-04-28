@@ -32,6 +32,26 @@
         </p>
       </div>
     </div>
-    <p class="chat-list-entry__message-preview">{{(index $.messages $room.LastMessageID).Text}}</p>
+    <div class="chat-list-entry__preview-and-unread-container row">
+      <p class="chat-list-entry__message-preview">
+        {{ $message := (index $.messages $room.LastMessageID)}}
+        {{ $sender  := (user $message.SenderID) }}
+        {{if ne $message.Text ""}}
+          {{if eq $room.Type "GROUP_DM"}}
+            {{ $sender.DisplayName }}:
+          {{end}}
+          {{$message.Text}}
+        {{else if $message.EmbeddedTweetID}}
+          <span class="chat-list-entry__preview-no-text">{{$sender.DisplayName}} sent a Tweet</span>
+        {{else if $message.Images}}
+          <span class="chat-list-entry__preview-no-text">{{$sender.DisplayName}} sent an image</span>
+        {{else if $message.Videos}}
+          <span class="chat-list-entry__preview-no-text">{{$sender.DisplayName}} sent a video</span>
+        {{else if $message.Urls}}
+          <span class="chat-list-entry__preview-no-text">{{$sender.DisplayName}} sent a link</span>
+        {{end}}
+      </p>
+      <span class="chat-list-entry__unread-indicator"></span>
+    </div>
   </div>
 {{end}}

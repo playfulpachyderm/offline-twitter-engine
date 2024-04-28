@@ -1,7 +1,12 @@
 {{define "chat-list"}}
   <div class="chat-list">
     {{range .RoomIDs}}
-      {{template "chat-list-entry" (dict "room" (index $.Rooms .) "messages" $.DMTrove.Messages "is_active" (eq $.ActiveRoomID .))}}
+      {{template "chat-list-entry" (dict
+          "room" (index $.Rooms .)
+          "messages" $.DMTrove.Messages
+          "is_active" (eq $.ActiveRoomID .)
+          "is_unread" (index $.UnreadRoomIDs .)
+      ) }}
     {{end}}
 
     {{/* Scroll the active chat into view, if there is one */}}

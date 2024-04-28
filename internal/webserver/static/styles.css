@@ -1195,11 +1195,33 @@ main {
 		white-space: nowrap;
 		cursor: default; /* TODO: redundancy check `.author-info` */
 	}
+	.chat-list-entry__preview-and-unread-container {
+		justify-content: space-between;
+	}
 	.chat-list-entry__message-preview {
 		font-size: 0.9em;
 		color: var(--color-twitter-text-gray);
 		padding: 0 1em;
 		border-left: 1px solid var(--color-outline-gray);
+
+		.chat-list-entry--unread & {
+			font-weight: bold;
+		}
+	}
+	.chat-list-entry__unread-indicator {
+		display: none;
+        background-color: var(--color-twitter-blue);
+        height: 0.5em;
+        width: 0.5em;
+        border-radius: 50%;
+        flex: auto 0 0; /* Otherwise it gets squished if the message preview is long */
+
+		.chat-list-entry--unread & {
+			display: revert;
+		}
+	}
+	.chat-list-entry__preview-no-text {
+		font-style: italic;
 	}
 
 	.posted-at__text {
@@ -1273,6 +1295,7 @@ main {
 	.dm-message__embedded-image, .dm-message__embedded-video {
 		max-width: 100%;
 		height: auto; /* preserve aspect ratio */
+		cursor: pointer;
 	}
 	.dm-message__text-content {
 		display: inline-block;

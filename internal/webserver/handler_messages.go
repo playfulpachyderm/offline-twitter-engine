@@ -15,6 +15,7 @@ type MessageData struct {
 	persistence.DMChatView
 	LatestPollingTimestamp int
 	ScrollBottom           bool
+	UnreadRoomIDs          map[scraper.DMChatRoomID]bool
 }
 
 func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
@@ -34,6 +35,10 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 	}
 
 	chat_view_data := MessageData{DMChatView: app.Profile.GetChatRoomsPreview(app.ActiveUser.ID)} // Get message list previews
+	chat_view_data.UnreadRoomIDs = make(map[scraper.DMChatRoomID]bool)
+	for _, room_id := range app.Profile.GetUnreadConversations(app.ActiveUser.ID) {
+		chat_view_data.UnreadRoomIDs[room_id] = true
+	}
 	global_data := PageGlobalData{TweetTrove: chat_view_data.DMChatView.TweetTrove}
 
 	if room_id != "" {

@@ -257,6 +257,8 @@ func (p Profile) GetChatRoomsPreview(id UserID) DMChatView {
 		ret.Messages[msg.ID] = msg
 		ret.RoomIDs = append(ret.RoomIDs, room.ID)
 	}
+	// Since the message text might be empty, fetch contents (images, tweets etc) so we can still create a preview
+	p.fill_dm_contents(&ret.DMTrove)
 	return ret
 }
 
