@@ -27,7 +27,7 @@
         <a onclick="window.history.back()" class="button search-bar__back-button">
           <img class="svg-icon" src="/static/icons/back.svg" width="24" height="24"/>
         </a>
-        <form class="search-bar__form" hx-get="/search" hx-push-url="true" hx-target="body" hx-swap="inner-html show:window:top">
+        <form class="search-bar__form" hx-get="/search" hx-push-url="true" hx-target="body" hx-swap="innerHTML show:window:top">
           <input id="search-bar" class="search-bar__input"
             name="q"
             placeholder="Search" type="text"

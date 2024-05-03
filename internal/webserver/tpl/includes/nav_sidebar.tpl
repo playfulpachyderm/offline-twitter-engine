@@ -68,6 +68,12 @@
           </li>
         </a>
       {{end}}
+      <a href="https://twitter.com" target="_blank">
+        <li class="button labelled-icon">
+          <img class="svg-icon" src="/static/icons/internet.svg" width="24" height="24" />
+          <label class="nav-sidebar__button-label">Go online</label>
+        </li>
+      </a>
       <a href="#">
         <li class="button labelled-icon">
           <img class="svg-icon" src="/static/icons/more.svg" width="24" height="24"/>
