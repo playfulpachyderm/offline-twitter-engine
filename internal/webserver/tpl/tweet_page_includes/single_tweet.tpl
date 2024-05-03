@@ -156,7 +156,7 @@
         <div class="interactions__dummy"></div>
         <div class="row" hx-trigger="click consume">
           <a class="button" title="Copy link" onclick="navigator.clipboard.writeText('https://twitter.com/{{ $author.Handle }}/status/{{ $main_tweet.ID }}')">
-            <img class="svg-icon" src="/static/icons/352285_content_copy_icon.svg" width="24" height="24" />
+            <img class="svg-icon" src="/static/icons/copy.svg" width="24" height="24" />
           </a>
           <a
             class="button"

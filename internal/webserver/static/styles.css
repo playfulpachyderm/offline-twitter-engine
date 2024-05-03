@@ -1202,16 +1202,6 @@ main {
 		align-items: center;
 		justify-content: space-between;
 	}
-	.chat-list-entry__groupchat-profile-image {
-		display: flex;
-	}
-	.chat-list-entry__groupchat-profile-image .display-name {
-		padding: 0.6em;
-		font-style: italic;
-		font-weight: bold; /* TODO: redundancy check `.author-info__display-name` */
-		white-space: nowrap;
-		cursor: default; /* TODO: redundancy check `.author-info` */
-	}
 	.chat-list-entry__preview-and-unread-container {
 		justify-content: space-between;
 	}
@@ -1244,6 +1234,28 @@ main {
 	.posted-at__text {
 		margin: 0;
 	}
+}
+
+/**
+ * Groupchat info module (like Author Info but for group chats)
+ */
+.groupchat-info {
+	.groupchat-info__display-name {
+		padding: 0.6em;
+		font-style: italic;
+		font-weight: bold; /* TODO: redundancy check `.author-info__display-name` */
+		white-space: nowrap;
+		cursor: default; /* TODO: redundancy check `.author-info` */
+	}
+}
+
+.chat-header {
+    border-bottom: 1px solid var(--color-outline-gray);
+    padding: 0.5em;
+    display: flex;
+    justify-content: space-around;
+    background-color: var(--color-twitter-off-white);
+    margin: -0.5em -0.5em 0 -0.5em;
 }
 
 /**

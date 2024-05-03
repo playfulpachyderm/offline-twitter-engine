@@ -92,6 +92,18 @@
 
 {{define "chat-view"}}
   <div id="chat-view">
+    {{if $.ActiveRoomID}}
+      <div class="chat-header">
+        {{ $room := (index $.Rooms $.ActiveRoomID) }}
+        {{template "chat-profile-image" $room}}
+        {{if (ne $room.Type "ONE_TO_ONE")}}
+          <!-- Group chats need an "Info" button -->
+          <a class="button">
+            <img class="svg-icon" src="/static/icons/info.svg" width="24" height="24" />
+          </a>
+        {{end}}
+      </div>
+    {{end}}
     <div class="chat-messages">
       {{if $.ActiveRoomID}}
         {{template "messages-with-poller" .}}
