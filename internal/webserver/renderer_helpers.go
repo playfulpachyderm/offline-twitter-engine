@@ -161,8 +161,10 @@ func get_entities(text string) []Entity {
 	ret := []Entity{}
 	start := 0
 	for _, idxs := range regexp.MustCompile(`(\W|^)[@#]\w+`).FindAllStringIndex(text, -1) {
-		// Handle leading whitespace.  Only match start-of-string or leading whitespace to avoid matching, e.g., emails
-		if text[idxs[0]] == ' ' || text[idxs[0]] == '\n' {
+		// The character immediately preceding the entity must not be a word character (alphanumeric
+		// or "_").  This is to avoid matching emails.  Accordingly, if the first character in the
+		// match isn't a '@' or '#' (i.e., there's a preceding character), skip past it.
+		if text[idxs[0]] != '@' && text[idxs[0]] != '#' {
 			idxs[0] += 1
 		}
 		if start != idxs[0] {
