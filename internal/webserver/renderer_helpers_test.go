@@ -18,6 +18,3 @@ func TestEntitiesWithParentheses(t *testing.T) {
 	assert.Equal(entities[2].EntityType, ENTITY_TYPE_TEXT)
 	assert.Equal(entities[2].Contents, " has said this), through process automation.)")
 }
-
-
-
