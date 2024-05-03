@@ -549,8 +549,6 @@ func (p Profile) NextDMPage(c DMCursor) DMChatView {
 		  ` + c.SortOrder.OrderByClause() + `
 		 limit ?
 	`
-	fmt.Printf("query: %s\n", q)
-	fmt.Printf("Bind values: %#v\n", bind_values)
 
 	err := p.DB.Select(&msgs, q, bind_values...)
 	if err != nil {
