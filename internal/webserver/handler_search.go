@@ -139,7 +139,7 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 	data.SearchText = search_text
 	data.SortOrder = c.SortOrder
 
-	if r.Header.Get("HX-Request") == "true" && c.CursorPosition == persistence.CURSOR_MIDDLE {
+	if is_htmx(r) && c.CursorPosition == persistence.CURSOR_MIDDLE {
 		// It's a Show More request
 		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: data.Feed.TweetTrove, SearchText: search_text}, data)
 	} else {

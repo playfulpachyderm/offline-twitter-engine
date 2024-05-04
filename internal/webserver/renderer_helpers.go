@@ -184,3 +184,7 @@ func get_entities(text string) []Entity {
 
 	return ret
 }
+
+func is_htmx(r *http.Request) bool {
+	return r.Header.Get("HX-Request") == "true"
+}

@@ -29,7 +29,7 @@ func (app *Application) OfflineTimeline(w http.ResponseWriter, r *http.Request) 
 		panic(err)
 	}
 
-	if r.Header.Get("HX-Request") == "true" && c.CursorPosition == persistence.CURSOR_MIDDLE {
+	if is_htmx(r) && c.CursorPosition == persistence.CURSOR_MIDDLE {
 		// It's a Show More request
 		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
 	} else {
@@ -74,7 +74,7 @@ func (app *Application) Timeline(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	if r.Header.Get("HX-Request") == "true" && c.CursorPosition == persistence.CURSOR_MIDDLE {
+	if is_htmx(r) && c.CursorPosition == persistence.CURSOR_MIDDLE {
 		// It's a Show More request
 		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
 	} else {

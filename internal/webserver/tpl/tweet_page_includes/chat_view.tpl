@@ -92,7 +92,7 @@
 
 {{define "chat-view"}}
   <div id="chat-view">
-    {{if $.ActiveRoomID}}
+    {{if .ActiveRoomID}}
       <div class="chat-header">
         {{ $room := (index $.Rooms $.ActiveRoomID) }}
         {{template "chat-profile-image" $room}}
@@ -105,11 +105,11 @@
       </div>
     {{end}}
     <div class="chat-messages">
-      {{if $.ActiveRoomID}}
+      {{if .ActiveRoomID}}
         {{template "messages-with-poller" .}}
       {{end}}
     </div>
-    {{if $.ActiveRoomID}}
+    {{if .ActiveRoomID}}
       <div class="dm-composer">
         <form
           hx-post="/messages/{{$.ActiveRoomID}}/send"
