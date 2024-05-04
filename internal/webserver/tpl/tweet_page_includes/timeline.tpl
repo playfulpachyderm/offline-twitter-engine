@@ -3,13 +3,13 @@
     {{template "tweet" .}}
   {{end}}
 
-  <div class="timeline__bottom">
+  <div class="show-more">
     {{if .CursorBottom.CursorPosition.IsEnd}}
-      <label class="timeline__eof-label">End of feed</label>
+      <label class="show-more__eof-label">End of feed</label>
     {{else}}
-      <a class="timeline__show-more-button button"
+      <a class="show-more__button button"
         hx-get="?{{(cursor_to_query_params .CursorBottom)}}"
-        hx-target=".timeline__bottom"
+        hx-target=".show-more"
         hx-swap="outerHTML"
       >Show more</a>
     {{end}}

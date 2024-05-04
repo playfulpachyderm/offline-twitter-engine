@@ -890,18 +890,16 @@ main {
  ******************************************************/
 
 /**
- * Timeline module
+ * Show more button and EOF indicator module
  */
-.timeline {
-	.timeline__bottom {
-		text-align: center;
-		font-size: 1.2em;
-		padding: 1em 0;
-	}
-	.timeline__eof-label {
+.show-more {
+	text-align: center;
+	font-size: 1.2em;
+	padding: 1em 0;
+	.show-more__eof-label {
 		color: var(--color-twitter-text-gray);
 	}
-	.timeline__show-more-button {
+	.show-more__button {
 		padding: 0em 0.8em;
 		display: inline-block;
 		border: 2px solid var(--color-twitter-blue);
