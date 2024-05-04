@@ -106,6 +106,7 @@
     {{end}}
     <div class="chat-messages">
       {{if .ActiveRoomID}}
+        {{template "conversation-top" .}}
         {{template "messages-with-poller" .}}
       {{end}}
     </div>
@@ -189,4 +190,25 @@
       hx-swap-oob="true"
     {{end}}
   ></span>
+{{end}}
+
+{{define "conversation-top"}}
+  <div class="conversation-top">
+    {{if .Cursor.CursorPosition.IsEnd}}
+      <!-- TODO: make a reusable eof-indicator -->
+      <div class="eof-indicator">Beginning of conversation</div>
+    {{else}}
+      <a class="show-more-button button"
+        hx-get="?cursor={{.Cursor.CursorValue}}" {{/* TODO: this might require a `cursor_to_query_params` if the same view is used for searching */}}
+        hx-target=".conversation-top"
+        hx-swap="outerHTML"
+      >Show more</a>
+    {{end}}
+  </div>
+{{end}}
+
+{{/* convenience template for htmx requests */}}
+{{define "messages-top"}}
+  {{template "conversation-top" .}}
+  {{template "messages" .}}
 {{end}}

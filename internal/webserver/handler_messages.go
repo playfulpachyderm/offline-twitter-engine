@@ -57,10 +57,18 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Get("scroll_bottom") != "0" {
 		chat_view_data.ScrollBottom = true
 	}
-	chat_contents := app.Profile.GetChatRoomContents(room_id, chat_view_data.LatestPollingTimestamp)
-	chat_view_data.MergeWith(chat_contents.DMTrove)
+
+	c := persistence.NewConversationCursor(room_id)
+	c.SinceTimestamp = scraper.TimestampFromUnixMilli(int64(chat_view_data.LatestPollingTimestamp))
+	if cursor_value := r.URL.Query().Get("cursor"); cursor_value != "" {
+		until_time, err := strconv.Atoi(cursor_value)
+		panic_if(err) // TODO: 400 not 500
+		c.UntilTimestamp = scraper.TimestampFromUnixMilli(int64(until_time))
+	}
+	chat_contents := app.Profile.GetChatRoomMessagesByCursor(c)
 	chat_view_data.DMChatView.MergeWith(chat_contents.DMTrove)
 	chat_view_data.MessageIDs = chat_contents.MessageIDs
+	chat_view_data.Cursor = chat_contents.Cursor
 	if len(chat_view_data.MessageIDs) > 0 {
 		last_message_id := chat_view_data.MessageIDs[len(chat_view_data.MessageIDs)-1]
 		chat_view_data.LatestPollingTimestamp = int(chat_view_data.Messages[last_message_id].SentAt.UnixMilli())
@@ -70,6 +78,12 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 		// Polling for updates and sending a message should add messages at the bottom of the page (newest)
 		if r.URL.Query().Has("poll") || is_sending {
 			app.buffered_render_htmx(w, "messages-with-poller", global_data, chat_view_data)
+			return
+		}
+
+		// Scrolling-back should add new messages to the top of the page
+		if r.URL.Query().Has("cursor") {
+			app.buffered_render_htmx(w, "messages-top", global_data, chat_view_data)
 			return
 		}
 	}

@@ -264,9 +264,14 @@ func (p Profile) GetChatRoomsPreview(id UserID) DMChatView {
 }
 
 // Get chat room detail, including participants and messages
+// TODO: get rid of this function (behavior has been moved to GetChatRoomMessagesByCursor)
 func (p Profile) GetChatRoomContents(id DMChatRoomID, latest_timestamp int) DMChatView {
 	c := NewConversationCursor(id)
 	c.SinceTimestamp = TimestampFromUnixMilli(int64(latest_timestamp))
+	return p.GetChatRoomMessagesByCursor(c)
+}
+
+func (p Profile) GetChatRoomMessagesByCursor(c DMCursor) DMChatView {
 	ret := p.NextDMPage(c)
 
 	var room DMChatRoom
@@ -274,7 +279,7 @@ func (p Profile) GetChatRoomContents(id DMChatRoomID, latest_timestamp int) DMCh
 		select `+CHAT_ROOMS_ALL_SQL_FIELDS+`
 		  from chat_rooms
 		 where id = ?
-	`, id)
+	`, c.ConversationId)
 	if err != nil {
 		panic(err)
 	}
