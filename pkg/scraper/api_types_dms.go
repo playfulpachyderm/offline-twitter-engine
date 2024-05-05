@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"html"
+	"encoding/json"
 
 	"github.com/google/uuid"
 )
@@ -71,6 +73,7 @@ func (m *APIDMMessage) NormalizeContent() {
 		m.MessageData.Text = strings.Replace(m.MessageData.Text, m.MessageData.Attachment.Video.URL, "", 1)
 	}
 
+	m.MessageData.Text = html.UnescapeString(m.MessageData.Text)
 	m.MessageData.Text = strings.TrimSpace(m.MessageData.Text)
 }
 
@@ -503,9 +506,15 @@ func (api *API) SendDMMessage(room_id DMChatRoomID, text string, in_reply_to_id 
 		replying_to_text = fmt.Sprintf(`"reply_to_dm_id":"%d",`, in_reply_to_id)
 	}
 
+	// Format safely as JSON (escape quotes, etc)
+	sanitized_text, err := json.Marshal(text)
+	if err != nil {
+		panic(err)
+	}
+
 	post_data := `{"conversation_id":"` + string(room_id) +
 		`","recipient_ids":false,"request_id":"` + request_id.String() +
-		`","text":"` + text + `",` +
+		`","text":` + string(sanitized_text) + `,` +
 		replying_to_text + `"cards_platform":"Web-12","include_cards":1,"include_quote_count":true,"dm_users":false}`
 
 	var result APIInbox

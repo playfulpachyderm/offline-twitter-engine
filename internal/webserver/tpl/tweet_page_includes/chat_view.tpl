@@ -93,6 +93,18 @@
   ></div>
 {{end}}
 
+{{define "composer-polling-timestamp-field"}}
+  <input id="composerPollingTimestamp"
+    type="hidden"
+    name="latest_polling_timestamp"
+    value="{{.LatestPollingTimestamp}}"
+    {{if .oob}}
+      {{/* See comment about `oob` in the "dm-composer" template.  Here we pass a parameter to say oob or not */}}
+      hx-swap-oob="true"
+    {{end}}
+  >
+{{end}}
+
 {{define "chat-view"}}
   <div id="chat-view">
     {{if .ActiveRoomID}}
@@ -128,6 +140,7 @@
         >
           {{template "dm-composer"}}
           <input id="realInput" type="hidden" name="text" value="" />
+          {{template "composer-polling-timestamp-field" (dict "LatestPollingTimestamp" .LatestPollingTimestamp "oob" false)}}
           <input type="submit" />
         </form>
       </div>
