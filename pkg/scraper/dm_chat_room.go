@@ -45,6 +45,14 @@ type DMChatRoom struct {
 	Participants  map[UserID]DMChatParticipant
 }
 
+func (r DMChatRoom) GetParticipantIDs() []UserID {
+	ret := []UserID{}
+	for user_id := range r.Participants {
+		ret = append(ret, user_id)
+	}
+	return ret
+}
+
 func ParseAPIDMChatRoom(api_room APIDMConversation) DMChatRoom {
 	ret := DMChatRoom{}
 	ret.ID = DMChatRoomID(api_room.ConversationID)

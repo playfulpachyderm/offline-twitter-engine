@@ -102,7 +102,7 @@
         <div class="chat-header__buttons-container row">
           {{if (ne $room.Type "ONE_TO_ONE")}}
             <!-- Group chats need an "Info" button -->
-            <a class="button">
+            <a class="button" onclick="toggle_participants_view()">
               <img class="svg-icon" src="/static/icons/info.svg" width="24" height="24" />
             </a>
           {{end}}
@@ -121,7 +121,7 @@
     {{if .ActiveRoomID}}
       <div class="dm-composer">
         <form
-          hx-post="/messages/{{$.ActiveRoomID}}/send"
+          hx-post="/messages/{{.ActiveRoomID}}/send"
           hx-target="#new-messages-poller"
           hx-swap="outerHTML scroll:.chat-messages:bottom"
           hx-ext="json-enc"
@@ -142,6 +142,19 @@
           document.execCommand("insertHTML", false, text);
         });
       </script>
+
+      {{ $room := (index $.Rooms $.ActiveRoomID) }}
+      {{if (ne $room.Type "ONE_TO_ONE")}}
+        <div class="groupchat-participants-list">
+          <div class="header row">
+            <a onclick="toggle_participants_view()" class="button back-button">
+              <img class="svg-icon" src="/static/icons/back.svg" width="24" height="24">
+            </a>
+            <h3>People</h3>
+          </div>
+          {{template "list" (dict "UserIDs" $room.GetParticipantIDs)}}
+        </div>
+      {{end}}
     {{end}}
   </div>
 
@@ -199,6 +212,18 @@
       setTimeout(function() {
         replied_to_message.classList.remove("highlighted");
       }, 1000);
+    }
+
+    /**
+     * Show or hide the Participants view
+     */
+    function toggle_participants_view() {
+      const panel = document.querySelector(".groupchat-participants-list");
+      if (panel.classList.contains("unhidden")) {
+        panel.classList.remove("unhidden");
+      } else {
+        panel.classList.add("unhidden");
+      }
     }
   </script>
 {{end}}
