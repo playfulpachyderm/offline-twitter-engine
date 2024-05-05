@@ -62,9 +62,6 @@ TODO apiv2-tombstones
 TODO tidy-up-command-line-flags
 - make flags that are part of a subcommand go after that subcommand (e.g., `twitter get_user_tweets -n 200 ...`)
 
-TODO: fatih-color
-- replace "terminal-utils" with "fatih/color"
-
 TODO: mobile-requests
 - implement mobile versions of various requests
 - Check in `pkg/scraper/test_responses/mobile_requests`
@@ -114,13 +111,11 @@ TODO: show-errors-in-UI
 TODO: refactor-compound_queries_test-file
 - Move the tests for user feeds into the compound_queries_ssf_test file
 
-TODO: features-from-qt-version
-- Add all features from the Qt app to the web UI
-  - when previous tweet in thread is missing, put a "fetch tweet" button to get it
+TODO: incomplete-threads
+- when previous tweet in thread is missing, put a "fetch tweet" button to get it
 
 TODO: dms
 - fetch chat room history on opening
-- add scrollback / pagination
 - add search
 
 TODO: search-terms-highlighted
@@ -134,6 +129,3 @@ Windows Build
 
 TODO: windows-session-list
 - Check that sessions load as @Offline_Twatter instead of @test\Offline_Twatter on Windows
-
-TODO: windows-automated-build
-- build and upload to offline-twitter.org on release branches

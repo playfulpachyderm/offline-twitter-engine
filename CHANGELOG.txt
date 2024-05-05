@@ -288,3 +288,21 @@ v0.6.8
 - UI improvements:
 	- fix some buggy styling around the pin icon on pinned tweets and error toast messages
 - BUGFIX: fix scraper crashing when a media download times out (e.g., long video)
+
+v0.6.9
+------
+
+- UI improvements:
+	- GIFs now show differently than videos; can be paused and restarted on click
+	- Add unread indicators to DMs, and show unread messages count in nav sidebar
+	- DM messages now have a message preview if the last message was just an attachment (image, tweet, or video)
+
+v0.6.10
+-------
+
+- UI improvements:
+	- add "Copy Link" button to tweets
+	- add "Go Online" button to nav sidebar
+	- add header section for DMs with open-in-external button
+	- Clicking on the "replying-to" button on a DM scrolls that message into view
+- Add DM pagination / show-more button
