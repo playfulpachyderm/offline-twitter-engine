@@ -99,12 +99,17 @@
       <div class="chat-header">
         {{ $room := (index $.Rooms $.ActiveRoomID) }}
         {{template "chat-profile-image" $room}}
-        {{if (ne $room.Type "ONE_TO_ONE")}}
-          <!-- Group chats need an "Info" button -->
-          <a class="button">
-            <img class="svg-icon" src="/static/icons/info.svg" width="24" height="24" />
+        <div class="chat-header__buttons-container row">
+          {{if (ne $room.Type "ONE_TO_ONE")}}
+            <!-- Group chats need an "Info" button -->
+            <a class="button">
+              <img class="svg-icon" src="/static/icons/info.svg" width="24" height="24" />
+            </a>
+          {{end}}
+          <a class="button" href="https://twitter.com/messages/{{ $room.ID }}" target="_blank">
+            <img class="svg-icon" src="/static/icons/external-link.svg" width="24" height="24" />
           </a>
-        {{end}}
+        </div>
       </div>
     {{end}}
     <div class="chat-messages">
