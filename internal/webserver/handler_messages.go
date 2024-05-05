@@ -86,7 +86,11 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 			app.buffered_render_htmx(w, "messages-with-poller", global_data, chat_view_data)
 
 			// OOB-swap the composer polling timestamp field since it may have updated
-			app.buffered_render_htmx(w, "composer-polling-timestamp-field", global_data, map[string]interface{}{"LatestPollingTimestamp": chat_view_data.LatestPollingTimestamp, "oob": true})
+			app.buffered_render_htmx(w, "composer-polling-timestamp-field", global_data, map[string]interface{}{
+				"LatestPollingTimestamp": chat_view_data.LatestPollingTimestamp,
+				"oob":                    true,
+			})
+
 			return
 		}
 
