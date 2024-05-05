@@ -202,6 +202,10 @@ func (t *APITweet) NormalizeContent() {
 	// Handle short links showing up at ends of tweets
 	for _, url := range t.Entities.URLs {
 		index := strings.Index(t.FullText, url.ShortenedUrl)
+		if index < 0 {
+			// It's not in the text
+			continue
+		}
 		if index == (len(t.FullText) - len(url.ShortenedUrl)) {
 			t.FullText = strings.TrimSpace(t.FullText[0:index])
 		}
