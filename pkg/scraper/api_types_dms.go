@@ -1,11 +1,11 @@
 package scraper
 
 import (
+	"encoding/json"
 	"fmt"
+	"html"
 	"net/url"
 	"strings"
-	"html"
-	"encoding/json"
 
 	"github.com/google/uuid"
 )

@@ -38,8 +38,8 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 		panic_if(err)
 		var message_data struct {
-			Text string `json:"text"`
-			LatestPollingTimestamp int `json:"latest_polling_timestamp,string"`
+			Text                   string `json:"text"`
+			LatestPollingTimestamp int    `json:"latest_polling_timestamp,string"`
 		}
 		panic_if(json.Unmarshal(body, &message_data))
 		trove := scraper.SendDMMessage(room_id, message_data.Text, 0)
