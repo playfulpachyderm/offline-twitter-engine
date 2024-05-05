@@ -1268,13 +1268,12 @@ main {
 	 * 		margin: 0.5em 0;
 	 */
 
+	/* When a replying-to box is clicked, it scrolls that message into view and highlights it for a second */
 	transition: background-color 2s ease;
-
 	&.highlighted {
 	    background-color: var(--color-twitter-off-white-dark);
 	    transition: background-color 0.5s ease;
 	}
-
 
 	.dm-message__row {
 		align-items: stretch;

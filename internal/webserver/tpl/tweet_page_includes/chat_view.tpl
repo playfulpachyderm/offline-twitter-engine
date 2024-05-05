@@ -81,22 +81,6 @@
       </div>
     </div>
   {{end}}
-  <script>
-    /**
-     * Add on-click listeners to the 'replying-to' previews; they should scroll the replied-to
-     * message into view, if possible.
-     */
-    function doReplyTo(replying_to_box) {
-      const replied_to_id = replying_to_box.getAttribute("data-replying-to-message-id");
-      const replied_to_message = document.querySelector('[data-message-id="' + replied_to_id + '"]');
-
-      replied_to_message.scrollIntoView({behavior: "smooth", block: "center"});
-      replied_to_message.classList.add("highlighted");
-      setTimeout(function() {
-        replied_to_message.classList.remove("highlighted");
-      }, 1000);
-    }
-  </script>
 {{end}}
 
 {{define "messages-with-poller"}}
@@ -196,6 +180,21 @@
       // Scroll to the bottom of the chat window on initial page load
       chat_messages.scrollTop = chat_messages.scrollHeight;
     })();
+
+    /**
+     * Define callback on-click handler for 'replying-to' previews; they should scroll the replied-to
+     * message into view, if possible.
+     */
+    function doReplyTo(replying_to_box) {
+      const replied_to_id = replying_to_box.getAttribute("data-replying-to-message-id");
+      const replied_to_message = document.querySelector('[data-message-id="' + replied_to_id + '"]');
+
+      replied_to_message.scrollIntoView({behavior: "smooth", block: "center"});
+      replied_to_message.classList.add("highlighted");
+      setTimeout(function() {
+        replied_to_message.classList.remove("highlighted");
+      }, 1000);
+    }
   </script>
 {{end}}
 
@@ -234,4 +233,19 @@
 {{define "messages-top"}}
   {{template "conversation-top" .}}
   {{template "messages" .}}
+  <script>
+    /**
+     * Scroll the last message into view
+     */
+    (function() {
+      const last_message = document.querySelector(
+        '[data-message-id="{{ index .MessageIDs (sub (len .MessageIDs) 1)}}"]'
+      );
+      last_message.scrollIntoView({behavior: "instant", block: "start"});
+      last_message.classList.add("highlighted");
+      setTimeout(function() {
+        last_message.classList.remove("highlighted");
+      }, 1000);
+    })();
+  </script>
 {{end}}
