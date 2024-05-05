@@ -3,7 +3,7 @@
     {{$message := (index $.DMTrove.Messages .)}}
     {{$user := (user $message.SenderID)}}
     {{$is_us := (eq $message.SenderID (active_user).ID)}}
-    <div class="dm-message {{if $is_us}} our-message {{end}}">
+    <div class="dm-message {{if $is_us}} our-message {{end}}" data-message-id="{{ $message.ID }}">
       <div class="dm-message__row row">
         <div class="dm-message__sender-profile-img">
           {{template "circle-profile-img" $user}}
@@ -15,7 +15,10 @@
                 <img class="svg-icon" src="/static/icons/replying_to.svg" width="24" height="24" />
                 <label>Replying to</label>
               </div>
-              <div class="replying-to-message">
+              <div class="replying-to-message"
+                data-replying-to-message-id="{{ $message.InReplyToID }}"
+                onclick="doReplyTo(this)"
+              >
                 {{(index $.DMTrove.Messages $message.InReplyToID).Text}}
               </div>
             </div>
@@ -78,6 +81,22 @@
       </div>
     </div>
   {{end}}
+  <script>
+    /**
+     * Add on-click listeners to the 'replying-to' previews; they should scroll the replied-to
+     * message into view, if possible.
+     */
+    function doReplyTo(replying_to_box) {
+      const replied_to_id = replying_to_box.getAttribute("data-replying-to-message-id");
+      const replied_to_message = document.querySelector('[data-message-id="' + replied_to_id + '"]');
+
+      replied_to_message.scrollIntoView({behavior: "smooth", block: "center"});
+      replied_to_message.classList.add("highlighted");
+      setTimeout(function() {
+        replied_to_message.classList.remove("highlighted");
+      }, 1000);
+    }
+  </script>
 {{end}}
 
 {{define "messages-with-poller"}}
@@ -138,6 +157,11 @@
   </div>
 
   <script>
+    /**
+     * When new messages are loaded in (via polling), they should be scrolled into view.
+     * However, if the user has scrolled up in the conversation, they shouldn't be.
+     * Also, when the conversation is opened, we should start at the bottom by default.
+     */
     (function () {  // Wrap it all in an IIFE to avoid namespace pollution
       const chat_messages = document.querySelector('.chat-messages');
 

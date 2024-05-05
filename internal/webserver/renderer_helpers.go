@@ -140,7 +140,7 @@ func (app *Application) make_funcmap(global_data PageGlobalData) template.FuncMa
 			result.Set("sort-order", c.SortOrder.String())
 			return result.Encode()
 		},
-		"get_entities": get_entities, //
+		"get_entities": get_entities,
 	}
 }
 
