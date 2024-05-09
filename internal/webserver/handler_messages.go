@@ -31,7 +31,7 @@ func (app *Application) message_send(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	panic_if(err)
 	var message_data struct {
-		Text                   string `json:"text"`
+		Text string `json:"text"`
 	}
 	panic_if(json.Unmarshal(body, &message_data))
 
