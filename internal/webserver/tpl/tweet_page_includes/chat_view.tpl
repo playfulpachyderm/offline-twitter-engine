@@ -147,8 +147,9 @@
           hx-target="#new-messages-poller"
           hx-swap="outerHTML scroll:.chat-messages:bottom"
           hx-ext="json-enc"
+          hx-on:htmx:after-request="composer.innerText = ''; realInput.value = ''; "
         >
-          {{template "dm-composer"}}
+          <span id="composer" role="textbox" contenteditable oninput="realInput.value = this.innerText"></span>
           <input id="realInput" type="hidden" name="text" value="" />
           <input type="submit" />
         </form>
@@ -244,23 +245,6 @@
       }
     }
   </script>
-{{end}}
-
-{{define "dm-composer"}}
-  <span id="composer" role="textbox" contenteditable oninput="realInput.value = this.innerText"
-    {{if .}}
-      {{/*
-        This is a separate template so it can be OOB-swapped to clear the contents of the composer
-        box after a successful DM send.  However, the chat-view itself also loads via HTMX call.
-
-        To prevent the composer from being OOB'd on the initial page load (and thus never rendering),
-        we guard the "hx-swap-oob" attr; so if this template is called with nothing as the arg, then
-        it will be inlined normally (i.e., not OOB'd), and if the arg is something (e.g., a DMTrove),
-        then it will be OOB'd, thus clearing the contents of the composer box.
-      */}}
-      hx-swap-oob="true"
-    {{end}}
-  ></span>
 {{end}}
 
 {{define "conversation-top"}}

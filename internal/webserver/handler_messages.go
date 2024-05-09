@@ -51,7 +51,6 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 	// First send a message, if applicable
 	if is_sending {
 		app.message_send(w, r)
-		app.buffered_render_htmx(w, "dm-composer", global_data, chat_view_data) // Wipe the chat box
 	}
 
 	// `LatestPollingTimestamp` sort of passes-through the function; if we're not updating it, it
