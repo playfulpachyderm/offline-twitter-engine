@@ -25,6 +25,21 @@ func (app *Application) messages_index(w http.ResponseWriter, r *http.Request) {
 	app.buffered_render_page(w, "tpl/messages.tpl", global_data, chat_view_data)
 }
 
+func (app *Application) message_send(w http.ResponseWriter, r *http.Request) {
+	room_id := get_room_id_from_context(r.Context())
+
+	body, err := io.ReadAll(r.Body)
+	panic_if(err)
+	var message_data struct {
+		Text                   string `json:"text"`
+	}
+	panic_if(json.Unmarshal(body, &message_data))
+
+	trove := scraper.SendDMMessage(room_id, message_data.Text, 0)
+	app.Profile.SaveDMTrove(trove, false)
+	go app.Profile.SaveDMTrove(trove, true)
+}
+
 func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 	room_id := get_room_id_from_context(r.Context())
 
@@ -35,25 +50,13 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 
 	// First send a message, if applicable
 	if is_sending {
-		body, err := io.ReadAll(r.Body)
-		panic_if(err)
-		var message_data struct {
-			Text                   string `json:"text"`
-			LatestPollingTimestamp int    `json:"latest_polling_timestamp,string"`
-		}
-		panic_if(json.Unmarshal(body, &message_data))
-		trove := scraper.SendDMMessage(room_id, message_data.Text, 0)
-		app.Profile.SaveDMTrove(trove, false)
+		app.message_send(w, r)
 		app.buffered_render_htmx(w, "dm-composer", global_data, chat_view_data) // Wipe the chat box
-		go app.Profile.SaveDMTrove(trove, true)
-		chat_view_data.LatestPollingTimestamp = message_data.LatestPollingTimestamp // We're going to return some messages
-	} else {
-		chat_view_data.LatestPollingTimestamp = -1 // TODO: why not 0?  If `0` then it won't generate a SQL `where` clause
 	}
 
-	// TODO: Why are the input (parsed out of the HTTP request) and output (computed from the messsages
-	// fetched and printed into the HTTP response) using the same variable in `chat_view_data`?
-
+	// `LatestPollingTimestamp` sort of passes-through the function; if we're not updating it, it
+	//  goes out the same it came in.  Hence, using a single variable for it
+	chat_view_data.LatestPollingTimestamp = 0
 	chat_view_data.ActiveRoomID = room_id
 	if latest_timestamp_str := r.URL.Query().Get("latest_timestamp"); latest_timestamp_str != "" {
 		var err error
@@ -84,13 +87,6 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 		// Polling for updates and sending a message should add messages at the bottom of the page (newest)
 		if r.URL.Query().Has("poll") || is_sending {
 			app.buffered_render_htmx(w, "messages-with-poller", global_data, chat_view_data)
-
-			// OOB-swap the composer polling timestamp field since it may have updated
-			app.buffered_render_htmx(w, "composer-polling-timestamp-field", global_data, map[string]interface{}{
-				"LatestPollingTimestamp": chat_view_data.LatestPollingTimestamp,
-				"oob":                    true,
-			})
-
 			return
 		}
 

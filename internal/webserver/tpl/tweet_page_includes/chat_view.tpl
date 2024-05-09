@@ -86,23 +86,33 @@
 {{define "messages-with-poller"}}
   {{template "messages" .}}
 
-  <div id="new-messages-poller"
+  <form id="new-messages-poller"
     hx-swap="outerHTML {{if $.ScrollBottom}}scroll:.chat-messages:bottom{{end}}"
     hx-trigger="load delay:3s"
-    hx-get="/messages/{{$.ActiveRoomID}}?poll&latest_timestamp={{$.LatestPollingTimestamp}}&scroll_bottom={{if $.ScrollBottom}}1{{else}}0{{end}}"
-  ></div>
-{{end}}
-
-{{define "composer-polling-timestamp-field"}}
-  <input id="composerPollingTimestamp"
-    type="hidden"
-    name="latest_polling_timestamp"
-    value="{{.LatestPollingTimestamp}}"
-    {{if .oob}}
-      {{/* See comment about `oob` in the "dm-composer" template.  Here we pass a parameter to say oob or not */}}
-      hx-swap-oob="true"
-    {{end}}
+    hx-get="/messages/{{$.ActiveRoomID}}"
   >
+    <input type="hidden" name="poll">
+    <input type="hidden" name="latest_timestamp" value="{{$.LatestPollingTimestamp}}">
+    <input type="hidden" name="scroll_bottom" value="{{if $.ScrollBottom}}1{{else}}0{{end}}">
+  </form>
+
+  <script>
+    /**
+     * The poller's timestamp will be updated by HTMX, but the POST URL for /send needs updating too
+     */
+    (function() {
+      const composer_form = document.querySelector(".dm-composer form");
+      if (composer_form === null) {
+        // Initial page load; composer isn't rendered yet
+        return;
+      }
+      const [path, qs] = composer_form.attributes["hx-post"].value.split("?");
+      const params = new URLSearchParams(qs);
+      params.set("latest_timestamp", "{{.LatestPollingTimestamp}}");
+      composer_form.setAttribute("hx-post", [path, params.toString()].join("?"));
+      htmx.process(composer_form); // Manually enable HTMX on the manually-added node
+    })();
+  </script>
 {{end}}
 
 {{define "chat-view"}}
@@ -133,14 +143,13 @@
     {{if .ActiveRoomID}}
       <div class="dm-composer">
         <form
-          hx-post="/messages/{{.ActiveRoomID}}/send"
+          hx-post="/messages/{{.ActiveRoomID}}/send?latest_timestamp={{.LatestPollingTimestamp}}"
           hx-target="#new-messages-poller"
           hx-swap="outerHTML scroll:.chat-messages:bottom"
           hx-ext="json-enc"
         >
           {{template "dm-composer"}}
           <input id="realInput" type="hidden" name="text" value="" />
-          {{template "composer-polling-timestamp-field" (dict "LatestPollingTimestamp" .LatestPollingTimestamp "oob" false)}}
           <input type="submit" />
         </form>
       </div>
@@ -183,25 +192,21 @@
       // Disable auto-scroll-bottom on new message loads if the user has scrolled up
       chat_messages.addEventListener('scroll', function() {
         const _node = document.querySelector("#new-messages-poller");
-        const node = _node.cloneNode()
+        const node = _node.cloneNode(true)
         _node.remove(); // Removing and re-inserting the element cancels the HTMX polling, otherwise it will use the old values
+        const scroll_bottom_input = node.querySelector("input[name='scroll_bottom']")
 
         const scrollPosition = chat_messages.scrollTop;
         var bottomOfElement = chat_messages.scrollHeight - chat_messages.clientHeight;
 
-        var [path, qs] = node.attributes["hx-get"].value.split("?")
-        var params = new URLSearchParams(qs)
-
         if (scrollPosition === bottomOfElement) {
           // At bottom; new messages should be scrolled into view
           node.setAttribute("hx-swap", "outerHTML scroll:.chat-messages:bottom");
-          params.set("scroll_bottom", "1")
-          node.setAttribute("hx-get", [path, params.toString()].join("?"))
+          scroll_bottom_input.value = 1;
         } else {
           // User has scrolled up; disable auto-scrolling when new messages arrive
           node.setAttribute("hx-swap", "outerHTML");
-          params.set("scroll_bottom", "0")
-          node.setAttribute("hx-get", [path, params.toString()].join("?"))
+          scroll_bottom_input.value = 0;
         }
 
         chat_messages.appendChild(node);

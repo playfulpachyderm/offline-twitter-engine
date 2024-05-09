@@ -756,12 +756,17 @@ func TestMessagesRoom(t *testing.T) {
 	assert.Len(cascadia.QueryAll(root, selector("#chat-view .dm-message")), 5)
 
 	// Should have the poller at the bottom
-	node := cascadia.Query(root, selector("#new-messages-poller"))
-	assert.NotNil(node)
-	assert.Contains(node.Attr, html.Attribute{
-		Key: "hx-get",
-		Val: "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129144&scroll_bottom=1",
-	})
+	poller := cascadia.Query(root, selector("#new-messages-poller"))
+	assert.NotNil(poller)
+	assert.Contains(poller.Attr, html.Attribute{Key: "hx-get", Val: "/messages/1488963321701171204-1178839081222115328"})
+	assert.Contains(
+		cascadia.Query(poller, selector("input[name='scroll_bottom']")).Attr,
+		html.Attribute{Key: "value", Val: "1"},
+	)
+	assert.Contains(
+		cascadia.Query(poller, selector("input[name='latest_timestamp']")).Attr,
+		html.Attribute{Key: "value", Val: "1686025129144"},
+	)
 }
 
 // Loading the page since a given message
@@ -785,12 +790,17 @@ func TestMessagesRoomPollForUpdates(t *testing.T) {
 	assert.Len(cascadia.QueryAll(root, selector(".dm-message")), 3)
 
 	// Should have the poller at the bottom
-	node := cascadia.Query(root, selector("#new-messages-poller"))
-	assert.NotNil(node)
-	assert.Contains(node.Attr, html.Attribute{
-		Key: "hx-get",
-		Val: "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129144&scroll_bottom=1",
-	})
+	poller := cascadia.Query(root, selector("#new-messages-poller"))
+	assert.NotNil(poller)
+	assert.Contains(poller.Attr, html.Attribute{Key: "hx-get", Val: "/messages/1488963321701171204-1178839081222115328"})
+	assert.Contains(
+		cascadia.Query(poller, selector("input[name='scroll_bottom']")).Attr,
+		html.Attribute{Key: "value", Val: "1"},
+	)
+	assert.Contains(
+		cascadia.Query(poller, selector("input[name='latest_timestamp']")).Attr,
+		html.Attribute{Key: "value", Val: "1686025129144"},
+	)
 }
 
 // Loading the page since latest message (no updates)
@@ -814,12 +824,17 @@ func TestMessagesRoomPollForUpdatesEmptyResult(t *testing.T) {
 	assert.Len(cascadia.QueryAll(root, selector(".dm-message")), 0)
 
 	// Should have the poller at the bottom, with the same value as previously
-	node := cascadia.Query(root, selector("#new-messages-poller"))
-	assert.NotNil(node)
-	assert.Contains(node.Attr, html.Attribute{
-		Key: "hx-get",
-		Val: "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129144&scroll_bottom=1",
-	})
+	poller := cascadia.Query(root, selector("#new-messages-poller"))
+	assert.NotNil(poller)
+	assert.Contains(poller.Attr, html.Attribute{Key: "hx-get", Val: "/messages/1488963321701171204-1178839081222115328"})
+	assert.Contains(
+		cascadia.Query(poller, selector("input[name='scroll_bottom']")).Attr,
+		html.Attribute{Key: "value", Val: "1"},
+	)
+	assert.Contains(
+		cascadia.Query(poller, selector("input[name='latest_timestamp']")).Attr,
+		html.Attribute{Key: "value", Val: "1686025129144"},
+	)
 }
 
 // Scroll back in the messages
