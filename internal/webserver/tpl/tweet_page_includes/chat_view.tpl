@@ -124,15 +124,15 @@
         <div class="chat-header__buttons-container row">
           {{if (ne $room.Type "ONE_TO_ONE")}}
             <!-- Group chats need an "Info" button -->
-            <a class="button" onclick="toggle_participants_view()">
+            <a class="button" onclick="toggle_participants_view()" title="Show participants">
               <img class="svg-icon" src="/static/icons/info.svg" width="24" height="24" />
             </a>
           {{end}}
-          <a class="button" href="https://twitter.com/messages/{{ $room.ID }}" target="_blank">
+          <a class="button" href="https://twitter.com/messages/{{ $room.ID }}" target="_blank" title="Open on twitter.com">
             <img class="svg-icon" src="/static/icons/external-link.svg" width="24" height="24" />
           </a>
-          <a class="button" hx-post="/messages/{{ $room.ID }}/mark-as-read">
-            <img class="svg-icon" src="/static/icons/external-link.svg" width="24" height="24" />
+          <a class="button" hx-post="/messages/{{ $room.ID }}/mark-as-read" title="Mark as read">
+            <img class="svg-icon" src="/static/icons/eye.svg" width="24" height="24" />
           </a>
         </div>
       </div>
