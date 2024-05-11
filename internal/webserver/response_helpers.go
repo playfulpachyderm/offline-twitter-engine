@@ -28,24 +28,27 @@ func (app *Application) error_404(w http.ResponseWriter) {
 	http.Error(w, "Not Found", 404)
 }
 
-func (app *Application) error_500(w http.ResponseWriter, err error) {
+func (app *Application) error_500(w http.ResponseWriter, r *http.Request, err error) {
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
 	err2 := app.ErrorLog.Output(2, trace) // Magic
 	if err2 != nil {
 		panic(err2)
 	}
+	app.toast(w, r, Toast{Title: "Server error", Message: err.Error(), Type: "error"})
+}
 
+func (app *Application) toast(w http.ResponseWriter, r *http.Request, t Toast) {
 	// Reset the HTMX response to return an error toast and put it in the
 	w.Header().Set("HX-Reswap", "beforeend")
-	w.Header().Set("HX-Retarget", "#errorMessages")
+	w.Header().Set("HX-Retarget", "#toasts")
 	w.Header().Set("HX-Push-Url", "false")
 
-	r := renderer{
-		Filenames: []string{get_filepath("tpl/http_500.tpl")},
-		TplName:   "error-toast",
-		Data: struct {
-			ErrorMsg string
-		}{err.Error()},
-	}
-	r.BufferedRender(w)
+	app.buffered_render_htmx(w, "toast", PageGlobalData{}, t)
+}
+
+type Toast struct {
+	Title          string
+	Message        string
+	Type           string
+	AutoCloseDelay int64
 }

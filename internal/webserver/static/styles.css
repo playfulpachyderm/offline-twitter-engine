@@ -293,7 +293,31 @@ main {
 /**
  * Toast notification popup that gets sent on HTTP 500
  */
-.error-messages {
+.toast {
+	border-radius: 1em;
+	padding: 1em;
+	text-align: center;
+	word-wrap: break-word;
+	margin: 1em;
+	width: 90%;
+
+	/* Default: use "success" toast */
+	background-color: #efe;
+	border: 1px solid green;
+	color: green;
+
+	&.toast--error {
+		color: red;
+		background-color: #fee;
+		border-color: red;
+	}
+	&.toast--warning {
+		color: hsl(50.59deg 75% 40%);
+		background-color: #ffe;
+		border-color: hsl(50.59deg 75% 40%);
+	}
+}
+.toasts {
 	position: fixed;
 	left: var(--width-body-margins);
 	top: 10em;
@@ -301,18 +325,6 @@ main {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-
-	.error-messages__msg {
-		background-color: #fee;
-		border: 1px solid red;
-		border-radius: 1em;
-		padding: 1em;
-		color: red;
-		text-align: center;
-		word-wrap: break-word;
-		margin: 1em;
-		width: 90%;
-	}
 }
 
 /**
@@ -440,10 +452,12 @@ main {
  */
 .text {
 	display: block;
-	margin-bottom: 0.4em;
+	margin-bottom: 0.5em;
 	margin-top: 0;
 	overflow-wrap: anywhere;
 	cursor: text;
+	/* Prevent empty paragraphs from being collapsed into each other (i.e., `margin-bottom`s overlapping) */
+	padding-bottom: 0.1em;
 
 	&:last-child {
 		margin-bottom: 0;
