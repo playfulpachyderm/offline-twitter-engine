@@ -131,6 +131,9 @@
           <a class="button" href="https://twitter.com/messages/{{ $room.ID }}" target="_blank">
             <img class="svg-icon" src="/static/icons/external-link.svg" width="24" height="24" />
           </a>
+          <a class="button" hx-post="/messages/{{ $room.ID }}/mark-as-read">
+            <img class="svg-icon" src="/static/icons/external-link.svg" width="24" height="24" />
+          </a>
         </div>
       </div>
     {{end}}

@@ -25,6 +25,30 @@ func (app *Application) messages_index(w http.ResponseWriter, r *http.Request) {
 	app.buffered_render_page(w, "tpl/messages.tpl", global_data, chat_view_data)
 }
 
+func (app *Application) message_mark_as_read(w http.ResponseWriter, r *http.Request) {
+	room_id := get_room_id_from_context(r.Context())
+
+	c := persistence.NewConversationCursor(room_id)
+	c.PageSize = 1
+	chat_contents := app.Profile.GetChatRoomMessagesByCursor(c)
+	last_message_id := chat_contents.MessageIDs[len(chat_contents.MessageIDs)-1]
+	scraper.MarkDMChatRead(room_id, last_message_id)
+	room := chat_contents.Rooms[room_id]
+	participant, is_ok := room.Participants[app.ActiveUser.ID]
+	if !is_ok {
+		panic(room)
+	}
+	participant.LastReadEventID = last_message_id
+	room.Participants[app.ActiveUser.ID] = participant
+	panic_if(app.Profile.SaveChatRoom(room))
+	app.toast(w, r, Toast{
+		Title:          "Success",
+		Message:        `Conversation marked as "read"`,
+		Type:           "success",
+		AutoCloseDelay: 2000,
+	})
+}
+
 func (app *Application) message_send(w http.ResponseWriter, r *http.Request) {
 	room_id := get_room_id_from_context(r.Context())
 
@@ -47,6 +71,11 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 	is_sending := len(parts) == 1 && parts[0] == "send"
 
 	chat_view_data, global_data := app.get_message_global_data()
+
+	if len(parts) == 1 && parts[0] == "mark-as-read" {
+		app.message_mark_as_read(w, r)
+		return
+	}
 
 	// First send a message, if applicable
 	if is_sending {

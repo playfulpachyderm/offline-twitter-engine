@@ -164,7 +164,11 @@ func (api *API) do_http_POST(remote_url string, body string, result interface{})
 		return fmt.Errorf("Error initializing HTTP POST request:\n  %w", err)
 	}
 
-	req.Header.Set("content-type", "application/json")
+	if body[0] == '{' {
+		req.Header.Set("content-type", "application/json")
+	} else {
+		req.Header.Set("content-type", "application/x-www-form-urlencoded")
+	}
 
 	api.add_authentication_headers(req)
 
@@ -189,6 +193,11 @@ func (api *API) do_http_POST(remote_url string, body string, result interface{})
 		return fmt.Errorf("GET %q:\n  reading response body:\n  %w", remote_url, ErrRequestTimeout)
 	} else if err != nil {
 		panic(err)
+	}
+
+	if resp.StatusCode == 204 {
+		// No Content
+		return nil
 	}
 
 	if resp.StatusCode != 200 {

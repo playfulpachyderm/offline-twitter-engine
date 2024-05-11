@@ -111,3 +111,9 @@ func SendDMMessage(room_id DMChatRoomID, text string, in_reply_to_id DMMessageID
 	}
 	return dm_response.ToDMTrove()
 }
+func MarkDMChatRead(room_id DMChatRoomID, read_message_id DMMessageID) {
+	if !the_api.IsAuthenticated {
+		log.Fatalf("Writing DMs can only be done when authenticated.  Please provide `--session [user]`")
+	}
+	the_api.MarkDMChatRead(room_id, read_message_id)
+}

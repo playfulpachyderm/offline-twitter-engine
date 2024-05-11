@@ -521,3 +521,16 @@ func (api *API) SendDMMessage(room_id DMChatRoomID, text string, in_reply_to_id 
 	err = api.do_http_POST(url.String(), post_data, &result)
 	return result, err
 }
+
+// Mark a chat as read.
+func (api *API) MarkDMChatRead(room_id DMChatRoomID, read_message_id DMMessageID) {
+	url := fmt.Sprintf("https://twitter.com/i/api/1.1/dm/conversation/%s/mark_read.json", room_id)
+
+	// `do_http_POST` will set the "content-type" header based on whether the body starts with '{' or not.
+	data := fmt.Sprintf("conversationId=%s&last_read_event_id=%d", room_id, read_message_id)
+
+	err := api.do_http_POST(url, data, nil) // Expected: HTTP 204
+	if err != nil {
+		panic(err)
+	}
+}
