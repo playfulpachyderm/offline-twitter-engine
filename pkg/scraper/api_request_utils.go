@@ -164,7 +164,7 @@ func (api *API) do_http_POST(remote_url string, body string, result interface{})
 		return fmt.Errorf("Error initializing HTTP POST request:\n  %w", err)
 	}
 
-	if body[0] == '{' {
+	if len(body) == 0 || body[0] == '{' { // TODO: unclear what the content-type should be if body is empty; might not matter
 		req.Header.Set("content-type", "application/json")
 	} else {
 		req.Header.Set("content-type", "application/x-www-form-urlencoded")
