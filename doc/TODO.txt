@@ -99,10 +99,6 @@ TODO: login-routes-tests
 TODO: webserver-session-arg-active-user
 - make the active user get set on initializing the Application object if a --session flag is given
 
-TODO: paste-twitter-urls-in-search-bar
-- pasting a link from twitter.com into the search bar should handle it properly
-	- space
-
 TODO: show-errors-in-UI
 - if an HTTP request fails, show an error in the UI somehow
   - scrape failed due to rate limiting
@@ -115,7 +111,6 @@ TODO: incomplete-threads
 - when previous tweet in thread is missing, put a "fetch tweet" button to get it
 
 TODO: dms
-- fetch chat room history on opening
 - add search
 
 TODO: search-terms-highlighted

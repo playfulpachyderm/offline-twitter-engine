@@ -306,3 +306,9 @@ v0.6.10
 	- add header section for DMs with open-in-external button
 	- Clicking on the "replying-to" button on a DM scrolls that message into view
 - Add DM pagination / show-more button
+
+v0.6.11
+-------
+
+- Add 2 buttons in DM chat header: mark as "read", manually re-scrape
+- DM list now updates itself live while on the Messages page
