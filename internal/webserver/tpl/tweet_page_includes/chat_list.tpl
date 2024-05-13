@@ -1,5 +1,5 @@
 {{define "chat-list"}}
-  <div class="chat-list">
+  <div class="chat-list" hx-get="/messages/refresh-list?active-chat={{.ActiveRoomID}}" hx-swap="outerHTML" hx-trigger="load delay:3s">
     {{range .RoomIDs}}
       {{template "chat-list-entry" (dict
           "room" (index $.Rooms .)

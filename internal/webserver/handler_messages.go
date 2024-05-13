@@ -142,6 +142,12 @@ func (app *Application) get_message_global_data() (MessageData, PageGlobalData) 
 	return chat_view_data, global_data
 }
 
+func (app *Application) messages_refresh_list(w http.ResponseWriter, r *http.Request) {
+	chat_view_data, global_data := app.get_message_global_data()
+	chat_view_data.ActiveRoomID = scraper.DMChatRoomID(r.URL.Query().Get("active-chat"))
+	app.buffered_render_htmx(w, "chat-list", global_data, chat_view_data)
+}
+
 func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'Messages' handler (path: %q)", r.URL.Path)
 
@@ -157,6 +163,10 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 	}
 
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	if parts[0] == "refresh-list" {
+		app.messages_refresh_list(w, r)
+		return
+	}
 	room_id := scraper.DMChatRoomID(parts[0])
 
 	// Messages index
