@@ -82,6 +82,13 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 		app.message_send(w, r)
 	}
 
+	if r.URL.Query().Has("scrape") && !app.IsScrapingDisabled {
+		max_id := scraper.DMMessageID(^uint(0) >> 1)
+		trove := scraper.GetConversation(room_id, max_id, 50) // TODO: parameterizable
+		app.Profile.SaveDMTrove(trove, false)
+		go app.Profile.SaveDMTrove(trove, true) // Download the content in the background
+	}
+
 	// `LatestPollingTimestamp` sort of passes-through the function; if we're not updating it, it
 	//  goes out the same it came in.  Hence, using a single variable for it
 	chat_view_data.LatestPollingTimestamp = 0
@@ -121,6 +128,12 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 		// Scrolling-back should add new messages to the top of the page
 		if r.URL.Query().Has("cursor") {
 			app.buffered_render_htmx(w, "messages-top", global_data, chat_view_data)
+			return
+		}
+
+		// Reload the whole chat view pane
+		if r.URL.Query().Has("scrape") {
+			app.buffered_render_htmx(w, "chat-view", global_data, chat_view_data)
 			return
 		}
 	}
