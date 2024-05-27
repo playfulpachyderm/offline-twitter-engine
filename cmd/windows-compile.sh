@@ -13,4 +13,4 @@ if [[ -z "$1" ]]; then
 	exit 1
 fi
 
-go build -ldflags="-linkmode external -extldflags -static -s -w -X main.version_string=$1 -X gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.use_embedded=true" -buildvcs=false -o twitter.exe ./twitter
+go build -ldflags="-linkmode external -extldflags -static -s -w -X main.version_string=$1 -X gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.use_embedded=true" -o twitter.exe ./twitter
