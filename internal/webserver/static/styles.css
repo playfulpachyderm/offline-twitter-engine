@@ -1447,6 +1447,7 @@ main {
 		padding: 1px 6px;
 		max-height: 10em;
 		min-height: 3em;
+		overflow-wrap: anywhere;
 		overflow-y: auto; /* scrollbar only if needed */
 		border: 2px solid var(--color-outline-gray);
 		border-radius: 0.5em;
