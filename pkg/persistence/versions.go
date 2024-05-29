@@ -297,6 +297,16 @@ var MIGRATIONS = []string{
 		    foreign key(chat_message_id) references chat_messages(id)
 		);
 		create index if not exists index_chat_message_urls_chat_message_id on chat_message_urls (chat_message_id);`,
+	`create table bookmarks(rowid integer primary key,
+		    sort_order integer not null, -- Can't be unique because "-1" is used as "unknown" value
+		    user_id integer not null,
+		    tweet_id integer not null,
+		    unique(user_id, tweet_id)
+		    foreign key(tweet_id) references tweets(id)
+		    foreign key(user_id) references users(id)
+		);
+		create index if not exists index_bookmarks_user_id on bookmarks (user_id);
+		create index if not exists index_bookmarks_tweet_id on bookmarks (tweet_id);`,
 }
 var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
 

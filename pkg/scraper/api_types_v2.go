@@ -599,6 +599,11 @@ type APIV2Response struct {
 				} `json:"timeline"`
 			} `json:"search_timeline"`
 		} `json:"search_by_raw_query"`
+		BookmarkTimelineV2 struct {
+			Timeline struct {
+				Instructions []APIV2Instruction `json:"instructions"`
+			} `json:"timeline"`
+		} `json:"bookmark_timeline_v2"`
 	} `json:"data"`
 	Errors []struct {
 		Message string `json:"message"`
@@ -632,6 +637,12 @@ func (api_response APIV2Response) GetMainInstruction() *APIV2Instruction {
 		}
 	}
 	instructions = api_response.Data.SearchByRawQuery.SearchTimeline.Timeline.Instructions
+	for i := range instructions {
+		if instructions[i].Type == "TimelineAddEntries" {
+			return &instructions[i]
+		}
+	}
+	instructions = api_response.Data.BookmarkTimelineV2.Timeline.Instructions
 	for i := range instructions {
 		if instructions[i].Type == "TimelineAddEntries" {
 			return &instructions[i]
@@ -825,6 +836,45 @@ func (r APIV2Response) ToTweetTroveAsLikes() (TweetTrove, error) {
 		}
 		ret.Likes[LikeSortID(entry.SortIndex)] = Like{
 			SortID:  LikeSortID(entry.SortIndex),
+			TweetID: tweet.ID,
+		}
+	}
+	return ret, err
+}
+
+func (r APIV2Response) ToTweetTroveAsBookmarks() (TweetTrove, error) {
+	ret, err := r.ToTweetTrove()
+	if err != nil {
+		return ret, err
+	}
+
+	// Post-process tweets as Bookmarks
+	for _, entry := range r.GetMainInstruction().Entries {
+		// Skip cursors
+		if entry.Content.EntryType == "TimelineTimelineCursor" {
+			continue
+		}
+		// Assume it's not a TimelineModule or a Tombstone
+		if entry.Content.EntryType != "TimelineTimelineItem" {
+			panic(fmt.Sprintf("Unknown Bookmark entry type: %s", entry.Content.EntryType))
+		}
+		if entry.Content.ItemContent.ItemType == "TimelineTombstone" {
+			panic(fmt.Sprintf("Bookmarkd tweet is a tombstone: %#v", entry))
+		}
+
+		// Generate a "Bookmark" from the entry
+		tweet, is_ok := ret.Tweets[TweetID(entry.Content.ItemContent.TweetResults.Result._Result.ID)]
+		if !is_ok {
+			// For TweetWithVisibilityResults
+			tweet, is_ok = ret.Tweets[TweetID(entry.Content.ItemContent.TweetResults.Result.Tweet.ID)]
+			if !is_ok {
+				log.Warnf("ID: %d", entry.Content.ItemContent.TweetResults.Result._Result.ID)
+				log.Warnf("Entry JSON: %s", entry.OriginalJSON)
+				panic(ret.Tweets)
+			}
+		}
+		ret.Bookmarks[BookmarkSortID(entry.SortIndex)] = Bookmark{
+			SortID:  BookmarkSortID(entry.SortIndex),
 			TweetID: tweet.ID,
 		}
 	}
@@ -1083,6 +1133,75 @@ func (p PaginatedUserLikes) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
 
 func GetUserLikes(user_id UserID, how_many int) (TweetTrove, error) {
 	return the_api.GetPaginatedQuery(PaginatedUserLikes{user_id}, how_many)
+}
+
+func (api *API) GetBookmarks(cursor string) (APIV2Response, error) {
+	url, err := url.Parse(GraphqlURL{
+		BaseUrl: "https://twitter.com/i/api/graphql/xLjCVTqYWz8CGSprLU349w/Bookmarks",
+		Variables: GraphqlVariables{
+			Count:                  20,
+			Cursor:                 cursor,
+			IncludePromotedContent: false,
+		},
+		Features: GraphqlFeatures{
+			ResponsiveWebTwitterBlueVerifiedBadgeIsEnabled:                 true,
+			ResponsiveWebGraphqlTimelineNavigationEnabled:                  true,
+			UnifiedCardsAdMetadataContainerDynamicCardContentQueryEnabled:  true,
+			TweetypieUnmentionOptimizationEnabled:                          true,
+			ResponsiveWebUcGqlEnabled:                                      true,
+			VibeApiEnabled:                                                 true,
+			ResponsiveWebEditTweetApiEnabled:                               true,
+			GraphqlIsTranslatableRWebTweetIsTranslatableEnabled:            true,
+			StandardizedNudgesMisinfo:                                      true,
+			InteractiveTextEnabled:                                         true,
+			ResponsiveWebEnhanceCardsEnabled:                               true,
+			TweetWithVisibilityResultsPreferGqlLimitedActionsPolicyEnabled: false,
+			ResponsiveWebTextConversationsEnabled:                          false,
+			VerifiedPhoneLabelEnabled:                                      false,
+
+			CommunitiesWebEnableTweetCommunityResultsFetch: true,
+			RWebTipjarConsumptionEnabled:                   true,
+			ArticlesPreviewEnabled:                         true,
+			GraphqlTimelineV2BookmarkTimeline:              true,
+			CreatorSubscriptionsQuoteTweetPreviewEnabled:   false,
+		},
+	}.String())
+	if err != nil {
+		panic(err)
+	}
+
+	var response APIV2Response
+	err = api.do_http(url.String(), cursor, &response)
+	if err != nil {
+		panic(err)
+	}
+	return response, nil
+}
+
+type PaginatedBookmarks struct {
+	user_id UserID
+}
+
+func (p PaginatedBookmarks) NextPage(api *API, cursor string) (APIV2Response, error) {
+	return api.GetBookmarks(cursor)
+}
+func (p PaginatedBookmarks) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
+	ret, err := r.ToTweetTroveAsBookmarks()
+	if err != nil {
+		return TweetTrove{}, err
+	}
+
+	// Fill out the bookmarking UserID
+	for i := range ret.Bookmarks {
+		l := ret.Bookmarks[i]
+		l.UserID = p.user_id
+		ret.Bookmarks[i] = l
+	}
+	return ret, nil
+}
+
+func GetBookmarks(how_many int) (TweetTrove, error) {
+	return the_api.GetPaginatedQuery(PaginatedBookmarks{the_api.UserID}, how_many)
 }
 
 func (api *API) GetHomeTimeline(cursor string, is_following_only bool) (TweetTrove, error) {

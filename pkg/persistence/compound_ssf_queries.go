@@ -18,10 +18,11 @@ const (
 	SORT_ORDER_MOST_LIKES
 	SORT_ORDER_MOST_RETWEETS
 	SORT_ORDER_LIKED_AT
+	SORT_ORDER_BOOKMARKED_AT
 )
 
 func (o SortOrder) String() string {
-	return []string{"newest", "oldest", "most likes", "most retweets", "liked at"}[o]
+	return []string{"newest", "oldest", "most likes", "most retweets", "liked at", "bookmarked at"}[o]
 }
 
 func SortOrderFromString(s string) (SortOrder, bool) {
@@ -31,6 +32,7 @@ func SortOrderFromString(s string) (SortOrder, bool) {
 		"most likes":    SORT_ORDER_MOST_LIKES,
 		"most retweets": SORT_ORDER_MOST_RETWEETS,
 		"liked at":      SORT_ORDER_LIKED_AT,
+		"bookmarked at": SORT_ORDER_BOOKMARKED_AT,
 	}[s]
 	return result, is_ok // Have to store as temporary variable b/c otherwise it interprets it as single-value and compile fails
 }
@@ -47,6 +49,8 @@ func (o SortOrder) OrderByClause() string {
 		return "order by num_retweets desc"
 	case SORT_ORDER_LIKED_AT:
 		return "order by likes_sort_order desc"
+	case SORT_ORDER_BOOKMARKED_AT:
+		return "order by bookmarks_sort_order desc"
 	default:
 		panic(fmt.Sprintf("Invalid sort order: %d", o))
 	}
@@ -63,6 +67,8 @@ func (o SortOrder) PaginationWhereClause() string {
 		return "num_retweets < ?"
 	case SORT_ORDER_LIKED_AT:
 		return "likes_sort_order < ?"
+	case SORT_ORDER_BOOKMARKED_AT:
+		return "bookmarks_sort_order < ?"
 	default:
 		panic(fmt.Sprintf("Invalid sort order: %d", o))
 	}
@@ -79,6 +85,8 @@ func (o SortOrder) NextCursorValue(r CursorResult) int {
 		return r.NumRetweets
 	case SORT_ORDER_LIKED_AT:
 		return r.LikeSortOrder
+	case SORT_ORDER_BOOKMARKED_AT:
+		return r.BookmarkSortOrder
 	default:
 		panic(fmt.Sprintf("Invalid sort order: %d", o))
 	}
@@ -125,9 +133,10 @@ const (
 type CursorResult struct {
 	scraper.Tweet
 	scraper.Retweet
-	Chrono        int            `db:"chrono"`
-	LikeSortOrder int            `db:"likes_sort_order"`
-	ByUserID      scraper.UserID `db:"by_user_id"`
+	Chrono            int            `db:"chrono"`
+	LikeSortOrder     int            `db:"likes_sort_order"`
+	BookmarkSortOrder int            `db:"bookmarks_sort_order"`
+	ByUserID          scraper.UserID `db:"by_user_id"`
 }
 
 type Cursor struct {
@@ -137,26 +146,27 @@ type Cursor struct {
 	PageSize int
 
 	// Search params
-	Keywords              []string
-	FromUserHandle        scraper.UserHandle   // Tweeted by this user
-	RetweetedByUserHandle scraper.UserHandle   // Retweeted by this user
-	ByUserHandle          scraper.UserHandle   // Either tweeted or retweeted by this user
-	ToUserHandles         []scraper.UserHandle // In reply to these users
-	LikedByUserHandle     scraper.UserHandle   // Liked by this user
-	ListID                scraper.ListID       // Either tweeted or retweeted by users from this List
-	FollowedByUserHandle  scraper.UserHandle   // Either tweeted or retweeted by users followed by this user
-	SinceTimestamp        scraper.Timestamp
-	UntilTimestamp        scraper.Timestamp
-	TombstoneType         string
-	FilterLinks           Filter
-	FilterImages          Filter
-	FilterVideos          Filter
-	FilterMedia           Filter
-	FilterPolls           Filter
-	FilterSpaces          Filter
-	FilterReplies         Filter
-	FilterRetweets        Filter
-	FilterOfflineFollowed Filter
+	Keywords               []string
+	FromUserHandle         scraper.UserHandle   // Tweeted by this user
+	RetweetedByUserHandle  scraper.UserHandle   // Retweeted by this user
+	ByUserHandle           scraper.UserHandle   // Either tweeted or retweeted by this user
+	ToUserHandles          []scraper.UserHandle // In reply to these users
+	LikedByUserHandle      scraper.UserHandle   // Liked by this user
+	BookmarkedByUserHandle scraper.UserHandle   // Bookmarked by this user
+	ListID                 scraper.ListID       // Either tweeted or retweeted by users from this List
+	FollowedByUserHandle   scraper.UserHandle   // Either tweeted or retweeted by users followed by this user
+	SinceTimestamp         scraper.Timestamp
+	UntilTimestamp         scraper.Timestamp
+	TombstoneType          string
+	FilterLinks            Filter
+	FilterImages           Filter
+	FilterVideos           Filter
+	FilterMedia            Filter
+	FilterPolls            Filter
+	FilterSpaces           Filter
+	FilterReplies          Filter
+	FilterRetweets         Filter
+	FilterOfflineFollowed  Filter
 }
 
 // Generate a cursor with some reasonable defaults
@@ -255,6 +265,22 @@ func NewUserFeedLikesCursor(h scraper.UserHandle) Cursor {
 	}
 }
 
+// Generate a cursor for a User's Bookmarks
+func NewUserFeedBookmarksCursor(h scraper.UserHandle) Cursor {
+	return Cursor{
+		Keywords:       []string{},
+		ToUserHandles:  []scraper.UserHandle{},
+		SinceTimestamp: scraper.TimestampFromUnix(0),
+		UntilTimestamp: scraper.TimestampFromUnix(0),
+		CursorPosition: CURSOR_START,
+		CursorValue:    0,
+		SortOrder:      SORT_ORDER_BOOKMARKED_AT,
+		PageSize:       50,
+
+		BookmarkedByUserHandle: h,
+	}
+}
+
 func NewCursorFromSearchQuery(q string) (Cursor, error) {
 	ret := NewCursor()
 	is_in_quotes := false
@@ -325,6 +351,8 @@ func (c *Cursor) apply_token(token string) error {
 		c.FilterRetweets = NONE // Clear the "exclude retweets" filter set by default in NewCursor
 	case "liked_by":
 		c.LikedByUserHandle = scraper.UserHandle(parts[1])
+	case "bookmarked_by":
+		c.BookmarkedByUserHandle = scraper.UserHandle(parts[1])
 	case "followed_by":
 		c.FollowedByUserHandle = scraper.UserHandle(parts[1])
 	case "list":
@@ -513,6 +541,19 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
 		where_clauses = append(where_clauses, "retweet_id = 0")
 	}
 
+	bookmarked_by_filter_join_clause := ""
+	bookmarks_sort_order_field := ""
+	if c.BookmarkedByUserHandle != "" {
+		bookmarked_by_filter_join_clause = " join bookmarks filter_bookmarks on tweets.id = filter_bookmarks.tweet_id "
+		where_clauses = append(where_clauses, "filter_bookmarks.user_id = (select id from users where handle like ?) ")
+		bind_values = append(bind_values, c.BookmarkedByUserHandle)
+		bookmarks_sort_order_field = ", coalesce(filter_bookmarks.sort_order, -1) bookmarks_sort_order "
+
+		// Don't include retweets on "bookmarked by" searches because it doesn't distinguish which retweet
+		// version was the "bookmarked" one
+		where_clauses = append(where_clauses, "retweet_id = 0")
+	}
+
 	// Pagination
 	if c.CursorPosition != CURSOR_START {
 		where_clauses = append(where_clauses, c.SortOrder.PaginationWhereClause())
@@ -525,21 +566,30 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
 		where_clause = "where " + strings.Join(where_clauses, " and ")
 	}
 
+	// The Query:
+	//   1. Base query:
+	//     a. Include "likes_sort_order" and "bookmarks_sort_order" fields, if they're in the filters
+	//     b. Left join on "likes" table to get whether logged-in user has liked the tweet
+	//     c. Left join on "likes" and "bookmarks" tables, if needed (i.e., if in the filters)
+	//     d. Add 'where', 'order by', and (mildly unnecessary) 'limit' clauses
+	//   2. Two copies of the base query, one for "tweets" and one for "retweets", joined with "union"
+	//   3. Actual "limit" clause
 	q := `select * from (
-	select ` + TWEETS_ALL_SQL_FIELDS + likes_sort_order_field + `,
+	select ` + TWEETS_ALL_SQL_FIELDS + likes_sort_order_field + bookmarks_sort_order_field + `,
            0 tweet_id, 0 retweet_id, 0 retweeted_by, 0 retweeted_at,
            posted_at chrono, tweets.user_id by_user_id
       from tweets
  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
  left join likes on tweets.id = likes.tweet_id and likes.user_id = ?
      ` + liked_by_filter_join_clause + `
+     ` + bookmarked_by_filter_join_clause + `
      ` + where_clause + ` ` + c.SortOrder.OrderByClause() + ` limit ?
     )
 
      union
 
     select * from (
-    select ` + TWEETS_ALL_SQL_FIELDS + likes_sort_order_field + `,
+    select ` + TWEETS_ALL_SQL_FIELDS + likes_sort_order_field + bookmarks_sort_order_field + `,
            retweets.tweet_id, retweet_id, retweeted_by, retweeted_at,
            retweeted_at chrono, retweeted_by by_user_id
       from retweets
@@ -547,10 +597,9 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
  left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
  left join likes on tweets.id = likes.tweet_id and likes.user_id = ?
      ` + liked_by_filter_join_clause + `
-     ` + where_clause + `
-     ` + c.SortOrder.OrderByClause() + `
-     limit ?
-    ) ` + c.SortOrder.OrderByClause() + ` limit ?`
+     ` + bookmarked_by_filter_join_clause + `
+     ` + where_clause + ` ` + c.SortOrder.OrderByClause() + ` limit ?
+    )` + c.SortOrder.OrderByClause() + ` limit ?`
 
 	bind_values = append([]interface{}{current_user_id}, bind_values...)
 	bind_values = append(bind_values, c.PageSize)

@@ -76,7 +76,7 @@ func main() {
 
 	if len(args) < 2 {
 		if len(args) == 1 && (args[0] == "list_followed" || args[0] == "webserver" || args[0] == "fetch_timeline" ||
-			args[0] == "fetch_timeline_following_only" || args[0] == "fetch_inbox") {
+			args[0] == "fetch_timeline_following_only" || args[0] == "fetch_inbox" || args[0] == "get_bookmarks") {
 			// Doesn't need a target, so create a fake second arg
 			args = append(args, "")
 		} else {
@@ -167,6 +167,8 @@ func main() {
 		get_followers(target, *how_many)
 	case "get_followees":
 		get_followees(target, *how_many)
+	case "get_bookmarks":
+		get_bookmarks(*how_many)
 	case "fetch_timeline":
 		fetch_timeline(false) // TODO: *how_many
 	case "fetch_timeline_following_only":
@@ -384,7 +386,18 @@ func get_followers(handle string, how_many int) {
 
 	happy_exit(fmt.Sprintf("Saved %d followers", len(trove.Users)))
 }
+func get_bookmarks(how_many int) {
+	trove, err := scraper.GetBookmarks(how_many)
+	if err != nil {
+		die(fmt.Sprintf("Error scraping bookmarks:\n  %s", err.Error()), false, -2)
+	}
+	profile.SaveTweetTrove(trove, true)
 
+	happy_exit(fmt.Sprintf(
+		"Saved %d tweets, %d retweets, %d users, and %d bookmarks",
+		len(trove.Tweets), len(trove.Retweets), len(trove.Users), len(trove.Bookmarks)),
+	)
+}
 func fetch_timeline(is_following_only bool) {
 	trove, err := scraper.GetHomeTimeline("", is_following_only)
 	if err != nil {

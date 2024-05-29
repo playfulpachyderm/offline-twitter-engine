@@ -87,4 +87,11 @@ func (p Profile) SaveTweetTrove(trove TweetTrove, should_download bool) {
 			panic(fmt.Errorf("Error saving Like: %#v\n  %w", l, err))
 		}
 	}
+
+	for _, b := range trove.Bookmarks {
+		err := p.SaveBookmark(b)
+		if err != nil {
+			panic(fmt.Errorf("Error saving Bookmark: %#v\n  %w", b, err))
+		}
+	}
 }

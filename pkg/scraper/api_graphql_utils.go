@@ -74,6 +74,13 @@ type GraphqlFeatures struct {
 	// Spaces
 	Spaces2022H2Clipping          bool `json:"spaces_2022_h2_clipping,omitempty"`
 	Spaces2022H2SpacesCommunities bool `json:"spaces_2022_h2_spaces_communities,omitempty"`
+
+	// Bookmarks
+	CommunitiesWebEnableTweetCommunityResultsFetch bool `json:"communities_web_enable_tweet_community_results_fetch,omitempty"`
+	RWebTipjarConsumptionEnabled                   bool `json:"rweb_tipjar_consumption_enabled,omitempty"`
+	ArticlesPreviewEnabled                         bool `json:"articles_preview_enabled,omitempty"`
+	GraphqlTimelineV2BookmarkTimeline              bool `json:"graphql_timeline_v2_bookmark_timeline,omitempty"`
+	CreatorSubscriptionsQuoteTweetPreviewEnabled   bool `json:"creator_subscriptions_quote_tweet_preview_enabled"`
 }
 
 type GraphqlURL struct {

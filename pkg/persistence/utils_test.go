@@ -304,6 +304,14 @@ func create_dummy_like() Like {
 	}
 }
 
+func create_dummy_bookmark() Bookmark {
+	return Bookmark{
+		TweetID: create_stable_tweet().ID,
+		UserID:  create_stable_user().ID,
+		SortID:  BookmarkSortID(12345),
+	}
+}
+
 func create_stable_chat_room() DMChatRoom {
 	id := DMChatRoomID("some chat room ID")
 

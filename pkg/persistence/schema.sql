@@ -260,6 +260,21 @@ create index if not exists index_likes_user_id on likes (user_id);
 create index if not exists index_likes_tweet_id on likes (tweet_id);
 
 
+-- Bookmarks
+------------
+
+create table bookmarks(rowid integer primary key,
+    sort_order integer not null, -- Can't be unique because "-1" is used as "unknown" value
+    user_id integer not null,
+    tweet_id integer not null,
+    unique(user_id, tweet_id)
+    foreign key(tweet_id) references tweets(id)
+    foreign key(user_id) references users(id)
+);
+create index if not exists index_bookmarks_user_id on bookmarks (user_id);
+create index if not exists index_bookmarks_tweet_id on bookmarks (tweet_id);
+
+
 -- Direct Messages (DMs)
 -- ---------------------
 

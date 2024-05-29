@@ -369,6 +369,10 @@ tw unlike_tweet https://twitter.com/elonmusk/status/1589023388676554753
 # TODO: implement deleting a Like
 # test $(sqlite3 twitter.db "select count(*) from likes where tweet_id = 1589023388676554753 and user_id = (select id from users where handle like 'offline_twatter')") = "0"
 
+# Test fetching bookmarks
+tw get_bookmarks
+test $(sqlite3 twitter.db "select count(*) from bookmarks") -ge "2"
+test $(sqlite3 twitter.db "select count(*) from bookmarks where tweet_id = 1762239926437843421") = "1"
 
 # Test fetch inbox
 test $(sqlite3 twitter.db "select count(*) from chat_rooms") = "0"
@@ -376,6 +380,7 @@ test $(sqlite3 twitter.db "select count(*) from chat_messages") = "0"
 tw fetch_inbox
 test $(sqlite3 twitter.db "select count(*) from chat_rooms") -ge "1"
 test $(sqlite3 twitter.db "select count(*) from chat_messages where chat_room_id = '1458284524761075714-1488963321701171204'") -ge "5"
+
 
 # Test fetch a DM conversation
 tw fetch_dm "1458284524761075714-1488963321701171204"
