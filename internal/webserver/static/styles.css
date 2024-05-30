@@ -1190,6 +1190,15 @@ main {
 	}
 }
 
+
+/******************************************************
+ * Bookmarks pages
+ ******************************************************/
+
+.bookmarks-feed-header {
+    border-bottom: 1px solid var(--color-outline-gray);
+}
+
 .add-users-container {
 	padding: 1em;
 	text-align: center;

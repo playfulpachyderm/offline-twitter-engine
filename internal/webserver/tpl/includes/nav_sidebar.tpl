@@ -42,7 +42,7 @@
           <label class="nav-sidebar__button-label">Lists</label>
         </li>
       </a>
-      <a href="#">
+      <a href="/bookmarks">
         <li class="button labelled-icon">
           <img class="svg-icon" src="/static/icons/bookmarks.svg" width="24" height="24" />
           <label class="nav-sidebar__button-label">Bookmarks</label>
@@ -50,7 +50,7 @@
       </a>
       <a href="#">
       <li class="button labelled-icon">
-          <img class="svg-icon" src="/static/icons/communities.svg" width="24" height="24" />
+        <img class="svg-icon" src="/static/icons/communities.svg" width="24" height="24" />
         <label class="nav-sidebar__button-label">Communities</label>
       </li>
       </a>

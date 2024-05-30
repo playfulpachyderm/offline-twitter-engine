@@ -347,6 +347,8 @@ create table likes(rowid integer primary key,
     foreign key(user_id) references users(id)
     foreign key(tweet_id) references tweets(id)
 );
+create index if not exists index_likes_user_id on likes (user_id);
+create index if not exists index_likes_tweet_id on likes (tweet_id);
 
 insert into likes values
     (1, 1, 1178839081222115328, 1413646595493568516),
@@ -354,6 +356,22 @@ insert into likes values
     (3, 3, 1178839081222115328, 1343633011364016128),
     (4, 4, 1178839081222115328, 1426669666928414720),
     (5, 5, 1178839081222115328, 1698765208393576891);
+
+
+create table bookmarks(rowid integer primary key,
+    sort_order integer not null,
+    user_id integer not null,
+    tweet_id integer not null,
+    unique(user_id, tweet_id)
+    foreign key(tweet_id) references tweets(id)
+    foreign key(user_id) references users(id)
+);
+create index if not exists index_bookmarks_user_id on bookmarks (user_id);
+create index if not exists index_bookmarks_tweet_id on bookmarks (tweet_id);
+insert into bookmarks values
+    (23,1800452344077464795,1488963321701171204,1413647919215906817),
+    (24,1800452337108289740,1488963321701171204,1439747634277740546);
+
 
 
 create table chat_rooms (rowid integer primary key,
@@ -514,6 +532,6 @@ insert into fake_user_sequence values(0x4000000000000000);
 create table database_version(rowid integer primary key,
     version_number integer not null unique
 );
-insert into database_version(version_number) values (29);
+insert into database_version(version_number) values (30);
 
 COMMIT;
