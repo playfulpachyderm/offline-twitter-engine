@@ -350,7 +350,8 @@ tw --session Offline_Twatter.session list_followed > /dev/null  # Dummy operatio
 
 # Test search
 tw  search "from:michaelmalice constitution"
-test $(sqlite3 twitter.db "select count(*) from tweets where user_id = 44067298 and text like '%constitution%'") -gt "30"  # Not sure exactly how many
+# Update 2024-05-30: the default search page doesn't paginate anymore
+test $(sqlite3 twitter.db "select count(*) from tweets where user_id = 44067298 and text like '%constitution%'") -gt "20"  # Not sure exactly how many
 
 
 # Test fetching user Likes
