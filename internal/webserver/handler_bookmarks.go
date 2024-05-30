@@ -1,8 +1,8 @@
 package webserver
 
 import (
-	"net/http"
 	"errors"
+	"net/http"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
