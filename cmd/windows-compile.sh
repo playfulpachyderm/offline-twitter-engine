@@ -13,4 +13,7 @@ if [[ -z "$1" ]]; then
 	exit 1
 fi
 
-go build -ldflags="-linkmode external -extldflags -static -s -w -X main.version_string=$1 -X gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.use_embedded=true" -o twitter.exe ./twitter
+# Always use static build for windows
+FLAGS="-s -w -X gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.use_embedded=true"
+SPECIAL_FLAGS_FOR_STATIC_BUILD="-linkmode=external -extldflags=-static"
+go build -ldflags="$FLAGS $SPECIAL_FLAGS_FOR_STATIC_BUILD -X main.version_string=$1" -o twitter.exe ./twitter

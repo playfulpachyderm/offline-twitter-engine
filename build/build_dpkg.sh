@@ -8,6 +8,9 @@ then
 	>&2 echo "No version number provided!  Exiting."
 	exit 1
 fi
+version=$1
+
+(cd ../cmd && ./compile.sh --static $version)
 
 # Prepare the output folder
 if [[ -e dpkg_tmp ]]
@@ -32,7 +35,7 @@ cp Twitter.desktop dpkg_tmp/usr/share/applications/Twitter.desktop
 # Create the `DEBIAN/control` file
 mkdir dpkg_tmp/DEBIAN
 echo "Package: offline-twitter
-Version: $1
+Version: $version
 Architecture: all
 Maintainer: alex@playfulpachyderm.com
 Installed-Size: `du -k dpkg_tmp | tail -n 1 | cut -f 1`
