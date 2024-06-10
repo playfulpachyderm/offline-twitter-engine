@@ -584,12 +584,21 @@ func TestAPIV2TombstoneEntry(t *testing.T) {
 	trove := entry.ToTweetTrove()
 	assert.NoError(err)
 	assert.Len(trove.Tweets, 1)
-	assert.Len(trove.Users, 0)
+	assert.Len(trove.Users, 1)
 	assert.Len(trove.Retweets, 0)
 
 	tweet, is_ok := trove.Tweets[1454515503242829830]
 	assert.True(is_ok)
+	assert.True(tweet.IsStub)
+	assert.Equal("hidden", tweet.TombstoneType)
 	assert.Equal(tweet.ID, TweetID(1454515503242829830))
+
+	expected_user := GetUnknownUser()
+	assert.Equal(expected_user.ID, tweet.UserID)
+
+	assert.Len(trove.Users, 1)
+	_, is_ok = trove.Users[expected_user.ID]
+	assert.True(is_ok)
 }
 
 func TestAPIV2UserFeedTombstoneEntry(t *testing.T) {
