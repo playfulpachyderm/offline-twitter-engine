@@ -63,11 +63,15 @@ pipeline:
   dpkg_build_and_upload:
     when:
       branch: v*.*.*
-    image: offline-twitter/deploy
+    image: offline-twitter/go
+    secrets:
+      - aptrepo_id_ecdsa
     commands:
       - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^v)\d+\.\d+\.\d+")
       - cd build
       - ./build_dpkg.sh $version
+      - eval $(ssh-agent)
+      - echo "$APTREPO_ID_ECDSA" | ssh-add -
       - scp offline-twitter_$${version}_all.deb aptrepo@apt.playfulpachyderm.com:/apt-repo/test-repo
       - ssh aptrepo@apt.playfulpachyderm.com "cd ~/test-repo && ./update.sh"
 
