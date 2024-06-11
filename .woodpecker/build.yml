@@ -23,7 +23,7 @@ pipeline:
       - path:
         - pkg/scraper/**
         - cmd/**
-      - branch: release-*
+      - branch: v*.*.*
     commands:
       - cd cmd
       - ./tests.sh
@@ -41,11 +41,11 @@ pipeline:
   version_bump_test:
     image: offline-twitter/go
     when:
-      branch: release-*
+      branch: v*.*.*
     secrets:
       - offline_twatter_passwd
     commands:
-      - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^release-)\d+\.\d+\.\d+")
+      - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^v)\d+\.\d+\.\d+")
       - curl https://apt.playfulpachyderm.com/KEY.gpg | sudo apt-key add -
       - echo "deb https://apt.playfulpachyderm.com/ ./" | sudo tee /etc/apt/sources.list.d/offline_twitter.list
       - sudo apt update
@@ -62,10 +62,10 @@ pipeline:
 
   dpkg_build_and_upload:
     when:
-      branch: release-*
+      branch: v*.*.*
     image: offline-twitter/deploy
     commands:
-      - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^release-)\d+\.\d+\.\d+")
+      - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^v)\d+\.\d+\.\d+")
       - cd build
       - ./build_dpkg.sh $version
       - scp offline-twitter_$${version}_all.deb aptrepo@apt.playfulpachyderm.com:/apt-repo/test-repo
@@ -74,20 +74,20 @@ pipeline:
   windows_build:
     image: offline-twitter/go-mingw
     when:
-      branch: release-*
+      branch: v*.*.*
     commands:
       - cd cmd
-      - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^release-)\d+\.\d+\.\d+")
+      - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^v)\d+\.\d+\.\d+")
       - ./windows-compile.sh $version
 
   windows_package_and_upload:
     when:
-      branch: release-*
+      branch: v*.*.*
     image: offline-twitter/innosetup
     secrets:
       - offline_twatter_id_ecdsa
     commands:
-      - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^release-)\d+\.\d+\.\d+")
+      - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^v)\d+\.\d+\.\d+")
       - iscc.sh /Dversion=$version /Dexe_path=`winepath -w cmd/twitter.exe` build/windows/setup.iss
       - eval $(ssh-agent)
       - echo "$OFFLINE_TWATTER_ID_ECDSA" | ssh-add -
