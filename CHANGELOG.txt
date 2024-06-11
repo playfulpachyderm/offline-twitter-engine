@@ -312,3 +312,10 @@ v0.6.11
 
 - Add 2 buttons in DM chat header: mark as "read", manually re-scrape
 - DM list now updates itself live while on the Messages page
+
+v0.6.12
+-------
+
+- Add support for scraping bookmarks (not making them, yet)
+- Publish statically linked builds only
+- Various minor bugfixes
