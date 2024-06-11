@@ -9,3 +9,6 @@ run curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/i
 
 # Install project dependencies (so they don't have to be reinstalled on every CI run)
 run git clone https://gitlab.com/offline-twitter/twitter_offline_engine.git && cd twitter_offline_engine && go install ./... && cd .. && rm -r twitter_offline_engine
+
+# For SSH upload
+copy known_hosts /root/.ssh/known_hosts
