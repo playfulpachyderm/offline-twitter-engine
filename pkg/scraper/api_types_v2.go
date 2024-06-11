@@ -895,7 +895,7 @@ func (api *API) GetMore(pq PaginatedQuery, response *APIV2Response, count int) e
 	for last_response.GetCursorBottom() != "" && len(response.GetMainInstruction().Entries) < count {
 		fresh_response, err := pq.NextPage(api, last_response.GetCursorBottom())
 		if err != nil {
-			return fmt.Errorf("error getting next page for %#v: %w", pq, err)
+			return fmt.Errorf("error getting next page for %#v: %w", pq, err) // e.g., rate limited
 		}
 
 		if fresh_response.GetCursorBottom() == last_response.GetCursorBottom() && len(fresh_response.GetMainInstruction().Entries) == 0 {
@@ -925,25 +925,31 @@ func (api *API) GetPaginatedQuery(pq PaginatedQuery, count int) (TweetTrove, err
 	fmt.Printf("Paginating %d count\n", count)
 	api_response, err := pq.NextPage(api, "")
 	if err != nil {
+		// End of feed on the first call constitutes an empty result, so returning empty is OK
 		return TweetTrove{}, fmt.Errorf("Error calling API to fetch query %#v:\n  %w", pq, err)
 	}
 	if len(api_response.GetMainInstruction().Entries) < count && api_response.GetCursorBottom() != "" {
 		err = api.GetMore(pq, &api_response, count)
 		if errors.Is(err, END_OF_FEED) {
-			println("End of feed!")
+			log.Infof("End of feed!")
+		} else if errors.Is(err, ErrRateLimited) {
+			log.Errorf("Rate limited!")
 		} else if err != nil {
 			return TweetTrove{}, err
 		}
 	}
 
-	trove, err := pq.ToTweetTrove(api_response)
-	if err != nil {
-		return TweetTrove{}, fmt.Errorf("Error parsing the tweet trove for query %#v:\n  %w", pq, err)
+	trove, err2 := pq.ToTweetTrove(api_response)
+	if err2 != nil {
+		return TweetTrove{}, fmt.Errorf("Error parsing the tweet trove for query %#v:\n  %w", pq, err2)
 	}
 
 	fmt.Println("------------")
-	err = trove.PostProcess()
-	return trove, err
+	err2 = trove.PostProcess()
+	if err2 != nil {
+		return TweetTrove{}, fmt.Errorf("failed to post-process tweet trove: %w", err2)
+	}
+	return trove, err // `err` will be either nil, END_OF_FEED, or ErrRateLimited
 }
 
 // Get a User feed using the new GraphQL twitter api
@@ -987,7 +993,6 @@ func (api *API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response,
 
 	var response APIV2Response
 	err = api.do_http(url.String(), cursor, &response)
-
 	return response, err
 }
 
@@ -1107,10 +1112,7 @@ func (api *API) GetUserLikes(user_id UserID, cursor string) (APIV2Response, erro
 
 	var response APIV2Response
 	err = api.do_http(url.String(), cursor, &response)
-	if err != nil {
-		panic(err)
-	}
-	return response, nil
+	return response, err
 }
 
 type PaginatedUserLikes struct {
@@ -1176,10 +1178,7 @@ func (api *API) GetBookmarks(cursor string) (APIV2Response, error) {
 
 	var response APIV2Response
 	err = api.do_http(url.String(), cursor, &response)
-	if err != nil {
-		panic(err)
-	}
-	return response, nil
+	return response, err
 }
 
 type PaginatedBookmarks struct {
@@ -1259,12 +1258,9 @@ func (api *API) GetHomeTimeline(cursor string, is_following_only bool) (TweetTro
 		panic(err)
 	}
 	err = api.do_http_POST(url, string(body_bytes), &response)
-	if err != nil {
-		panic(err)
-	}
-	trove, err := response.ToTweetTrove()
-	if err != nil {
-		return TweetTrove{}, err
+	trove, err2 := response.ToTweetTrove()
+	if err2 != nil {
+		return TweetTrove{}, err2
 	}
 	return trove, err
 }
@@ -1312,11 +1308,7 @@ func (api API) GetUser(handle UserHandle) (APIUser, error) {
 
 	var response UserResponse
 	err = api.do_http(url.String(), "", &response)
-	if err != nil {
-		panic(err)
-	}
-
-	return response.ConvertToAPIUser(), nil
+	return response.ConvertToAPIUser(), err
 }
 
 func (api *API) Search(query string, cursor string) (APIV2Response, error) {
@@ -1372,4 +1364,14 @@ func (p PaginatedSearch) NextPage(api *API, cursor string) (APIV2Response, error
 }
 func (p PaginatedSearch) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
 	return r.ToTweetTrove()
+}
+
+// TODO: Search modes:
+// - regular ("top")
+// - latest / "live"
+// - search for users
+// - photos
+// - videos
+func Search(query string, min_results int) (trove TweetTrove, err error) {
+	return the_api.GetPaginatedQuery(PaginatedSearch{query}, min_results)
 }

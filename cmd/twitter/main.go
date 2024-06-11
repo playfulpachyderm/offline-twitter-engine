@@ -261,7 +261,7 @@ func create_profile(target_dir string) {
  */
 func fetch_user(handle scraper.UserHandle) {
 	user, err := scraper.GetUser(handle)
-	if err != nil {
+	if is_scrape_failure(err) {
 		die(err.Error(), false, -1)
 	}
 	log.Debug(user)
@@ -288,7 +288,7 @@ func fetch_tweet_only(tweet_identifier string) {
 	}
 
 	tweet, err := scraper.GetTweet(tweet_id)
-	if err != nil {
+	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error fetching tweet: %s", err.Error()), false, -1)
 	}
 	log.Debug(tweet)
@@ -313,7 +313,7 @@ func fetch_tweet_conversation(tweet_identifier string, how_many int) {
 	}
 
 	trove, err := scraper.GetTweetFullAPIV2(tweet_id, how_many)
-	if err != nil {
+	if is_scrape_failure(err) {
 		die(err.Error(), false, -1)
 	}
 	profile.SaveTweetTrove(trove, true)
@@ -329,12 +329,12 @@ func fetch_tweet_conversation(tweet_identifier string, how_many int) {
  */
 func fetch_user_feed(handle string, how_many int) {
 	user, err := profile.GetUserByHandle(scraper.UserHandle(handle))
-	if err != nil {
+	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
 	}
 
 	trove, err := scraper.GetUserFeedGraphqlFor(user.ID, how_many)
-	if err != nil {
+	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error scraping feed: %s\n  %s", handle, err.Error()), false, -2)
 	}
 	profile.SaveTweetTrove(trove, true)
@@ -349,7 +349,7 @@ func get_user_likes(handle string, how_many int) {
 	}
 
 	trove, err := scraper.GetUserLikes(user.ID, how_many)
-	if err != nil {
+	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error scraping feed: %s\n  %s", handle, err.Error()), false, -2)
 	}
 	profile.SaveTweetTrove(trove, true)
@@ -364,7 +364,7 @@ func get_followees(handle string, how_many int) {
 	}
 
 	trove, err := scraper.GetFollowees(user.ID, how_many)
-	if err != nil {
+	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error getting followees: %s\n  %s", handle, err.Error()), false, -2)
 	}
 	profile.SaveTweetTrove(trove, true)
@@ -378,7 +378,7 @@ func get_followers(handle string, how_many int) {
 		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
 	}
 	trove, err := scraper.GetFollowers(user.ID, how_many)
-	if err != nil {
+	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error getting followees: %s\n  %s", handle, err.Error()), false, -2)
 	}
 	profile.SaveTweetTrove(trove, true)
@@ -388,7 +388,7 @@ func get_followers(handle string, how_many int) {
 }
 func get_bookmarks(how_many int) {
 	trove, err := scraper.GetBookmarks(how_many)
-	if err != nil {
+	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error scraping bookmarks:\n  %s", err.Error()), false, -2)
 	}
 	profile.SaveTweetTrove(trove, true)
@@ -400,7 +400,7 @@ func get_bookmarks(how_many int) {
 }
 func fetch_timeline(is_following_only bool) {
 	trove, err := scraper.GetHomeTimeline("", is_following_only)
-	if err != nil {
+	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error fetching timeline:\n  %s", err.Error()), false, -2)
 	}
 	profile.SaveTweetTrove(trove, true)
@@ -437,7 +437,7 @@ func download_user_content(handle scraper.UserHandle) {
 
 func search(query string, how_many int) {
 	trove, err := scraper.Search(query, how_many)
-	if err != nil {
+	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error scraping search results: %s", err.Error()), false, -100)
 	}
 	profile.SaveTweetTrove(trove, true)
@@ -506,7 +506,7 @@ func fetch_inbox(how_many int) {
 
 func fetch_dm(id string, how_many int) {
 	room, err := profile.GetChatRoom(scraper.DMChatRoomID(id))
-	if err != nil {
+	if is_scrape_failure(err) {
 		panic(err)
 	}
 	max_id := scraper.DMMessageID(^uint(0) >> 1)

@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -81,4 +82,12 @@ func get_default_profile() string {
 		}
 	}
 	return filepath.Join(app_data_dir, "twitter")
+}
+
+// Returns whether this error should be treated as a failure
+func is_scrape_failure(err error) bool {
+	if err == nil || errors.Is(err, scraper.END_OF_FEED) || errors.Is(err, scraper.ErrRateLimited) {
+		return false
+	}
+	return true
 }

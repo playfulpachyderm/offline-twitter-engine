@@ -50,10 +50,10 @@ func (app *Application) ensure_tweet(id scraper.TweetID, is_forced bool, is_conv
 
 	if is_needing_scrape && !app.IsScrapingDisabled {
 		trove, err := scraper.GetTweetFullAPIV2(id, 50) // TODO: parameterizable
-		if err == nil {
+		if err == nil || errors.Is(err, scraper.END_OF_FEED) || errors.Is(err, scraper.ErrRateLimited) {
 			app.Profile.SaveTweetTrove(trove, false)
 			go app.Profile.SaveTweetTrove(trove, true) // Download the content in the background
-			is_available = true
+			_, is_available = trove.Tweets[id]
 		} else {
 			app.ErrorLog.Print(err)
 			// TODO: show error in UI
