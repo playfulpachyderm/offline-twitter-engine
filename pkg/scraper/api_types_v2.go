@@ -933,7 +933,7 @@ func (api *API) GetPaginatedQuery(pq PaginatedQuery, count int) (TweetTrove, err
 		if errors.Is(err, END_OF_FEED) {
 			log.Infof("End of feed!")
 		} else if errors.Is(err, ErrRateLimited) {
-			log.Errorf("Rate limited!")
+			log.Warnf("Rate limited!")
 		} else if err != nil {
 			return TweetTrove{}, err
 		}

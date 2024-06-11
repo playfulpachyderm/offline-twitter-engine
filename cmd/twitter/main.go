@@ -237,7 +237,7 @@ func login(username string, password string) {
 	}
 
 	profile.SaveSession(api)
-	happy_exit("Logged in as "+string(api.UserHandle), false)
+	happy_exit("Logged in as "+string(api.UserHandle), nil)
 }
 
 /**
@@ -272,7 +272,7 @@ func fetch_user(handle scraper.UserHandle) {
 	}
 
 	download_user_content(handle)
-	happy_exit("Saved the user", false)
+	happy_exit("Saved the user", nil)
 }
 
 /**
@@ -297,7 +297,7 @@ func fetch_tweet_only(tweet_identifier string) {
 	if err2 != nil {
 		die(fmt.Sprintf("Error saving tweet: %s", err2.Error()), false, 4)
 	}
-	happy_exit("Saved the tweet", errors.Is(err, scraper.ErrRateLimited))
+	happy_exit("Saved the tweet", err)
 }
 
 /**
@@ -318,7 +318,7 @@ func fetch_tweet_conversation(tweet_identifier string, how_many int) {
 	}
 	profile.SaveTweetTrove(trove, true)
 
-	happy_exit(fmt.Sprintf("Saved %d tweets and %d users", len(trove.Tweets), len(trove.Users)), errors.Is(err, scraper.ErrRateLimited))
+	happy_exit(fmt.Sprintf("Saved %d tweets and %d users", len(trove.Tweets), len(trove.Users)), err)
 }
 
 /**
@@ -341,7 +341,7 @@ func fetch_user_feed(handle string, how_many int) {
 
 	happy_exit(
 		fmt.Sprintf("Saved %d tweets, %d retweets and %d users", len(trove.Tweets), len(trove.Retweets), len(trove.Users)),
-		errors.Is(err, scraper.ErrRateLimited),
+		err,
 	)
 }
 
@@ -359,7 +359,7 @@ func get_user_likes(handle string, how_many int) {
 
 	happy_exit(
 		fmt.Sprintf("Saved %d tweets, %d retweets and %d users", len(trove.Tweets), len(trove.Retweets), len(trove.Users)),
-		errors.Is(err, scraper.ErrRateLimited),
+		err,
 	)
 }
 
@@ -376,7 +376,7 @@ func get_followees(handle string, how_many int) {
 	profile.SaveTweetTrove(trove, true)
 	profile.SaveAsFolloweesList(user.ID, trove)
 
-	happy_exit(fmt.Sprintf("Saved %d followees", len(trove.Users)), errors.Is(err, scraper.ErrRateLimited))
+	happy_exit(fmt.Sprintf("Saved %d followees", len(trove.Users)), err)
 }
 func get_followers(handle string, how_many int) {
 	user, err := profile.GetUserByHandle(scraper.UserHandle(handle))
@@ -390,7 +390,7 @@ func get_followers(handle string, how_many int) {
 	profile.SaveTweetTrove(trove, true)
 	profile.SaveAsFollowersList(user.ID, trove)
 
-	happy_exit(fmt.Sprintf("Saved %d followers", len(trove.Users)), errors.Is(err, scraper.ErrRateLimited))
+	happy_exit(fmt.Sprintf("Saved %d followers", len(trove.Users)), err)
 }
 func get_bookmarks(how_many int) {
 	trove, err := scraper.GetBookmarks(how_many)
@@ -402,7 +402,7 @@ func get_bookmarks(how_many int) {
 	happy_exit(fmt.Sprintf(
 		"Saved %d tweets, %d retweets, %d users, and %d bookmarks",
 		len(trove.Tweets), len(trove.Retweets), len(trove.Users), len(trove.Bookmarks)),
-		errors.Is(err, scraper.ErrRateLimited),
+		err,
 	)
 }
 func fetch_timeline(is_following_only bool) {
@@ -414,7 +414,7 @@ func fetch_timeline(is_following_only bool) {
 
 	happy_exit(
 		fmt.Sprintf("Saved %d tweets, %d retweets and %d users", len(trove.Tweets), len(trove.Retweets), len(trove.Users)),
-		errors.Is(err, scraper.ErrRateLimited),
+		err,
 	)
 }
 
@@ -452,7 +452,7 @@ func search(query string, how_many int) {
 	}
 	profile.SaveTweetTrove(trove, true)
 
-	happy_exit(fmt.Sprintf("Saved %d tweets and %d users", len(trove.Tweets), len(trove.Users)), errors.Is(err, scraper.ErrRateLimited))
+	happy_exit(fmt.Sprintf("Saved %d tweets and %d users", len(trove.Tweets), len(trove.Users)), err)
 }
 
 func follow_user(handle string, is_followed bool) {
@@ -463,9 +463,9 @@ func follow_user(handle string, is_followed bool) {
 	profile.SetUserFollowed(&user, is_followed)
 
 	if is_followed {
-		happy_exit("Followed user: "+handle, false)
+		happy_exit("Followed user: "+handle, nil)
 	} else {
-		happy_exit("Unfollowed user: "+handle, false)
+		happy_exit("Unfollowed user: "+handle, nil)
 	}
 }
 
@@ -478,7 +478,7 @@ func unlike_tweet(tweet_identifier string) {
 	if err != nil {
 		die(err.Error(), false, -10)
 	}
-	happy_exit("Unliked the tweet.", false)
+	happy_exit("Unliked the tweet.", nil)
 }
 
 func like_tweet(tweet_identifier string) {
@@ -494,7 +494,7 @@ func like_tweet(tweet_identifier string) {
 	if err != nil {
 		die(err.Error(), false, -1)
 	}
-	happy_exit("Liked the tweet.", false)
+	happy_exit("Liked the tweet.", nil)
 }
 
 func list_followed() {
@@ -511,7 +511,7 @@ func start_webserver(addr string, should_auto_open bool) {
 func fetch_inbox(how_many int) {
 	trove, _ := scraper.GetInbox(how_many)
 	profile.SaveDMTrove(trove, true)
-	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)), false)
+	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)), nil)
 }
 
 func fetch_dm(id string, how_many int) {
@@ -524,7 +524,7 @@ func fetch_dm(id string, how_many int) {
 	profile.SaveDMTrove(trove, true)
 	happy_exit(
 		fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)),
-		errors.Is(err, scraper.ErrRateLimited),
+		err,
 	)
 }
 
@@ -536,5 +536,5 @@ func send_dm(room_id string, text string, in_reply_to_id int) {
 
 	trove := scraper.SendDMMessage(room.ID, text, scraper.DMMessageID(in_reply_to_id))
 	profile.SaveDMTrove(trove, true)
-	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)), false)
+	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)), nil)
 }

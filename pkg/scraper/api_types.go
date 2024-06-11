@@ -373,12 +373,12 @@ var tombstone_types = map[string]string{
 	"Age-restricted adult content. This content might not be appropriate for people under 18 years old. To view this media, " +
 		"you’ll need to log in to Twitter. Learn more": "age-restricted",
 
-	// New versions that use "Post" instead of "Tweet"
+	// New versions that use "Post" instead of "Tweet" and "X" instead of "Twitter"
 	"This Post was deleted by the Post author. Learn more":                                                   "deleted",
 	"This Post is from a suspended account. Learn more":                                                      "suspended",
 	"You’re unable to view this Post because this account owner limits who can view their Posts. Learn more": "hidden",
 	"This Post is unavailable. Learn more":                                                                   "unavailable",
-	"This Post violated the Twitter Rules. Learn more":                                                       "violated",
+	"This Post violated the X Rules. Learn more":                                                             "violated",
 	"This Post is from an account that no longer exists. Learn more":                                         "no longer exists",
 }
 
