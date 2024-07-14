@@ -39,7 +39,7 @@ func die(text string, display_help bool, exit_code int) {
 func happy_exit(text string, exit_err error) {
 	if errors.Is(exit_err, scraper.ErrRateLimited) {
 		fmt.Printf(terminal_utils.COLOR_YELLOW + text + terminal_utils.COLOR_RESET + "\n")
-		fmt.Printf(terminal_utils.COLOR_YELLOW + "Exiting early (%s)." + terminal_utils.COLOR_RESET + "\n", exit_err.Error())
+		fmt.Printf(terminal_utils.COLOR_YELLOW+"Exiting early (%s)."+terminal_utils.COLOR_RESET+"\n", exit_err.Error())
 		os.Exit(1)
 	}
 	fmt.Printf(terminal_utils.COLOR_GREEN + text + terminal_utils.COLOR_RESET + "\n")
