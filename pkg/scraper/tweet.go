@@ -332,7 +332,9 @@ func GetTweetFullAPIV2(id TweetID, how_many int) (TweetTrove, error) {
 	trove, err := the_api.GetPaginatedQuery(PaginatedTweetReplies{id}, how_many)
 	if errors.Is(err, ErrDoesntExist) {
 		trove := NewTweetTrove()
-		trove.Tweets[id] = Tweet{ID: id, TombstoneType: "deleted", IsConversationScraped: true, IsStub: true}
+		fake_user := GetUnknownUser()
+		trove.Users[fake_user.ID] = fake_user
+		trove.Tweets[id] = Tweet{ID: id, UserID: fake_user.ID, TombstoneType: "deleted", IsConversationScraped: true, IsStub: true}
 		return trove, nil
 	} else if err != nil {
 		return trove, err

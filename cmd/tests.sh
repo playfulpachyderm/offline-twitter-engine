@@ -309,8 +309,8 @@ test $(sqlite3 twitter.db "select is_id_fake from users where handle = '_selfopt
 test $(sqlite3 twitter.db "select count(*) from tweets where user_id = (select id from users where handle = '_selfoptimizer')") = 1
 
 # Test a tweet which is itself from a deleted account
-tw fetch_tweet https://twitter.com/lndian_Bronson/status/1569875562784608256
-test $(sqlite3 twitter.db "select is_stub, user_id = 0x4000000000000000 from tweets where id = 1569875562784608256") = "1|1"
+tw fetch_tweet https://x.com/agnisterion/status/1569727165268393986
+test $(sqlite3 twitter.db "select is_stub, user_id = 0x4000000000000000 from tweets where id = 1569727165268393986") = "1|1"
 
 
 # Test fetching a banned user
