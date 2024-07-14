@@ -42,7 +42,10 @@ func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
 		panic_if(json.Unmarshal(data, &form)) // TODO: HTTP 400 not 500
 		form.Validate()
 		if len(form.FormErrors) == 0 {
-			api := scraper.NewGuestSession()
+			api, err := scraper.NewGuestSession()
+			if err != nil {
+				panic(err.Error()) // Return it as a toast
+			}
 			challenge := api.LogIn(form.Username, form.Password)
 			if challenge != nil {
 				panic( // Middleware will trap this panic and return an HTMX error toast

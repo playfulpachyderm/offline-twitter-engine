@@ -111,10 +111,10 @@ func (api API) add_authentication_headers(req *http.Request) {
 	}
 }
 
-func NewGuestSession() API {
-	guestAPIString, err := GetGuestToken()
+func NewGuestSession() (API, error) {
+	guestAPIString, err := GetGuestTokenWithRetries(3, 1*time.Second)
 	if err != nil {
-		panic(err)
+		return API{}, err
 	}
 
 	jar, err := cookiejar.New(nil)
@@ -129,7 +129,7 @@ func NewGuestSession() API {
 			Jar:     jar,
 		},
 		CSRFToken: "",
-	}
+	}, nil
 }
 
 func (api *API) update_csrf_token() {

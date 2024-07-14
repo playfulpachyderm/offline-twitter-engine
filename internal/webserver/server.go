@@ -62,7 +62,6 @@ func (app *Application) WithMiddlewares() http.Handler {
 
 func (app *Application) SetActiveUser(handle scraper.UserHandle) error {
 	if handle == "no account" {
-		scraper.InitApi(scraper.NewGuestSession())
 		app.ActiveUser = get_default_user()
 		app.IsScrapingDisabled = true // API requests will fail b/c not logged in
 	} else {

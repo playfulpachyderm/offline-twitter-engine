@@ -11,5 +11,8 @@ var (
 	ErrorIsTombstone   = errors.New("tweet is a tombstone")
 	ErrRateLimited     = errors.New("rate limited")
 	ErrorDMCA          = errors.New("video is DMCAed, unable to download (HTTP 403 Forbidden)")
-	ErrRequestTimeout  = errors.New("request timed out")
+
+	// These are not API errors, but network errors generally
+	ErrNoInternet     = errors.New("no internet connection")
+	ErrRequestTimeout = errors.New("request timed out")
 )

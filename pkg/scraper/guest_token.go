@@ -2,8 +2,11 @@ package scraper
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"log"
+	"net"
 	"net/http"
 	"time"
 )
@@ -15,7 +18,20 @@ type GuestTokenResponse struct {
 
 var guestToken GuestTokenResponse
 
+func GetGuestTokenWithRetries(n int, sleep time.Duration) (ret string, err error) {
+	for i := 0; i < n; i++ {
+		ret, err = GetGuestToken()
+		if err == nil {
+			return
+		}
+		log.Printf("Failed to get guest token: %s\nRetrying...", err.Error())
+		time.Sleep(sleep)
+	}
+	return
+}
+
 func GetGuestToken() (string, error) {
+	// Guest token is still valid; no need for new one
 	if time.Since(guestToken.RefreshedAt).Hours() < 1 {
 		return guestToken.Token, nil
 	}
@@ -29,6 +45,11 @@ func GetGuestToken() (string, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
+		var dnsErr *net.DNSError
+		if errors.As(err, &dnsErr) && dnsErr.Err == "server misbehaving" && dnsErr.Temporary() {
+			return "", ErrNoInternet
+		}
+
 		return "", fmt.Errorf("Error executing HTTP request:\n  %w", err)
 	}
 

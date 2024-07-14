@@ -129,7 +129,12 @@ func main() {
 		scraper.InitApi(profile.LoadSession(scraper.UserHandle(*session_name)))
 		// fmt.Printf("Operating as user: @%s\n", scraper.the_api.UserHandle)
 	} else {
-		scraper.InitApi(scraper.NewGuestSession())
+		session, err := scraper.NewGuestSession()
+		if err != nil {
+			log.Warnf("Unable to initialize guest session!  Might be a network issue")
+		} else {
+			scraper.InitApi(session)
+		}
 	}
 
 	switch operation {
@@ -222,7 +227,10 @@ func main() {
 // - password: twitter account password
 func login(username string, password string) {
 	// Skip the scraper.the_api variable, just use a local one since no scraping is happening
-	api := scraper.NewGuestSession()
+	api, err := scraper.NewGuestSession()
+	if err != nil {
+		die(fmt.Sprintf("Unable to create session: %s", err.Error()), false, 1)
+	}
 	challenge := api.LogIn(username, password)
 	if challenge != nil {
 		fmt.Printf("Secondary challenge issued:\n")
