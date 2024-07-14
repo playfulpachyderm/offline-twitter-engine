@@ -39,9 +39,15 @@
       <main>
         {{template "main" .}}
       </main>
-      <dialog id="image_carousel" class="image-carousel">
-        <a class="button image-carousel__close-button" onclick="image_carousel.close()">X</a>
-        <img class="image-carousel__active-image" src="">
+      <dialog
+        id="image_carousel"
+        class="image-carousel"
+        onmousedown="event.button == 0 && event.target==this && this.close()"
+      >
+        <div class="image-carousel__padding">
+          <a class="button image-carousel__close-button" onclick="image_carousel.close()">X</a>
+          <img class="image-carousel__active-image" src="">
+        </div>
       </dialog>
       <div class="toasts" id="toasts">
       </div>

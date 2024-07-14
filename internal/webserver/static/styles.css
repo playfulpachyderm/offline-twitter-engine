@@ -393,7 +393,12 @@ main {
 	box-shadow: 0 0 1em var(--color-twitter-blue);
 	outline: none;
 	overflow: visible;
-	padding: 1.4em;
+	padding: 0;
+	line-height: 0;
+
+	.image-carousel__padding {
+		padding: 1.4em;
+	}
 
 	&::backdrop {
 		background: hsla(204, 87%, 73%, 0.3); /* based on --color-twitter-blue-light */
