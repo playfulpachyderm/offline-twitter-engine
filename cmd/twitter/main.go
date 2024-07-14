@@ -182,7 +182,7 @@ func main() {
 		download_tweet_content(target)
 	case "search":
 		search(target, *how_many)
-	case "follow":
+	case "follow": // TODO: update these to use Lists
 		follow_user(target, true)
 	case "unfollow":
 		follow_user(target, false)

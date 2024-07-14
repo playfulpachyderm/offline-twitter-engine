@@ -319,3 +319,11 @@ v0.6.12
 - Add support for scraping bookmarks (not making them, yet)
 - Publish statically linked builds only
 - Various minor bugfixes
+
+v0.6.13
+-------
+
+- BUGFIX: no longer throws away all scrape results if a pagination request gets rate-limited
+- BUGFIX: can now start the webserver without an internet connection
+- UI improvements:
+	- image carousel now closes if you click outside of it
