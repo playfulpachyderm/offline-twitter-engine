@@ -67,6 +67,11 @@
             </div>
           {{end}}
         </div>
+        <div class="dm-message__emoji-button-container">
+          <div class="dm-message__emoji-button button" onclick="show_emoji_picker(console.log)">
+            <img class="svg-icon" src="/static/icons/emoji-react.svg" width="24" height="24"/>
+          </div>
+        </div>
       </div>
       <div class="dm-message__reactions">
         {{range $message.Reactions}}
@@ -155,6 +160,23 @@
           hx-ext="json-enc"
           hx-on:htmx:after-request="composer.innerText = ''; realInput.value = ''; "
         >
+          <img class="svg-icon button" src="/static/icons/emoji-insert.svg" width="24" height="24" onclick="
+            var carat = composer.innerText.length;
+            if (composer.contains(window.getSelection().anchorNode)) {
+              carat = window.getSelection().anchorOffset;
+            }
+            show_emoji_picker(function(emoji) {
+              composer.innerText = composer.innerText.substring(0, carat) + emoji.unicode + composer.innerText.substring(carat);
+              composer.oninput(); // force-update the `realInput`
+              let range = document.createRange();
+              range.setStart(composer.childNodes[0], carat+emoji.unicode.length);
+              range.setEnd(composer.childNodes[0], carat+emoji.unicode.length);
+              let selection = window.getSelection();
+              selection.removeAllRanges();
+              selection.addRange(range);
+              composer.focus();
+            });
+          "/>
           <span id="composer" role="textbox" contenteditable oninput="realInput.value = this.innerText"></span>
           <input id="realInput" type="hidden" name="text" value="" />
           <input type="submit" />
@@ -186,6 +208,8 @@
       {{end}}
     {{end}}
   </div>
+
+  <dialog id="emoji_popup" onmousedown="event.button == 0 && event.target==this && close_emoji_picker()"></dialog>
 
   <script>
     /**
@@ -249,6 +273,27 @@
       } else {
         panel.classList.add("unhidden");
       }
+    }
+
+    /**
+     * When the emoji-react button is clicked, show the emoji picker
+     */
+    function show_emoji_picker(emoji_callback) {
+      const PickerElement = customElements.get("emoji-picker"); // Not copied into the namespace by default
+      const picker = new PickerElement();
+      picker.addEventListener('emoji-click', function(emoji_event) {
+        close_emoji_picker();
+        emoji_callback(emoji_event.detail)
+      });
+      emoji_popup.appendChild(picker);
+      emoji_popup.showModal();
+    }
+    /**
+     * Callback function to close the emoji picker
+     */
+    function close_emoji_picker() {
+      emoji_popup.close();
+      emoji_popup.innerHTML = ""; // remove the picker
     }
   </script>
 {{end}}

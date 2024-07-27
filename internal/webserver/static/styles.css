@@ -185,8 +185,8 @@ h3 {
 }
 
 .disappearing {
-    transition: opacity 2s ease;
-    opacity: 0;
+	transition: opacity 2s ease;
+	opacity: 0;
 }
 
 
@@ -1201,7 +1201,7 @@ main {
  ******************************************************/
 
 .bookmarks-feed-header {
-    border-bottom: 1px solid var(--color-outline-gray);
+	border-bottom: 1px solid var(--color-outline-gray);
 }
 
 .add-users-container {
@@ -1321,8 +1321,8 @@ main {
 	/* When a replying-to box is clicked, it scrolls that message into view and highlights it for a second */
 	transition: background-color 2s ease;
 	&.highlighted {
-	    background-color: var(--color-twitter-off-white-dark);
-	    transition: background-color 0.5s ease;
+		background-color: var(--color-twitter-off-white-dark);
+		transition: background-color 0.5s ease;
 	}
 
 	.dm-message__row {
@@ -1330,6 +1330,12 @@ main {
 
 		.our-message & {
 			flex-direction: row-reverse;
+		}
+
+		.dm-message__emoji-button-container {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
 		}
 	}
 	.dm-message__sender-profile-img {
