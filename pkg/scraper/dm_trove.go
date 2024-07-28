@@ -89,6 +89,12 @@ func SendDMMessage(room_id DMChatRoomID, text string, in_reply_to_id DMMessageID
 	}
 	return dm_response.ToTweetTrove()
 }
+func SendDMReaction(room_id DMChatRoomID, message_id DMMessageID, reacc string) error {
+	if !the_api.IsAuthenticated {
+		log.Fatalf("Fetching DMs can only be done when authenticated.  Please provide `--session [user]`")
+	}
+	return the_api.SendDMReaction(room_id, message_id, reacc)
+}
 func MarkDMChatRead(room_id DMChatRoomID, read_message_id DMMessageID) {
 	if !the_api.IsAuthenticated {
 		log.Fatalf("Writing DMs can only be done when authenticated.  Please provide `--session [user]`")

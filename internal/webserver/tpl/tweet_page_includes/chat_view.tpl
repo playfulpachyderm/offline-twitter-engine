@@ -1,7 +1,7 @@
 {{define "message"}}
   {{$user := (user .SenderID)}}
   {{$is_us := (eq .SenderID (active_user).ID)}}
-  <div class="dm-message {{if $is_us}} our-message {{end}}" data-message-id="{{ .ID }}" hx-ext="json-enc">
+  <div class="dm-message {{if $is_us}} our-message {{end}}" data-message-id="{{ .ID }}" hx-ext="json-enc" hx-swap="outerHTML">
     <div class="dm-message__row row">
       <div class="dm-message__sender-profile-img">
         {{template "circle-profile-img" $user}}
@@ -64,6 +64,18 @@
             {{template "text-with-entities" .Text}}
           </div>
         {{end}}
+      </div>
+      <div class="dm-message__emoji-button-container">
+        <div class="dm-message__emoji-button button" onclick="
+          show_emoji_picker(function(emoji_info) {
+            htmx.ajax('POST', '/messages/{{$.DMChatRoomID}}/reacc', {values: {
+              message_id: '{{$.ID}}',
+              reacc: emoji_info.unicode,
+            }, source: '[data-message-id=\'{{$.ID}}\']'});
+          });
+        ">
+          <img class="svg-icon" src="/static/icons/emoji-react.svg" width="24" height="24"/>
+        </div>
       </div>
     </div>
     <div class="dm-message__reactions">

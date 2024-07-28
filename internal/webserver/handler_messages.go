@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
@@ -74,6 +75,30 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 
 	if len(parts) == 1 && parts[0] == "mark-as-read" {
 		app.message_mark_as_read(w, r)
+		return
+	}
+
+	// Handle reactions
+	if len(parts) == 1 && parts[0] == "reacc" {
+		var data struct {
+			MessageID scraper.DMMessageID `json:"message_id,string"`
+			Reacc     string              `json:"reacc"`
+		}
+		data_, err := io.ReadAll(r.Body)
+		panic_if(err)
+		panic_if(json.Unmarshal(data_, &data))
+		panic_if(scraper.SendDMReaction(room_id, data.MessageID, data.Reacc))
+
+		dm_message := global_data.Messages[data.MessageID]
+		dm_message.Reactions[app.ActiveUser.ID] = scraper.DMReaction{
+			ID:          0, // Hopefully will be OK temporarily
+			DMMessageID: dm_message.ID,
+			SenderID:    app.ActiveUser.ID,
+			SentAt:      scraper.Timestamp{time.Now()},
+			Emoji:       data.Reacc,
+		}
+		global_data.Messages[dm_message.ID] = dm_message
+		app.buffered_render_htmx(w, "message", global_data, dm_message)
 		return
 	}
 

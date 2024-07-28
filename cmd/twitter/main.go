@@ -215,6 +215,15 @@ func main() {
 			}
 			send_dm(target, args[2], val)
 		}
+	case "send_dm_reacc":
+		if len(args) != 4 {
+			die("", true, 1)
+		}
+		val, err := strconv.Atoi(args[2])
+		if err != nil {
+			panic(err)
+		}
+		send_dm_reacc(args[1], val, args[3]) // room, message, emoji
 	default:
 		die(fmt.Sprintf("Invalid operation: %s", operation), true, 3)
 	}
@@ -545,4 +554,21 @@ func send_dm(room_id string, text string, in_reply_to_id int) {
 	trove := scraper.SendDMMessage(room.ID, text, scraper.DMMessageID(in_reply_to_id))
 	profile.SaveTweetTrove(trove, true)
 	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)), nil)
+}
+
+func send_dm_reacc(room_id string, in_reply_to_id int, reacc string) {
+	room, err := profile.GetChatRoom(scraper.DMChatRoomID(room_id))
+	if err != nil {
+		die(fmt.Sprintf("No such chat room: %d", in_reply_to_id), false, 1)
+	}
+	_, err = profile.GetChatMessage(scraper.DMMessageID(in_reply_to_id))
+	if err != nil {
+		die(fmt.Sprintf("No such message: %d", in_reply_to_id), false, 1)
+	}
+	err = scraper.SendDMReaction(room.ID, scraper.DMMessageID(in_reply_to_id), reacc)
+	if err != nil {
+		die(fmt.Sprintf("Failed to react to message:\n  %s", err.Error()), false, 1)
+	}
+
+	happy_exit("Sent the reaction", nil)
 }

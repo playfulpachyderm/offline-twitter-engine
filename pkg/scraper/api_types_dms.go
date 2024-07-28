@@ -522,6 +522,29 @@ func (api *API) SendDMMessage(room_id DMChatRoomID, text string, in_reply_to_id 
 	return result, err
 }
 
+// Send a reacc
+func (api *API) SendDMReaction(room_id DMChatRoomID, message_id DMMessageID, reacc string) error {
+	url := "https://twitter.com/i/api/graphql/VyDyV9pC2oZEj6g52hgnhA/useDMReactionMutationAddMutation"
+	body := `{"variables":{"conversationId":"` + string(room_id) + `","messageId":"` + fmt.Sprint(message_id) +
+		`","reactionTypes":["Emoji"],"emojiReactions":["` + reacc + `"]},"queryId":"VyDyV9pC2oZEj6g52hgnhA"}`
+	type SendDMResponse struct {
+		Data struct {
+			CreateDmReaction struct {
+				Typename string `json:"__typename"`
+			} `json:"create_dm_reaction"`
+		} `json:"data"`
+	}
+	var result SendDMResponse
+	err := api.do_http_POST(url, body, &result)
+	if err != nil {
+		return fmt.Errorf("Error executing HTTP POST:\n  %w", err)
+	}
+	if result.Data.CreateDmReaction.Typename != "CreateDMReactionSuccess" {
+		return fmt.Errorf("Unexpected result sending DM reaction: %s", result.Data.CreateDmReaction.Typename)
+	}
+	return nil
+}
+
 // Mark a chat as read.
 func (api *API) MarkDMChatRead(room_id DMChatRoomID, read_message_id DMMessageID) {
 	url := fmt.Sprintf("https://twitter.com/i/api/1.1/dm/conversation/%s/mark_read.json", room_id)
