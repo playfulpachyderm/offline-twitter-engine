@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"path"
 	"regexp"
+	"log"
 )
 
 type Url struct {
@@ -56,6 +57,9 @@ func ParseAPIUrlCard(apiCard APICard) Url {
 		thumbnail_url = values.Thumbnail.ImageValue.Url
 	} else if apiCard.Name == "player" {
 		thumbnail_url = values.PlayerImage.ImageValue.Url
+	} else if apiCard.Name == "unified_card" {
+		// TODO: Grok chat previews
+		log.Print("Grok chat card, not implemented yet-- skipping")
 	} else {
 		panic("Unknown card type: " + apiCard.Name)
 	}
