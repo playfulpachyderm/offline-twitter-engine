@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"strings"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
@@ -169,7 +168,7 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
 		outfile = p.get_banner_image_output_path(*u)
 		err = downloader.Curl(u.BannerImageUrl, outfile)
 
-		if err != nil && strings.Contains(err.Error(), "404 Not Found") {
+		if errors.Is(err, scraper.ErrMediaDownload404) {
 			// Try adding "600x200".  Not sure why this does this but sometimes it does.
 			err = downloader.Curl(u.BannerImageUrl+"/600x200", outfile)
 		}
