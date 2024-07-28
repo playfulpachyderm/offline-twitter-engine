@@ -60,8 +60,8 @@ func (app *Application) message_send(w http.ResponseWriter, r *http.Request) {
 	panic_if(json.Unmarshal(body, &message_data))
 
 	trove := scraper.SendDMMessage(room_id, message_data.Text, 0)
-	app.Profile.SaveDMTrove(trove, false)
-	go app.Profile.SaveDMTrove(trove, true)
+	app.Profile.SaveTweetTrove(trove, false)
+	go app.Profile.SaveTweetTrove(trove, true)
 }
 
 func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
@@ -85,8 +85,8 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Has("scrape") && !app.IsScrapingDisabled {
 		max_id := scraper.DMMessageID(^uint(0) >> 1)
 		trove := scraper.GetConversation(room_id, max_id, 50) // TODO: parameterizable
-		app.Profile.SaveDMTrove(trove, false)
-		go app.Profile.SaveDMTrove(trove, true) // Download the content in the background
+		app.Profile.SaveTweetTrove(trove, false)
+		go app.Profile.SaveTweetTrove(trove, true) // Download the content in the background
 	}
 
 	// `LatestPollingTimestamp` sort of passes-through the function; if we're not updating it, it
@@ -110,7 +110,7 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 		c.UntilTimestamp = scraper.TimestampFromUnixMilli(int64(until_time))
 	}
 	chat_contents := app.Profile.GetChatRoomMessagesByCursor(c)
-	chat_view_data.DMChatView.MergeWith(chat_contents.DMTrove)
+	chat_view_data.DMChatView.MergeWith(chat_contents.TweetTrove)
 	chat_view_data.MessageIDs = chat_contents.MessageIDs
 	chat_view_data.Cursor = chat_contents.Cursor
 	if len(chat_view_data.MessageIDs) > 0 {

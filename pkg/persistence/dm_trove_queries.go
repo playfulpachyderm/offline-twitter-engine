@@ -12,8 +12,8 @@ import (
 // Panics if anything goes wrong.
 //
 // TODO: a lot of this function contains duplicated code and should be extracted to functions
-func (p Profile) SaveDMTrove(trove DMTrove, should_download bool) {
-	p.SaveTweetTrove(trove.TweetTrove, should_download)
+func (p Profile) SaveDMTrove(trove TweetTrove, should_download bool) {
+	p.SaveTweetTrove(trove, should_download)
 
 	for _, r := range trove.Rooms {
 		err := p.SaveChatRoom(r)

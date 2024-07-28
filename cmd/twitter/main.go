@@ -518,7 +518,7 @@ func start_webserver(addr string, should_auto_open bool) {
 
 func fetch_inbox(how_many int) {
 	trove, _ := scraper.GetInbox(how_many)
-	profile.SaveDMTrove(trove, true)
+	profile.SaveTweetTrove(trove, true)
 	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)), nil)
 }
 
@@ -529,7 +529,7 @@ func fetch_dm(id string, how_many int) {
 	}
 	max_id := scraper.DMMessageID(^uint(0) >> 1)
 	trove := scraper.GetConversation(room.ID, max_id, how_many)
-	profile.SaveDMTrove(trove, true)
+	profile.SaveTweetTrove(trove, true)
 	happy_exit(
 		fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)),
 		err,
@@ -539,10 +539,10 @@ func fetch_dm(id string, how_many int) {
 func send_dm(room_id string, text string, in_reply_to_id int) {
 	room, err := profile.GetChatRoom(scraper.DMChatRoomID(room_id))
 	if err != nil {
-		panic(err)
+		die(fmt.Sprintf("No such chat room: %d", in_reply_to_id), false, 1)
 	}
 
 	trove := scraper.SendDMMessage(room.ID, text, scraper.DMMessageID(in_reply_to_id))
-	profile.SaveDMTrove(trove, true)
+	profile.SaveTweetTrove(trove, true)
 	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)), nil)
 }

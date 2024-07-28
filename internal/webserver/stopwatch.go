@@ -102,15 +102,15 @@ func (app *Application) background_dm_polling_scrape() {
 	}
 
 	fmt.Println("Scraping user DMs...")
-	var trove scraper.DMTrove
+	var trove scraper.TweetTrove
 	if inbox_cursor == "" {
 		trove, inbox_cursor = scraper.GetInbox(0)
 	} else {
 		trove, inbox_cursor = scraper.PollInboxUpdates(inbox_cursor)
 	}
 	fmt.Println("Saving DM results...")
-	app.Profile.SaveDMTrove(trove, false)
-	go app.Profile.SaveDMTrove(trove, true)
+	app.Profile.SaveTweetTrove(trove, false)
+	go app.Profile.SaveTweetTrove(trove, true)
 	fmt.Println("Scraping DMs succeeded.")
 }
 

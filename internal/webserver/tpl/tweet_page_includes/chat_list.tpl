@@ -2,8 +2,7 @@
   <div class="chat-list" hx-get="/messages/refresh-list?active-chat={{.ActiveRoomID}}" hx-swap="outerHTML" hx-trigger="load delay:3s">
     {{range .RoomIDs}}
       {{template "chat-list-entry" (dict
-          "room" (index $.Rooms .)
-          "messages" $.DMTrove.Messages
+          "room" (chat_room .)
           "is_active" (eq $.ActiveRoomID .)
           "is_unread" (index $.UnreadRoomIDs .)
       ) }}

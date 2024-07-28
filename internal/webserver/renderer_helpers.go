@@ -39,6 +39,12 @@ func (d PageGlobalData) Retweet(id scraper.TweetID) scraper.Retweet {
 func (d PageGlobalData) Space(id scraper.SpaceID) scraper.Space {
 	return d.Spaces[id]
 }
+func (d PageGlobalData) Message(id scraper.DMMessageID) scraper.DMMessage {
+	return d.Messages[id]
+}
+func (d PageGlobalData) ChatRoom(id scraper.DMChatRoomID) scraper.DMChatRoom {
+	return d.Rooms[id]
+}
 func (d PageGlobalData) GetFocusedTweetID() scraper.TweetID {
 	return d.FocusedTweetID
 }
@@ -120,6 +126,8 @@ func (app *Application) make_funcmap(global_data PageGlobalData) template.FuncMa
 		"user":             global_data.User,
 		"retweet":          global_data.Retweet,
 		"space":            global_data.Space,
+		"dm_message":       global_data.Message,
+		"chat_room":        global_data.ChatRoom,
 		"focused_tweet_id": global_data.GetFocusedTweetID,
 		"search_text":      global_data.GetSearchText,
 		"global_data":      global_data.GlobalData, // This fucking sucks

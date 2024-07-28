@@ -1,92 +1,92 @@
-{{define "messages"}}
-  {{range .MessageIDs}}
-    {{$message := (index $.DMTrove.Messages .)}}
-    {{$user := (user $message.SenderID)}}
-    {{$is_us := (eq $message.SenderID (active_user).ID)}}
-    <div class="dm-message {{if $is_us}} our-message {{end}}" data-message-id="{{ $message.ID }}">
-      <div class="dm-message__row row">
-        <div class="dm-message__sender-profile-img">
-          {{template "circle-profile-img" $user}}
-        </div>
-        <div class="dm-message__contents">
-          {{if (ne $message.InReplyToID 0)}}
-            <div class="dm-message__replying-to">
-              <div class="dm-message__replying-to-label labelled-icon">
-                <img class="svg-icon" src="/static/icons/replying_to.svg" width="24" height="24" />
-                <label>Replying to</label>
-              </div>
-              <div class="replying-to-message"
-                data-replying-to-message-id="{{ $message.InReplyToID }}"
-                onclick="doReplyTo(this)"
-              >
-                {{(index $.DMTrove.Messages $message.InReplyToID).Text}}
-              </div>
-            </div>
-          {{end}}
-          {{if (ne $message.EmbeddedTweetID 0)}}
-            <div class="dm-message__tweet-preview">
-              {{template "tweet" (dict
-                "TweetID" $message.EmbeddedTweetID
-                "RetweetID" 0
-                "QuoteNestingLevel" 1)
-              }}
-            </div>
-          {{end}}
-          {{range $message.Images}}
-            <img class="dm-message__embedded-image"
-              {{if .IsDownloaded}}
-                src="/content/images/{{.LocalFilename}}"
-              {{else}}
-                src="{{.RemoteURL}}"
-              {{end}}
-              width="{{.Width}}" height="{{.Height}}"
-              onclick="image_carousel.querySelector('img').src = this.src; image_carousel.showModal();"
-            >
-          {{end}}
-          {{range $message.Videos}}
-            <video class="dm-message__embedded-video" controls width="{{.Width}}" height="{{.Height}}"
-              {{if .IsDownloaded}}
-                poster="/content/video_thumbnails/{{.ThumbnailLocalPath}}"
-              {{else}}
-                poster="{{.ThumbnailRemoteUrl}}"
-              {{end}}
-            >
-              {{if .IsDownloaded}}
-                <source src="/content/videos/{{.LocalFilename}}">
-              {{else}}
-                <source src="{{.RemoteURL}}">
-              {{end}}
-            </video>
-          {{end}}
-          {{range $message.Urls}}
-            {{template "embedded-link" .}}
-          {{end}}
-          {{if $message.Text}}
-            <div class="dm-message__text-content">
-              {{template "text-with-entities" $message.Text}}
-            </div>
-          {{end}}
-        </div>
-        <div class="dm-message__emoji-button-container">
-          <div class="dm-message__emoji-button button" onclick="show_emoji_picker(console.log)">
-            <img class="svg-icon" src="/static/icons/emoji-react.svg" width="24" height="24"/>
-          </div>
-        </div>
+{{define "message"}}
+  {{$user := (user .SenderID)}}
+  {{$is_us := (eq .SenderID (active_user).ID)}}
+  <div class="dm-message {{if $is_us}} our-message {{end}}" data-message-id="{{ .ID }}" hx-ext="json-enc">
+    <div class="dm-message__row row">
+      <div class="dm-message__sender-profile-img">
+        {{template "circle-profile-img" $user}}
       </div>
-      <div class="dm-message__reactions">
-        {{range $message.Reactions}}
-          {{$sender := (user .SenderID)}}
-          <span title="{{$sender.DisplayName}} (@{{$sender.Handle}})">{{.Emoji}}</span>
+      <div class="dm-message__contents">
+        {{if (ne .InReplyToID 0)}}
+          <div class="dm-message__replying-to">
+            <div class="dm-message__replying-to-label labelled-icon">
+              <img class="svg-icon" src="/static/icons/replying_to.svg" width="24" height="24" />
+              <label>Replying to</label>
+            </div>
+            <div class="replying-to-message"
+              data-replying-to-message-id="{{ .InReplyToID }}"
+              onclick="doReplyTo(this)"
+            >
+              {{(dm_message .InReplyToID).Text}}
+            </div>
+          </div>
+        {{end}}
+        {{if (ne .EmbeddedTweetID 0)}}
+          <div class="dm-message__tweet-preview">
+            {{template "tweet" (dict
+              "TweetID" .EmbeddedTweetID
+              "RetweetID" 0
+              "QuoteNestingLevel" 1)
+            }}
+          </div>
+        {{end}}
+        {{range .Images}}
+          <img class="dm-message__embedded-image"
+            {{if .IsDownloaded}}
+              src="/content/images/{{.LocalFilename}}"
+            {{else}}
+              src="{{.RemoteURL}}"
+            {{end}}
+            width="{{.Width}}" height="{{.Height}}"
+            onclick="image_carousel.querySelector('img').src = this.src; image_carousel.showModal();"
+          >
+        {{end}}
+        {{range .Videos}}
+          <video class="dm-message__embedded-video" controls width="{{.Width}}" height="{{.Height}}"
+            {{if .IsDownloaded}}
+              poster="/content/video_thumbnails/{{.ThumbnailLocalPath}}"
+            {{else}}
+              poster="{{.ThumbnailRemoteUrl}}"
+            {{end}}
+          >
+            {{if .IsDownloaded}}
+              <source src="/content/videos/{{.LocalFilename}}">
+            {{else}}
+              <source src="{{.RemoteURL}}">
+            {{end}}
+          </video>
+        {{end}}
+        {{range .Urls}}
+          {{template "embedded-link" .}}
+        {{end}}
+        {{if .Text}}
+          <div class="dm-message__text-content">
+            {{template "text-with-entities" .Text}}
+          </div>
         {{end}}
       </div>
-      <div class="sent-at">
-        <p class="sent-at__text">
-          {{$message.SentAt.Time.Format "Jan 2, 2006 @ 3:04 pm"}}
-        </p>
-      </div>
     </div>
+    <div class="dm-message__reactions">
+      {{range .Reactions}}
+        {{$sender := (user .SenderID)}}
+        <span title="{{$sender.DisplayName}} (@{{$sender.Handle}})">{{.Emoji}}</span>
+      {{end}}
+    </div>
+    <div class="sent-at">
+      <p class="sent-at__text">
+        {{.SentAt.Time.Format "Jan 2, 2006 @ 3:04 pm"}}
+      </p>
+    </div>
+  </div>
+{{end}}
+
+
+{{define "messages"}}
+  {{range .MessageIDs}}
+    {{template "message" (dm_message .)}}
   {{end}}
 {{end}}
+
 
 {{define "messages-with-poller"}}
   {{template "messages" .}}
@@ -119,6 +119,7 @@
     })();
   </script>
 {{end}}
+
 
 {{define "chat-view"}}
   <div id="chat-view">
@@ -298,6 +299,7 @@
   </script>
 {{end}}
 
+
 {{define "conversation-top"}}
   <div class="show-more conversation-top">
     {{if .Cursor.CursorPosition.IsEnd}}
@@ -311,6 +313,7 @@
     {{end}}
   </div>
 {{end}}
+
 
 {{/* convenience template for htmx requests */}}
 {{define "messages-top"}}

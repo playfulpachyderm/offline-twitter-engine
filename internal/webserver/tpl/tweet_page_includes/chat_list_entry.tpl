@@ -18,7 +18,7 @@
     </div>
     <div class="chat-list-entry__preview-and-unread-container row">
       <p class="chat-list-entry__message-preview">
-        {{ $message := (index $.messages $room.LastMessageID)}}
+        {{ $message := (dm_message $room.LastMessageID)}}
         {{ $sender  := (user $message.SenderID) }}
         {{if ne $message.Text ""}}
           {{if eq $room.Type "GROUP_DM"}}

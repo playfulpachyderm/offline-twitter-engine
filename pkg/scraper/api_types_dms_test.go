@@ -64,7 +64,7 @@ func TestParseAPIDMMessageWithEmbeddedTweet(t *testing.T) {
 	err = json.Unmarshal(data, &api_message)
 	require.NoError(t, err)
 
-	trove := api_message.ToDMTrove()
+	trove := api_message.ToTweetTrove()
 
 	assert.Len(trove.Messages, 1)
 	m, is_ok := trove.Messages[DMMessageID(1665936253483614212)]
@@ -92,7 +92,7 @@ func TestParseAPIDMMessageWithEmbeddedImage(t *testing.T) {
 	err = json.Unmarshal(data, &api_message)
 	require.NoError(t, err)
 
-	trove := api_message.ToDMTrove()
+	trove := api_message.ToTweetTrove()
 
 	assert.Len(trove.Messages, 1)
 	m, is_ok := trove.Messages[DMMessageID(1766224476729995648)]
@@ -117,7 +117,7 @@ func TestParseAPIDMMessageWithEmbeddedVideo(t *testing.T) {
 	err = json.Unmarshal(data, &api_message)
 	require.NoError(t, err)
 
-	trove := api_message.ToDMTrove()
+	trove := api_message.ToTweetTrove()
 
 	assert.Len(trove.Messages, 1)
 	m, is_ok := trove.Messages[DMMessageID(1766248283901776125)]
@@ -144,7 +144,7 @@ func TestParseAPIDMMessageWithUrlCard(t *testing.T) {
 	err = json.Unmarshal(data, &api_message)
 	require.NoError(t, err)
 
-	trove := api_message.ToDMTrove()
+	trove := api_message.ToTweetTrove()
 
 	assert.Len(trove.Messages, 1)
 	m, is_ok := trove.Messages[DMMessageID(1766255994668191902)]
@@ -232,7 +232,7 @@ func TestParseInbox(t *testing.T) {
 	err = json.Unmarshal(data, &inbox)
 	require.NoError(t, err)
 
-	trove := inbox.InboxInitialState.ToDMTrove()
+	trove := inbox.InboxInitialState.ToTweetTrove()
 
 	for _, id := range []DMMessageID{1663623062195957773, 1663623203644751885, 1665922180176044037, 1665936253483614212} {
 		m, is_ok := trove.Messages[id]
@@ -240,7 +240,7 @@ func TestParseInbox(t *testing.T) {
 		assert.Equal(m.ID, id)
 	}
 	for _, id := range []UserID{1458284524761075714, 1488963321701171204} {
-		u, is_ok := trove.TweetTrove.Users[id]
+		u, is_ok := trove.Users[id]
 		assert.True(is_ok, "User with ID %d not in the trove!")
 		assert.Equal(u.ID, id)
 	}
@@ -259,7 +259,7 @@ func TestParseDMRoomResponse(t *testing.T) {
 	err = json.Unmarshal(data, &inbox)
 	require.NoError(t, err)
 
-	trove := inbox.ConversationTimeline.ToDMTrove()
+	trove := inbox.ConversationTimeline.ToTweetTrove()
 
 	for _, id := range []DMMessageID{
 		1663623062195957773,
@@ -273,7 +273,7 @@ func TestParseDMRoomResponse(t *testing.T) {
 		assert.Equal(m.ID, id)
 	}
 	for _, id := range []UserID{1458284524761075714, 1488963321701171204} {
-		u, is_ok := trove.TweetTrove.Users[id]
+		u, is_ok := trove.Users[id]
 		assert.True(is_ok, "User with ID %d not in the trove!")
 		assert.Equal(u.ID, id)
 	}
@@ -293,7 +293,7 @@ func TestParseInboxUpdates(t *testing.T) {
 	err = json.Unmarshal(data, &inbox)
 	require.NoError(t, err)
 
-	trove := inbox.UserEvents.ToDMTrove()
+	trove := inbox.UserEvents.ToTweetTrove()
 
 	assert.Len(trove.Messages, 2) // Should ignore stuff that isn't a message
 

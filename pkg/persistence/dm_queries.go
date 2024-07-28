@@ -185,7 +185,7 @@ func (p Profile) GetChatMessage(id DMMessageID) (ret DMMessage, err error) {
 	ret.Reactions = make(map[UserID]DMReaction)
 
 	// This is a bit circuitous, but it doesn't matter because this function is only used in tests
-	trove := NewDMTrove()
+	trove := NewTweetTrove()
 	trove.Messages[ret.ID] = ret
 	p.fill_dm_contents(&trove)
 
@@ -193,7 +193,7 @@ func (p Profile) GetChatMessage(id DMMessageID) (ret DMMessage, err error) {
 }
 
 type DMChatView struct {
-	DMTrove
+	TweetTrove
 	Cursor       DMCursor
 	RoomIDs      []DMChatRoomID
 	MessageIDs   []DMMessageID
@@ -202,7 +202,7 @@ type DMChatView struct {
 
 func NewDMChatView() DMChatView {
 	return DMChatView{
-		DMTrove:    NewDMTrove(),
+		TweetTrove: NewTweetTrove(),
 		RoomIDs:    []DMChatRoomID{},
 		MessageIDs: []DMMessageID{},
 	}
@@ -250,7 +250,7 @@ func (p Profile) GetChatRoomsPreview(id UserID) DMChatView {
 		}
 
 		// Fetch the participants
-		p.fill_chat_room_participants(&room, &ret.DMTrove)
+		p.fill_chat_room_participants(&room, &ret.TweetTrove)
 
 		// Add everything to the Trove
 		room.LastMessageID = msg.ID
@@ -259,7 +259,7 @@ func (p Profile) GetChatRoomsPreview(id UserID) DMChatView {
 		ret.RoomIDs = append(ret.RoomIDs, room.ID)
 	}
 	// Since the message text might be empty, fetch contents (images, tweets etc) so we can still create a preview
-	p.fill_dm_contents(&ret.DMTrove)
+	p.fill_dm_contents(&ret.TweetTrove)
 	return ret
 }
 
@@ -300,19 +300,19 @@ func (p Profile) GetChatRoomMessagesByCursor(c DMCursor) DMChatView {
 	}
 
 	// Fetch the participants
-	p.fill_chat_room_participants(&room, &ret.DMTrove)
+	p.fill_chat_room_participants(&room, &ret.TweetTrove)
 
 	// Put the room in the Trove
 	ret.Rooms[room.ID] = room
 
 	// Fetch reaccs, attachments, and replied-to messages
-	p.fill_dm_contents(&ret.DMTrove)
+	p.fill_dm_contents(&ret.TweetTrove)
 	return ret
 }
 
 // Fetch the chat participants and insert it into the DMChatRoom.  Inserts user information
-// into the DMTrove.
-func (p Profile) fill_chat_room_participants(room *DMChatRoom, trove *DMTrove) {
+// into the TweetTrove.
+func (p Profile) fill_chat_room_participants(room *DMChatRoom, trove *TweetTrove) {
 	var participants []struct {
 		DMChatParticipant
 		User
@@ -332,8 +332,8 @@ func (p Profile) fill_chat_room_participants(room *DMChatRoom, trove *DMTrove) {
 	}
 }
 
-// Fetch reaccs, attachments/embeds and replied-to messages and add them to the DMTrove
-func (p Profile) fill_dm_contents(trove *DMTrove) {
+// Fetch reaccs, attachments/embeds and replied-to messages and add them to the TweetTrove
+func (p Profile) fill_dm_contents(trove *TweetTrove) {
 	// Skip processing if there's no messages whomst'd've contents to fetch
 	if len(trove.Messages) == 0 {
 		return
@@ -460,7 +460,7 @@ func (p Profile) fill_dm_contents(trove *DMTrove) {
 		}
 	}
 
-	p.fill_content(&trove.TweetTrove, UserID(0))
+	p.fill_content(trove, UserID(0))
 }
 
 type DMCursor struct {
@@ -620,7 +620,7 @@ func (p Profile) NextDMPage(c DMCursor) DMChatView {
 			// }
 
 			// Fetch the participants
-			p.fill_chat_room_participants(&room, &ret.DMTrove)
+			p.fill_chat_room_participants(&room, &ret.TweetTrove)
 			// Add to the Trove
 			// room.LastMessageID = msg.ID
 			ret.Rooms[room.ID] = room
@@ -629,7 +629,7 @@ func (p Profile) NextDMPage(c DMCursor) DMChatView {
 		}
 	}
 
-	p.fill_dm_contents(&ret.DMTrove)
+	p.fill_dm_contents(&ret.TweetTrove)
 	return ret
 }
 

@@ -77,8 +77,8 @@ func (m *APIDMMessage) NormalizeContent() {
 	m.MessageData.Text = strings.TrimSpace(m.MessageData.Text)
 }
 
-func (m APIDMMessage) ToDMTrove() DMTrove {
-	ret := NewDMTrove()
+func (m APIDMMessage) ToTweetTrove() TweetTrove {
+	ret := NewTweetTrove()
 	if m.ID == 0 {
 		return ret
 	}
@@ -186,8 +186,8 @@ type APIDMResponse struct {
 	UserEvents           APIInbox `json:"user_events"`
 }
 
-func (r APIInbox) ToDMTrove() DMTrove {
-	ret := NewDMTrove()
+func (r APIInbox) ToTweetTrove() TweetTrove {
+	ret := NewTweetTrove()
 
 	for _, entry := range r.Entries {
 		if entry.JoinConversation.ID != 0 || entry.TrustConversation.ID != 0 ||
@@ -209,7 +209,7 @@ func (r APIInbox) ToDMTrove() DMTrove {
 		// 	panic("Already in the trove: " + fmt.Sprint(result.ID))
 		// }
 
-		ret.MergeWith(entry.Message.ToDMTrove())
+		ret.MergeWith(entry.Message.ToTweetTrove())
 	}
 	for _, room := range r.Conversations {
 		result := ParseAPIDMChatRoom(room)
@@ -220,7 +220,7 @@ func (r APIInbox) ToDMTrove() DMTrove {
 		if err != nil {
 			panic(err)
 		}
-		ret.TweetTrove.Users[result.ID] = result
+		ret.Users[result.ID] = result
 	}
 	return ret
 }

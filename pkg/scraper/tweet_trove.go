@@ -16,6 +16,10 @@ type TweetTrove struct {
 	Bookmarks map[BookmarkSortID]Bookmark
 
 	TombstoneUsers []UserHandle
+
+	// For DMs
+	Rooms    map[DMChatRoomID]DMChatRoom
+	Messages map[DMMessageID]DMMessage
 }
 
 func NewTweetTrove() TweetTrove {
@@ -27,6 +31,8 @@ func NewTweetTrove() TweetTrove {
 	ret.Likes = make(map[LikeSortID]Like)
 	ret.Bookmarks = make(map[BookmarkSortID]Bookmark)
 	ret.TombstoneUsers = []UserHandle{}
+	ret.Rooms = make(map[DMChatRoomID]DMChatRoom)
+	ret.Messages = make(map[DMMessageID]DMMessage)
 	return ret
 }
 
@@ -66,6 +72,13 @@ func (t1 *TweetTrove) MergeWith(t2 TweetTrove) {
 	}
 
 	t1.TombstoneUsers = append(t1.TombstoneUsers, t2.TombstoneUsers...)
+
+	for id, val := range t2.Rooms {
+		t1.Rooms[id] = val
+	}
+	for id, val := range t2.Messages {
+		t1.Messages[id] = val
+	}
 }
 
 /**
