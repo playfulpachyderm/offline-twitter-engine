@@ -452,6 +452,11 @@ func (api *API) DownloadMedia(remote_url string) ([]byte, error) {
 		// Not a DCMA; fall through
 	}
 
+	if resp.StatusCode == 404 {
+		log.Debugf("Media download 404 (%s)", remote_url)
+		return body, ErrMediaDownload404
+	}
+
 	if resp.StatusCode != 200 {
 		url, err := url.Parse(remote_url)
 		if err != nil {

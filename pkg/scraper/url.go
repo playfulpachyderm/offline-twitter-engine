@@ -2,10 +2,10 @@ package scraper
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 	"path"
 	"regexp"
-	"log"
 )
 
 type Url struct {

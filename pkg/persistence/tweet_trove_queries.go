@@ -65,7 +65,7 @@ func (p Profile) SaveTweetTrove(trove TweetTrove, should_download bool) {
 
 		if should_download {
 			err = p.DownloadTweetContentFor(&t)
-			if errors.Is(err, ErrRequestTimeout) {
+			if errors.Is(err, ErrRequestTimeout) || errors.Is(err, ErrMediaDownload404) {
 				// Forget about it; if it's important someone will try again
 				fmt.Printf("Failed to download tweet ID %d: %s\n", t.ID, err.Error())
 			} else if err != nil {
