@@ -24,8 +24,10 @@
       </a>
     </div>
     <div class="htmx-spinner">
-      <div class="htmx-spinner__background"></div>
-      <img class="svg-icon htmx-spinner__icon" src="/static/icons/spinner.svg" />
+      <div class="htmx-spinner__fullscreen-forcer">
+        <div class="htmx-spinner__background"></div>
+        <img class="svg-icon htmx-spinner__icon" src="/static/icons/spinner.svg" />
+      </div>
     </div>
   </div>
   {{if .IsUsersSearch}}

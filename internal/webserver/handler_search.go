@@ -104,7 +104,7 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 
 		// Run scraper
 		trove, err := scraper.Search(search_text, 1) // TODO: parameterizable
-		if err != nil {
+		if err != nil && !errors.Is(err, scraper.END_OF_FEED) {
 			app.ErrorLog.Print(err)
 			// TOOD: show error in UI
 		}
