@@ -1332,7 +1332,7 @@ main {
 			flex-direction: row-reverse;
 		}
 
-		.dm-message__emoji-button-container {
+		.dm-message__button-container {
 			display: flex;
 			flex-direction: column;
 			justify-content: center;
@@ -1356,30 +1356,7 @@ main {
 			align-items: flex-end;
 		}
 	}
-	.dm-message__replying-to {
-		background-color: #f0f0f0f0;
-		border-radius: 1em 1em 1em 0em;
-		padding: 0.5em 1.2em 2em 1.2em;
-		margin: 0 0 -2em 0.2em;
-		font-size: 0.9em;
 
-		.our-message & {
-			border-radius: 1em 1em 0em 1em;
-			margin: 0 0.2em -2em;
-		}
-
-		.replying-to-message {
-			cursor: pointer;
-		}
-	}
-	.dm-message__replying-to-label {
-		font-size: 0.8em;
-		color: var(--color-twitter-text-gray);
-
-		& img.svg-icon {
-			width: 1em;
-		}
-	}
 	.dm-message__tweet-preview {
 		border-radius: 1em;
 		overflow: hidden; /* TODO: redundancy check-- why is this necessary?  check .rounded-gray-outline */
@@ -1446,18 +1423,43 @@ main {
 	}
 }
 
+.dm-replying-to {
+	background-color: #f0f0f0f0;
+	border-radius: 1em 1em 1em 0em;
+	padding: 0.5em 1.2em 2em 1.2em;
+	margin: 0 0 -2em 0.2em;
+	font-size: 0.9em;
+
+	.our-message & {
+		border-radius: 1em 1em 0em 1em;
+		margin: 0 0.2em -2em;
+	}
+
+	.dm-replying-to__label {
+		font-size: 0.8em;
+		color: var(--color-twitter-text-gray);
+
+		& img.svg-icon {
+			width: 1em;
+		}
+	}
+
+	.dm-replying-to__preview-text {
+		cursor: pointer;
+	}
+}
+
 /**
  * Messages page DM composer module
  */
 .dm-composer {
-	padding-top: 0.5em;
-	border-top: 1px solid var(--color-outline-gray);
-
 	& form {
 		display: flex;
 		gap: 1em;
-		padding: 0.5em 1em;
+		padding: 0.8em 1em;
 		align-items: center;
+		border-top: 1px solid var(--color-outline-gray);
+		background-color: white;
 	}
 	[role="textbox"] {
 		flex-grow: 1;
@@ -1477,5 +1479,23 @@ main {
 		flex-grow: 0;
 		height: 3em;
 		width: 6em;
+	}
+
+
+	.dm-composer__replying-to-container {
+		display: none;
+		&.unhidden {
+			display: revert;
+		}
+
+		/* This is gross; it's to counter the left margin on `dm-replying-to`, which is meant for the one on DMs specifically */
+		margin-left: -0.2em;
+
+		.dm-composer__replying-to {
+			position: absolute;
+			top: 0;
+			transform: translate(0, -100%);
+			width: 100%;
+		}
 	}
 }

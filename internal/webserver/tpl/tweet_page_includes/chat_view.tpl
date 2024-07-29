@@ -8,14 +8,14 @@
       </div>
       <div class="dm-message__contents">
         {{if (ne .InReplyToID 0)}}
-          <div class="dm-message__replying-to">
-            <div class="dm-message__replying-to-label labelled-icon">
+          <div class="dm-replying-to">
+            <div class="dm-replying-to__label labelled-icon">
               <img class="svg-icon" src="/static/icons/replying_to.svg" width="24" height="24" />
               <label>Replying to</label>
             </div>
-            <div class="replying-to-message"
+            <div class="dm-replying-to__preview-text"
               data-replying-to-message-id="{{ .InReplyToID }}"
-              onclick="doReplyTo(this)"
+              onclick="handleReplyingToClicked(this)"
             >
               {{(dm_message .InReplyToID).Text}}
             </div>
@@ -65,16 +65,21 @@
           </div>
         {{end}}
       </div>
-      <div class="dm-message__emoji-button-container">
-        <div class="dm-message__emoji-button button" onclick="
-          show_emoji_picker(function(emoji_info) {
-            htmx.ajax('POST', '/messages/{{$.DMChatRoomID}}/reacc', {values: {
-              message_id: '{{$.ID}}',
-              reacc: emoji_info.unicode,
-            }, source: '[data-message-id=\'{{$.ID}}\']'});
-          });
-        ">
-          <img class="svg-icon" src="/static/icons/emoji-react.svg" width="24" height="24"/>
+      <div class="dm-message__button-container">
+        <div class="row">
+          <div class="dm-message__emoji-button button" onclick="
+            show_emoji_picker(function(emoji_info) {
+              htmx.ajax('POST', '/messages/{{$.DMChatRoomID}}/reacc', {values: {
+                message_id: '{{$.ID}}',
+                reacc: emoji_info.unicode,
+              }, source: '[data-message-id=\'{{$.ID}}\']'});
+            });
+          ">
+            <img class="svg-icon" src="/static/icons/emoji-react.svg" width="24" height="24"/>
+          </div>
+          <div class="dm-message__emoji-button button" onclick="handle_reply_clicked(this.closest('.dm-message').getAttribute('data-message-id'))">
+            <img class="svg-icon" src="/static/icons/replying_to.svg" width="24" height="24"/>
+          </div>
         </div>
       </div>
     </div>
@@ -166,12 +171,31 @@
     </div>
     {{if .ActiveRoomID}}
       <div class="dm-composer">
+        {{/* TODO: replying-to CSS re-use is a mess */}}
+        <div id="composerReplyingTo" class="dm-composer__replying-to-container">
+          <div class="dm-replying-to row row--spread">
+            <div>
+              <div class="dm-replying-to__label labelled-icon">
+                <img class="svg-icon" src="/static/icons/replying_to.svg" width="24" height="24" />
+                <label>Replying to</label>
+              </div>
+              <div class="dm-replying-to__preview-text"
+                data-replying-to-message-id=""
+                onclick="handleReplyingToClicked(this)"
+              >
+                Lorem ipsum dolor sit amet
+              </div>
+            </div>
+            <img class="svg-icon button" src="/static/icons/close.svg" width="24" height="24" onclick="cancel_reply()">
+          </div>
+        </div>
+
         <form
           hx-post="/messages/{{.ActiveRoomID}}/send?latest_timestamp={{.LatestPollingTimestamp}}"
           hx-target="#new-messages-poller"
           hx-swap="outerHTML scroll:.chat-messages:bottom"
           hx-ext="json-enc"
-          hx-on:htmx:after-request="composer.innerText = ''; realInput.value = ''; "
+          hx-on:htmx:after-request="composer.innerText = ''; realInput.value = ''; cancel_reply();"
         >
           <img class="svg-icon button" src="/static/icons/emoji-insert.svg" width="24" height="24" onclick="
             var carat = composer.innerText.length;
@@ -192,11 +216,14 @@
           "/>
           <span id="composer" role="textbox" contenteditable oninput="realInput.value = this.innerText"></span>
           <input id="realInput" type="hidden" name="text" value="" />
+          <input id="inReplyToInput" type="hidden" name="in_reply_to_id" value="" />
           <input type="submit" />
         </form>
       </div>
       <script>
-        // Make pasting text work for HTML as well as plain text
+        /**
+         *  Make pasting text work for HTML as well as plain text
+         */
         composer.addEventListener("paste", function(e) {
           // cancel paste
           e.preventDefault();
@@ -205,6 +232,27 @@
           // insert text manually
           document.execCommand("insertHTML", false, text);
         });
+
+        /**
+         * Handle "Reply" button
+         */
+        function handle_reply_clicked(reply_to_message_id) {
+          composerReplyingTo.classList.add("unhidden");
+          inReplyToInput.value = reply_to_message_id;
+          console.log(reply_to_message_id);
+          const message_text_element = document.querySelector('[data-message-id="' + reply_to_message_id + '"] .dm-message__text-content');
+          const preview_text = message_text_element.innerText;
+          const preview_element = composerReplyingTo.querySelector('.dm-replying-to__preview-text');
+          preview_element.innerText = preview_text;
+          preview_element.setAttribute("data-replying-to-message-id", reply_to_message_id);
+        }
+        /**
+         * Handle cancel-reply button
+         */
+        function cancel_reply() {
+          composerReplyingTo.classList.remove("unhidden");
+          inReplyToInput.value = "";
+        }
       </script>
 
       {{ $room := (index $.Rooms $.ActiveRoomID) }}
@@ -265,7 +313,7 @@
      * Define callback on-click handler for 'replying-to' previews; they should scroll the replied-to
      * message into view, if possible.
      */
-    function doReplyTo(replying_to_box) {
+    function handleReplyingToClicked(replying_to_box) {
       const replied_to_id = replying_to_box.getAttribute("data-replying-to-message-id");
       const replied_to_message = document.querySelector('[data-message-id="' + replied_to_id + '"]');
 

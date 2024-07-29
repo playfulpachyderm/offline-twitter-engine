@@ -56,11 +56,17 @@ func (app *Application) message_send(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	panic_if(err)
 	var message_data struct {
-		Text string `json:"text"`
+		Text        string `json:"text"`
+		InReplyToID string `json:"in_reply_to_id"`
 	}
 	panic_if(json.Unmarshal(body, &message_data))
 
-	trove := scraper.SendDMMessage(room_id, message_data.Text, 0)
+	in_reply_to_id, err := strconv.Atoi(message_data.InReplyToID)
+	if err != nil {
+		in_reply_to_id = 0
+	}
+
+	trove := scraper.SendDMMessage(room_id, message_data.Text, scraper.DMMessageID(in_reply_to_id))
 	app.Profile.SaveTweetTrove(trove, false)
 	go app.Profile.SaveTweetTrove(trove, true)
 }
