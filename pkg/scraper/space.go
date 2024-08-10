@@ -48,11 +48,3 @@ func ParseAPISpace(apiCard APICard) Space {
 
 	return ret
 }
-
-func FetchSpaceDetail(id SpaceID) (TweetTrove, error) {
-	space_response, err := the_api.GetSpace(id)
-	if err != nil {
-		return TweetTrove{}, fmt.Errorf("Error in API call to fetch Space (id %q):\n  %w", id, err)
-	}
-	return space_response.ToTweetTrove(), nil
-}

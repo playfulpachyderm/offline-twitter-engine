@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -885,6 +886,10 @@ func (r APIV2Response) ToTweetTroveAsBookmarks() (TweetTrove, error) {
 	return ret, err
 }
 
+// ---------------------------------------------------------
+// Paginated queries API
+// ---------------------------------------------------------
+
 type PaginatedQuery interface {
 	NextPage(api *API, cursor string) (APIV2Response, error)
 	ToTweetTrove(r APIV2Response) (TweetTrove, error)
@@ -952,8 +957,11 @@ func (api *API) GetPaginatedQuery(pq PaginatedQuery, count int) (TweetTrove, err
 	return trove, err // `err` will be either nil, END_OF_FEED, or ErrRateLimited
 }
 
+// Paginated User Feed
+// -------------------
+
 // Get a User feed using the new GraphQL twitter api
-func (api *API) GetGraphqlFeedFor(user_id UserID, cursor string) (APIV2Response, error) {
+func (api *API) GetUserFeedPage(user_id UserID, cursor string) (APIV2Response, error) {
 	url, err := url.Parse(GraphqlURL{
 		BaseUrl: "https://twitter.com/i/api/graphql/Q6aAvPw7azXZbqXzuqTALA/UserTweetsAndReplies",
 		Variables: GraphqlVariables{
@@ -1001,7 +1009,7 @@ type PaginatedUserFeed struct {
 }
 
 func (p PaginatedUserFeed) NextPage(api *API, cursor string) (APIV2Response, error) {
-	return api.GetGraphqlFeedFor(p.user_id, cursor)
+	return api.GetUserFeedPage(p.user_id, cursor)
 }
 func (p PaginatedUserFeed) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
 	ret, err := r.ToTweetTrove()
@@ -1009,6 +1017,17 @@ func (p PaginatedUserFeed) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
 	ret.MergeWith(r.GetPinnedTweetAsTweetTrove())
 	return ret, err
 }
+
+func (api *API) GetUserFeed(user_id UserID, min_tweets int) (trove TweetTrove, err error) {
+	return api.GetPaginatedQuery(PaginatedUserFeed{user_id}, min_tweets)
+}
+
+func GetUserFeed(user_id UserID, min_tweets int) (trove TweetTrove, err error) {
+	return the_api.GetUserFeed(user_id, min_tweets)
+}
+
+// Paginated Tweet Detail (conversation)
+// -------------------------------------
 
 func (api *API) GetTweetDetail(tweet_id TweetID, cursor string) (APIV2Response, error) {
 	url, err := url.Parse(GraphqlURL{
@@ -1072,7 +1091,39 @@ func (p PaginatedTweetReplies) ToTweetTrove(r APIV2Response) (TweetTrove, error)
 	return r.ToTweetTrove()
 }
 
-func (api *API) GetUserLikes(user_id UserID, cursor string) (APIV2Response, error) {
+func (api *API) GetTweetFullAPIV2(id TweetID, how_many int) (TweetTrove, error) {
+	trove, err := api.GetPaginatedQuery(PaginatedTweetReplies{id}, how_many)
+
+	// Handle deleted tweet
+	if errors.Is(err, ErrDoesntExist) {
+		trove := NewTweetTrove()
+		fake_user := GetUnknownUser()
+		trove.Users[fake_user.ID] = fake_user
+		trove.Tweets[id] = Tweet{ID: id, UserID: fake_user.ID, TombstoneType: "deleted", IsConversationScraped: true, IsStub: true}
+		return trove, nil
+	} else if err != nil {
+		return trove, err
+	}
+
+	// Find the main tweet and update its "is_conversation_downloaded" and "last_scraped_at"
+	tweet, ok := trove.Tweets[id]
+	if !ok {
+		panic("Trove didn't contain its own tweet!")
+	}
+	tweet.LastScrapedAt = Timestamp{time.Now()}
+	tweet.IsConversationScraped = true
+	trove.Tweets[id] = tweet
+
+	return trove, err
+}
+func GetTweetFullAPIV2(id TweetID, how_many int) (TweetTrove, error) {
+	return the_api.GetTweetFullAPIV2(id, how_many)
+}
+
+// Paginated User Likes
+// --------------------
+
+func (api *API) GetUserLikesPage(user_id UserID, cursor string) (APIV2Response, error) {
 	url, err := url.Parse(GraphqlURL{
 		BaseUrl: "https://twitter.com/i/api/graphql/2Z6LYO4UTM4BnWjaNCod6g/Likes",
 		Variables: GraphqlVariables{
@@ -1120,7 +1171,7 @@ type PaginatedUserLikes struct {
 }
 
 func (p PaginatedUserLikes) NextPage(api *API, cursor string) (APIV2Response, error) {
-	return api.GetUserLikes(p.user_id, cursor)
+	return api.GetUserLikesPage(p.user_id, cursor)
 }
 func (p PaginatedUserLikes) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
 	ret, err := r.ToTweetTroveAsLikes()
@@ -1137,11 +1188,18 @@ func (p PaginatedUserLikes) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
 	return ret, nil
 }
 
-func GetUserLikes(user_id UserID, how_many int) (TweetTrove, error) {
-	return the_api.GetPaginatedQuery(PaginatedUserLikes{user_id}, how_many)
+func (api *API) GetUserLikes(user_id UserID, how_many int) (TweetTrove, error) {
+	return api.GetPaginatedQuery(PaginatedUserLikes{user_id}, how_many)
 }
 
-func (api *API) GetBookmarks(cursor string) (APIV2Response, error) {
+func GetUserLikes(user_id UserID, how_many int) (TweetTrove, error) {
+	return the_api.GetUserLikes(user_id, how_many)
+}
+
+// Paginated Bookmarks
+// -------------------
+
+func (api *API) GetBookmarksPage(cursor string) (APIV2Response, error) {
 	url, err := url.Parse(GraphqlURL{
 		BaseUrl: "https://twitter.com/i/api/graphql/xLjCVTqYWz8CGSprLU349w/Bookmarks",
 		Variables: GraphqlVariables{
@@ -1186,7 +1244,7 @@ type PaginatedBookmarks struct {
 }
 
 func (p PaginatedBookmarks) NextPage(api *API, cursor string) (APIV2Response, error) {
-	return api.GetBookmarks(cursor)
+	return api.GetBookmarksPage(cursor)
 }
 func (p PaginatedBookmarks) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
 	ret, err := r.ToTweetTroveAsBookmarks()
@@ -1203,10 +1261,18 @@ func (p PaginatedBookmarks) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
 	return ret, nil
 }
 
-func GetBookmarks(how_many int) (TweetTrove, error) {
-	return the_api.GetPaginatedQuery(PaginatedBookmarks{the_api.UserID}, how_many)
+func (api *API) GetBookmarks(how_many int) (TweetTrove, error) {
+	return api.GetPaginatedQuery(PaginatedBookmarks{api.UserID}, how_many)
 }
 
+func GetBookmarks(how_many int) (TweetTrove, error) {
+	return the_api.GetBookmarks(how_many)
+}
+
+// Paginated Home Timeline
+// -----------------------
+
+// TODO: paginated?
 func (api *API) GetHomeTimeline(cursor string, is_following_only bool) (TweetTrove, error) {
 	var url string
 	body_struct := struct {
@@ -1269,6 +1335,9 @@ func GetHomeTimeline(cursor string, is_following_only bool) (TweetTrove, error) 
 	return the_api.GetHomeTimeline(cursor, is_following_only)
 }
 
+// Get User
+// --------
+
 func (api API) GetUser(handle UserHandle) (APIUser, error) {
 	url, err := url.Parse(GraphqlURL{
 		BaseUrl: "https://api.twitter.com/graphql/SAMkL5y_N9pmahSw8yy6gw/UserByScreenName",
@@ -1311,7 +1380,10 @@ func (api API) GetUser(handle UserHandle) (APIUser, error) {
 	return response.ConvertToAPIUser(), err
 }
 
-func (api *API) Search(query string, cursor string) (APIV2Response, error) {
+// Paginated Search
+// ----------------
+
+func (api *API) SearchPage(query string, cursor string) (APIV2Response, error) {
 	url, err := url.Parse(GraphqlURL{
 		BaseUrl: "https://twitter.com/i/api/graphql/NA567V_8AFwu0cZEkAAKcw/SearchTimeline",
 		Variables: GraphqlVariables{
@@ -1360,7 +1432,7 @@ type PaginatedSearch struct {
 }
 
 func (p PaginatedSearch) NextPage(api *API, cursor string) (APIV2Response, error) {
-	return api.Search(p.query, cursor)
+	return api.SearchPage(p.query, cursor)
 }
 func (p PaginatedSearch) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
 	return r.ToTweetTrove()
@@ -1372,6 +1444,9 @@ func (p PaginatedSearch) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
 // - search for users
 // - photos
 // - videos
+func (api *API) Search(query string, min_results int) (trove TweetTrove, err error) {
+	return api.GetPaginatedQuery(PaginatedSearch{query}, min_results)
+}
 func Search(query string, min_results int) (trove TweetTrove, err error) {
-	return the_api.GetPaginatedQuery(PaginatedSearch{query}, min_results)
+	return the_api.Search(query, min_results)
 }

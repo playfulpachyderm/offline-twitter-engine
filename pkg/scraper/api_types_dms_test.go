@@ -168,9 +168,7 @@ func TestParseAPIDMConversation(t *testing.T) {
 	require.NoError(t, err)
 
 	// Simulate one of the participants being logged in
-	InitApi(API{UserID: 1458284524761075714})
-
-	chat_room := ParseAPIDMChatRoom(api_room)
+	chat_room := ParseAPIDMChatRoom(api_room, UserID(1458284524761075714))
 	assert.Equal(DMChatRoomID("1458284524761075714-1488963321701171204"), chat_room.ID)
 	assert.Equal("ONE_TO_ONE", chat_room.Type)
 	assert.Equal(TimestampFromUnixMilli(1686025129086), chat_room.LastMessagedAt)
@@ -204,9 +202,7 @@ func TestParseAPIDMGroupChat(t *testing.T) {
 	require.NoError(t, err)
 
 	// Simulate one of the participants being logged in
-	InitApi(API{UserID: 1458284524761075714})
-
-	chat_room := ParseAPIDMChatRoom(api_room)
+	chat_room := ParseAPIDMChatRoom(api_room, UserID(1458284524761075714))
 	assert.Equal(DMChatRoomID("1710215025518948715"), chat_room.ID)
 	assert.Equal("GROUP_DM", chat_room.Type)
 	assert.Equal(TimestampFromUnixMilli(1700112789457), chat_room.LastMessagedAt)
@@ -232,7 +228,7 @@ func TestParseInbox(t *testing.T) {
 	err = json.Unmarshal(data, &inbox)
 	require.NoError(t, err)
 
-	trove := inbox.InboxInitialState.ToTweetTrove()
+	trove := inbox.InboxInitialState.ToTweetTrove(UserID(0))
 
 	for _, id := range []DMMessageID{1663623062195957773, 1663623203644751885, 1665922180176044037, 1665936253483614212} {
 		m, is_ok := trove.Messages[id]
@@ -259,7 +255,7 @@ func TestParseDMRoomResponse(t *testing.T) {
 	err = json.Unmarshal(data, &inbox)
 	require.NoError(t, err)
 
-	trove := inbox.ConversationTimeline.ToTweetTrove()
+	trove := inbox.ConversationTimeline.ToTweetTrove(UserID(0))
 
 	for _, id := range []DMMessageID{
 		1663623062195957773,
@@ -293,7 +289,7 @@ func TestParseInboxUpdates(t *testing.T) {
 	err = json.Unmarshal(data, &inbox)
 	require.NoError(t, err)
 
-	trove := inbox.UserEvents.ToTweetTrove()
+	trove := inbox.UserEvents.ToTweetTrove(UserID(0))
 
 	assert.Len(trove.Messages, 2) // Should ignore stuff that isn't a message
 

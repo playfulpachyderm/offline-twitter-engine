@@ -4,7 +4,7 @@ import (
 	"net/url"
 )
 
-func (api *API) GetFollowees(user_id UserID, cursor string) (APIV2Response, error) {
+func (api *API) GetFolloweesPage(user_id UserID, cursor string) (APIV2Response, error) {
 	url, err := url.Parse(GraphqlURL{
 		BaseUrl: "https://twitter.com/i/api/graphql/0yD6Eiv23DKXRDU9VxlG2A/Following",
 		Variables: GraphqlVariables{
@@ -51,17 +51,21 @@ type PaginatedFollowees struct {
 }
 
 func (p PaginatedFollowees) NextPage(api *API, cursor string) (APIV2Response, error) {
-	return api.GetFollowees(p.user_id, cursor)
+	return api.GetFolloweesPage(p.user_id, cursor)
 }
 func (p PaginatedFollowees) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
 	return r.ToTweetTrove()
 }
 
-func GetFollowees(user_id UserID, how_many int) (TweetTrove, error) {
-	return the_api.GetPaginatedQuery(PaginatedFollowees{user_id}, how_many)
+func (api *API) GetFollowees(user_id UserID, how_many int) (TweetTrove, error) {
+	return api.GetPaginatedQuery(PaginatedFollowees{user_id}, how_many)
 }
 
-func (api *API) GetFollowers(user_id UserID, cursor string) (APIV2Response, error) {
+func GetFollowees(user_id UserID, how_many int) (TweetTrove, error) {
+	return the_api.GetFollowees(user_id, how_many)
+}
+
+func (api *API) GetFollowersPage(user_id UserID, cursor string) (APIV2Response, error) {
 	url, err := url.Parse(GraphqlURL{
 		BaseUrl: "https://twitter.com/i/api/graphql/3_7xfjmh897x8h_n6QBqTA/Followers",
 		Variables: GraphqlVariables{
@@ -108,12 +112,16 @@ type PaginatedFollowers struct {
 }
 
 func (p PaginatedFollowers) NextPage(api *API, cursor string) (APIV2Response, error) {
-	return api.GetFollowers(p.user_id, cursor)
+	return api.GetFollowersPage(p.user_id, cursor)
 }
 func (p PaginatedFollowers) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
 	return r.ToTweetTrove()
 }
 
+func (api *API) GetFollowers(user_id UserID, how_many int) (TweetTrove, error) {
+	return api.GetPaginatedQuery(PaginatedFollowers{user_id}, how_many)
+}
+
 func GetFollowers(user_id UserID, how_many int) (TweetTrove, error) {
-	return the_api.GetPaginatedQuery(PaginatedFollowers{user_id}, how_many)
+	return the_api.GetFollowers(user_id, how_many)
 }

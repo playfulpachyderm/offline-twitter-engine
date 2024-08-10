@@ -4,7 +4,6 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
 
@@ -244,16 +243,14 @@ func ParseSingleTweet(apiTweet APITweet) (ret Tweet, err error) {
 	return
 }
 
-/**
- * Get a single tweet with no replies from the API.
- *
- * args:
- * - id: the ID of the tweet to get
- *
- * returns: the single Tweet
- */
-func GetTweet(id TweetID) (Tweet, error) {
-	resp, err := the_api.GetTweetDetail(id, "")
+// Get a single tweet with no replies from the API.
+//
+// args:
+// - id: the ID of the tweet to get
+//
+// returns: the single Tweet
+func (api *API) GetTweet(id TweetID) (Tweet, error) {
+	resp, err := api.GetTweetDetail(id, "")
 	if err != nil {
 		return Tweet{}, fmt.Errorf("Error getting tweet detail: %d\n  %w", id, err)
 	}
@@ -271,83 +268,6 @@ func GetTweet(id TweetID) (Tweet, error) {
 	tweet.IsConversationScraped = true
 	return tweet, nil
 }
-
-/**
- * Return a list of tweets, including the original and the rest of its thread,
- * along with a list of associated users.
- *
- * Mark the main tweet as "is_conversation_downloaded = true", and update its "last_scraped_at"
- * value.
- *
- * args:
- * - id: the ID of the tweet to get
- *
- * returns: the tweet, list of its replies and context, and users associated with those replies
- */
-func GetTweetFull(id TweetID, how_many int) (trove TweetTrove, err error) {
-	tweet_response, err := the_api.GetTweet(id, "")
-	if err != nil {
-		err = fmt.Errorf("Error getting tweet: %d\n  %w", id, err)
-		return
-	}
-	if len(tweet_response.GlobalObjects.Tweets) < how_many &&
-		tweet_response.GetCursor() != "" {
-		err = the_api.GetMoreReplies(id, &tweet_response, how_many)
-		if err != nil {
-			err = fmt.Errorf("Error getting more tweet replies: %d\n  %w", id, err)
-			return
-		}
-	}
-
-	// This has to be called BEFORE ToTweetTrove, because it modifies the TweetResponse (adds tombstone tweets to its tweets list)
-	tombstoned_users := tweet_response.HandleTombstones()
-
-	trove, err = tweet_response.ToTweetTrove()
-	if err != nil {
-		panic(err)
-	}
-	trove.TombstoneUsers = tombstoned_users
-
-	// Quoted tombstones need their user_id filled out from the tombstoned_users list
-	log.Debug("Running tweet trove post-processing\n")
-	err = trove.PostProcess()
-	if err != nil {
-		err = fmt.Errorf("Error getting tweet (id %d):\n  %w", id, err)
-		return
-	}
-
-	// Find the main tweet and update its "is_conversation_downloaded" and "last_scraped_at"
-	tweet, ok := trove.Tweets[id]
-	if !ok {
-		panic("Trove didn't contain its own tweet!")
-	}
-	tweet.LastScrapedAt = Timestamp{time.Now()}
-	tweet.IsConversationScraped = true
-	trove.Tweets[id] = tweet
-
-	return
-}
-
-func GetTweetFullAPIV2(id TweetID, how_many int) (TweetTrove, error) {
-	trove, err := the_api.GetPaginatedQuery(PaginatedTweetReplies{id}, how_many)
-	if errors.Is(err, ErrDoesntExist) {
-		trove := NewTweetTrove()
-		fake_user := GetUnknownUser()
-		trove.Users[fake_user.ID] = fake_user
-		trove.Tweets[id] = Tweet{ID: id, UserID: fake_user.ID, TombstoneType: "deleted", IsConversationScraped: true, IsStub: true}
-		return trove, nil
-	} else if err != nil {
-		return trove, err
-	}
-
-	// Find the main tweet and update its "is_conversation_downloaded" and "last_scraped_at"
-	tweet, ok := trove.Tweets[id]
-	if !ok {
-		panic("Trove didn't contain its own tweet!")
-	}
-	tweet.LastScrapedAt = Timestamp{time.Now()}
-	tweet.IsConversationScraped = true
-	trove.Tweets[id] = tweet
-
-	return trove, err
+func GetTweet(id TweetID) (Tweet, error) {
+	return the_api.GetTweet(id)
 }

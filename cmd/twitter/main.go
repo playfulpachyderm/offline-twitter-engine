@@ -127,7 +127,6 @@ func main() {
 			*session_name = (*session_name)[:len(*session_name)-8]
 		}
 		scraper.InitApi(profile.LoadSession(scraper.UserHandle(*session_name)))
-		// fmt.Printf("Operating as user: @%s\n", scraper.the_api.UserHandle)
 	} else {
 		session, err := scraper.NewGuestSession()
 		if err != nil {
@@ -235,7 +234,7 @@ func main() {
 // - username: twitter username or email address
 // - password: twitter account password
 func login(username string, password string) {
-	// Skip the scraper.the_api variable, just use a local one since no scraping is happening
+	// Skip the scraper.InitApi, just use a local one since no scraping is happening
 	api, err := scraper.NewGuestSession()
 	if err != nil {
 		die(fmt.Sprintf("Unable to create session: %s", err.Error()), false, 1)
@@ -350,7 +349,7 @@ func fetch_user_feed(handle string, how_many int) {
 		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
 	}
 
-	trove, err := scraper.GetUserFeedGraphqlFor(user.ID, how_many)
+	trove, err := scraper.GetUserFeed(user.ID, how_many)
 	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error scraping feed: %s\n  %s", handle, err.Error()), false, -2)
 	}
@@ -526,7 +525,10 @@ func start_webserver(addr string, should_auto_open bool) {
 }
 
 func fetch_inbox(how_many int) {
-	trove, _ := scraper.GetInbox(how_many)
+	trove, _, err := scraper.GetInbox(how_many)
+	if err != nil {
+		die(fmt.Sprintf("Failed to fetch inbox:\n  %s", err.Error()), false, 1)
+	}
 	profile.SaveTweetTrove(trove, true)
 	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)), nil)
 }
@@ -537,7 +539,10 @@ func fetch_dm(id string, how_many int) {
 		panic(err)
 	}
 	max_id := scraper.DMMessageID(^uint(0) >> 1)
-	trove := scraper.GetConversation(room.ID, max_id, how_many)
+	trove, err := scraper.GetConversation(room.ID, max_id, how_many)
+	if err != nil {
+		die(fmt.Sprintf("Failed to fetch dm:\n  %s", err.Error()), false, 1)
+	}
 	profile.SaveTweetTrove(trove, true)
 	happy_exit(
 		fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)),
@@ -551,7 +556,10 @@ func send_dm(room_id string, text string, in_reply_to_id int) {
 		die(fmt.Sprintf("No such chat room: %d", in_reply_to_id), false, 1)
 	}
 
-	trove := scraper.SendDMMessage(room.ID, text, scraper.DMMessageID(in_reply_to_id))
+	trove, err := scraper.SendDMMessage(room.ID, text, scraper.DMMessageID(in_reply_to_id))
+	if err != nil {
+		die(fmt.Sprintf("Failed to send dm:\n  %s", err.Error()), false, 1)
+	}
 	profile.SaveTweetTrove(trove, true)
 	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)), nil)
 }

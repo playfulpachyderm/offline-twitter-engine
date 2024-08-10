@@ -15,9 +15,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const API_CONVERSATION_BASE_PATH = "https://twitter.com/i/api/2/timeline/conversation/"
-const API_USER_TIMELINE_BASE_PATH = "https://api.twitter.com/2/timeline/profile/"
-
 type API struct {
 	UserHandle      UserHandle
 	UserID          UserID
@@ -305,102 +302,6 @@ func add_tweet_query_params(query *url.Values) {
 	query.Add("include_tweet_replies", "true")
 	query.Add("ext", "mediaStats,highlightedLabel")
 	query.Add("count", "20")
-}
-
-func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) {
-	// TODO: this function isn't actually used for anything (APIv2 is used instead)
-	url, err := url.Parse(fmt.Sprintf("%s%d.json", API_USER_TIMELINE_BASE_PATH, user_id))
-	if err != nil {
-		panic(err)
-	}
-	queryParams := url.Query()
-	add_tweet_query_params(&queryParams)
-	url.RawQuery = queryParams.Encode()
-
-	var result TweetResponse
-	err = api.do_http(url.String(), cursor, &result)
-
-	return result, err
-}
-
-/**
- * Resend the request to get more tweets if necessary
- *
- * args:
- * - user_id: the user's UserID
- * - response: an "out" parameter; the TweetResponse that tweets, RTs and users will be appended to
- * - min_tweets: the desired minimum amount of tweets to get
- */
-func (api API) GetMoreTweetsFromFeed(user_id UserID, response *TweetResponse, min_tweets int) error {
-	// TODO user-feed-infinite-fetch: what if you reach the end of the user's timeline?  Might loop
-	// forever getting no new tweets
-	last_response := response
-	for last_response.GetCursor() != "" && len(response.GlobalObjects.Tweets) < min_tweets {
-		fresh_response, err := api.GetFeedFor(user_id, last_response.GetCursor())
-		if err != nil {
-			return err
-		}
-
-		if fresh_response.GetCursor() == last_response.GetCursor() && len(fresh_response.GlobalObjects.Tweets) == 0 {
-			// Empty response, cursor same as previous: end of feed has been reached
-			return END_OF_FEED
-		}
-		if fresh_response.IsEndOfFeed() {
-			// Response has a pinned tweet, but no other content: end of feed has been reached
-			return END_OF_FEED
-		}
-
-		last_response = &fresh_response
-
-		// Copy over the tweets and the users
-		for id, tweet := range last_response.GlobalObjects.Tweets {
-			response.GlobalObjects.Tweets[id] = tweet
-		}
-		for id, user := range last_response.GlobalObjects.Users {
-			response.GlobalObjects.Users[id] = user
-		}
-		fmt.Printf("Have %d tweets, and %d users so far\n", len(response.GlobalObjects.Tweets), len(response.GlobalObjects.Users))
-	}
-	return nil
-}
-
-func (api *API) GetTweet(id TweetID, cursor string) (TweetResponse, error) {
-	url, err := url.Parse(fmt.Sprintf("%s%d.json", API_CONVERSATION_BASE_PATH, id))
-	if err != nil {
-		panic(err)
-	}
-	queryParams := url.Query()
-	if cursor != "" {
-		queryParams.Add("referrer", "tweet")
-	}
-	add_tweet_query_params(&queryParams)
-	url.RawQuery = queryParams.Encode()
-
-	var result TweetResponse
-	err = api.do_http(url.String(), cursor, &result)
-	return result, err
-}
-
-// Resend the request to get more replies if necessary
-func (api *API) GetMoreReplies(tweet_id TweetID, response *TweetResponse, max_replies int) error {
-	last_response := response
-	for last_response.GetCursor() != "" && len(response.GlobalObjects.Tweets) < max_replies {
-		fresh_response, err := api.GetTweet(tweet_id, last_response.GetCursor())
-		if err != nil {
-			return err
-		}
-
-		last_response = &fresh_response
-
-		// Copy over the tweets and the users
-		for id, tweet := range last_response.GlobalObjects.Tweets {
-			response.GlobalObjects.Tweets[id] = tweet
-		}
-		for id, user := range last_response.GlobalObjects.Users {
-			response.GlobalObjects.Users[id] = user
-		}
-	}
-	return nil
 }
 
 func DownloadMedia(url string) ([]byte, error) {

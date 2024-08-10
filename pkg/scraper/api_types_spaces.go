@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"fmt"
 	"net/url"
 )
 
@@ -130,4 +131,16 @@ func (api API) GetSpace(id SpaceID) (SpaceResponse, error) {
 	var result SpaceResponse
 	err = api.do_http(url.String(), "", &result)
 	return result, err
+}
+
+func (api *API) FetchSpaceDetail(id SpaceID) (TweetTrove, error) {
+	space_response, err := api.GetSpace(id)
+	if err != nil {
+		return TweetTrove{}, fmt.Errorf("Error in API call to fetch Space (id %q):\n  %w", id, err)
+	}
+	return space_response.ToTweetTrove(), nil
+}
+
+func FetchSpaceDetail(id SpaceID) (TweetTrove, error) {
+	return the_api.FetchSpaceDetail(id)
 }

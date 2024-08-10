@@ -186,7 +186,7 @@ type APIDMResponse struct {
 	UserEvents           APIInbox `json:"user_events"`
 }
 
-func (r APIInbox) ToTweetTrove() TweetTrove {
+func (r APIInbox) ToTweetTrove(current_user_id UserID) TweetTrove {
 	ret := NewTweetTrove()
 
 	for _, entry := range r.Entries {
@@ -212,7 +212,7 @@ func (r APIInbox) ToTweetTrove() TweetTrove {
 		ret.MergeWith(entry.Message.ToTweetTrove())
 	}
 	for _, room := range r.Conversations {
-		result := ParseAPIDMChatRoom(room)
+		result := ParseAPIDMChatRoom(room, current_user_id)
 		ret.Rooms[result.ID] = result
 	}
 	for _, u := range r.Users {
@@ -403,7 +403,11 @@ func (api *API) GetDMConversation(id DMChatRoomID, max_id DMMessageID) (APIInbox
 	return result.ConversationTimeline, err
 }
 
-func (api *API) PollInboxUpdates(cursor string) (APIInbox, error) {
+// Returns a TweetTrove and the cursor for the next update, or an error
+func (api *API) PollInboxUpdates(cursor string) (TweetTrove, string, error) {
+	if !api.IsAuthenticated {
+		return TweetTrove{}, "", ErrLoginRequired
+	}
 	url, err := url.Parse("https://twitter.com/i/api/1.1/dm/user_updates.json")
 	if err != nil {
 		panic(err)
@@ -449,10 +453,16 @@ func (api *API) PollInboxUpdates(cursor string) (APIInbox, error) {
 
 	var result APIDMResponse
 	err = api.do_http(url.String(), "", &result)
-	return result.UserEvents, err
+	if err != nil {
+		return TweetTrove{}, "", err
+	}
+	return result.UserEvents.ToTweetTrove(api.UserID), result.UserEvents.Cursor, nil
 }
 
-func (api *API) SendDMMessage(room_id DMChatRoomID, text string, in_reply_to_id DMMessageID) (APIInbox, error) {
+func (api *API) SendDMMessage(room_id DMChatRoomID, text string, in_reply_to_id DMMessageID) (TweetTrove, error) {
+	if !api.IsAuthenticated {
+		return TweetTrove{}, ErrLoginRequired
+	}
 	url, err := url.Parse("https://twitter.com/i/api/1.1/dm/new2.json")
 	if err != nil {
 		panic(err)
@@ -519,11 +529,18 @@ func (api *API) SendDMMessage(room_id DMChatRoomID, text string, in_reply_to_id 
 
 	var result APIInbox
 	err = api.do_http_POST(url.String(), post_data, &result)
-	return result, err
+
+	if err != nil {
+		return TweetTrove{}, err
+	}
+	return result.ToTweetTrove(api.UserID), nil
 }
 
 // Send a reacc
 func (api *API) SendDMReaction(room_id DMChatRoomID, message_id DMMessageID, reacc string) error {
+	if !api.IsAuthenticated {
+		return ErrLoginRequired
+	}
 	url := "https://twitter.com/i/api/graphql/VyDyV9pC2oZEj6g52hgnhA/useDMReactionMutationAddMutation"
 	body := `{"variables":{"conversationId":"` + string(room_id) + `","messageId":"` + fmt.Sprint(message_id) +
 		`","reactionTypes":["Emoji"],"emojiReactions":["` + reacc + `"]},"queryId":"VyDyV9pC2oZEj6g52hgnhA"}`
@@ -546,14 +563,14 @@ func (api *API) SendDMReaction(room_id DMChatRoomID, message_id DMMessageID, rea
 }
 
 // Mark a chat as read.
-func (api *API) MarkDMChatRead(room_id DMChatRoomID, read_message_id DMMessageID) {
+func (api *API) MarkDMChatRead(room_id DMChatRoomID, read_message_id DMMessageID) error {
+	if !api.IsAuthenticated {
+		return ErrLoginRequired
+	}
 	url := fmt.Sprintf("https://twitter.com/i/api/1.1/dm/conversation/%s/mark_read.json", room_id)
 
 	// `do_http_POST` will set the "content-type" header based on whether the body starts with '{' or not.
 	data := fmt.Sprintf("conversationId=%s&last_read_event_id=%d", room_id, read_message_id)
 
-	err := api.do_http_POST(url, data, nil) // Expected: HTTP 204
-	if err != nil {
-		panic(err)
-	}
+	return api.do_http_POST(url, data, nil) // Expected: HTTP 204
 }

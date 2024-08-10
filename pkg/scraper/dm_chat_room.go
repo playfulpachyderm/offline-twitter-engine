@@ -53,7 +53,7 @@ func (r DMChatRoom) GetParticipantIDs() []UserID {
 	return ret
 }
 
-func ParseAPIDMChatRoom(api_room APIDMConversation) DMChatRoom {
+func ParseAPIDMChatRoom(api_room APIDMConversation, current_user_id UserID) DMChatRoom {
 	ret := DMChatRoom{}
 	ret.ID = DMChatRoomID(api_room.ConversationID)
 	ret.Type = api_room.Type
@@ -80,7 +80,7 @@ func ParseAPIDMChatRoom(api_room APIDMConversation) DMChatRoom {
 		participant.LastReadEventID = DMMessageID(api_participant.LastReadEventID)
 
 		// Process chat settings if this is the logged-in user
-		if participant.UserID == the_api.UserID {
+		if participant.UserID == current_user_id {
 			participant.IsNotificationsDisabled = api_room.NotificationsDisabled
 			participant.IsReadOnly = api_room.ReadOnly
 			participant.IsTrusted = api_room.Trusted

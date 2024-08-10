@@ -4,14 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var AlreadyLikedThisTweet error = errors.New("already liked this tweet")
 var HaventLikedThisTweet error = errors.New("Haven't liked this tweet")
 
 func (api API) LikeTweet(id TweetID) (Like, error) {
+	if !api.IsAuthenticated {
+		return Like{}, ErrLoginRequired
+	}
 	type LikeResponse struct {
 		Data struct {
 			FavoriteTweet string `json:"favorite_tweet"`
@@ -52,6 +53,9 @@ func (api API) LikeTweet(id TweetID) (Like, error) {
 }
 
 func (api API) UnlikeTweet(id TweetID) error {
+	if !api.IsAuthenticated {
+		return ErrLoginRequired
+	}
 	type UnlikeResponse struct {
 		Data struct {
 			UnfavoriteTweet string `json:"unfavorite_tweet"`
@@ -84,14 +88,8 @@ func (api API) UnlikeTweet(id TweetID) error {
 }
 
 func LikeTweet(id TweetID) (Like, error) {
-	if !the_api.IsAuthenticated {
-		log.Fatalf("Must be authenticated!")
-	}
 	return the_api.LikeTweet(id)
 }
 func UnlikeTweet(id TweetID) error {
-	if !the_api.IsAuthenticated {
-		log.Fatalf("Must be authenticated!")
-	}
 	return the_api.UnlikeTweet(id)
 }
