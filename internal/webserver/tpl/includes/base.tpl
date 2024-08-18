@@ -50,6 +50,9 @@
         </div>
       </dialog>
       <div class="toasts" id="toasts">
+        {{range (global_data).Toasts}}
+          {{template "toast" .}}
+        {{end}}
       </div>
     </body>
   </html>

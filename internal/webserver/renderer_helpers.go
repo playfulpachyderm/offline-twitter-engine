@@ -25,6 +25,7 @@ type PageGlobalData struct {
 	SearchText     string
 	FocusedTweetID scraper.TweetID
 	Notifications
+	Toasts []Toast
 }
 
 func (d PageGlobalData) Tweet(id scraper.TweetID) scraper.Tweet {

@@ -38,7 +38,7 @@ func (app *Application) error_500(w http.ResponseWriter, r *http.Request, err er
 }
 
 func (app *Application) toast(w http.ResponseWriter, r *http.Request, t Toast) {
-	// Reset the HTMX response to return an error toast and put it in the
+	// Reset the HTMX response to return an error toast and append it to the Toasts container
 	w.Header().Set("HX-Reswap", "beforeend")
 	w.Header().Set("HX-Retarget", "#toasts")
 	w.Header().Set("HX-Push-Url", "false")
@@ -46,6 +46,12 @@ func (app *Application) toast(w http.ResponseWriter, r *http.Request, t Toast) {
 	app.buffered_render_htmx(w, "toast", PageGlobalData{}, t)
 }
 
+// `Type` can be:
+//   - "success" (default)
+//   - "warning"
+//   - "error"
+//
+// If "AutoCloseDelay" is not 0, the toast will auto-disappear after that many milliseconds.
 type Toast struct {
 	Title          string
 	Message        string

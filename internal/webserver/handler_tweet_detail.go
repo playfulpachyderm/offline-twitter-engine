@@ -50,13 +50,16 @@ func (app *Application) ensure_tweet(id scraper.TweetID, is_forced bool, is_conv
 
 	if is_needing_scrape && !app.IsScrapingDisabled {
 		trove, err := scraper.GetTweetFullAPIV2(id, 50) // TODO: parameterizable
+
+		// Save the trove unless there was an unrecoverable error
 		if err == nil || errors.Is(err, scraper.END_OF_FEED) || errors.Is(err, scraper.ErrRateLimited) {
 			app.Profile.SaveTweetTrove(trove, false)
 			go app.Profile.SaveTweetTrove(trove, true) // Download the content in the background
 			_, is_available = trove.Tweets[id]
-		} else {
-			app.ErrorLog.Print(err)
-			// TODO: show error in UI
+		}
+
+		if err != nil && !errors.Is(err, scraper.END_OF_FEED) {
+			return scraper.Tweet{}, fmt.Errorf("scraper error: %w", err)
 		}
 	} else if is_needing_scrape {
 		app.InfoLog.Printf("Would have scraped Tweet: %d", id)
@@ -115,10 +118,31 @@ func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 	is_conversation_required := len(parts) <= 2 || (parts[2] != "like" && parts[2] != "unlike")
 
 	tweet, err := app.ensure_tweet(tweet_id, is_scrape_required, is_conversation_required)
-	if errors.Is(err, ErrNotFound) {
-		app.error_404(w)
-		return
+	var toasts []Toast
+	if err != nil {
+		app.ErrorLog.Print(fmt.Errorf("TweetDetail (%d): %w", tweet_id, err))
+		if errors.Is(err, ErrNotFound) {
+			// Can't find the tweet; abort
+			app.toast(w, r, Toast{Title: "Not found", Message: "Tweet not found in database", Type: "error"})
+			return
+		} else if errors.Is(err, scraper.ErrSessionInvalidated) {
+			toasts = append(toasts, Toast{
+				Title:   "Session invalidated",
+				Message: "Your session has been invalidated by Twitter.  You'll have to log in again.",
+				Type:    "error",
+			})
+			// TODO: delete the invalidated session
+		} else if errors.Is(err, scraper.ErrRateLimited) {
+			toasts = append(toasts, Toast{
+				Title:   "Rate limited",
+				Message: "While scraping, a rate-limit was hit.  Results may be incomplete.",
+				Type:    "warning",
+			})
+		} else {
+			panic(err) // Let the 500 handler deal with it
+		}
 	}
+
 	req_with_tweet := r.WithContext(add_tweet_to_context(r.Context(), tweet))
 
 	if len(parts) > 2 && parts[2] == "like" {
@@ -137,7 +161,7 @@ func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 	app.buffered_render_page(
 		w,
 		"tpl/tweet_detail.tpl",
-		PageGlobalData{TweetTrove: twt_detail.TweetTrove, FocusedTweetID: data.MainTweetID},
+		PageGlobalData{TweetTrove: twt_detail.TweetTrove, FocusedTweetID: data.MainTweetID, Toasts: toasts},
 		data,
 	)
 }
