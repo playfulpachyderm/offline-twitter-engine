@@ -155,6 +155,21 @@ func is_timeout(err error) bool {
 	return false
 }
 
+func is_session_invalidated(respBody []byte) bool {
+	var result struct {
+		Errors []struct {
+			Message string
+			Code    int
+		} `json:"errors"`
+	}
+	err := json.Unmarshal(respBody, &result)
+	if err != nil {
+		panic(err)
+	}
+	return len(result.Errors) == 1 &&
+		(result.Errors[0].Message == "Could not authenticate you" || result.Errors[0].Code == 32)
+}
+
 func (api *API) do_http_POST(remote_url string, body string, result interface{}) error {
 	req, err := http.NewRequest("POST", remote_url, strings.NewReader(body))
 	if err != nil {
@@ -198,6 +213,10 @@ func (api *API) do_http_POST(remote_url string, body string, result interface{})
 	}
 
 	if resp.StatusCode != 200 {
+		if resp.StatusCode == 401 && is_session_invalidated(respBody) {
+			return ErrSessionInvalidated
+		}
+
 		responseHeaders := ""
 		for header := range resp.Header {
 			responseHeaders += fmt.Sprintf("    %s: %s\n", header, resp.Header.Get(header))
@@ -260,6 +279,10 @@ func (api *API) do_http(remote_url string, cursor string, result interface{}) er
 	}
 
 	if resp.StatusCode != 200 && resp.StatusCode != 403 {
+		if resp.StatusCode == 401 && is_session_invalidated(body) {
+			return ErrSessionInvalidated
+		}
+
 		responseHeaders := ""
 		for header := range resp.Header {
 			responseHeaders += fmt.Sprintf("    %s: %s\n", header, resp.Header.Get(header))
@@ -364,6 +387,10 @@ func (api *API) DownloadMedia(remote_url string) ([]byte, error) {
 			panic(err)
 		}
 		print_curl_cmd(*req, api.Client.Jar.Cookies(url))
+
+		if resp.StatusCode == 401 && is_session_invalidated(body) {
+			return body, ErrSessionInvalidated
+		}
 
 		responseHeaders := ""
 		for header := range resp.Header {
