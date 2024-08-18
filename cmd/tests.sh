@@ -229,29 +229,29 @@ test $(sqlite3 twitter.db "select is_private from users where handle = 'Landshar
 
 
 # Test tweets with URLs
-tw fetch_user ScottAdamsSays
+tw fetch_user KashPrime
 urls_count=$(sqlite3 twitter.db "select count(*) from urls")
-test "$(sqlite3 twitter.db "select * from tweets where id = 1812198878403612695")" = ""  # Check it's not already there
-tw fetch_tweet_only https://twitter.com/ScottAdamsSays/status/1812198878403612695
+test "$(sqlite3 twitter.db "select * from tweets where id = 1825294074129109100")" = ""  # Check it's not already there
+tw fetch_tweet_only https://twitter.com/KashPrime/status/1825294074129109100
 urls_count_after=$(sqlite3 twitter.db "select count(*) from urls")
 test $urls_count_after = $(($urls_count + 1))
-test "$(sqlite3 twitter.db "select title from urls where tweet_id = 1812198878403612695")" = "How to Fail at Almost Everything and Still Win Big: Kind of the Story of My Life (The Scott Adams..."
-test $(sqlite3 twitter.db "select count(*) from urls where tweet_id = 1812198878403612695") = "1"
-thumbnail_name=$(sqlite3 twitter.db "select thumbnail_remote_url from urls where tweet_id = 1812198878403612695" | grep -Po "(?<=/)[\w-]+(?=\?)")
+test "$(sqlite3 twitter.db "select title from urls where tweet_id = 1825294074129109100")" = "Meta drops lawsuit against web-scraping firm Bright Data that sold millions of Instagram records |..."
+test $(sqlite3 twitter.db "select count(*) from urls where tweet_id = 1825294074129109100") = "1"
+thumbnail_name=$(sqlite3 twitter.db "select thumbnail_remote_url from urls where tweet_id = 1825294074129109100" | grep -Po "(?<=/)[\w-]+(?=\?)")
 test -n "$thumbnail_name"  # Not testing for what the thumbnail url is because it keeps changing
 
 # Try to double-fetch it; shouldn't duplicate the URL
-tw fetch_tweet_only https://twitter.com/ScottAdamsSays/status/1812198878403612695
+tw fetch_tweet_only https://twitter.com/KashPrime/status/1825294074129109100
 urls_count_after_2x=$(sqlite3 twitter.db "select count(*) from urls")
 test $urls_count_after_2x = $urls_count_after
 
 # Download the link's preview image
-test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1812198878403612695") = "0"
-test $(sqlite3 twitter.db "select is_content_downloaded from urls where tweet_id = 1812198878403612695") = "0"
+test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1825294074129109100") = "0"
+test $(sqlite3 twitter.db "select is_content_downloaded from urls where tweet_id = 1825294074129109100") = "0"
 initial_link_preview_images_count=$(find link_preview_images -mindepth 2 | wc -l)
-tw download_tweet_content 1812198878403612695
-test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1812198878403612695") = "1"
-test $(sqlite3 twitter.db "select is_content_downloaded from urls where tweet_id = 1812198878403612695") = "1"
+tw download_tweet_content 1825294074129109100
+test $(sqlite3 twitter.db "select is_content_downloaded from tweets where id = 1825294074129109100") = "1"
+test $(sqlite3 twitter.db "select is_content_downloaded from urls where tweet_id = 1825294074129109100") = "1"
 test $(find link_preview_images -mindepth 2 | wc -l) = "$((initial_link_preview_images_count + 1))"
 find link_preview_images | grep -P ${thumbnail_name}\\w*.\\w+
 
