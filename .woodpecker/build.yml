@@ -29,7 +29,8 @@ pipeline:
     #   - branch: v*.*.*
     commands:
       - cd cmd
-      - echo "$OFFLINE_TWATTER_SESSION_FILE" > $SESSION_FILE_PATH # Write the session file to temp location
+      - mkdir -p $(dirname $SESSION_FILE_PATH)                     # Make the temp directory...
+      - echo "$OFFLINE_TWATTER_SESSION_FILE" > $SESSION_FILE_PATH  # ...and write the session file to temp location
       - ./tests.sh
 
   webserver_test:
