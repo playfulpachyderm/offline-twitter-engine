@@ -18,7 +18,10 @@ pipeline:
   integration_test:
     image: offline-twitter/go
     secrets:
-      - offline_twatter_passwd
+      # - offline_twatter_passwd
+      - offline_twatter_session_file
+    environment:
+      - SESSION_FILE_PATH="/tmp/Offline_Twatter.session" # Temp location, to be imported by the integration test
     when:  # At least one
       - path:
         - pkg/scraper/**
@@ -26,6 +29,7 @@ pipeline:
       - branch: v*.*.*
     commands:
       - cd cmd
+      - echo "$OFFLINE_TWATTER_SESSION_FILE" > $SESSION_FILE_PATH # Write the session file to temp location
       - ./tests.sh
 
   webserver_test:
@@ -40,10 +44,11 @@ pipeline:
 
   version_bump_test:
     image: offline-twitter/go
-    when:
-      branch: v*.*.*
+    # when:
+    #   branch: v*.*.*
     secrets:
-      - offline_twatter_passwd
+      # - offline_twatter_passwd
+      - offline_twatter_session_file
     commands:
       - export version=$(echo $CI_COMMIT_BRANCH | grep -Poh "(?<=^v)\d+\.\d+\.\d+")
       - curl https://apt.playfulpachyderm.com/KEY.gpg | sudo apt-key add -
@@ -53,7 +58,9 @@ pipeline:
       - which twitter
       - twitter create_profile outdated_profile
       - cd outdated_profile
-      - twitter login offline_twatter "$OFFLINE_TWATTER_PASSWD"
+      # TODO: The CI server appears to have been IP-banned.  Replacing login with session-file secret for now
+      # - twitter login offline_twatter "$OFFLINE_TWATTER_PASSWD"
+      - echo "$OFFLINE_TWATTER_SESSION_FILE" > Offline_Twatter.session  # Write the session file
       - twitter fetch_user pcmonk
       - twitter --session Offline_Twatter get_user_tweets pcmonk
       - (cd ../cmd && ./compile.sh $version)

@@ -5,10 +5,11 @@ set -x
 
 PS4='+(${BASH_SOURCE}:${LINENO}): '
 
-if [[ -z "$OFFLINE_TWATTER_PASSWD" ]]; then
-    echo "OFFLINE_TWATTER_PASSWD not set!  Exiting."
+if [[ -z "$OFFLINE_TWATTER_PASSWD" && -z "$SESSION_FILE_PATH" ]]; then
+    echo "Neither SESSION_FILE_PATH nor OFFLINE_TWATTER_PASSWD is set!  Please provide one or the other.  Exiting."
     exit 1
 fi
+
 FAKE_VERSION="1.100.3489"
 ./compile.sh $FAKE_VERSION
 
@@ -28,20 +29,28 @@ cd data
 test $(find profile_images | wc -l) = "2"
 test -f profile_images/default_profile.png
 
-
-
 # Print an error message in red before exiting if a test fails
 trap 'echo -e "\033[31mTEST FAILURE.  Aborting\033[0m"' ERR
 
-# Testing login
-tw login offline_twatter "$OFFLINE_TWATTER_PASSWD"
-test -f Offline_Twatter.session
+# If a SESSION_FILE_PATH is provided, then use it instead of logging in
+if [[ -n "$SESSION_FILE_PATH" ]]; then
+    echo "Using provided session file: $SESSION_FILE_PATH"
+    cp $SESSION_FILE_PATH Offline_Twatter.session
+else
+    # Testing login
+    test ! -e Offline_Twatter.session
+    tw login offline_twatter "$OFFLINE_TWATTER_PASSWD"
+    test -f Offline_Twatter.session
+fi
+# Ensure session file is valid
 test "$(jq .UserHandle Offline_Twatter.session)" = "\"Offline_Twatter\""
 test "$(jq .IsAuthenticated Offline_Twatter.session)" = "true"
 jq .CSRFToken Offline_Twatter.session | grep -P '"\w+"'
 
+
 shopt -s expand_aliases
 alias tw="tw --session Offline_Twatter"
+
 
 # Fetch a user
 initial_profile_images_count=$(find profile_images | wc -l)
