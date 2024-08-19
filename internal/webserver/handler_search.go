@@ -50,7 +50,7 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 		// Redirect GET param "q" to use a URL param instead
 		search_text = r.URL.Query().Get("q")
 		if search_text == "" {
-			app.error_400_with_message(w, "Empty search query")
+			app.error_400_with_message(w, r, "Empty search query")
 			return
 			// TODO: return an actual page
 		}
@@ -114,19 +114,19 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 
 	c, err := persistence.NewCursorFromSearchQuery(search_text)
 	if err != nil {
-		app.error_400_with_message(w, err.Error())
+		app.error_400_with_message(w, r, err.Error())
 		return
 		// TODO: return actual page
 	}
 	err = parse_cursor_value(&c, r)
 	if err != nil {
-		app.error_400_with_message(w, "invalid cursor (must be a number)")
+		app.error_400_with_message(w, r, "invalid cursor (must be a number)")
 		return
 	}
 	var is_ok bool
 	c.SortOrder, is_ok = persistence.SortOrderFromString(r.URL.Query().Get("sort-order"))
 	if !is_ok && r.URL.Query().Get("sort-order") != "" {
-		app.error_400_with_message(w, "Invalid sort order")
+		app.error_400_with_message(w, r, "Invalid sort order")
 	}
 
 	feed, err := app.Profile.NextPage(c, app.ActiveUser.ID)

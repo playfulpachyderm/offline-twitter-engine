@@ -106,7 +106,7 @@ func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	val, err := strconv.Atoi(parts[1])
 	if err != nil {
-		app.error_400_with_message(w, fmt.Sprintf("Invalid tweet ID: %q", parts[1]))
+		app.error_400_with_message(w, r, fmt.Sprintf("Invalid tweet ID: %q", parts[1]))
 		return
 	}
 	tweet_id := scraper.TweetID(val)
@@ -123,7 +123,7 @@ func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 		app.ErrorLog.Print(fmt.Errorf("TweetDetail (%d): %w", tweet_id, err))
 		if errors.Is(err, ErrNotFound) {
 			// Can't find the tweet; abort
-			app.toast(w, r, Toast{Title: "Not found", Message: "Tweet not found in database", Type: "error"})
+			app.error_404(w, r)
 			return
 		} else if errors.Is(err, scraper.ErrSessionInvalidated) {
 			toasts = append(toasts, Toast{

@@ -20,7 +20,7 @@ func (app *Application) OfflineTimeline(w http.ResponseWriter, r *http.Request) 
 	c := persistence.NewTimelineCursor()
 	err := parse_cursor_value(&c, r)
 	if err != nil {
-		app.error_400_with_message(w, "invalid cursor (must be a number)")
+		app.error_400_with_message(w, r, "invalid cursor (must be a number)")
 		return
 	}
 
@@ -65,7 +65,7 @@ func (app *Application) Timeline(w http.ResponseWriter, r *http.Request) {
 	}
 	err := parse_cursor_value(&c, r)
 	if err != nil {
-		app.error_400_with_message(w, "invalid cursor (must be a number)")
+		app.error_400_with_message(w, r, "invalid cursor (must be a number)")
 		return
 	}
 

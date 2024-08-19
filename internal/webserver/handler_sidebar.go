@@ -9,7 +9,7 @@ func (app *Application) NavSidebarPollUpdates(w http.ResponseWriter, r *http.Req
 
 	// Must be an HTMX request, otherwise HTTP 400
 	if !is_htmx(r) {
-		app.error_400_with_message(w, "This is an HTMX-only endpoint, not a page")
+		app.error_400_with_message(w, r, "This is an HTMX-only endpoint, not a page")
 		return
 	}
 

@@ -202,7 +202,7 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'Messages' handler (path: %q)", r.URL.Path)
 
 	if app.ActiveUser.ID == 0 {
-		app.error_401(w)
+		app.error_401(w, r)
 		return
 	}
 

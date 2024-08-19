@@ -15,7 +15,7 @@ func (app *Application) Bookmarks(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Has("scrape") {
 		if app.IsScrapingDisabled {
 			app.InfoLog.Printf("Would have scraped: %s", r.URL.Path)
-			http.Error(w, "Scraping is disabled (are you logged in?)", 401)
+			http.Error(w, "Scraping is disabled (are you logged in?)", 401) // TODO: toast
 			return
 		}
 
@@ -33,7 +33,7 @@ func (app *Application) Bookmarks(w http.ResponseWriter, r *http.Request) {
 	c := persistence.NewUserFeedBookmarksCursor(app.ActiveUser.Handle)
 	err := parse_cursor_value(&c, r)
 	if err != nil {
-		app.error_400_with_message(w, "invalid cursor (must be a number)")
+		app.error_400_with_message(w, r, "invalid cursor (must be a number)")
 		return
 	}
 

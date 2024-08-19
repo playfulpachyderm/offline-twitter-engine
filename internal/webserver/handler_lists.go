@@ -39,7 +39,7 @@ func (app *Application) ListDetailFeed(w http.ResponseWriter, r *http.Request) {
 	c := persistence.NewListCursor(list.ID)
 	err := parse_cursor_value(&c, r)
 	if err != nil {
-		app.error_400_with_message(w, "invalid cursor (must be a number)")
+		app.error_400_with_message(w, r, "invalid cursor (must be a number)")
 		return
 	}
 	feed, err := app.Profile.NextPage(c, app.ActiveUser.ID)
@@ -98,7 +98,7 @@ func (app *Application) ListDetail(w http.ResponseWriter, r *http.Request) {
 	case "remove_user":
 		app.ListRemoveUser(w, r)
 	default:
-		app.error_404(w)
+		app.error_404(w, r)
 	}
 }
 
@@ -109,7 +109,7 @@ func (app *Application) ListAddUser(w http.ResponseWriter, r *http.Request) {
 	}
 	user, err := app.Profile.GetUserByHandle(UserHandle(handle))
 	if err != nil {
-		app.error_400_with_message(w, "Fetch user: "+err.Error())
+		app.error_400_with_message(w, r, "Fetch user: "+err.Error())
 		return
 	}
 	list := get_list_from_context(r.Context())
@@ -124,7 +124,7 @@ func (app *Application) ListRemoveUser(w http.ResponseWriter, r *http.Request) {
 	}
 	user, err := app.Profile.GetUserByHandle(UserHandle(handle))
 	if err != nil {
-		app.error_400_with_message(w, "Fetch user: "+err.Error())
+		app.error_400_with_message(w, r, "Fetch user: "+err.Error())
 		return
 	}
 	list := get_list_from_context(r.Context())
@@ -141,12 +141,12 @@ func (app *Application) Lists(w http.ResponseWriter, r *http.Request) {
 	if parts[0] != "" { // If there's an ID param
 		_list_id, err := strconv.Atoi(parts[0])
 		if err != nil {
-			app.error_400_with_message(w, "List ID must be a number")
+			app.error_400_with_message(w, r, "List ID must be a number")
 			return
 		}
 		list, err := app.Profile.GetListById(ListID(_list_id))
 		if err != nil {
-			app.error_404(w)
+			app.error_404(w, r)
 			return
 		}
 		req_with_ctx := r.WithContext(add_list_to_context(r.Context(), list))

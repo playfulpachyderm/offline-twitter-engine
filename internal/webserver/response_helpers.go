@@ -12,20 +12,31 @@ func panic_if(err error) {
 	}
 }
 
-// func (app *Application) error_400(w http.ResponseWriter) {
-// 	http.Error(w, "Bad Request", 400)
-// }
-
-func (app *Application) error_400_with_message(w http.ResponseWriter, msg string) {
-	http.Error(w, fmt.Sprintf("Bad Request\n\n%s", msg), 400)
+func (app *Application) error_400_with_message(w http.ResponseWriter, r *http.Request, msg string) {
+	if is_htmx(r) {
+		w.WriteHeader(400)
+		app.toast(w, r, Toast{Title: "Bad Request", Message: msg, Type: "error"})
+	} else {
+		http.Error(w, fmt.Sprintf("Bad Request\n\n%s", msg), 400)
+	}
 }
 
-func (app *Application) error_401(w http.ResponseWriter) {
-	http.Error(w, "Please log in or set an active session", 401)
+func (app *Application) error_401(w http.ResponseWriter, r *http.Request) {
+	if is_htmx(r) {
+		w.WriteHeader(401)
+		app.toast(w, r, Toast{Title: "Login required", Message: "Please log in or set an active session", Type: "error"})
+	} else {
+		http.Error(w, "Please log in or set an active session", 401)
+	}
 }
 
-func (app *Application) error_404(w http.ResponseWriter) {
-	http.Error(w, "Not Found", 404)
+func (app *Application) error_404(w http.ResponseWriter, r *http.Request) {
+	if is_htmx(r) {
+		w.WriteHeader(404)
+		app.toast(w, r, Toast{Title: "Not found", Type: "error"})
+	} else {
+		http.Error(w, "Not Found", 404)
+	}
 }
 
 func (app *Application) error_500(w http.ResponseWriter, r *http.Request, err error) {

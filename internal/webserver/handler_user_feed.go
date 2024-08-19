@@ -21,7 +21,7 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 			user, err = scraper.GetUser(scraper.UserHandle(parts[0]))
 		}
 		if err != nil {
-			app.error_404(w)
+			app.error_404(w, r)
 			return
 		}
 		panic_if(app.Profile.SaveUser(&user))
@@ -78,7 +78,7 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	}
 	err = parse_cursor_value(&c, r)
 	if err != nil {
-		app.error_400_with_message(w, "invalid cursor (must be a number)")
+		app.error_400_with_message(w, r, "invalid cursor (must be a number)")
 		return
 	}
 

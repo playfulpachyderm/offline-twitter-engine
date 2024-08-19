@@ -71,7 +71,7 @@ func (app *Application) after_login(w http.ResponseWriter, r *http.Request, api 
 	// Ensure the user is downloaded
 	user, err := scraper.GetUser(api.UserHandle)
 	if err != nil {
-		app.error_404(w)
+		app.error_404(w, r)
 		return
 	}
 	panic_if(app.Profile.SaveUser(&user))
@@ -115,7 +115,7 @@ func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
 	panic_if(json.Unmarshal(formdata, &form)) // TODO: HTTP 400 not 500
 	err = app.SetActiveUser(scraper.UserHandle(form.AccountName))
 	if err != nil {
-		app.error_400_with_message(w, fmt.Sprintf("User not in database: %s", form.AccountName))
+		app.error_400_with_message(w, r, fmt.Sprintf("User not in database: %s", form.AccountName))
 		return
 	}
 	data := Notifications{NumMessageNotifications: len(app.Profile.GetUnreadConversations(app.ActiveUser.ID))}
