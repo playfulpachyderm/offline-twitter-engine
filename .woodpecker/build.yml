@@ -21,7 +21,7 @@ pipeline:
       # - offline_twatter_passwd
       - offline_twatter_session_file
     environment:
-      - SESSION_FILE_PATH="/tmp/Offline_Twatter.session" # Temp location, to be imported by the integration test
+      - SESSION_FILE_PATH=/tmp/Offline_Twatter.session # Temp location, to be imported by the integration test
     # when:  # At least one
     #   - path:
     #     - pkg/scraper/**
