@@ -21,16 +21,15 @@ pipeline:
       # - offline_twatter_passwd
       - offline_twatter_session_file
     environment:
-      - SESSION_FILE_PATH=/tmp/Offline_Twatter.session # Temp location, to be imported by the integration test
-    # when:  # At least one
-    #   - path:
-    #     - pkg/scraper/**
-    #     - cmd/**
-    #   - branch: v*.*.*
+      - SESSION_FILE_PATH=/tmp/Offline_Twatter.session  # Temp location, to be imported by the integration test
+    when:  # At least one
+      - path:
+        - pkg/scraper/**
+        - cmd/**
+      - branch: v*.*.*
     commands:
       - cd cmd
       - mkdir -p $(dirname $SESSION_FILE_PATH)                     # Make the temp directory...
-      - ls /tmp
       - echo "$OFFLINE_TWATTER_SESSION_FILE" > $SESSION_FILE_PATH  # ...and write the session file to temp location
       - ./tests.sh
 
@@ -46,8 +45,8 @@ pipeline:
 
   version_bump_test:
     image: offline-twitter/go
-    # when:
-    #   branch: v*.*.*
+    when:
+      branch: v*.*.*
     secrets:
       # - offline_twatter_passwd
       - offline_twatter_session_file

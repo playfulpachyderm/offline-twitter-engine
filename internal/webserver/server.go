@@ -101,6 +101,7 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			// Serve directly from the embedded files
 			http.FileServer(http.FS(embedded_files)).ServeHTTP(w, r)
 		} else {
+			// Serve from disk
 			http.StripPrefix("/static", http.FileServer(http.Dir(get_filepath("static")))).ServeHTTP(w, r)
 		}
 	case "tweet":

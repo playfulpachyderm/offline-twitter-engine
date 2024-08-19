@@ -387,7 +387,6 @@ func (p Profile) fill_dm_contents(trove *TweetTrove) {
 		panic(err)
 	}
 	for _, vid := range videos {
-		println("asdfasfasdf")
 		msg := trove.Messages[vid.DMMessageID]
 		msg.Videos = []Video{vid}
 		trove.Messages[msg.ID] = msg
