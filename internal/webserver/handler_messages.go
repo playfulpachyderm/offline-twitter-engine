@@ -33,7 +33,7 @@ func (app *Application) message_mark_as_read(w http.ResponseWriter, r *http.Requ
 	c.PageSize = 1
 	chat_contents := app.Profile.GetChatRoomMessagesByCursor(c)
 	last_message_id := chat_contents.MessageIDs[len(chat_contents.MessageIDs)-1]
-	panic_if(scraper.MarkDMChatRead(room_id, last_message_id))
+	panic_if(app.API.MarkDMChatRead(room_id, last_message_id))
 	room := chat_contents.Rooms[room_id]
 	participant, is_ok := room.Participants[app.ActiveUser.ID]
 	if !is_ok {
@@ -66,7 +66,7 @@ func (app *Application) message_send(w http.ResponseWriter, r *http.Request) {
 		in_reply_to_id = 0
 	}
 
-	trove, err := scraper.SendDMMessage(room_id, message_data.Text, scraper.DMMessageID(in_reply_to_id))
+	trove, err := app.API.SendDMMessage(room_id, message_data.Text, scraper.DMMessageID(in_reply_to_id))
 	if err != nil {
 		panic(err)
 	}
@@ -96,7 +96,7 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 		data_, err := io.ReadAll(r.Body)
 		panic_if(err)
 		panic_if(json.Unmarshal(data_, &data))
-		panic_if(scraper.SendDMReaction(room_id, data.MessageID, data.Reacc))
+		panic_if(app.API.SendDMReaction(room_id, data.MessageID, data.Reacc))
 
 		dm_message := global_data.Messages[data.MessageID]
 		dm_message.Reactions[app.ActiveUser.ID] = scraper.DMReaction{
@@ -118,7 +118,7 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 
 	if r.URL.Query().Has("scrape") && !app.IsScrapingDisabled {
 		max_id := scraper.DMMessageID(^uint(0) >> 1)
-		trove, err := scraper.GetConversation(room_id, max_id, 50) // TODO: parameterizable
+		trove, err := app.API.GetConversation(room_id, max_id, 50) // TODO: parameterizable
 		if err != nil {
 			panic(err)
 		}

@@ -86,10 +86,3 @@ func (api API) UnlikeTweet(id TweetID) error {
 	}
 	return nil
 }
-
-func LikeTweet(id TweetID) (Like, error) {
-	return the_api.LikeTweet(id)
-}
-func UnlikeTweet(id TweetID) error {
-	return the_api.UnlikeTweet(id)
-}

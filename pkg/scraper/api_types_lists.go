@@ -61,10 +61,6 @@ func (api *API) GetFollowees(user_id UserID, how_many int) (TweetTrove, error) {
 	return api.GetPaginatedQuery(PaginatedFollowees{user_id}, how_many)
 }
 
-func GetFollowees(user_id UserID, how_many int) (TweetTrove, error) {
-	return the_api.GetFollowees(user_id, how_many)
-}
-
 func (api *API) GetFollowersPage(user_id UserID, cursor string) (APIV2Response, error) {
 	url, err := url.Parse(GraphqlURL{
 		BaseUrl: "https://twitter.com/i/api/graphql/3_7xfjmh897x8h_n6QBqTA/Followers",
@@ -120,8 +116,4 @@ func (p PaginatedFollowers) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
 
 func (api *API) GetFollowers(user_id UserID, how_many int) (TweetTrove, error) {
 	return api.GetPaginatedQuery(PaginatedFollowers{user_id}, how_many)
-}
-
-func GetFollowers(user_id UserID, how_many int) (TweetTrove, error) {
-	return the_api.GetFollowers(user_id, how_many)
 }

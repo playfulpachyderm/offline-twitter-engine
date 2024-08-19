@@ -268,6 +268,3 @@ func (api *API) GetTweet(id TweetID) (Tweet, error) {
 	tweet.IsConversationScraped = true
 	return tweet, nil
 }
-func GetTweet(id TweetID) (Tweet, error) {
-	return the_api.GetTweet(id)
-}

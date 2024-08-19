@@ -31,7 +31,7 @@ func (app *Application) background_scrape() {
 	}
 
 	fmt.Println("Scraping home timeline...")
-	trove, err := scraper.GetHomeTimeline("", is_following_only)
+	trove, err := app.API.GetHomeTimeline("", is_following_only)
 	if err != nil {
 		app.ErrorLog.Printf("Background scrape failed: %s", err.Error())
 		return
@@ -66,7 +66,7 @@ func (app *Application) background_user_likes_scrape() {
 	}
 
 	fmt.Println("Scraping user likes...")
-	trove, err := scraper.GetUserLikes(app.ActiveUser.ID, 50) // TODO: parameterizable
+	trove, err := app.API.GetUserLikes(app.ActiveUser.ID, 50) // TODO: parameterizable
 	if err != nil {
 		app.ErrorLog.Printf("Background scrape failed: %s", err.Error())
 		return
@@ -105,9 +105,9 @@ func (app *Application) background_dm_polling_scrape() {
 	var trove scraper.TweetTrove
 	var err error
 	if inbox_cursor == "" {
-		trove, inbox_cursor, err = scraper.GetInbox(0)
+		trove, inbox_cursor, err = app.API.GetInbox(0)
 	} else {
-		trove, inbox_cursor, err = scraper.PollInboxUpdates(inbox_cursor)
+		trove, inbox_cursor, err = app.API.PollInboxUpdates(inbox_cursor)
 	}
 	if err != nil {
 		panic(err)

@@ -82,7 +82,7 @@ func (app *Application) after_login(w http.ResponseWriter, r *http.Request, api 
 	panic_if(err)
 
 	// Scrape the user's feed
-	trove, err := scraper.GetHomeTimeline("", true)
+	trove, err := app.API.GetHomeTimeline("", true)
 	if err != nil {
 		app.ErrorLog.Printf("Initial timeline scrape failed: %s", err.Error())
 		http.Redirect(w, r, "/", 303)
@@ -92,7 +92,7 @@ func (app *Application) after_login(w http.ResponseWriter, r *http.Request, api 
 	go app.Profile.SaveTweetTrove(trove, true)
 
 	// Scrape the user's followers
-	trove, err = scraper.GetFollowees(user.ID, 1000)
+	trove, err = app.API.GetFollowees(user.ID, 1000)
 	if err != nil {
 		app.ErrorLog.Printf("Failed to scrape followers: %s", err.Error())
 		http.Redirect(w, r, "/", 303)

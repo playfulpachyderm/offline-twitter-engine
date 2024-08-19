@@ -154,11 +154,11 @@ func (trove *TweetTrove) FillMissingUserIDs() {
 	}
 }
 
-func (trove *TweetTrove) FillSpaceDetails() error {
+func (trove *TweetTrove) FillSpaceDetails(api *API) error {
 	fmt.Println("Filling space details")
 	for i := range trove.Spaces {
 		fmt.Printf("Getting space: %q\n", trove.Spaces[i].ID)
-		new_trove, err := FetchSpaceDetail(trove.Spaces[i].ID)
+		new_trove, err := api.FetchSpaceDetail(trove.Spaces[i].ID)
 		if err != nil {
 			return err
 		}
@@ -177,10 +177,10 @@ func (trove *TweetTrove) FillSpaceDetails() error {
 	return nil
 }
 
-func (trove *TweetTrove) PostProcess() error {
+func (trove *TweetTrove) PostProcess(api *API) error {
 	trove.FetchTombstoneUsers()
 	trove.FillMissingUserIDs()
-	err := trove.FillSpaceDetails()
+	err := trove.FillSpaceDetails(api)
 	if err != nil {
 		return err
 	}

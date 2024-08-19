@@ -31,6 +31,7 @@ type Application struct {
 	Profile            persistence.Profile
 	ActiveUser         scraper.User
 	IsScrapingDisabled bool
+	API                scraper.API
 }
 
 func NewApp(profile persistence.Profile) Application {
@@ -44,6 +45,11 @@ func NewApp(profile persistence.Profile) Application {
 		ActiveUser:         get_default_user(),
 		IsScrapingDisabled: true, // Until an active user is set
 	}
+
+	// Can ignore errors; if not authenticated, it won't be used for anything.
+	// GetUser and Login both create a new session.
+	ret.API, _ = scraper.NewGuestSession() //nolint:errcheck // see above
+
 	ret.Middlewares = []Middleware{
 		secureHeaders,
 		ret.logRequest,
@@ -69,7 +75,7 @@ func (app *Application) SetActiveUser(handle scraper.UserHandle) error {
 		if err != nil {
 			return fmt.Errorf("set active user to %q: %w", handle, err)
 		}
-		scraper.InitApi(app.Profile.LoadSession(handle))
+		app.API = app.Profile.LoadSession(handle)
 		app.ActiveUser = user
 		app.IsScrapingDisabled = false
 	}

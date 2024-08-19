@@ -950,7 +950,7 @@ func (api *API) GetPaginatedQuery(pq PaginatedQuery, count int) (TweetTrove, err
 	}
 
 	fmt.Println("------------")
-	err2 = trove.PostProcess()
+	err2 = trove.PostProcess(api)
 	if err2 != nil {
 		return TweetTrove{}, fmt.Errorf("failed to post-process tweet trove: %w", err2)
 	}
@@ -1020,10 +1020,6 @@ func (p PaginatedUserFeed) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
 
 func (api *API) GetUserFeed(user_id UserID, min_tweets int) (trove TweetTrove, err error) {
 	return api.GetPaginatedQuery(PaginatedUserFeed{user_id}, min_tweets)
-}
-
-func GetUserFeed(user_id UserID, min_tweets int) (trove TweetTrove, err error) {
-	return the_api.GetUserFeed(user_id, min_tweets)
 }
 
 // Paginated Tweet Detail (conversation)
@@ -1116,9 +1112,6 @@ func (api *API) GetTweetFullAPIV2(id TweetID, how_many int) (TweetTrove, error) 
 
 	return trove, err
 }
-func GetTweetFullAPIV2(id TweetID, how_many int) (TweetTrove, error) {
-	return the_api.GetTweetFullAPIV2(id, how_many)
-}
 
 // Paginated User Likes
 // --------------------
@@ -1192,10 +1185,6 @@ func (api *API) GetUserLikes(user_id UserID, how_many int) (TweetTrove, error) {
 	return api.GetPaginatedQuery(PaginatedUserLikes{user_id}, how_many)
 }
 
-func GetUserLikes(user_id UserID, how_many int) (TweetTrove, error) {
-	return the_api.GetUserLikes(user_id, how_many)
-}
-
 // Paginated Bookmarks
 // -------------------
 
@@ -1265,10 +1254,6 @@ func (api *API) GetBookmarks(how_many int) (TweetTrove, error) {
 	return api.GetPaginatedQuery(PaginatedBookmarks{api.UserID}, how_many)
 }
 
-func GetBookmarks(how_many int) (TweetTrove, error) {
-	return the_api.GetBookmarks(how_many)
-}
-
 // Paginated Home Timeline
 // -----------------------
 
@@ -1329,10 +1314,6 @@ func (api *API) GetHomeTimeline(cursor string, is_following_only bool) (TweetTro
 		return TweetTrove{}, err2
 	}
 	return trove, err
-}
-
-func GetHomeTimeline(cursor string, is_following_only bool) (TweetTrove, error) {
-	return the_api.GetHomeTimeline(cursor, is_following_only)
 }
 
 // Get User
@@ -1446,7 +1427,4 @@ func (p PaginatedSearch) ToTweetTrove(r APIV2Response) (TweetTrove, error) {
 // - videos
 func (api *API) Search(query string, min_results int) (trove TweetTrove, err error) {
 	return api.GetPaginatedQuery(PaginatedSearch{query}, min_results)
-}
-func Search(query string, min_results int) (trove TweetTrove, err error) {
-	return the_api.Search(query, min_results)
 }

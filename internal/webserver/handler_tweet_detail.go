@@ -49,7 +49,7 @@ func (app *Application) ensure_tweet(id scraper.TweetID, is_forced bool, is_conv
 	}
 
 	if is_needing_scrape && !app.IsScrapingDisabled {
-		trove, err := scraper.GetTweetFullAPIV2(id, 50) // TODO: parameterizable
+		trove, err := app.API.GetTweetFullAPIV2(id, 50) // TODO: parameterizable
 
 		// Save the trove unless there was an unrecoverable error
 		if err == nil || errors.Is(err, scraper.END_OF_FEED) || errors.Is(err, scraper.ErrRateLimited) {
@@ -73,7 +73,7 @@ func (app *Application) ensure_tweet(id scraper.TweetID, is_forced bool, is_conv
 
 func (app *Application) LikeTweet(w http.ResponseWriter, r *http.Request) {
 	tweet := get_tweet_from_context(r.Context())
-	like, err := scraper.LikeTweet(tweet.ID)
+	like, err := app.API.LikeTweet(tweet.ID)
 	// "Already Liked This Tweet" is no big deal-- we can just update the UI as if it succeeded
 	if err != nil && !errors.Is(err, scraper.AlreadyLikedThisTweet) {
 		// It's a different error
@@ -87,7 +87,7 @@ func (app *Application) LikeTweet(w http.ResponseWriter, r *http.Request) {
 }
 func (app *Application) UnlikeTweet(w http.ResponseWriter, r *http.Request) {
 	tweet := get_tweet_from_context(r.Context())
-	err := scraper.UnlikeTweet(tweet.ID)
+	err := app.API.UnlikeTweet(tweet.ID)
 	// As above, "Haven't Liked This Tweet" is no big deal-- we can just update the UI as if the request succeeded
 	if err != nil && !errors.Is(err, scraper.HaventLikedThisTweet) {
 		// It's a different error

@@ -140,7 +140,3 @@ func (api *API) FetchSpaceDetail(id SpaceID) (TweetTrove, error) {
 	}
 	return space_response.ToTweetTrove(), nil
 }
-
-func FetchSpaceDetail(id SpaceID) (TweetTrove, error) {
-	return the_api.FetchSpaceDetail(id)
-}

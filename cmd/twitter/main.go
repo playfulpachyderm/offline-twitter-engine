@@ -23,6 +23,8 @@ var profile persistence.Profile
 
 var version_string string
 
+var api scraper.API
+
 func main() {
 	profile_dir := flag.String("profile", ".", "")
 	flag.StringVar(profile_dir, "p", ".", "")
@@ -126,13 +128,15 @@ func main() {
 			// Lop off the ".session" suffix (allows using `--session asdf.session` which lets you tab-autocomplete at command line)
 			*session_name = (*session_name)[:len(*session_name)-8]
 		}
-		scraper.InitApi(profile.LoadSession(scraper.UserHandle(*session_name)))
+		api = profile.LoadSession(scraper.UserHandle(*session_name))
+		scraper.InitApi(api)
 	} else {
-		session, err := scraper.NewGuestSession()
+		var err error
+		api, err = scraper.NewGuestSession()
 		if err != nil {
 			log.Warnf("Unable to initialize guest session!  Might be a network issue")
 		} else {
-			scraper.InitApi(session)
+			scraper.InitApi(api)
 		}
 	}
 
@@ -234,7 +238,6 @@ func main() {
 // - username: twitter username or email address
 // - password: twitter account password
 func login(username string, password string) {
-	// Skip the scraper.InitApi, just use a local one since no scraping is happening
 	api, err := scraper.NewGuestSession()
 	if err != nil {
 		die(fmt.Sprintf("Unable to create session: %s", err.Error()), false, 1)
@@ -303,7 +306,7 @@ func fetch_tweet_only(tweet_identifier string) {
 		die(err.Error(), false, -1)
 	}
 
-	tweet, err := scraper.GetTweet(tweet_id)
+	tweet, err := api.GetTweet(tweet_id)
 	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error fetching tweet: %s", err.Error()), false, -1)
 	}
@@ -328,7 +331,7 @@ func fetch_tweet_conversation(tweet_identifier string, how_many int) {
 		die(err.Error(), false, -1)
 	}
 
-	trove, err := scraper.GetTweetFullAPIV2(tweet_id, how_many)
+	trove, err := api.GetTweetFullAPIV2(tweet_id, how_many)
 	if is_scrape_failure(err) {
 		die(err.Error(), false, -1)
 	}
@@ -349,7 +352,7 @@ func fetch_user_feed(handle string, how_many int) {
 		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
 	}
 
-	trove, err := scraper.GetUserFeed(user.ID, how_many)
+	trove, err := api.GetUserFeed(user.ID, how_many)
 	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error scraping feed: %s\n  %s", handle, err.Error()), false, -2)
 	}
@@ -367,7 +370,7 @@ func get_user_likes(handle string, how_many int) {
 		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
 	}
 
-	trove, err := scraper.GetUserLikes(user.ID, how_many)
+	trove, err := api.GetUserLikes(user.ID, how_many)
 	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error scraping feed: %s\n  %s", handle, err.Error()), false, -2)
 	}
@@ -385,7 +388,7 @@ func get_followees(handle string, how_many int) {
 		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
 	}
 
-	trove, err := scraper.GetFollowees(user.ID, how_many)
+	trove, err := api.GetFollowees(user.ID, how_many)
 	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error getting followees: %s\n  %s", handle, err.Error()), false, -2)
 	}
@@ -399,7 +402,7 @@ func get_followers(handle string, how_many int) {
 	if err != nil {
 		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
 	}
-	trove, err := scraper.GetFollowers(user.ID, how_many)
+	trove, err := api.GetFollowers(user.ID, how_many)
 	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error getting followees: %s\n  %s", handle, err.Error()), false, -2)
 	}
@@ -409,7 +412,7 @@ func get_followers(handle string, how_many int) {
 	happy_exit(fmt.Sprintf("Saved %d followers", len(trove.Users)), err)
 }
 func get_bookmarks(how_many int) {
-	trove, err := scraper.GetBookmarks(how_many)
+	trove, err := api.GetBookmarks(how_many)
 	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error scraping bookmarks:\n  %s", err.Error()), false, -2)
 	}
@@ -422,7 +425,7 @@ func get_bookmarks(how_many int) {
 	)
 }
 func fetch_timeline(is_following_only bool) {
-	trove, err := scraper.GetHomeTimeline("", is_following_only)
+	trove, err := api.GetHomeTimeline("", is_following_only)
 	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error fetching timeline:\n  %s", err.Error()), false, -2)
 	}
@@ -462,7 +465,7 @@ func download_user_content(handle scraper.UserHandle) {
 }
 
 func search(query string, how_many int) {
-	trove, err := scraper.Search(query, how_many)
+	trove, err := api.Search(query, how_many)
 	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error scraping search results: %s", err.Error()), false, -100)
 	}
@@ -490,7 +493,7 @@ func unlike_tweet(tweet_identifier string) {
 	if err != nil {
 		die(err.Error(), false, -1)
 	}
-	err = scraper.UnlikeTweet(tweet_id)
+	err = api.UnlikeTweet(tweet_id)
 	if err != nil {
 		die(err.Error(), false, -10)
 	}
@@ -502,7 +505,7 @@ func like_tweet(tweet_identifier string) {
 	if err != nil {
 		die(err.Error(), false, -1)
 	}
-	like, err := scraper.LikeTweet(tweet_id)
+	like, err := api.LikeTweet(tweet_id)
 	if err != nil {
 		die(err.Error(), false, -10)
 	}
@@ -525,7 +528,7 @@ func start_webserver(addr string, should_auto_open bool) {
 }
 
 func fetch_inbox(how_many int) {
-	trove, _, err := scraper.GetInbox(how_many)
+	trove, _, err := api.GetInbox(how_many)
 	if err != nil {
 		die(fmt.Sprintf("Failed to fetch inbox:\n  %s", err.Error()), false, 1)
 	}
@@ -539,7 +542,7 @@ func fetch_dm(id string, how_many int) {
 		panic(err)
 	}
 	max_id := scraper.DMMessageID(^uint(0) >> 1)
-	trove, err := scraper.GetConversation(room.ID, max_id, how_many)
+	trove, err := api.GetConversation(room.ID, max_id, how_many)
 	if err != nil {
 		die(fmt.Sprintf("Failed to fetch dm:\n  %s", err.Error()), false, 1)
 	}
@@ -556,7 +559,7 @@ func send_dm(room_id string, text string, in_reply_to_id int) {
 		die(fmt.Sprintf("No such chat room: %d", in_reply_to_id), false, 1)
 	}
 
-	trove, err := scraper.SendDMMessage(room.ID, text, scraper.DMMessageID(in_reply_to_id))
+	trove, err := api.SendDMMessage(room.ID, text, scraper.DMMessageID(in_reply_to_id))
 	if err != nil {
 		die(fmt.Sprintf("Failed to send dm:\n  %s", err.Error()), false, 1)
 	}
@@ -573,7 +576,7 @@ func send_dm_reacc(room_id string, in_reply_to_id int, reacc string) {
 	if err != nil {
 		die(fmt.Sprintf("No such message: %d", in_reply_to_id), false, 1)
 	}
-	err = scraper.SendDMReaction(room.ID, scraper.DMMessageID(in_reply_to_id), reacc)
+	err = api.SendDMReaction(room.ID, scraper.DMMessageID(in_reply_to_id), reacc)
 	if err != nil {
 		die(fmt.Sprintf("Failed to react to message:\n  %s", err.Error()), false, 1)
 	}

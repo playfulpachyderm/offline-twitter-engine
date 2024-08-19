@@ -46,7 +46,7 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 
 		if len(parts) == 1 { // The URL is just the user handle
 			// Run scraper
-			trove, err := scraper.GetUserFeed(user.ID, 50) // TODO: parameterizable
+			trove, err := app.API.GetUserFeed(user.ID, 50) // TODO: parameterizable
 			if err != nil {
 				app.ErrorLog.Print(err)
 				// TOOD: show error in UI
@@ -54,7 +54,7 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 			app.Profile.SaveTweetTrove(trove, false)
 			go app.Profile.SaveTweetTrove(trove, true)
 		} else if len(parts) == 2 && parts[1] == "likes" {
-			trove, err := scraper.GetUserLikes(user.ID, 50) // TODO: parameterizable
+			trove, err := app.API.GetUserLikes(user.ID, 50) // TODO: parameterizable
 			if err != nil {
 				app.ErrorLog.Print(err)
 				// TOOD: show error in UI
@@ -158,7 +158,7 @@ func (app *Application) UserFollowees(w http.ResponseWriter, r *http.Request, us
 		}
 
 		// Run scraper
-		trove, err := scraper.GetFollowees(user.ID, 200) // TODO: parameterizable
+		trove, err := app.API.GetFollowees(user.ID, 200) // TODO: parameterizable
 		if err != nil {
 			app.ErrorLog.Print(err)
 			// TOOD: show error in UI
@@ -184,7 +184,7 @@ func (app *Application) UserFollowers(w http.ResponseWriter, r *http.Request, us
 		}
 
 		// Run scraper
-		trove, err := scraper.GetFollowers(user.ID, 200) // TODO: parameterizable
+		trove, err := app.API.GetFollowers(user.ID, 200) // TODO: parameterizable
 		if err != nil {
 			app.ErrorLog.Print(err)
 			// TOOD: show error in UI

@@ -20,7 +20,7 @@ func (app *Application) Bookmarks(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Run scraper
-		trove, err := scraper.GetBookmarks(300) // TODO: parameterizable
+		trove, err := app.API.GetBookmarks(300) // TODO: parameterizable
 		if err != nil && !errors.Is(err, scraper.END_OF_FEED) {
 			app.ErrorLog.Print(err)
 			panic(err) // Return a toast
