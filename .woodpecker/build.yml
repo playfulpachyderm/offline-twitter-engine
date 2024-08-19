@@ -22,11 +22,11 @@ pipeline:
       - offline_twatter_session_file
     environment:
       - SESSION_FILE_PATH="/tmp/Offline_Twatter.session" # Temp location, to be imported by the integration test
-    when:  # At least one
-      - path:
-        - pkg/scraper/**
-        - cmd/**
-      - branch: v*.*.*
+    # when:  # At least one
+    #   - path:
+    #     - pkg/scraper/**
+    #     - cmd/**
+    #   - branch: v*.*.*
     commands:
       - cd cmd
       - echo "$OFFLINE_TWATTER_SESSION_FILE" > $SESSION_FILE_PATH # Write the session file to temp location
