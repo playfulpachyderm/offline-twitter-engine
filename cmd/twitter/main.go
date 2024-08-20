@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/term"
 	"io/fs"
+	"time"
 	"os"
 	"strconv"
 	"strings"
@@ -39,6 +40,8 @@ func main() {
 
 	how_many := flag.Int("n", 50, "")
 	flag.IntVar(how_many, "number", 50, "")
+
+	delay := flag.String("delay", "0ms", "")
 
 	var default_log_level string
 	if version_string == "" {
@@ -136,6 +139,10 @@ func main() {
 		if err != nil {
 			log.Warnf("Unable to initialize guest session!  Might be a network issue")
 		} // Don't exit here, some operations don't require a connection
+	}
+	api.Delay, err = time.ParseDuration(*delay)
+	if err != nil {
+		die(fmt.Sprintf("Invalid delay: %q", *delay), false, 1)
 	}
 
 	switch operation {

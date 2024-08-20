@@ -898,6 +898,10 @@ type PaginatedQuery interface {
 func (api *API) GetMore(pq PaginatedQuery, response *APIV2Response, count int) error {
 	last_response := response
 	for last_response.GetCursorBottom() != "" && len(response.GetMainInstruction().Entries) < count {
+		if api.Delay != 0 {
+			fmt.Printf("Pausing for %s...", api.Delay)
+			time.Sleep(api.Delay) // Slow down the requests, if applicable
+		}
 		fresh_response, err := pq.NextPage(api, last_response.GetCursorBottom())
 		if err != nil {
 			return fmt.Errorf("error getting next page for %#v: %w", pq, err) // e.g., rate limited

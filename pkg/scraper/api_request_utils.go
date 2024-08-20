@@ -22,6 +22,7 @@ type API struct {
 	GuestToken      string
 	Client          http.Client
 	CSRFToken       string
+	Delay           time.Duration
 }
 
 type api_outstruct struct {
