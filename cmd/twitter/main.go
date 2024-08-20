@@ -35,6 +35,7 @@ func main() {
 	flag.BoolVar(show_version_flag, "v", false, "")
 
 	session_name := flag.String("session", "", "Name of session file to use")
+	flag.StringVar(session_name, "s", "", "")
 
 	how_many := flag.Int("n", 50, "")
 	flag.IntVar(how_many, "number", 50, "")
@@ -521,6 +522,12 @@ func list_followed() {
 
 func start_webserver(addr string, should_auto_open bool) {
 	app := webserver.NewApp(profile)
+	if api.UserHandle != "" {
+		err := app.SetActiveUser(api.UserHandle)
+		if err != nil {
+			die(err.Error(), false, -1)
+		}
+	}
 	app.Run(addr, should_auto_open)
 }
 

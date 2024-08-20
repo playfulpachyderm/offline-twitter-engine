@@ -157,7 +157,11 @@ func (app *Application) Run(address string, should_auto_open bool) {
 	app.start_background()
 
 	if should_auto_open {
-		go openWebPage("http://" + address + "/login")
+		page := "/login"
+		if app.ActiveUser != get_default_user() {
+			page = "" // Load the timeline
+		}
+		go openWebPage("http://" + address + page)
 	}
 	err := srv.ListenAndServe()
 	app.ErrorLog.Fatal(err)
