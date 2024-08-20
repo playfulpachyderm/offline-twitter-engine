@@ -24,7 +24,6 @@ type API struct {
 	CSRFToken       string
 }
 
-
 type api_outstruct struct {
 	Cookies         []*http.Cookie
 	UserID          UserID
