@@ -8,11 +8,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/term"
 	"io/fs"
-	"time"
 	"os"
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
