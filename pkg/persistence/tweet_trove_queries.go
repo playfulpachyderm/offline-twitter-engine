@@ -10,7 +10,7 @@ import (
 
 // Convenience function that saves all the objects in a TweetTrove.
 // Panics if anything goes wrong.
-func (p Profile) SaveTweetTrove(trove TweetTrove, should_download bool) {
+func (p Profile) SaveTweetTrove(trove TweetTrove, should_download bool, api *API) {
 	for i, u := range trove.Users {
 		err := p.SaveUser(&u)
 		if err != nil {
@@ -41,7 +41,7 @@ func (p Profile) SaveTweetTrove(trove TweetTrove, should_download bool) {
 
 		if should_download {
 			// Download their tiny profile image
-			err = p.DownloadUserProfileImageTiny(&u)
+			err = p.DownloadUserProfileImageTiny(&u, api)
 			if errors.Is(err, ErrRequestTimeout) {
 				// Forget about it; if it's important someone will try again
 				fmt.Printf("Failed to @%s's tiny profile image (%q): %s\n", u.Handle, u.ProfileImageUrl, err.Error())
@@ -65,7 +65,7 @@ func (p Profile) SaveTweetTrove(trove TweetTrove, should_download bool) {
 		}
 
 		if should_download {
-			err = p.DownloadTweetContentFor(&t)
+			err = p.DownloadTweetContentFor(&t, api)
 			if errors.Is(err, ErrRequestTimeout) || errors.Is(err, ErrMediaDownload404) {
 				// Forget about it; if it's important someone will try again
 				fmt.Printf("Failed to download tweet ID %d: %s\n", t.ID, err.Error())
@@ -120,7 +120,7 @@ func (p Profile) SaveTweetTrove(trove TweetTrove, should_download bool) {
 
 		// Download content if needed
 		if should_download {
-			downloader := DefaultDownloader{}
+			downloader := DefaultDownloader{API: api}
 
 			for _, img := range m.Images {
 				// Check if it's already downloaded

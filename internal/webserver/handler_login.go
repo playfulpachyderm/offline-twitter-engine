@@ -75,7 +75,7 @@ func (app *Application) after_login(w http.ResponseWriter, r *http.Request, api 
 		return
 	}
 	panic_if(app.Profile.SaveUser(&user))
-	panic_if(app.Profile.DownloadUserContentFor(&user))
+	panic_if(app.Profile.DownloadUserContentFor(&user, &app.API))
 
 	// Now that the user is scraped for sure, set them as the logged-in user
 	err = app.SetActiveUser(api.UserHandle)
@@ -88,8 +88,8 @@ func (app *Application) after_login(w http.ResponseWriter, r *http.Request, api 
 		http.Redirect(w, r, "/", 303)
 	}
 	fmt.Println("Saving initial feed results...")
-	app.Profile.SaveTweetTrove(trove, false)
-	go app.Profile.SaveTweetTrove(trove, true)
+	app.Profile.SaveTweetTrove(trove, false, &app.API)
+	go app.Profile.SaveTweetTrove(trove, true, &app.API)
 
 	// Scrape the user's followers
 	trove, err = app.API.GetFollowees(user.ID, 1000)
@@ -97,9 +97,9 @@ func (app *Application) after_login(w http.ResponseWriter, r *http.Request, api 
 		app.ErrorLog.Printf("Failed to scrape followers: %s", err.Error())
 		http.Redirect(w, r, "/", 303)
 	}
-	app.Profile.SaveTweetTrove(trove, false)
+	app.Profile.SaveTweetTrove(trove, false, &app.API)
 	app.Profile.SaveAsFolloweesList(user.ID, trove)
-	go app.Profile.SaveTweetTrove(trove, true)
+	go app.Profile.SaveTweetTrove(trove, true, &app.API)
 
 	// Redirect to Timeline
 	http.Redirect(w, r, "/", 303)

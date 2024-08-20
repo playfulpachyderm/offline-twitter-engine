@@ -25,7 +25,7 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		panic_if(app.Profile.SaveUser(&user))
-		panic_if(app.Profile.DownloadUserContentFor(&user))
+		panic_if(app.Profile.DownloadUserContentFor(&user, &app.API))
 	}
 
 	if len(parts) > 1 && parts[1] == "followers" {
@@ -51,16 +51,16 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 				app.ErrorLog.Print(err)
 				// TOOD: show error in UI
 			}
-			app.Profile.SaveTweetTrove(trove, false)
-			go app.Profile.SaveTweetTrove(trove, true)
+			app.Profile.SaveTweetTrove(trove, false, &app.API)
+			go app.Profile.SaveTweetTrove(trove, true, &app.API)
 		} else if len(parts) == 2 && parts[1] == "likes" {
 			trove, err := app.API.GetUserLikes(user.ID, 50) // TODO: parameterizable
 			if err != nil {
 				app.ErrorLog.Print(err)
 				// TOOD: show error in UI
 			}
-			app.Profile.SaveTweetTrove(trove, false)
-			go app.Profile.SaveTweetTrove(trove, true)
+			app.Profile.SaveTweetTrove(trove, false, &app.API)
+			go app.Profile.SaveTweetTrove(trove, true, &app.API)
 		}
 	}
 
@@ -163,9 +163,9 @@ func (app *Application) UserFollowees(w http.ResponseWriter, r *http.Request, us
 			app.ErrorLog.Print(err)
 			// TOOD: show error in UI
 		}
-		app.Profile.SaveTweetTrove(trove, false)
+		app.Profile.SaveTweetTrove(trove, false, &app.API)
 		app.Profile.SaveAsFolloweesList(user.ID, trove)
-		go app.Profile.SaveTweetTrove(trove, true)
+		go app.Profile.SaveTweetTrove(trove, true, &app.API)
 	}
 
 	data, trove := NewFollowsData(app.Profile.GetFollowees(user.ID))
@@ -189,9 +189,9 @@ func (app *Application) UserFollowers(w http.ResponseWriter, r *http.Request, us
 			app.ErrorLog.Print(err)
 			// TOOD: show error in UI
 		}
-		app.Profile.SaveTweetTrove(trove, false)
+		app.Profile.SaveTweetTrove(trove, false, &app.API)
 		app.Profile.SaveAsFollowersList(user.ID, trove)
-		go app.Profile.SaveTweetTrove(trove, true)
+		go app.Profile.SaveTweetTrove(trove, true, &app.API)
 	}
 
 	data, trove := NewFollowsData(app.Profile.GetFollowers(user.ID))

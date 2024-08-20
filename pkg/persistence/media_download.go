@@ -13,7 +13,9 @@ type MediaDownloader interface {
 	Curl(url string, outpath string) error
 }
 
-type DefaultDownloader struct{}
+type DefaultDownloader struct {
+	*scraper.API
+}
 
 // Download a file over HTTP and save it.
 //
@@ -21,7 +23,7 @@ type DefaultDownloader struct{}
 // - url: the remote file to download
 // - outpath: the path on disk to save it to
 func (d DefaultDownloader) Curl(url string, outpath string) error {
-	data, err := scraper.DownloadMedia(url)
+	data, err := d.API.DownloadMedia(url)
 	if err != nil {
 		return fmt.Errorf("downloading %q:\n  %w", url, err)
 	}
@@ -98,8 +100,8 @@ func (p Profile) download_link_thumbnail(url *scraper.Url, downloader MediaDownl
 
 // Download a tweet's video and picture content.
 // Wraps the `DownloadTweetContentWithInjector` method with the default (i.e., real) downloader.
-func (p Profile) DownloadTweetContentFor(t *scraper.Tweet) error {
-	return p.DownloadTweetContentWithInjector(t, DefaultDownloader{})
+func (p Profile) DownloadTweetContentFor(t *scraper.Tweet, api *scraper.API) error {
+	return p.DownloadTweetContentWithInjector(t, DefaultDownloader{API: api})
 }
 
 // Enable injecting a custom MediaDownloader (i.e., for testing)
@@ -139,8 +141,8 @@ func (p Profile) DownloadTweetContentWithInjector(t *scraper.Tweet, downloader M
 }
 
 // Download a user's banner and profile images
-func (p Profile) DownloadUserContentFor(u *scraper.User) error {
-	return p.DownloadUserContentWithInjector(u, DefaultDownloader{})
+func (p Profile) DownloadUserContentFor(u *scraper.User, api *scraper.API) error {
+	return p.DownloadUserContentWithInjector(u, DefaultDownloader{API: api})
 }
 
 // Enable injecting a custom MediaDownloader (i.e., for testing)
@@ -184,12 +186,12 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
 // Download a User's tiny profile image, if it hasn't been downloaded yet.
 // If it has been downloaded, do nothing.
 // If this user should have a big profile picture, defer to the regular `DownloadUserContentFor` method.
-func (p Profile) DownloadUserProfileImageTiny(u *scraper.User) error {
+func (p Profile) DownloadUserProfileImageTiny(u *scraper.User, api *scraper.API) error {
 	if p.IsFollowing(*u) {
-		return p.DownloadUserContentFor(u)
+		return p.DownloadUserContentFor(u, api)
 	}
 
-	d := DefaultDownloader{}
+	d := DefaultDownloader{API: api}
 
 	outfile := path.Join(p.ProfileDir, "profile_images", u.GetTinyProfileImageLocalPath())
 	if file_exists(outfile) {

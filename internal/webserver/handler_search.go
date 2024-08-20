@@ -108,8 +108,8 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 			app.ErrorLog.Print(err)
 			// TOOD: show error in UI
 		}
-		app.Profile.SaveTweetTrove(trove, false)
-		go app.Profile.SaveTweetTrove(trove, true)
+		app.Profile.SaveTweetTrove(trove, false, &app.API)
+		go app.Profile.SaveTweetTrove(trove, true, &app.API)
 	}
 
 	c, err := persistence.NewCursorFromSearchQuery(search_text)

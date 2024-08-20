@@ -26,8 +26,8 @@ func (app *Application) Bookmarks(w http.ResponseWriter, r *http.Request) {
 			panic(err) // Return a toast
 		}
 
-		app.Profile.SaveTweetTrove(trove, false)
-		go app.Profile.SaveTweetTrove(trove, true)
+		app.Profile.SaveTweetTrove(trove, false, &app.API)
+		go app.Profile.SaveTweetTrove(trove, true, &app.API)
 	}
 
 	c := persistence.NewUserFeedBookmarksCursor(app.ActiveUser.Handle)
