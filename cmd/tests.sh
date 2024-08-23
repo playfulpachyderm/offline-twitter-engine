@@ -35,14 +35,15 @@ trap 'echo -e "\033[31mTEST FAILURE.  Aborting\033[0m"' ERR
 # If a SESSION_FILE_PATH is provided, then use it instead of logging in
 if [[ -n "$SESSION_FILE_PATH" ]]; then
     echo "Using provided session file: $SESSION_FILE_PATH"
+    wc -c $SESSION_FILE_PATH
     cp $SESSION_FILE_PATH Offline_Twatter.session
 else
     # Testing login
     test ! -e Offline_Twatter.session
     tw login offline_twatter "$OFFLINE_TWATTER_PASSWD"
-    test -f Offline_Twatter.session
 fi
 # Ensure session file is valid
+test -f Offline_Twatter.session
 test "$(jq .UserHandle Offline_Twatter.session)" = "\"Offline_Twatter\""
 test "$(jq .IsAuthenticated Offline_Twatter.session)" = "true"
 jq .CSRFToken Offline_Twatter.session | grep -P '"\w+"'
