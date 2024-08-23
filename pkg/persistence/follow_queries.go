@@ -6,7 +6,6 @@ import (
 )
 
 func (p Profile) SaveFollow(follower_id UserID, followee_id UserID) {
-	fmt.Printf("Saving %d => %d\n", follower_id, followee_id)
 	_, err := p.DB.Exec(`
 		insert into follows (follower_id, followee_id)
 		     values (?, ?)

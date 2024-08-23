@@ -334,3 +334,10 @@ v0.6.14
 - Add sending replies and emoji reaccs for DMs
 - Bookmarks are now scrapable from the web UI
 - BUGFIX: don't crash when an image or video download 404s
+
+v0.6.15
+-------
+
+- BUGFIX: `webserver` subcommand now respects the `--session` flag
+- More types of scraping errors now show toasts in the UI: rate limiting, expired session
+- New `--delay` flag added to introduce a delay in paginated scrapes
