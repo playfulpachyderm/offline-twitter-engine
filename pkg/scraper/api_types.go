@@ -260,6 +260,37 @@ type APIUser struct {
 	DoesntExist          bool
 }
 
+type APINotification struct {
+	ID          string `json:"id"`
+	TimestampMs int64  `json:"timestampMs,string"`
+	Message     struct {
+		Text     string `json:"text"`
+		Entities []struct {
+			FromIndex int `json:"fromIndex"`
+			ToIndex   int `json:"toIndex"`
+			Ref       struct {
+				User struct {
+					ID int `json:"id,string"`
+				} `json:"user"`
+			} `json:"ref"`
+		} `json:"entities"`
+	} `json:"message"`
+	Template struct {
+		AggregateUserActionsV1 struct {
+			TargetObjects []struct {
+				Tweet struct {
+					ID int `json:"id,string"`
+				} `json:"tweet"`
+			} `json:"targetObjects"`
+			FromUsers []struct {
+				User struct {
+					ID int `json:"id,string"`
+				} `json:"user"`
+			} `json:"fromUsers"`
+		} `json:"aggregateUserActionsV1"`
+	} `json:"template"`
+}
+
 type UserResponse struct {
 	Data struct {
 		User struct {
@@ -326,7 +357,15 @@ type Entry struct {
 				Tweet struct {
 					ID int64 `json:"id,string"`
 				} `json:"tweet"`
+				Notification struct {
+					ID           string     `json:"id"`
+					FromUsers    Int64Slice `json:"fromUsers"`
+					TargetTweets Int64Slice `json:"targetTweets"`
+				} `json:"notification"`
 			} `json:"content"`
+			ClientEventInfo struct {
+				Element string `json:"element"`
+			} `json:"clientEventInfo"`
 		} `json:"item"`
 		Operation struct {
 			Cursor struct {
@@ -348,8 +387,9 @@ func (e SortableEntries) Less(i, j int) bool { return e[i].SortIndex > e[j].Sort
 
 type TweetResponse struct {
 	GlobalObjects struct {
-		Tweets map[string]APITweet `json:"tweets"`
-		Users  map[string]APIUser  `json:"users"`
+		Tweets        map[string]APITweet        `json:"tweets"`
+		Users         map[string]APIUser         `json:"users"`
+		Notifications map[string]APINotification `json:"notifications"`
 	} `json:"globalObjects"`
 	Timeline struct {
 		Instructions []struct {
@@ -458,11 +498,13 @@ func (t *TweetResponse) HandleTombstones() []UserHandle {
 }
 
 func (t *TweetResponse) GetCursor() string {
-	entries := t.Timeline.Instructions[0].AddEntries.Entries
-	if len(entries) > 0 {
-		last_entry := entries[len(entries)-1]
-		if strings.Contains(last_entry.EntryID, "cursor") {
-			return last_entry.Content.Operation.Cursor.Value
+	// TODO: is this function used anywhere other than Notifications?
+	for _, instr := range t.Timeline.Instructions {
+		if len(instr.AddEntries.Entries) > 0 {
+			last_entry := instr.AddEntries.Entries[len(instr.AddEntries.Entries)-1]
+			if strings.Contains(last_entry.EntryID, "cursor") {
+				return last_entry.Content.Operation.Cursor.Value
+			}
 		}
 	}
 
@@ -522,6 +564,10 @@ func (t *TweetResponse) ToTweetTrove() (TweetTrove, error) {
 			return ret, err
 		}
 		ret.Users[new_user.ID] = new_user
+	}
+	for _, n := range t.GlobalObjects.Notifications {
+		new_notification := ParseSingleNotification(n)
+		ret.Notifications[new_notification.ID] = new_notification
 	}
 	return ret, nil
 }
