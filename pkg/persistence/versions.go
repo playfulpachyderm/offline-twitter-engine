@@ -307,6 +307,45 @@ var MIGRATIONS = []string{
 		);
 		create index if not exists index_bookmarks_user_id on bookmarks (user_id);
 		create index if not exists index_bookmarks_tweet_id on bookmarks (tweet_id);`,
+	`create table notification_types (rowid integer primary key,
+		    name text not null unique
+		);
+		insert into notification_types(rowid, name) values
+		    (1, 'like'),
+		    (2, 'retweet'),
+		    (3, 'quote-tweet'),
+		    (4, 'reply'),
+		    (5, 'follow'),
+		    (6, 'mention'),
+		    (7, 'user is LIVE'),
+		    (8, 'poll ended'),
+		    (9, 'login'),
+		    (10, 'community pinned post'),
+		    (11, 'new recommended post');
+		create table notifications (rowid integer primary key,
+		    id text unique,
+		    type integer not null,
+		    sent_at integer not null,
+		    sort_index integer not null,
+		    user_id integer not null, -- user who received the notification
+
+		    action_user_id integer references users(id),  -- user who triggered the notification
+		    action_tweet_id integer references tweets(id), -- tweet associated with the notification
+		    action_retweet_id integer references retweets(retweet_id),
+
+		    foreign key(type) references notification_types(rowid)
+		    foreign key(user_id) references users(id)
+		);
+		create table notification_tweets (rowid integer primary key,
+		    notification_id not null references notifications(id),
+		    tweet_id not null references tweets(id),
+		    unique(notification_id, tweet_id)
+		);
+		create table notification_users (rowid integer primary key,
+		    notification_id not null references notifications(id),
+		    user_id not null references users(id),
+		    unique(notification_id, user_id)
+		);`,
 }
 var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
 

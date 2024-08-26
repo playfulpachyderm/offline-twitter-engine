@@ -96,6 +96,10 @@ func (p Profile) SaveTweetTrove(trove TweetTrove, should_download bool, api *API
 		}
 	}
 
+	for _, n := range trove.Notifications {
+		p.SaveNotification(n)
+	}
+
 	// DM related content
 	// ------------------
 

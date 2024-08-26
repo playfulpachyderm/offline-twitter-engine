@@ -396,3 +396,20 @@ func create_dummy_chat_message() DMMessage {
 		Urls:   []Url{url},
 	}
 }
+
+func create_dummy_notification() Notification {
+	rand.Seed(time.Now().UnixNano())
+	id := NotificationID(fmt.Sprintf("Notification #%d", rand.Int()))
+
+	return Notification{
+		ID:            id,
+		Type:          NOTIFICATION_TYPE_REPLY,
+		SentAt:        TimestampFromUnix(10000),
+		SortIndex:     rand.Int63(),
+		UserID:        create_stable_user().ID,
+		ActionUserID:  create_stable_user().ID,
+		ActionTweetID: create_stable_tweet().ID,
+		TweetIDs:      []TweetID{create_stable_tweet().ID},
+		UserIDs:       []UserID{create_stable_user().ID},
+	}
+}

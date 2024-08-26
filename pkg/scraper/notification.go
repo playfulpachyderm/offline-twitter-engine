@@ -19,15 +19,15 @@ const (
 )
 
 type Notification struct {
-	ID        NotificationID
-	Type      int
-	SentAt    Timestamp
-	SortIndex int64
-	UserID    UserID // recipient of the notification
+	ID        NotificationID `db:"id"`
+	Type      int            `db:"type"`
+	SentAt    Timestamp      `db:"sent_at"`
+	SortIndex int64          `db:"sort_index"`
+	UserID    UserID         `db:"user_id"` // recipient of the notification
 
-	ActionUserID    UserID
-	ActionTweetID   TweetID
-	ActionRetweetID TweetID
+	ActionUserID    UserID  `db:"action_user_id"`
+	ActionTweetID   TweetID `db:"action_tweet_id"`
+	ActionRetweetID TweetID `db:"action_retweet_id"`
 
 	TweetIDs []TweetID
 	UserIDs  []UserID
