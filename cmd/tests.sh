@@ -390,6 +390,11 @@ tw get_bookmarks
 test $(sqlite3 twitter.db "select count(*) from bookmarks") -ge "2"
 test $(sqlite3 twitter.db "select count(*) from bookmarks where tweet_id = 1762239926437843421") = "1"
 
+# Test fetching notifications
+tw get_notifications
+test $(sqlite3 twitter.db "select count(*) from notifications") -ge "5"
+
+
 # Test fetch inbox
 test $(sqlite3 twitter.db "select count(*) from chat_rooms") = "0"
 test $(sqlite3 twitter.db "select count(*) from chat_messages") = "0"

@@ -82,7 +82,8 @@ func main() {
 
 	if len(args) < 2 {
 		if len(args) == 1 && (args[0] == "list_followed" || args[0] == "webserver" || args[0] == "fetch_timeline" ||
-			args[0] == "fetch_timeline_following_only" || args[0] == "fetch_inbox" || args[0] == "get_bookmarks") {
+			args[0] == "fetch_timeline_following_only" || args[0] == "fetch_inbox" || args[0] == "get_bookmarks" ||
+			args[0] == "get_notifications") {
 			// Doesn't need a target, so create a fake second arg
 			args = append(args, "")
 		} else {
@@ -186,6 +187,8 @@ func main() {
 		fetch_timeline(false) // TODO: *how_many
 	case "fetch_timeline_following_only":
 		fetch_timeline(true)
+	case "get_notifications":
+		get_notifications(*how_many)
 	case "download_tweet_content":
 		download_tweet_content(target)
 	case "search":
@@ -593,4 +596,19 @@ func send_dm_reacc(room_id string, in_reply_to_id int, reacc string) {
 	}
 
 	happy_exit("Sent the reaction", nil)
+}
+
+func get_notifications(how_many int) {
+	resp, err := api.GetNotifications("") // TODO: how_many
+	if err != nil {
+		panic(err)
+	}
+	trove, err := resp.ToTweetTroveAsNotifications(api.UserID)
+	if err != nil {
+		panic(err)
+	}
+	profile.SaveTweetTrove(trove, true, &api)
+	happy_exit(fmt.Sprintf("Saved %d notifications, %d tweets and %d users",
+		len(trove.Notifications), len(trove.Tweets), len(trove.Users),
+	), nil)
 }
