@@ -2,9 +2,9 @@ package scraper
 
 import (
 	"net/url"
-	"strings"
 	"regexp"
 	"sort"
+	"strings"
 )
 
 func (api API) GetNotifications(cursor string) (TweetResponse, error) {
@@ -97,9 +97,8 @@ func ParseSingleNotification(n APINotification) Notification {
 		ret.Type = 2
 	} else if strings.Contains(n.Message.Text, "There was a login to your account") {
 		ret.Type = 9
-	} else {
-		// TODO: more types?
 	}
+	// TODO: more types?
 
 	ret.SentAt = TimestampFromUnixMilli(n.TimestampMs)
 	// TODO: caller should set ret.UserID
