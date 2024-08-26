@@ -7,7 +7,8 @@ import (
 	"strings"
 )
 
-func (api API) GetNotifications(cursor string) (TweetResponse, error) {
+// TODO: pagination
+func (api *API) GetNotifications(cursor string) (TweetResponse, error) {
 	url, err := url.Parse("https://api.twitter.com/2/notifications/all.json")
 	if err != nil {
 		panic(err)
@@ -23,7 +24,7 @@ func (api API) GetNotifications(cursor string) (TweetResponse, error) {
 	return result, err
 }
 
-func (t *TweetResponse) ToTweetTroveAsNotifications() (TweetTrove, error) {
+func (t *TweetResponse) ToTweetTroveAsNotifications(current_user_id UserID) (TweetTrove, error) {
 	ret, err := t.ToTweetTrove()
 	if err != nil {
 		return TweetTrove{}, err
@@ -45,11 +46,12 @@ func (t *TweetResponse) ToTweetTroveAsNotifications() (TweetTrove, error) {
 				// Tweet entry (e.g., someone replied to you)
 				notification = Notification{ID: NotificationID(notification_id)}
 			}
+			notification.UserID = current_user_id
 			notification.SortIndex = entry.SortIndex
 			if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "replied") {
-				notification.Type = 4
+				notification.Type = NOTIFICATION_TYPE_REPLY
 			} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "recommended") {
-				notification.Type = 11
+				notification.Type = NOTIFICATION_TYPE_RECOMMENDED_POST
 			}
 			if entry.Content.Item.Content.Tweet.ID != 0 {
 				notification.ActionTweetID = TweetID(entry.Content.Item.Content.Tweet.ID)
@@ -90,13 +92,13 @@ func ParseSingleNotification(n APINotification) Notification {
 	// t.Entities.ReplyMentions = strings.TrimSpace(string([]rune(t.FullText)[0:t.DisplayTextRange[0]]))
 
 	if strings.HasSuffix(n.Message.Text, "followed you") {
-		ret.Type = 5
+		ret.Type = NOTIFICATION_TYPE_FOLLOW
 	} else if strings.Contains(n.Message.Text, "liked") {
-		ret.Type = 1
+		ret.Type = NOTIFICATION_TYPE_LIKE
 	} else if strings.Contains(n.Message.Text, "reposted") {
-		ret.Type = 2
+		ret.Type = NOTIFICATION_TYPE_RETWEET
 	} else if strings.Contains(n.Message.Text, "There was a login to your account") {
-		ret.Type = 9
+		ret.Type = NOTIFICATION_TYPE_LOGIN
 	}
 	// TODO: more types?
 
