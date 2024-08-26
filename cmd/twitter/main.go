@@ -599,12 +599,8 @@ func send_dm_reacc(room_id string, in_reply_to_id int, reacc string) {
 }
 
 func get_notifications(how_many int) {
-	resp, err := api.GetNotifications("") // TODO: how_many
-	if err != nil {
-		panic(err)
-	}
-	trove, err := resp.ToTweetTroveAsNotifications(api.UserID)
-	if err != nil {
+	trove, err := api.GetNotifications(how_many)
+	if err != nil && !errors.Is(err, scraper.END_OF_FEED) {
 		panic(err)
 	}
 	profile.SaveTweetTrove(trove, true, &api)

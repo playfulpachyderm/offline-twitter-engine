@@ -18,8 +18,8 @@ func (p Profile) SaveNotification(n Notification) {
 		         on conflict do update
 		        set sent_at = max(sent_at, :sent_at),
 		            sort_index = max(sort_index, :sort_index),
-		            action_user_id = :action_user_id,
-		            action_tweet_id = :action_tweet_id
+		            action_user_id = nullif(:action_user_id, 0),
+		            action_tweet_id = nullif(:action_tweet_id, 0)
 	`, n)
 	if err != nil {
 		panic(err)

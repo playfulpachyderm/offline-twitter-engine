@@ -1,14 +1,17 @@
 package scraper
 
 import (
+	"errors"
 	"net/url"
 	"regexp"
 	"sort"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // TODO: pagination
-func (api *API) GetNotifications(cursor string) (TweetResponse, error) {
+func (api *API) GetNotificationsPage(cursor string) (TweetResponse, error) {
 	url, err := url.Parse("https://api.twitter.com/2/notifications/all.json")
 	if err != nil {
 		panic(err)
@@ -22,6 +25,38 @@ func (api *API) GetNotifications(cursor string) (TweetResponse, error) {
 	err = api.do_http(url.String(), cursor, &result)
 
 	return result, err
+}
+
+func (api *API) GetNotifications(how_many int) (TweetTrove, error) {
+	resp, err := api.GetNotificationsPage("")
+	if err != nil {
+		return TweetTrove{}, err
+	}
+	trove, err := resp.ToTweetTroveAsNotifications(api.UserID)
+	if err != nil {
+		panic(err)
+	}
+
+	for len(trove.Notifications) < how_many {
+		resp, err = api.GetNotificationsPage(resp.GetCursor())
+		if errors.Is(err, ErrRateLimited) {
+			log.Warnf("Rate limited!")
+			break
+		} else if err != nil {
+			return TweetTrove{}, err
+		}
+		if resp.IsEndOfFeed() {
+			log.Infof("End of feed!")
+			break
+		}
+
+		new_trove, err := resp.ToTweetTroveAsNotifications(api.UserID)
+		if err != nil {
+			panic(err)
+		}
+		trove.MergeWith(new_trove)
+	}
+	return trove, nil
 }
 
 func (t *TweetResponse) ToTweetTroveAsNotifications(current_user_id UserID) (TweetTrove, error) {
@@ -52,6 +87,10 @@ func (t *TweetResponse) ToTweetTroveAsNotifications(current_user_id UserID) (Twe
 				notification.Type = NOTIFICATION_TYPE_REPLY
 			} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "recommended") {
 				notification.Type = NOTIFICATION_TYPE_RECOMMENDED_POST
+			} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "quoted") {
+				notification.Type = NOTIFICATION_TYPE_QUOTE_TWEET
+			} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "mentioned") {
+				notification.Type = NOTIFICATION_TYPE_MENTION
 			}
 			if entry.Content.Item.Content.Tweet.ID != 0 {
 				notification.ActionTweetID = TweetID(entry.Content.Item.Content.Tweet.ID)
@@ -103,7 +142,6 @@ func ParseSingleNotification(n APINotification) Notification {
 	// TODO: more types?
 
 	ret.SentAt = TimestampFromUnixMilli(n.TimestampMs)
-	// TODO: caller should set ret.UserID
 	ret.UserIDs = []UserID{}
 	for _, u := range n.Template.AggregateUserActionsV1.FromUsers {
 		ret.UserIDs = append(ret.UserIDs, UserID(u.User.ID))
