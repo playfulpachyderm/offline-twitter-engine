@@ -603,6 +603,12 @@ func get_notifications(how_many int) {
 	if err != nil && !errors.Is(err, scraper.END_OF_FEED) {
 		panic(err)
 	}
+	to_scrape := profile.CheckNotificationScrapesNeeded(trove)
+	trove, err = api.GetNotificationDetailForAll(trove, to_scrape)
+	if err != nil {
+		panic(err)
+	}
+
 	profile.SaveTweetTrove(trove, true, &api)
 	happy_exit(fmt.Sprintf("Saved %d notifications, %d tweets and %d users",
 		len(trove.Notifications), len(trove.Tweets), len(trove.Users),

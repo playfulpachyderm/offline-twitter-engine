@@ -402,16 +402,18 @@ func create_dummy_notification() Notification {
 	id := NotificationID(fmt.Sprintf("Notification #%d", rand.Int()))
 
 	return Notification{
-		ID:            id,
-		Type:          NOTIFICATION_TYPE_REPLY,
-		SentAt:        TimestampFromUnix(10000),
-		SortIndex:     rand.Int63(),
-		UserID:        create_stable_user().ID,
-		ActionUserID:  create_stable_user().ID,
-		ActionTweetID: create_stable_tweet().ID,
+		ID:              id,
+		Type:            NOTIFICATION_TYPE_REPLY,
+		SentAt:          TimestampFromUnix(10000),
+		SortIndex:       rand.Int63(),
+		UserID:          create_stable_user().ID,
+		ActionUserID:    create_stable_user().ID,
+		ActionTweetID:   create_stable_tweet().ID,
 		ActionRetweetID: create_stable_retweet().RetweetID,
-		TweetIDs:      []TweetID{create_stable_tweet().ID},
-		UserIDs:       []UserID{create_stable_user().ID},
-		RetweetIDs:    []TweetID{create_stable_retweet().RetweetID},
+		HasDetail:       true,
+		LastScrapedAt:   TimestampFromUnix(57234728),
+		TweetIDs:        []TweetID{create_stable_tweet().ID},
+		UserIDs:         []UserID{create_stable_user().ID},
+		RetweetIDs:      []TweetID{create_stable_retweet().RetweetID},
 	}
 }

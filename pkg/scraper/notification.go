@@ -52,6 +52,10 @@ type Notification struct {
 	ActionTweetID   TweetID `db:"action_tweet_id"`
 	ActionRetweetID TweetID `db:"action_retweet_id"`
 
+	// Used for "multiple" notifs, like "user liked multiple tweets"
+	HasDetail     bool      `db:"has_detail"`
+	LastScrapedAt Timestamp `db:"last_scraped_at"`
+
 	TweetIDs   []TweetID
 	UserIDs    []UserID
 	RetweetIDs []TweetID

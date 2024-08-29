@@ -1,6 +1,9 @@
 package persistence
 
 import (
+	"database/sql"
+	"errors"
+	"fmt"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -12,16 +15,20 @@ func (p Profile) SaveNotification(n Notification) {
 
 	// Save the Notification
 	_, err = tx.NamedExec(`
-		insert into notifications(id, type, sent_at, sort_index, user_id, action_user_id, action_tweet_id, action_retweet_id)
+		insert into notifications(id, type, sent_at, sort_index, user_id, action_user_id, action_tweet_id, action_retweet_id,
+			                      has_detail, last_scraped_at)
 		     values (:id, :type, :sent_at, :sort_index, :user_id, nullif(:action_user_id, 0), nullif(:action_tweet_id, 0),
-		            nullif(:action_retweet_id, 0))
+		            nullif(:action_retweet_id, 0), :has_detail, :last_scraped_at)
 		         on conflict do update
 		        set sent_at = max(sent_at, :sent_at),
 		            sort_index = max(sort_index, :sort_index),
 		            action_user_id = nullif(:action_user_id, 0),
-		            action_tweet_id = nullif(:action_tweet_id, 0)
+		            action_tweet_id = nullif(:action_tweet_id, 0),
+		            has_detail = has_detail or :has_detail,
+		            last_scraped_at = max(last_scraped_at, :last_scraped_at)
 	`, n)
 	if err != nil {
+		fmt.Printf("failed to save notification %#v\n", n)
 		panic(err)
 	}
 
@@ -62,7 +69,7 @@ func (p Profile) GetNotification(id NotificationID) Notification {
 	var ret Notification
 	err := p.DB.Get(&ret,
 		`select id, type, sent_at, sort_index, user_id, ifnull(action_user_id, 0) action_user_id,
-		        ifnull(action_tweet_id, 0) action_tweet_id, ifnull(action_retweet_id, 0) action_retweet_id
+		        ifnull(action_tweet_id, 0) action_tweet_id, ifnull(action_retweet_id, 0) action_retweet_id, has_detail, last_scraped_at
 		   from notifications where id = ?`,
 		id)
 	if err != nil {
@@ -79,6 +86,32 @@ func (p Profile) GetNotification(id NotificationID) Notification {
 	err = p.DB.Select(&ret.RetweetIDs, `select retweet_id from notification_retweets where notification_id = ?`, id)
 	if err != nil {
 		panic(err)
+	}
+	return ret
+}
+
+func (p Profile) CheckNotificationScrapesNeeded(trove TweetTrove) []NotificationID {
+	ret := []NotificationID{}
+	for n_id, notification := range trove.Notifications {
+		// If there's no detail page, skip
+		if !notification.HasDetail {
+			continue
+		}
+
+		// Check its last-scraped
+		var last_scraped_at Timestamp
+		err := p.DB.Get(&last_scraped_at, `select last_scraped_at from notifications where id = ?`, n_id)
+		if errors.Is(err, sql.ErrNoRows) {
+			// It's not scraped at all yet
+			ret = append(ret, n_id)
+			continue
+		} else if err != nil {
+			panic(err)
+		}
+		// If the latest scrape is not fresh (older than the notification sent-at time), add it
+		if last_scraped_at.Time.Before(notification.SentAt.Time) {
+			ret = append(ret, n_id)
+		}
 	}
 	return ret
 }

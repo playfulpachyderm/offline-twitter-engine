@@ -414,6 +414,9 @@ create table notifications (rowid integer primary key,
     action_tweet_id integer references tweets(id), -- tweet associated with the notification
     action_retweet_id integer references retweets(retweet_id),
 
+    has_detail boolean not null default 0,
+    last_scraped_at not null default 0,
+
     foreign key(type) references notification_types(rowid)
     foreign key(user_id) references users(id)
 );

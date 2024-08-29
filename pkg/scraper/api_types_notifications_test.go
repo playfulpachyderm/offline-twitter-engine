@@ -119,6 +119,21 @@ func TestParseNotificationsPage(t *testing.T) {
 	assert.Len(notif10.RetweetIDs, 1)
 	assert.Contains(notif10.RetweetIDs, TweetID(1827183097382654351))
 
+	notif11, is_ok := tweet_trove.Notifications["FDzeDIfVUAIAAAABiJONco_yJRHyMqRjxDY"]
+	assert.True(is_ok)
+	assert.Equal(NOTIFICATION_TYPE_USER_IS_LIVE, notif11.Type)
+	assert.Equal(UserID(277536867), notif11.ActionUserID)
+
+	// 1 user liked multiple posts
+	notif12, is_ok := tweet_trove.Notifications["FDzeDIfVUAIAAAABiJONco_yJRESfwtSqvg"]
+	assert.True(is_ok)
+	assert.True(notif12.HasDetail)
+
+	// TODO: communities
+	// notif12, is_ok := tweet_trove.Notifications["FDzeDIfVUAIAAAABiJONco_yJRHPBNsDH88"]
+	// assert.True(is_ok)
+	// assert.Equal(NOTIFICATION_TYPE_COMMUNITY_PINNED_POST, notif12.Type)
+
 	// Check users
 	for _, u_id := range []UserID{1458284524761075714, 28815778, 1633158398555353096} {
 		_, is_ok := tweet_trove.Users[u_id]
@@ -154,4 +169,26 @@ func TestParseNotificationsEndOfFeed(t *testing.T) {
 	require.NoError(err)
 
 	assert.True(resp.IsEndOfFeed())
+}
+
+func TestParseNotificationDetail(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+	data, err := os.ReadFile("test_responses/notifications/notification_detail.json")
+	require.NoError(err)
+
+	var resp TweetResponse
+	err = json.Unmarshal(data, &resp)
+	require.NoError(err)
+
+	trove, ids, err := resp.ToTweetTroveAsNotificationDetail()
+	require.NoError(err)
+	assert.Len(ids, 2)
+	assert.Contains(ids, TweetID(1827544032714633628))
+	assert.Contains(ids, TweetID(1826743131108487390))
+
+	_, is_ok := trove.Tweets[1826743131108487390]
+	assert.True(is_ok)
+	_, is_ok = trove.Retweets[1827544032714633628]
+	assert.True(is_ok)
 }

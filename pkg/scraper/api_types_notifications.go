@@ -2,10 +2,12 @@ package scraper
 
 import (
 	"errors"
+	"fmt"
 	"net/url"
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -56,6 +58,41 @@ func (api *API) GetNotifications(how_many int) (TweetTrove, error) {
 		}
 		trove.MergeWith(new_trove)
 	}
+
+	return trove, nil
+}
+
+func (api *API) GetNotificationDetailForAll(trove TweetTrove, to_scrape []NotificationID) (TweetTrove, error) {
+	for _, n_id := range to_scrape {
+		notification := trove.Notifications[n_id]
+		resp, err := api.GetNotificationDetail(notification)
+		if errors.Is(err, ErrRateLimited) {
+			log.Warnf("Rate limited!")
+			break
+		} else if err != nil {
+			return TweetTrove{}, err
+		}
+
+		// Fetch the notification detail
+		new_trove, ids, err := resp.ToTweetTroveAsNotificationDetail()
+		if err != nil {
+			panic(err)
+		}
+		trove.MergeWith(new_trove)
+
+		// Add the fetched Tweet / Retweet IDs to the notification
+		for _, id := range ids {
+			_, is_retweet := trove.Retweets[id]
+			if is_retweet {
+				notification.RetweetIDs = append(notification.RetweetIDs, id)
+			} else {
+				notification.TweetIDs = append(notification.TweetIDs, id)
+			}
+		}
+		// Update the notification's last_scraped_at
+		notification.LastScrapedAt = Timestamp{time.Now()}
+		trove.Notifications[n_id] = notification
+	}
 	return trove, nil
 }
 
@@ -91,6 +128,17 @@ func (t *TweetResponse) ToTweetTroveAsNotifications(current_user_id UserID) (Twe
 				notification.Type = NOTIFICATION_TYPE_QUOTE_TWEET
 			} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "mentioned") {
 				notification.Type = NOTIFICATION_TYPE_MENTION
+			} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "live_broadcast") {
+				// TODO: broadcast
+				notification.Type = NOTIFICATION_TYPE_USER_IS_LIVE
+			} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "community_tweet_pinned") {
+				// TODO: communities
+				delete(ret.Notifications, notification.ID)
+				continue
+			}
+
+			if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "multiple") {
+				notification.HasDetail = true
 			}
 
 			if entry.Content.Item.Content.Tweet.ID != 0 {
@@ -160,4 +208,40 @@ func ParseSingleNotification(n APINotification) Notification {
 	}
 
 	return ret
+}
+
+func (api *API) GetNotificationDetail(n Notification) (TweetResponse, error) {
+	url, err := url.Parse(fmt.Sprintf("https://twitter.com/i/api/2/notifications/view/%s.json", n.ID))
+	if err != nil {
+		panic(err)
+	}
+
+	query := url.Query()
+	add_tweet_query_params(&query)
+	url.RawQuery = query.Encode()
+
+	var result TweetResponse
+	err = api.do_http(url.String(), "", &result)
+
+	return result, err
+}
+
+func (t *TweetResponse) ToTweetTroveAsNotificationDetail() (TweetTrove, []TweetID, error) {
+	ids := []TweetID{}
+	ret, err := t.ToTweetTrove()
+	if err != nil {
+		return TweetTrove{}, ids, err
+	}
+
+	// Find the "addEntries" instruction
+	for _, instr := range t.Timeline.Instructions {
+		sort.Sort(instr.AddEntries.Entries)
+		for _, entry := range instr.AddEntries.Entries {
+			if entry.Content.Item.Content.Tweet.ID != 0 {
+				ids = append(ids, TweetID(entry.Content.Item.Content.Tweet.ID))
+			}
+		}
+	}
+
+	return ret, ids, nil
 }
