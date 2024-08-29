@@ -92,28 +92,29 @@ func (t *TweetResponse) ToTweetTroveAsNotifications(current_user_id UserID) (Twe
 			} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "mentioned") {
 				notification.Type = NOTIFICATION_TYPE_MENTION
 			}
+
 			if entry.Content.Item.Content.Tweet.ID != 0 {
 				notification.ActionTweetID = TweetID(entry.Content.Item.Content.Tweet.ID)
+				notification.TweetIDs = []TweetID{notification.ActionTweetID}
 				notification.ActionUserID = UserID(ret.Tweets[notification.ActionTweetID].UserID)
-			}
-
-			if entry.Content.Item.Content.Notification.ID != "" {
-				notification.UserIDs = []UserID{}
-				for _, u_id := range entry.Content.Item.Content.Notification.FromUsers {
-					notification.UserIDs = append(notification.UserIDs, UserID(u_id))
-					notification.ActionUserID = UserID(u_id)
-				}
-
-				notification.TweetIDs = []TweetID{}
-				for _, t_id := range entry.Content.Item.Content.Notification.TargetTweets {
-					notification.TweetIDs = append(notification.TweetIDs, TweetID(t_id))
-					notification.ActionTweetID = TweetID(t_id)
+			} else if notification.ActionTweetID != TweetID(0) {
+				// Check if it's a tweet or retweet
+				_, is_ok := ret.Retweets[notification.ActionTweetID]
+				if is_ok {
+					// It's a retweet, not a tweet
+					notification.ActionRetweetID = notification.ActionTweetID
+					notification.RetweetIDs = []TweetID{notification.ActionRetweetID}
+					notification.ActionTweetID = TweetID(0) // It's not a tweet
+				} else {
+					// Otherwise, it's a tweet
+					notification.TweetIDs = []TweetID{notification.ActionTweetID}
 				}
 			}
+
 			ret.Notifications[notification.ID] = notification
 		}
 	}
-	return ret, err
+	return ret, nil
 }
 
 func ParseSingleNotification(n APINotification) Notification {
@@ -128,8 +129,8 @@ func ParseSingleNotification(n APINotification) Notification {
 
 		n.Message.Text = string(runetext[0:from]) + string(runetext[to:])
 	}
-	// t.Entities.ReplyMentions = strings.TrimSpace(string([]rune(t.FullText)[0:t.DisplayTextRange[0]]))
 
+	// Try to identify the notification type from the notification object itself (not always possible)
 	if strings.HasSuffix(n.Message.Text, "followed you") {
 		ret.Type = NOTIFICATION_TYPE_FOLLOW
 	} else if strings.Contains(n.Message.Text, "liked") {
@@ -139,24 +140,23 @@ func ParseSingleNotification(n APINotification) Notification {
 	} else if strings.Contains(n.Message.Text, "There was a login to your account") {
 		ret.Type = NOTIFICATION_TYPE_LOGIN
 	}
-	// TODO: more types?
 
 	ret.SentAt = TimestampFromUnixMilli(n.TimestampMs)
+
+	// Process UserIDs
 	ret.UserIDs = []UserID{}
 	for _, u := range n.Template.AggregateUserActionsV1.FromUsers {
 		ret.UserIDs = append(ret.UserIDs, UserID(u.User.ID))
+		if ret.ActionUserID == UserID(0) {
+			// "Liking" users are ordered most-recent-first
+			ret.ActionUserID = UserID(u.User.ID)
+		}
 	}
 
+	// If the action has a "target", store it temporarily in ActionTweetID
 	target_objs := n.Template.AggregateUserActionsV1.TargetObjects
 	if len(target_objs) > 0 {
-		if strings.HasSuffix(n.Message.Text, "liked your repost") {
-			// Retweet
-			ret.ActionRetweetID = TweetID(target_objs[0].Tweet.ID)
-		} else {
-			// Normal tweet
-			ret.ActionTweetID = TweetID(target_objs[0].Tweet.ID)
-			ret.TweetIDs = []TweetID{TweetID(target_objs[0].Tweet.ID)}
-		}
+		ret.ActionTweetID = TweetID(target_objs[0].Tweet.ID)
 	}
 
 	return ret

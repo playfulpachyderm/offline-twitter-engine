@@ -39,6 +39,16 @@ func (p Profile) SaveNotification(n Notification) {
 			insert into notification_tweets(notification_id, tweet_id) values (?, ?) on conflict do nothing
 		`, n.ID, t_id)
 		if err != nil {
+			fmt.Printf("failed to save notification %#v\n", n)
+			panic(err)
+		}
+	}
+	for _, r_id := range n.RetweetIDs {
+		_, err = tx.Exec(`
+			insert into notification_retweets(notification_id, retweet_id) values (?, ?) on conflict do nothing
+		`, n.ID, r_id)
+		if err != nil {
+			fmt.Printf("failed to save notification %#v\n", n)
 			panic(err)
 		}
 	}
@@ -63,6 +73,10 @@ func (p Profile) GetNotification(id NotificationID) Notification {
 		panic(err)
 	}
 	err = p.DB.Select(&ret.TweetIDs, `select tweet_id from notification_tweets where notification_id = ?`, id)
+	if err != nil {
+		panic(err)
+	}
+	err = p.DB.Select(&ret.RetweetIDs, `select retweet_id from notification_retweets where notification_id = ?`, id)
 	if err != nil {
 		panic(err)
 	}

@@ -409,7 +409,9 @@ func create_dummy_notification() Notification {
 		UserID:        create_stable_user().ID,
 		ActionUserID:  create_stable_user().ID,
 		ActionTweetID: create_stable_tweet().ID,
+		ActionRetweetID: create_stable_retweet().RetweetID,
 		TweetIDs:      []TweetID{create_stable_tweet().ID},
 		UserIDs:       []UserID{create_stable_user().ID},
+		RetweetIDs:    []TweetID{create_stable_retweet().RetweetID},
 	}
 }

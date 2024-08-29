@@ -422,6 +422,11 @@ create table notification_tweets (rowid integer primary key,
     tweet_id not null references tweets(id),
     unique(notification_id, tweet_id)
 );
+create table notification_retweets (rowid integer primary key,
+    notification_id not null references notifications(id),
+    retweet_id not null references retweets(retweet_id),
+    unique(notification_id, retweet_id)
+);
 create table notification_users (rowid integer primary key,
     notification_id not null references notifications(id),
     user_id not null references users(id),
