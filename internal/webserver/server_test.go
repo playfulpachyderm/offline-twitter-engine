@@ -888,3 +888,22 @@ func TestMessagesPaginate(t *testing.T) {
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".dm-message")), 2)
 }
+
+func TestNotifications(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	// Boilerplate for setting an active user
+	app := webserver.NewApp(profile)
+	app.IsScrapingDisabled = true
+	app.ActiveUser = scraper.User{ID: 1488963321701171204, Handle: "Offline_Twatter"} // Simulate a login
+
+	// Notifications page
+	recorder := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/notifications", nil)
+	app.ServeHTTP(recorder, req)
+	resp := recorder.Result()
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".notification")), 6)
+}

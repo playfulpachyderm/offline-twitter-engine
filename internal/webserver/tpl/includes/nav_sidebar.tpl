@@ -20,7 +20,7 @@
         </li>
       </a>
       {{if (not (eq (active_user).Handle "[nobody]"))}}
-        <a href="#">
+        <a href="/notifications">
           <li class="button labelled-icon">
             <img class="svg-icon" src="/static/icons/notifications.svg" width="24" height="24" />
             <label class="nav-sidebar__button-label">Notifications</label>

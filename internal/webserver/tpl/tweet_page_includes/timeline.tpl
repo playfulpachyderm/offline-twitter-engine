@@ -1,6 +1,10 @@
 {{define "timeline"}}
   {{range .Items}}
-    {{template "tweet" .}}
+    {{if .NotificationID}}
+      {{template "notification" .}}
+    {{else}}
+      {{template "tweet" .}}
+    {{end}}
   {{end}}
 
   <div class="show-more">

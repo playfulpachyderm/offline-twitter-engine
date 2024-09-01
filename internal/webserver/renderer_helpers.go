@@ -15,7 +15,7 @@ import (
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-type Notifications struct {
+type NotificationBubbles struct {
 	NumMessageNotifications int
 }
 
@@ -24,8 +24,8 @@ type PageGlobalData struct {
 	scraper.TweetTrove
 	SearchText     string
 	FocusedTweetID scraper.TweetID
-	Notifications
-	Toasts []Toast
+	Toasts         []Toast
+	NotificationBubbles
 }
 
 func (d PageGlobalData) Tweet(id scraper.TweetID) scraper.Tweet {
@@ -39,6 +39,9 @@ func (d PageGlobalData) Retweet(id scraper.TweetID) scraper.Retweet {
 }
 func (d PageGlobalData) Space(id scraper.SpaceID) scraper.Space {
 	return d.Spaces[id]
+}
+func (d PageGlobalData) Notification(id scraper.NotificationID) scraper.Notification {
+	return d.Notifications[id]
 }
 func (d PageGlobalData) Message(id scraper.DMMessageID) scraper.DMMessage {
 	return d.Messages[id]
@@ -95,7 +98,7 @@ func (r renderer) BufferedRender(w io.Writer) {
 func (app *Application) buffered_render_page(w http.ResponseWriter, tpl_file string, global_data PageGlobalData, tpl_data interface{}) {
 	partials := append(glob("tpl/includes/*.tpl"), glob("tpl/tweet_page_includes/*.tpl")...)
 
-	global_data.Notifications.NumMessageNotifications = len(app.Profile.GetUnreadConversations(app.ActiveUser.ID))
+	global_data.NotificationBubbles.NumMessageNotifications = len(app.Profile.GetUnreadConversations(app.ActiveUser.ID))
 
 	r := renderer{
 		Funcs:     app.make_funcmap(global_data),
@@ -127,6 +130,7 @@ func (app *Application) make_funcmap(global_data PageGlobalData) template.FuncMa
 		"user":             global_data.User,
 		"retweet":          global_data.Retweet,
 		"space":            global_data.Space,
+		"notification":     global_data.Notification,
 		"dm_message":       global_data.Message,
 		"chat_room":        global_data.ChatRoom,
 		"focused_tweet_id": global_data.GetFocusedTweetID,

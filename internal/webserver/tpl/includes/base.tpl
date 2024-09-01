@@ -35,7 +35,7 @@
           />
         </form>
       </header>
-      {{template "nav-sidebar" (global_data).Notifications}}
+      {{template "nav-sidebar" (global_data).NotificationBubbles}}
       <main>
         {{template "main" .}}
       </main>

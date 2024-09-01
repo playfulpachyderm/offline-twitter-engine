@@ -13,6 +13,6 @@ func (app *Application) NavSidebarPollUpdates(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	data := Notifications{NumMessageNotifications: len(app.Profile.GetUnreadConversations(app.ActiveUser.ID))}
+	data := NotificationBubbles{NumMessageNotifications: len(app.Profile.GetUnreadConversations(app.ActiveUser.ID))}
 	app.buffered_render_htmx(w, "nav-sidebar", PageGlobalData{}, data)
 }

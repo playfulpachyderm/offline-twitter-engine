@@ -132,6 +132,8 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/lists", http.HandlerFunc(app.Lists)).ServeHTTP(w, r)
 	case "bookmarks":
 		app.Bookmarks(w, r)
+	case "notifications":
+		app.Notifications(w, r)
 	case "messages":
 		http.StripPrefix("/messages", http.HandlerFunc(app.Messages)).ServeHTTP(w, r)
 	case "nav-sidebar-poll-updates":

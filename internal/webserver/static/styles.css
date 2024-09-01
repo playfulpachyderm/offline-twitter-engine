@@ -543,7 +543,7 @@ main {
 /**
  * Tweet module
  */
-.tweet {
+.tweet, .notification {
 	padding: 0 1.5em;
 	position: relative;
 	z-index: 0;  /* Dunno why, but without it, hovering a tweet with a Poll hides the poll fill bars */
@@ -939,6 +939,21 @@ main {
 		}
 	}
 }
+
+
+/******************************************************
+ * Notifications
+ ******************************************************/
+
+/**
+ * Notifications module
+ */
+.notification {
+	.notification__users {
+		font-size: 0.8em; /* Make the profile images smaller */
+	}
+}
+
 
 /******************************************************
  * Navigation and base page
