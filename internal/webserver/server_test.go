@@ -254,7 +254,7 @@ func TestTimeline(t *testing.T) {
 	assert.Equal(title_node.FirstChild.Data, "Timeline | Offline Twitter")
 
 	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
-	assert.Len(tweet_nodes, 19)
+	assert.Len(tweet_nodes, 20)
 }
 
 func TestTimelineWithCursor(t *testing.T) {

@@ -317,3 +317,39 @@ func TestTweetDetailWithThread(t *testing.T) {
 	require.Len(tweet_detail.ReplyChains, 1) // Should not include the Thread replies
 	assert.Equal(tweet_detail.ReplyChains[0][0], TweetID(1698792233619562866))
 }
+
+func TestNotificationsFeed(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+
+	feed := profile.GetNotificationsForUser(UserID(1488963321701171204), 12345678912345)
+	assert.Len(feed.TweetTrove.Notifications, 6)
+	assert.Len(feed.TweetTrove.Tweets, 3)
+	assert.Len(feed.TweetTrove.Retweets, 1)
+	assert.Len(feed.TweetTrove.Users, 6)
+
+	// Check that Users were retrieved on the notification with detail
+	notif, is_ok := feed.TweetTrove.Notifications["FKncQJGVgAQAAAABSQ3bEaTgXL8f40e77r4"]
+	assert.True(is_ok)
+	assert.Len(notif.UserIDs, 3)
+	// Ensure they're also in the TweetTrove
+	for _, u_id := range notif.UserIDs {
+		_, is_ok := feed.TweetTrove.Users[u_id]
+		assert.True(is_ok)
+	}
+
+	assert.Len(feed.Items, 6)
+	assert.Equal(feed.Items[0].NotificationID, NotificationID("FDzeDIfVUAIAAAABiJONcqaBFAzeN-n-Luw"))
+	assert.Equal(feed.Items[0].RetweetID, TweetID(1490135787124232223))
+	assert.Equal(feed.Items[1].NotificationID, NotificationID("FDzeDIfVUAIAAvsBiJONcqYgiLgXOolO9t0"))
+	assert.Equal(feed.Items[1].TweetID, TweetID(1826778617705115869))
+	assert.Equal(feed.Items[2].NotificationID, NotificationID("FKncQJGVgAQAAAABSQ3bEaTgXL8VBxefepo"))
+	assert.Equal(feed.Items[2].TweetID, TweetID(1826778617705115868))
+	assert.Equal(feed.Items[3].NotificationID, NotificationID("FKncQJGVgAQAAAABSQ3bEaTgXL_S11Ev36g"))
+	assert.Equal(feed.Items[4].NotificationID, NotificationID("FKncQJGVgAQAAAABSQ3bEaTgXL-G8wObqVY"))
+	assert.Equal(feed.Items[5].NotificationID, NotificationID("FKncQJGVgAQAAAABSQ3bEaTgXL8f40e77r4"))
+	assert.Equal(feed.Items[5].TweetID, TweetID(1826778617705115868))
+}

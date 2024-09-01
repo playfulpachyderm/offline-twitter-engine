@@ -53,7 +53,9 @@ INSERT INTO users VALUES
     (160242,534463724,'iko','ilyakooo0',replace('Code poet.\n~racfer-hattes','\n',char(10)),473,173,'','http://iko.soy',1332519666000,0,0,0,'https://pbs.twimg.com/profile_images/1671427114438909952/8v8raTeb.jpg','ilyakooo0_profile_8v8raTeb.jpg','','',0,0,0,0,0),
     (169994,1689006330235760640,'sol🏴‍☠️','sol_plunder','',165,134,'','',1691525490000,0,0,0,'https://pbs.twimg.com/profile_images/1689006644905033728/T1uO4Jvt.jpg','sol_plunder_profile_T1uO4Jvt.jpg','','',1704554384930058537,0,0,0,0),
     (1680,1458284524761075714,'wispem-wantex','wispem_wantex',replace('~wispem-wantex\n\nCurrently looking for work (DMs open)','\n',char(10)),136,483,'on my computer','https://offline-twitter.com/',1636517116000,0,0,0,'https://pbs.twimg.com/profile_images/1462880679687954433/dXJN4Bo4.jpg','wispem_wantex_profile_dXJN4Bo4.jpg','','',1695221528617468324,1,0,0,0),
-    (27398,1488963321701171204,'Offline Twatter','Offline_Twatter',replace('Offline Twitter is an open source twitter client and tweet-archiving app all in one.  Try it out!\n\nSource code: https://t.co/2PMumKSxFO','\n',char(10)),4,2,'','https://offline-twitter.com',1643831522000,0,0,0,'https://pbs.twimg.com/profile_images/1507883049853210626/TytFbk_3.jpg','Offline_Twatter_profile_TytFbk_3.jpg','','',1507883724615999488,1,1,0,0);
+    (27398,1488963321701171204,'Offline Twatter','Offline_Twatter',replace('Offline Twitter is an open source twitter client and tweet-archiving app all in one.  Try it out!\n\nSource code: https://t.co/2PMumKSxFO','\n',char(10)),4,2,'','https://offline-twitter.com',1643831522000,0,0,0,'https://pbs.twimg.com/profile_images/1507883049853210626/TytFbk_3.jpg','Offline_Twatter_profile_TytFbk_3.jpg','','',1507883724615999488,1,1,0,0),
+    (175560,249206992,'ludwig','ludwigABAP','God’s chosen principal engineer. What is impossible for you is not impossible for me.',984,17966,'','https://ludwigabap.bearblog.dev/',1297180819000,0,0,0,'https://pbs.twimg.com/profile_images/1753215006697459712/n76_qnTj.jpg','ludwigABAP_profile_n76_qnTj.jpg','https://pbs.twimg.com/profile_banners/249206992/1706835247','ludwigABAP_banner_1706835247.jpg',0,0,0,0,0);
+
 
 create table lists(rowid integer primary key,
     is_online boolean not null default 0,
@@ -192,7 +194,9 @@ INSERT INTO tweets VALUES
     (1409940,1698797388914151523,1458284524761075714,replace('This looks quite neat, but "comptime" is cool because it was designed to do stuff like declaring arrays where the size is the result of a function call, e.g.\n\nvar my_array: [fibonacci(10)]u32;\n\n...yet being able to create DSLs just emerged from this very simple concept','\n',char(10)),1693859834000,2,0,1,0,1698792233619562866,0,'ilyakooo0','ilyakooo0','',NULL,NULL,0,1,0,0,0),
     (1409953,1698802806096846909,1689006330235760640,replace('Just poking around at some examples and explanation videos, It does seem very similar to Template Haskell, though maybe a bit more ergonomic.\n\nIs there something missing from this mental model?','\n',char(10)),1693861125000,3,0,1,0,1698797388914151523,0,'wispem_wantex,ilyakooo0','wispem_wantex,ilyakooo0','',NULL,NULL,0,1,0,0,0),
     (1411566,1698848086880133147,1458284524761075714,'I have basically no experience with one and literally no experience with the other, and additionally I''ve never even used Haskell.  So unfortunately I''m not really in a position to say.',1693871921000,1,0,1,0,1698802806096846909,0,'sol_plunder,ilyakooo0','sol_plunder,ilyakooo0','',NULL,NULL, 0,1,0,0,0),
-    (1169437,1665509126737129472,1458284524761075714,replace('Btw, to the extent this has happened, it''s partly thanks to the Golden One (@TheGloriousLion) who invented #fizeekfriday and the "post physique" rejoinder.  Everyone should follow him if they don''t already.\n\nSince I forgot last week, and since it''s topical, here''s a leg poast','\n',char(10)),1685923294000,7,0,0,0,1665505986184900611,0,'TheGloriousLion','','fizeekfriday',NULL,NULL,0,1,0,0,0);
+    (1169437,1665509126737129472,1458284524761075714,replace('Btw, to the extent this has happened, it''s partly thanks to the Golden One (@TheGloriousLion) who invented #fizeekfriday and the "post physique" rejoinder.  Everyone should follow him if they don''t already.\n\nSince I forgot last week, and since it''s topical, here''s a leg poast','\n',char(10)),1685923294000,7,0,0,0,1665505986184900611,0,'TheGloriousLion','','fizeekfriday',NULL,NULL,0,1,0,0,0),
+    (2857438,1826778617705115868,1488963321701171204,'Conversations are trees, not sequences.  They branch.  They don''t flow in a perfectly linear way.',1724372937000,4,1,0,0,0,0,'','','',NULL,NULL,0,1,0,0,0),
+    (2857439,1826778617705115869,1178839081222115328,'Real tweet that is definitely real',1724372938000,4,1,0,0,1826778617705115868,0,'Offline_Twatter','Offline_Twatter','',NULL,NULL,0,1,0,0,0);
 
 CREATE TABLE retweets(rowid integer primary key,
     retweet_id integer not null unique,
@@ -211,7 +215,7 @@ INSERT INTO retweets VALUES
     (52,1490135787144237058,1490120332484972549,358545917,1644111031000),
     (42,1490119308692766723,1490116725395927042,358545917,1644107102000),
     (59,1490100255987171332,1489944024278523906,358545917,1644102560000),
-    (1000,1490135787124232222,1343715029707796489,1304281147074064385,1644111021000); -- This is fake
+    (1000,1490135787124232223,1698762413393236329,1488963321701171204,1644111022000); -- This is fake
 
 create table urls (rowid integer primary key,
     tweet_id integer not null,
@@ -526,12 +530,75 @@ insert into follows values
     (3, 1488963321701171204, 1240784920831762433);
 
 
+create table notification_types (rowid integer primary key,
+    name text not null unique
+);
+insert into notification_types(rowid, name) values
+    (1, 'like'),
+    (2, 'retweet'),
+    (3, 'quote-tweet'),
+    (4, 'reply'),
+    (5, 'follow'),
+    (6, 'mention'),
+    (7, 'user is LIVE'),
+    (8, 'poll ended'),
+    (9, 'login'),
+    (10, 'community pinned post'),
+    (11, 'new recommended post');
+create table notifications (rowid integer primary key,
+    id text unique,
+    type integer not null,
+    sent_at integer not null,
+    sort_index integer not null,
+    user_id integer not null, -- user who received the notification
+
+    action_user_id integer references users(id),  -- user who triggered the notification
+    action_tweet_id integer references tweets(id), -- tweet associated with the notification
+    action_retweet_id integer references retweets(retweet_id),
+
+    has_detail boolean not null default 0,
+    last_scraped_at not null default 0,
+
+    foreign key(type) references notification_types(rowid)
+    foreign key(user_id) references users(id)
+);
+INSERT INTO notifications VALUES
+    (1,'FKncQJGVgAQAAAABSQ3bEaTgXL8f40e77r4',1,1723494244885,1723494244885,1488963321701171204,249206992,1826778617705115868,NULL,1,1725067356270),
+    (2,'FKncQJGVgAQAAAABSQ3bEaTgXL-G8wObqVY',9,1724112169072,1724112169072,1488963321701171204,NULL,NULL,NULL,0,-62135596800000),
+    (3,'FKncQJGVgAQAAAABSQ3bEaTgXL_S11Ev36g',5,1722251072880,1724251072880,1488963321701171204,1032468021485293568,NULL,NULL,0,-62135596800000),
+    (4,'FKncQJGVgAQAAAABSQ3bEaTgXL8VBxefepo',2,1724372973735,1724372973735,1488963321701171204,1178839081222115328,1826778617705115868,NULL,0,-62135596800000),
+    (5,'FDzeDIfVUAIAAvsBiJONcqYgiLgXOolO9t0',6,-62135596800000,1725055975543,1488963321701171204,1178839081222115328,1826778617705115869,NULL,0,-62135596800000),
+    (6,'FDzeDIfVUAIAAAABiJONcqaBFAzeN-n-Luw',1,1724604756351,1726604756351,1488963321701171204,1178839081222115328,NULL,1490135787124232223,0,-62135596800000);
+
+create table notification_tweets (rowid integer primary key,
+    notification_id not null references notifications(id),
+    tweet_id not null references tweets(id),
+    unique(notification_id, tweet_id)
+);
+
+create table notification_retweets (rowid integer primary key,
+    notification_id not null references notifications(id),
+    retweet_id not null references retweets(retweet_id),
+    unique(notification_id, retweet_id)
+);
+
+create table notification_users (rowid integer primary key,
+    notification_id not null references notifications(id),
+    user_id not null references users(id),
+    unique(notification_id, user_id)
+);
+INSERT INTO notification_users VALUES
+    (1,'FKncQJGVgAQAAAABSQ3bEaTgXL8f40e77r4',249206992),
+    (2,'FKncQJGVgAQAAAABSQ3bEaTgXL8f40e77r4',1304281147074064385),
+    (3,'FKncQJGVgAQAAAABSQ3bEaTgXL8f40e77r4',1178839081222115328);
+
+
 create table fake_user_sequence(latest_fake_id integer not null);
 insert into fake_user_sequence values(0x4000000000000000);
 
 create table database_version(rowid integer primary key,
     version_number integer not null unique
 );
-insert into database_version(version_number) values (30);
+insert into database_version(version_number) values (31);
 
 COMMIT;

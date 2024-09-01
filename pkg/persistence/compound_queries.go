@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jmoiron/sqlx"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -13,6 +14,7 @@ var (
 	ErrNotInDB   = errors.New("not in database")
 )
 
+// TODO: make this a SQL view?
 const TWEETS_ALL_SQL_FIELDS = `
 		tweets.id id, tweets.user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id,
 		quoted_tweet_id, mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id,
@@ -20,6 +22,11 @@ const TWEETS_ALL_SQL_FIELDS = `
 		case when likes.user_id is null then 0 else 1 end is_liked_by_current_user,
 		is_expandable, is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at`
 
+// Given a TweetTrove, fetch its:
+// - quoted tweets
+// - spaces
+// - users
+// - images, videos, urls, polls
 func (p Profile) fill_content(trove *TweetTrove, current_user_id UserID) {
 	if len(trove.Tweets) == 0 {
 		// Empty trove, nothing to fetch
@@ -50,6 +57,7 @@ func (p Profile) fill_content(trove *TweetTrove, current_user_id UserID) {
 		}
 	}
 
+	// Fetch spaces
 	space_ids := []interface{}{}
 	for _, t := range trove.Tweets {
 		if t.SpaceID != "" {
@@ -79,6 +87,7 @@ func (p Profile) fill_content(trove *TweetTrove, current_user_id UserID) {
 		}
 	}
 
+	// Assemble list of users fetched in previous operations
 	in_clause := ""
 	user_ids := []interface{}{}
 	tweet_ids := []interface{}{}
@@ -96,6 +105,16 @@ func (p Profile) fill_content(trove *TweetTrove, current_user_id UserID) {
 		user_ids = append(user_ids, s.CreatedById)
 		for _, p := range s.ParticipantIds {
 			user_ids = append(user_ids, p)
+		}
+	}
+	for _, n := range trove.Notifications {
+		// Primary user
+		if n.ActionUserID != UserID(0) {
+			user_ids = append(user_ids, n.ActionUserID)
+		}
+		// Other users, if there are any
+		for _, u_id := range n.UserIDs {
+			user_ids = append(user_ids, u_id)
 		}
 	}
 
@@ -120,7 +139,6 @@ func (p Profile) fill_content(trove *TweetTrove, current_user_id UserID) {
 	var images []Image
 	imgquery := `
         select id, tweet_id, width, height, remote_url, local_filename, is_downloaded from images where tweet_id in (` + in_clause + `)`
-	// fmt.Printf("%s\n", imgquery) // TODO: SQL logger
 	err := p.DB.Select(&images, imgquery, tweet_ids...)
 	if err != nil {
 		panic(err)
@@ -357,8 +375,9 @@ func (p Profile) GetTweetDetail(id TweetID, current_user_id UserID) (TweetDetail
 // TODO: compound-query-structs
 type FeedItem struct {
 	TweetID
-	RetweetID         TweetID
-	QuoteNestingLevel int
+	RetweetID TweetID
+	NotificationID
+	QuoteNestingLevel int // Defines the current nesting level (not available remaining levels)
 }
 type Feed struct {
 	Items []FeedItem
@@ -382,4 +401,115 @@ func NewFeed() Feed {
 		Items:      []FeedItem{},
 		TweetTrove: NewTweetTrove(),
 	}
+}
+
+func (p Profile) GetNotificationsForUser(u_id UserID, cursor int64) Feed {
+	// Get the notifications
+	var notifications []Notification
+	err := p.DB.Select(&notifications,
+		`select id, type, sent_at, sort_index, user_id, ifnull(action_user_id, 0) action_user_id,
+		        ifnull(action_tweet_id, 0) action_tweet_id, ifnull(action_retweet_id, 0) action_retweet_id, has_detail, last_scraped_at
+		   from notifications
+		  where sort_index < ? or ?
+		    and user_id = ?
+		  order by sort_index desc
+	`, cursor, cursor == 0, u_id)
+	if err != nil {
+		panic(err)
+	}
+
+	// Get the user_ids list for each notification.  Unlike tweet+retweet_ids, users are needed to render
+	// the notification properly.
+	for i := range notifications {
+		err = p.DB.Select(&notifications[i].UserIDs, `select user_id from notification_users where notification_id = ?`, notifications[i].ID)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	// Collect tweet and retweet IDs
+	retweet_ids := []TweetID{}
+	tweet_ids := []TweetID{}
+	for _, n := range notifications {
+		if n.ActionRetweetID != TweetID(0) {
+			retweet_ids = append(retweet_ids, n.ActionRetweetID)
+		}
+		if n.ActionTweetID != TweetID(0) {
+			tweet_ids = append(tweet_ids, n.ActionTweetID)
+		}
+	}
+
+	// TODO: can this go in `fill_content`?
+
+	// Get retweets if there are any
+	var retweets []Retweet
+	if len(retweet_ids) != 0 {
+		sql_str, vals, err := sqlx.In(`
+			select retweet_id, tweet_id, retweeted_by, retweeted_at
+			  from retweets
+			 where retweet_id in (?)
+		`, retweet_ids)
+		if err != nil {
+			panic(err)
+		}
+		err = p.DB.Select(&retweets, sql_str, vals...)
+		if err != nil {
+			panic(err)
+		}
+
+		// Collect more tweet IDs, from retweets
+		for _, r := range retweets {
+			tweet_ids = append(tweet_ids, r.TweetID)
+		}
+	}
+
+	// Get tweets, if there are any
+	var tweets []Tweet
+	if len(tweet_ids) != 0 {
+		sql_str, vals, err := sqlx.In(`select `+TWEETS_ALL_SQL_FIELDS+`
+			from tweets
+			left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
+			left join likes on tweets.id = likes.tweet_id and likes.user_id = -1
+          where id in (?)`, tweet_ids)
+		if err != nil {
+			panic(err)
+		}
+		err = p.DB.Select(&tweets, sql_str, vals...)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	ret := NewFeed()
+	for _, t := range tweets {
+		ret.TweetTrove.Tweets[t.ID] = t
+	}
+	for _, r := range retweets {
+		ret.TweetTrove.Retweets[r.RetweetID] = r
+	}
+	for _, n := range notifications {
+		// Add to tweet trove
+		ret.TweetTrove.Notifications[n.ID] = n
+
+		// Construct feed item
+		feed_item := FeedItem{
+			NotificationID: n.ID,
+			RetweetID:      n.ActionRetweetID, // might be 0
+			TweetID:        n.ActionTweetID,   // might be 0
+		}
+		r, is_ok := ret.TweetTrove.Retweets[n.ActionRetweetID]
+		if is_ok {
+			// If the action has a retweet, fill the FeedItem.TweetID from the retweet
+			feed_item.TweetID = r.TweetID
+		}
+		ret.Items = append(ret.Items, feed_item)
+	}
+
+	// TODO: proper user id
+	p.fill_content(&ret.TweetTrove, UserID(0))
+
+	// TODO:
+	// ret.CursorBottom = ??
+
+	return ret
 }
