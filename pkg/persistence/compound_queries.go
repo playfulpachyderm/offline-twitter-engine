@@ -421,7 +421,10 @@ func (p Profile) GetNotificationsForUser(u_id UserID, cursor int64) Feed {
 	// Get the user_ids list for each notification.  Unlike tweet+retweet_ids, users are needed to render
 	// the notification properly.
 	for i := range notifications {
-		err = p.DB.Select(&notifications[i].UserIDs, `select user_id from notification_users where notification_id = ?`, notifications[i].ID)
+		err = p.DB.Select(&notifications[i].UserIDs,
+			`select user_id from notification_users where notification_id = ?`,
+			notifications[i].ID,
+		)
 		if err != nil {
 			panic(err)
 		}
