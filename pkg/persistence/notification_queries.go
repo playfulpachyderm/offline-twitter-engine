@@ -116,9 +116,9 @@ func (p Profile) CheckNotificationScrapesNeeded(trove TweetTrove) []Notification
 	return ret
 }
 
-func (p Profile) GetUnreadNotificationsCount(since_sort_index int64) int {
+func (p Profile) GetUnreadNotificationsCount(u_id UserID, since_sort_index int64) int {
 	var ret int
-	err := p.DB.Get(&ret, `select count(*) from notifications where sort_index > ?`, since_sort_index)
+	err := p.DB.Get(&ret, `select count(*) from notifications where sort_index > ? and user_id = ?`, since_sort_index, u_id)
 	if err != nil {
 		panic(err)
 	}
