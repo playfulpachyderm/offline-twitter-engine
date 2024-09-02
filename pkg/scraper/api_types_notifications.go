@@ -29,10 +29,11 @@ func (api *API) GetNotificationsPage(cursor string) (TweetResponse, error) {
 	return result, err
 }
 
-func (api *API) GetNotifications(how_many int) (TweetTrove, error) {
+// Second return value is last unread notification sort-index.  `0` will be returned if there is none.
+func (api *API) GetNotifications(how_many int) (TweetTrove, int64, error) {
 	resp, err := api.GetNotificationsPage("")
 	if err != nil {
-		return TweetTrove{}, err
+		return TweetTrove{}, 0, err
 	}
 	trove, err := resp.ToTweetTroveAsNotifications(api.UserID)
 	if err != nil {
@@ -45,7 +46,7 @@ func (api *API) GetNotifications(how_many int) (TweetTrove, error) {
 			log.Warnf("Rate limited!")
 			break
 		} else if err != nil {
-			return TweetTrove{}, err
+			return TweetTrove{}, 0, err
 		}
 		if resp.IsEndOfFeed() {
 			log.Infof("End of feed!")
@@ -59,7 +60,17 @@ func (api *API) GetNotifications(how_many int) (TweetTrove, error) {
 		trove.MergeWith(new_trove)
 	}
 
-	return trove, nil
+	return trove, resp.CheckUnreadNotifications(), nil
+}
+
+// Check a Notifications result for unread notifications.  Returns `0` if there are none.
+func (t TweetResponse) CheckUnreadNotifications() int64 {
+	for _, instr := range t.Timeline.Instructions {
+		if instr.MarkEntriesUnreadGreaterThanSortIndex.SortIndex != 0 {
+			return instr.MarkEntriesUnreadGreaterThanSortIndex.SortIndex
+		}
+	}
+	return 0
 }
 
 func (api *API) GetNotificationDetailForAll(trove TweetTrove, to_scrape []NotificationID) (TweetTrove, error) {

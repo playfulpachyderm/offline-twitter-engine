@@ -599,7 +599,7 @@ func send_dm_reacc(room_id string, in_reply_to_id int, reacc string) {
 }
 
 func get_notifications(how_many int) {
-	trove, err := api.GetNotifications(how_many)
+	trove, _, err := api.GetNotifications(how_many)
 	if err != nil && !errors.Is(err, scraper.END_OF_FEED) {
 		panic(err)
 	}

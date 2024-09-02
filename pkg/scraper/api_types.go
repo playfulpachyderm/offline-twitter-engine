@@ -399,6 +399,9 @@ type TweetResponse struct {
 			ReplaceEntry struct {
 				Entry Entry
 			} `json:"replaceEntry"`
+			MarkEntriesUnreadGreaterThanSortIndex struct {
+				SortIndex int64 `json:"sortIndex,string"`
+			} `json:"markEntriesUnreadGreaterThanSortIndex"`
 		} `json:"instructions"`
 	} `json:"timeline"`
 }

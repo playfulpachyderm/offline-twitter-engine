@@ -152,6 +152,9 @@ func TestParseNotificationsPage(t *testing.T) {
 		assert.True(is_ok)
 	}
 
+	// Test unread notifs
+	assert.Equal(int64(1724566381021), resp.CheckUnreadNotifications())
+
 	// Test cursor-bottom
 	bottom_cursor := resp.GetCursor()
 	assert.Equal("DAACDAABCgABFKncQJGVgAQIAAIAAAABCAADSQ3bEQgABIsN6BEACwACAAAAC0FaRkxRSXFNLTJJAAA", bottom_cursor)
