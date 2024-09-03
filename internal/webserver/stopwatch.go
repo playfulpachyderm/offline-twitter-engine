@@ -118,6 +118,41 @@ func (app *Application) background_dm_polling_scrape() {
 	fmt.Println("Scraping DMs succeeded.")
 }
 
+func (app *Application) background_notifications_scrape() {
+	// Avoid crashing the thread if a scrape fails
+	defer func() {
+		if r := recover(); r != nil {
+			// TODO
+			fmt.Println("Background notifications thread: panicked!")
+			if err, ok := r.(error); ok {
+				fmt.Println(err.Error())
+			} else {
+				fmt.Println(r)
+			}
+		}
+	}()
+
+	fmt.Println("Starting notifications scrape...")
+
+	// Do nothing if scraping is currently disabled
+	if app.IsScrapingDisabled {
+		fmt.Println("Skipping notifications scrape!")
+		return
+	}
+
+	fmt.Println("Scraping user notifications...")
+	trove, last_unread_notification_sort_index, err := app.API.GetNotifications(1) // Just 1 page
+	if err != nil {
+		panic(err)
+	}
+	// Jot down the unread notifs info in the application object (to render notification count bubble)
+	app.LastReadNotificationSortIndex = last_unread_notification_sort_index
+	fmt.Println("Saving notification results...")
+	app.Profile.SaveTweetTrove(trove, false, &app.API)
+	go app.Profile.SaveTweetTrove(trove, true, &app.API)
+	fmt.Println("Scraping notification succeeded.")
+}
+
 func (app *Application) start_background() {
 	fmt.Println("Starting background")
 
@@ -161,6 +196,18 @@ func (app *Application) start_background() {
 		defer timer.Stop()
 		for range timer.C {
 			app.background_dm_polling_scrape()
+		}
+	}()
+
+	// Scrape notifications every 10 seconds
+	go func() {
+		app.background_notifications_scrape()
+
+		interval := 10 * time.Second
+		timer := time.NewTicker(interval)
+		defer timer.Stop()
+		for range timer.C {
+			app.background_notifications_scrape()
 		}
 	}()
 }

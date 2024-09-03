@@ -945,8 +945,12 @@ main {
  * Notifications
  ******************************************************/
 
+.notifications-header {
+	border-bottom: 1px solid var(--color-outline-gray);
+}
+
 /**
- * Notifications module
+ * Notification module
  */
 .notification {
 	.notification__users {

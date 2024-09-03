@@ -17,6 +17,7 @@ import (
 
 type NotificationBubbles struct {
 	NumMessageNotifications int
+	NumRegularNotifications int
 }
 
 // TODO: this name sucks
@@ -99,6 +100,12 @@ func (app *Application) buffered_render_page(w http.ResponseWriter, tpl_file str
 	partials := append(glob("tpl/includes/*.tpl"), glob("tpl/tweet_page_includes/*.tpl")...)
 
 	global_data.NotificationBubbles.NumMessageNotifications = len(app.Profile.GetUnreadConversations(app.ActiveUser.ID))
+	if app.LastReadNotificationSortIndex != 0 {
+		global_data.NotificationBubbles.NumRegularNotifications = app.Profile.GetUnreadNotificationsCount(
+			app.ActiveUser.ID,
+			app.LastReadNotificationSortIndex,
+		)
+	}
 
 	r := renderer{
 		Funcs:     app.make_funcmap(global_data),

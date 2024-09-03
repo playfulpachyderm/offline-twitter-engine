@@ -21,8 +21,11 @@
       </a>
       {{if (not (eq (active_user).Handle "[nobody]"))}}
         <a href="/notifications">
-          <li class="button labelled-icon">
+          <li class="nav-sidebar__notifications button labelled-icon">
             <img class="svg-icon" src="/static/icons/notifications.svg" width="24" height="24" />
+            {{if .NumRegularNotifications}}
+              <span class="nav-sidebar__notifications-count">{{.NumRegularNotifications}}</span>
+            {{end}}
             <label class="nav-sidebar__button-label">Notifications</label>
           </li>
         </a>

@@ -28,10 +28,11 @@ type Application struct {
 
 	Middlewares []Middleware
 
-	Profile            persistence.Profile
-	ActiveUser         scraper.User
-	IsScrapingDisabled bool
-	API                scraper.API
+	Profile                       persistence.Profile
+	ActiveUser                    scraper.User
+	IsScrapingDisabled            bool
+	API                           scraper.API
+	LastReadNotificationSortIndex int64
 }
 
 func NewApp(profile persistence.Profile) Application {
