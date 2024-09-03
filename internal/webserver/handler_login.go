@@ -118,7 +118,7 @@ func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
 		app.error_400_with_message(w, r, fmt.Sprintf("User not in database: %s", form.AccountName))
 		return
 	}
-	app.LastReadNotificationSortIndex = 0 // Clear unread notifications
+	app.LastReadNotificationSortIndex = 0    // Clear unread notifications
 	go app.background_notifications_scrape() // Update notifications info in background (avoid latency when switching users)
 	data := NotificationBubbles{
 		NumMessageNotifications: len(app.Profile.GetUnreadConversations(app.ActiveUser.ID)),
