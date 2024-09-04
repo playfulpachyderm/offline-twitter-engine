@@ -256,6 +256,7 @@ func (api *API) do_http(remote_url string, cursor string, result interface{}) er
 
 	if resp.StatusCode == 429 {
 		// "Too many requests" => rate limited
+		log.Warn("HTTP 429")
 		reset_at := TimestampFromUnix(int64(int_or_panic(resp.Header.Get("X-Rate-Limit-Reset"))))
 		return fmt.Errorf("%w (resets at %d, which is in %s)", ErrRateLimited, reset_at.Unix(), time.Until(reset_at.Time).String())
 	}

@@ -27,7 +27,6 @@ TODO twitter-spaces
 TODO authenticated-requests
 - media tab
 - quote-tweets
-- notifications
 
 TODO post-tweets
 - post tweets

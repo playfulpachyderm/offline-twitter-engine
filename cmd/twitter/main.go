@@ -315,7 +315,7 @@ func fetch_tweet_only(tweet_identifier string) {
 	}
 
 	tweet, err := api.GetTweet(tweet_id)
-	if is_scrape_failure(err) {
+	if is_scrape_failure(err) || errors.Is(err, scraper.ErrRateLimited) {
 		die(fmt.Sprintf("Error fetching tweet: %s", err.Error()), false, -1)
 	}
 	log.Debug(tweet)
