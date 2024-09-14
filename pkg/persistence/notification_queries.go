@@ -9,6 +9,13 @@ import (
 
 func (p Profile) SaveNotification(n Notification) {
 	tx, err := p.DB.Beginx()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r) // Re-raise the panic
+		}
+	}()
+
 	if err != nil {
 		panic(err)
 	}
