@@ -11,7 +11,10 @@ func (p Profile) SaveNotification(n Notification) {
 	tx, err := p.DB.Beginx()
 	defer func() {
 		if r := recover(); r != nil {
-			tx.Rollback()
+			err := tx.Rollback()
+			if err != nil {
+				panic(err)
+			}
 			panic(r) // Re-raise the panic
 		}
 	}()
