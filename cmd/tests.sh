@@ -22,6 +22,7 @@ test "$(tw --version)" = "v$FAKE_VERSION"
 tw --help
 test $? -eq 0
 
+mkdir -p data
 tw create_profile data/profile
 cd data/profile
 
