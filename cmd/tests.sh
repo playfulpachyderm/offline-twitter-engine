@@ -13,7 +13,7 @@ fi
 FAKE_VERSION="1.100.3489"
 ./compile.sh $FAKE_VERSION
 
-test -e data && rm -r data
+test -e data/profile && rm -r data/profile
 
 PATH=`pwd`:$PATH
 
@@ -22,8 +22,8 @@ test "$(tw --version)" = "v$FAKE_VERSION"
 tw --help
 test $? -eq 0
 
-tw create_profile data
-cd data
+tw create_profile data/profile
+cd data/profile
 
 # Should only contain default profile image
 test $(find profile_images | wc -l) = "2"
@@ -203,10 +203,10 @@ test $(find profile_images/RememberAfghan1* | grep banner | wc -l) = "0"
 
 
 # Test that the `--profile` flag works
-cd ..
-tw --profile data fetch_user elonmusk
-test $(sqlite3 data/twitter.db "select count(*) from users where handle = 'elonmusk'") = "1"
-cd data
+cd ../..
+tw --profile data/profile fetch_user elonmusk
+test $(sqlite3 data/profile/twitter.db "select count(*) from users where handle = 'elonmusk'") = "1"
+cd -
 
 # Test that fetching tweets with ID only (not full URL) works
 test $(sqlite3 twitter.db "select count(*) from tweets where id = 1433713164546293767") = "0"  # Check it's not already there
