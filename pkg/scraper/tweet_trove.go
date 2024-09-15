@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -96,7 +97,7 @@ func (trove *TweetTrove) FetchTombstoneUsers() {
 
 		if already_fetched {
 			// If the user is already fetched and it's an intact user, don't fetch it again
-			if user.JoinDate.Unix() != (Timestamp{}).Unix() {
+			if user.JoinDate.Unix() != (Timestamp{}).Unix() && user.JoinDate.Unix() != 0 {
 				log.Debugf("Skipping %q due to intact user", handle)
 				continue
 			}
@@ -110,7 +111,10 @@ func (trove *TweetTrove) FetchTombstoneUsers() {
 
 		log.Debug("Getting tombstone user: " + handle)
 		user, err := GetUser(handle)
-		if err != nil {
+		if errors.Is(err, ErrDoesntExist) {
+			user = GetUnknownUserWithHandle(handle)
+			user.IsDeleted = true
+		} else if err != nil {
 			panic(fmt.Errorf("Error getting tombstoned user with handle %q: \n  %w", handle, err))
 		}
 

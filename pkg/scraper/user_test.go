@@ -15,18 +15,20 @@ import (
 
 func TestParseSingleUser(t *testing.T) {
 	assert := assert.New(t)
+	require := require.New(t)
 	data, err := os.ReadFile("test_responses/michael_malice_user_profile.json")
 	if err != nil {
 		panic(err)
 	}
 	var user_resp UserResponse
 	err = json.Unmarshal(data, &user_resp)
-	require.NoError(t, err)
+	require.NoError(err)
 
-	apiUser := user_resp.ConvertToAPIUser()
+	apiUser, err := user_resp.ConvertToAPIUser()
+	require.NoError(err)
 
 	user, err := ParseSingleUser(apiUser)
-	require.NoError(t, err)
+	require.NoError(err)
 
 	assert.Equal(UserID(44067298), user.ID)
 	assert.Equal("Michael Malice", user.DisplayName)
@@ -62,7 +64,8 @@ func TestParseBannedUser(t *testing.T) {
 	err = json.Unmarshal(data, &user_resp)
 	require.NoError(t, err)
 
-	apiUser := user_resp.ConvertToAPIUser()
+	apiUser, err := user_resp.ConvertToAPIUser()
+	require.NoError(t, err)
 
 	user, err := ParseSingleUser(apiUser)
 	require.NoError(t, err)
@@ -86,22 +89,9 @@ func TestParseDeletedUser(t *testing.T) {
 	err = json.Unmarshal(data, &user_resp)
 	require.NoError(t, err)
 
-	handle := "Some Random Deleted User"
-
-	apiUser := user_resp.ConvertToAPIUser()
-	apiUser.ScreenName = string(handle) // This is done in scraper.GetUser, since users are retrieved by handle anyway
-
-	user, err := ParseSingleUser(apiUser)
-	require.NoError(t, err)
-	assert.Equal(UserID(0), user.ID)
-	assert.True(user.IsIdFake)
-	assert.True(user.IsNeedingFakeID)
-	assert.Equal(user.Bio, "<blank>")
-	assert.Equal(user.Handle, UserHandle(handle))
-
-	// Test generation of profile images for deleted user
-	assert.Equal("https://abs.twimg.com/sticky/default_profile_images/default_profile.png", user.GetTinyProfileImageUrl())
-	assert.Equal("default_profile.png", user.GetTinyProfileImageLocalPath())
+	_, err = user_resp.ConvertToAPIUser()
+	assert.Error(err)
+	assert.ErrorIs(err, ErrDoesntExist)
 }
 
 /**

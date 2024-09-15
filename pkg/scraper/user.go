@@ -179,20 +179,7 @@ func GetUser(handle UserHandle) (User, error) {
 	if err != nil {
 		return User{}, err
 	}
-	apiUser, err := session.GetUser(handle)
-	if apiUser.ScreenName == "" {
-		if apiUser.IsBanned || apiUser.DoesntExist {
-			ret := GetUnknownUserWithHandle(handle)
-			ret.IsBanned = apiUser.IsBanned
-			ret.IsDeleted = apiUser.DoesntExist
-			return ret, nil
-		}
-		apiUser.ScreenName = string(handle)
-	}
-	if err != nil {
-		return User{}, fmt.Errorf("Error fetching user %q:\n  %w", handle, err)
-	}
-	return ParseSingleUser(apiUser)
+	return session.GetUser(handle)
 }
 
 /**

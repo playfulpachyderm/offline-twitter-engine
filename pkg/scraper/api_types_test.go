@@ -69,7 +69,8 @@ func TestUserProfileToAPIUser(t *testing.T) {
 	err = json.Unmarshal(data, &user_resp)
 	assert.NoError(err)
 
-	result := user_resp.ConvertToAPIUser()
+	result, err := user_resp.ConvertToAPIUser()
+	assert.NoError(err)
 	assert.Equal(int64(44067298), result.ID)
 	assert.Equal(user_resp.Data.User.Result.Legacy.FollowersCount, result.FollowersCount)
 }

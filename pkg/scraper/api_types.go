@@ -295,6 +295,7 @@ type UserResponse struct {
 	Data struct {
 		User struct {
 			Result struct {
+				MetaTypename       string  `json:"__typename"`
 				ID                 int64   `json:"rest_id,string"`
 				Legacy             APIUser `json:"legacy"`
 				IsBlueVerified     bool    `json:"is_blue_verified"`
@@ -312,7 +313,12 @@ type UserResponse struct {
 	} `json:"errors"`
 }
 
-func (u UserResponse) ConvertToAPIUser() APIUser {
+func (u UserResponse) ConvertToAPIUser() (APIUser, error) {
+	if u.Data.User.Result.MetaTypename == "" {
+		// Completely empty response (user not found)
+		return APIUser{}, ErrDoesntExist
+	}
+
 	ret := u.Data.User.Result.Legacy
 	ret.ID = u.Data.User.Result.ID
 	ret.Verified = u.Data.User.Result.IsBlueVerified
@@ -338,7 +344,7 @@ func (u UserResponse) ConvertToAPIUser() APIUser {
 		ret.DoesntExist = true
 	}
 
-	return ret
+	return ret, nil
 }
 
 type Entry struct {

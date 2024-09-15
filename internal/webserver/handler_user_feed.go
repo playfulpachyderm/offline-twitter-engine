@@ -16,16 +16,18 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 
 	user, err := app.Profile.GetUserByHandle(scraper.UserHandle(parts[0]))
-	if err != nil {
+	if errors.Is(err, persistence.ErrNotInDatabase) {
 		if !app.IsScrapingDisabled {
 			user, err = scraper.GetUser(scraper.UserHandle(parts[0]))
 		}
-		if err != nil {
+		if err != nil { // ErrDoesntExist or otherwise
 			app.error_404(w, r)
 			return
 		}
 		panic_if(app.Profile.SaveUser(&user))
 		panic_if(app.Profile.DownloadUserContentFor(&user, &app.API))
+	} else if err != nil {
+		panic(err)
 	}
 
 	if len(parts) > 1 && parts[1] == "followers" {

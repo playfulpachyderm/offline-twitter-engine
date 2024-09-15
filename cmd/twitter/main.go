@@ -288,7 +288,15 @@ func create_profile(target_dir string) {
  */
 func fetch_user(handle scraper.UserHandle) {
 	user, err := scraper.GetUser(handle)
-	if is_scrape_failure(err) {
+	if errors.Is(err, scraper.ErrDoesntExist) {
+		// There's several reasons we could get a ErrDoesntExist:
+		//   1. account never existed (user made a CLI typo)
+		//   2. user changed their handle
+		//   3. user deleted their account
+		// In case (1), we should just report the error; in case (2) and (3), it would be nice to rescrape by ID,
+		// but that feels kind of too complicated to do here.  So just report the error and let the user decide
+		die(fmt.Sprintf("User with handle %q doesn't exist.  Check spelling, or try scraping with the ID instead", handle), false, -1)
+	} else if is_scrape_failure(err) {
 		die(err.Error(), false, -1)
 	}
 	log.Debug(user)

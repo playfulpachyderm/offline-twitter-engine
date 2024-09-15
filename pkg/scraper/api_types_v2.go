@@ -1323,7 +1323,7 @@ func (api *API) GetHomeTimeline(cursor string, is_following_only bool) (TweetTro
 // Get User
 // --------
 
-func (api API) GetUser(handle UserHandle) (APIUser, error) {
+func (api API) GetUser(handle UserHandle) (User, error) {
 	url, err := url.Parse(GraphqlURL{
 		BaseUrl: "https://api.twitter.com/graphql/SAMkL5y_N9pmahSw8yy6gw/UserByScreenName",
 		Variables: GraphqlVariables{
@@ -1362,7 +1362,26 @@ func (api API) GetUser(handle UserHandle) (APIUser, error) {
 
 	var response UserResponse
 	err = api.do_http(url.String(), "", &response)
-	return response.ConvertToAPIUser(), err
+	if err != nil {
+		return User{}, err
+	}
+	apiUser, err := response.ConvertToAPIUser()
+	if errors.Is(err, ErrDoesntExist) {
+		return User{}, err
+	}
+	if apiUser.ScreenName == "" {
+		if apiUser.IsBanned || apiUser.DoesntExist {
+			ret := GetUnknownUserWithHandle(handle)
+			ret.IsBanned = apiUser.IsBanned
+			ret.IsDeleted = apiUser.DoesntExist
+			return ret, nil
+		}
+		apiUser.ScreenName = string(handle)
+	}
+	if err != nil {
+		return User{}, fmt.Errorf("Error fetching user %q:\n  %w", handle, err)
+	}
+	return ParseSingleUser(apiUser)
 }
 
 // Paginated Search
