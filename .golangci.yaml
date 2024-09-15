@@ -4,7 +4,7 @@
 # output configuration options
 output:
   # colored-line-number|line-number|json|tab|checkstyle|code-climate|junit-xml|github-actions
-  format: colored-line-number
+  formats: colored-line-number
 
   # sorts results by: filepath, line and column
   sort-results: true
@@ -12,17 +12,14 @@ output:
 linters:
   disable-all: true
   enable:
-    - deadcode
     - depguard
     - errcheck
     - gosimple
     - govet
     - ineffassign
     - staticcheck
-    - structcheck
     - typecheck
     - unused
-    - varcheck
     - whitespace
     - wrapcheck
     - lll
@@ -321,7 +318,7 @@ linters-settings:
 
   govet:
     # report about shadowed variables
-    check-shadowing: true
+    # check-shadowing: true
 
     # settings per analyzer
     # settings:
@@ -335,7 +332,6 @@ linters-settings:
     enable-all: true
     # disable-all: false
     disable:
-      # - shadow
       - fieldalignment
       - composites
       - shadow
