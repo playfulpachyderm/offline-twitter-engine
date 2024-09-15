@@ -11,7 +11,6 @@ import (
 
 var (
 	ErrEndOfFeed = errors.New("end of feed")
-	ErrNotInDB   = errors.New("not in database")
 )
 
 // TODO: make this a SQL view?
@@ -257,7 +256,7 @@ func (p Profile) GetTweetDetail(id TweetID, current_user_id UserID) (TweetDetail
 		panic(err)
 	}
 	if len(thread) == 0 {
-		return ret, fmt.Errorf("Tweet ID %d: %w", id, ErrNotInDB)
+		return ret, fmt.Errorf("Tweet ID %d: %w", id, ErrNotInDatabase)
 	}
 	for _, tweet := range thread {
 		ret.Tweets[tweet.ID] = tweet

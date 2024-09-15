@@ -84,7 +84,7 @@ func (p Profile) GetListById(list_id ListID) (List, error) {
 	var ret List
 	err := p.DB.Get(&ret, `select rowid, is_online, online_list_id, name from lists where rowid = ?`, list_id)
 	if errors.Is(err, sql.ErrNoRows) {
-		return List{}, ErrNotInDatabase{"List", list_id}
+		return List{}, ErrNotInDatabase
 	} else if err != nil {
 		panic(err)
 	}

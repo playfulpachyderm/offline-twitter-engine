@@ -334,5 +334,5 @@ func TestLoadMissingTweet(t *testing.T) {
 
 	_, err := profile.GetTweetById(scraper.TweetID(6234234)) // Random number
 	require.Error(t, err)
-	assert.ErrorIs(t, err, persistence.ErrNotInDB)
+	assert.ErrorIs(t, err, persistence.ErrNotInDatabase)
 }

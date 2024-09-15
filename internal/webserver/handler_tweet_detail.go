@@ -32,7 +32,7 @@ func (app *Application) ensure_tweet(id scraper.TweetID, is_forced bool, is_conv
 	// Check if tweet is already in DB
 	tweet, err := app.Profile.GetTweetById(id)
 	if err != nil {
-		if errors.Is(err, persistence.ErrNotInDB) {
+		if errors.Is(err, persistence.ErrNotInDatabase) {
 			is_needing_scrape = true
 			is_available = false
 		} else {
@@ -154,7 +154,7 @@ func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	twt_detail, err := app.Profile.GetTweetDetail(data.MainTweetID, app.ActiveUser.ID)
-	panic_if(err) // ErrNotInDB should be impossible, since we already fetched the single tweet successfully
+	panic_if(err) // ErrNotInDatabase should be impossible, since we already fetched the single tweet successfully
 
 	data.TweetDetailView = twt_detail
 

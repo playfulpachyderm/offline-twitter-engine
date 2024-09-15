@@ -113,7 +113,7 @@ func (p Profile) GetUserByHandle(handle scraper.UserHandle) (scraper.User, error
 	`, handle)
 
 	if errors.Is(err, sql.ErrNoRows) {
-		return ret, ErrNotInDatabase{"User", handle}
+		return ret, ErrNotInDatabase
 	}
 	return ret, nil
 }
@@ -136,7 +136,7 @@ func (p Profile) GetUserByID(id scraper.UserID) (scraper.User, error) {
 	     where id = ?
 	`, id)
 	if errors.Is(err, sql.ErrNoRows) {
-		return ret, ErrNotInDatabase{"User", id}
+		return ret, ErrNotInDatabase
 	}
 	if err != nil {
 		panic(err)
