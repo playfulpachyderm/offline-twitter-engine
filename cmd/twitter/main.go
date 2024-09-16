@@ -163,6 +163,12 @@ func main() {
 		login(target, password)
 	case "fetch_user":
 		fetch_user(scraper.UserHandle(target))
+	case "fetch_user_by_id":
+		id, err := strconv.Atoi(target)
+		if err != nil {
+			panic(err)
+		}
+		fetch_user_by_id(scraper.UserID(id))
 	case "download_user_content":
 		download_user_content(scraper.UserHandle(target))
 	case "fetch_tweet_only":
@@ -307,6 +313,26 @@ func fetch_user(handle scraper.UserHandle) {
 	}
 
 	download_user_content(handle)
+	happy_exit("Saved the user", nil)
+}
+
+func fetch_user_by_id(id scraper.UserID) {
+	session, err := scraper.NewGuestSession() // This endpoint works better if you're not logged in
+	if err != nil {
+		panic(err)
+	}
+	user, err := session.GetUserByID(id)
+	if err != nil {
+		panic(err)
+	}
+	log.Debug(user)
+
+	err = profile.SaveUser(&user)
+	if err != nil {
+		die(fmt.Sprintf("Error saving user: %s", err.Error()), false, 4)
+	}
+
+	download_user_content(user.Handle)
 	happy_exit("Saved the user", nil)
 }
 

@@ -51,7 +51,7 @@
           <label class="nav-sidebar__button-label">Bookmarks</label>
         </li>
       </a>
-      <a href="#">
+      <a hx-get="/communities">
       <li class="button labelled-icon">
         <img class="svg-icon" src="/static/icons/communities.svg" width="24" height="24" />
         <label class="nav-sidebar__button-label">Communities</label>

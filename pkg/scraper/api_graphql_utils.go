@@ -63,6 +63,7 @@ type GraphqlFeatures struct {
 	ResponsiveWebTextConversationsEnabled                          bool `json:"responsive_web_text_conversations_enabled"`
 	ResponsiveWebTwitterArticleTweetConsumptionEnabled             bool `json:"responsive_web_twitter_article_tweet_consumption_enabled"`
 	ResponsiveWebMediaDownloadVideoEnabled                         bool `json:"responsive_web_media_download_video_enabled"`
+	ResponsiveWebTwitterArticleNotesTabEnabled                     bool `json:"responsive_web_twitter_article_notes_tab_enabled"`
 	SubscriptionsVerificationInfoVerifiedSinceEnabled              bool `json:"subscriptions_verification_info_verified_since_enabled"`
 	HiddenProfileLikesEnabled                                      bool `json:"hidden_profile_likes_enabled"`
 	HiddenProfileSubscriptionsEnabled                              bool `json:"hidden_profile_subscriptions_enabled"`
@@ -81,6 +82,7 @@ type GraphqlFeatures struct {
 	ArticlesPreviewEnabled                         bool `json:"articles_preview_enabled,omitempty"`
 	GraphqlTimelineV2BookmarkTimeline              bool `json:"graphql_timeline_v2_bookmark_timeline,omitempty"`
 	CreatorSubscriptionsQuoteTweetPreviewEnabled   bool `json:"creator_subscriptions_quote_tweet_preview_enabled"`
+	SubscriptionsFeatureCanGiftPremium             bool `json:"subscriptions_feature_can_gift_premium,omitempty"`
 }
 
 type GraphqlURL struct {

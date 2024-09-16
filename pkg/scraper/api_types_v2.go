@@ -1384,6 +1384,48 @@ func (api API) GetUser(handle UserHandle) (User, error) {
 	return ParseSingleUser(apiUser)
 }
 
+func (api API) GetUserByID(u_id UserID) (User, error) {
+	url, err := url.Parse(GraphqlURL{
+		BaseUrl: "https://x.com/i/api/graphql/Qw77dDjp9xCpUY-AXwt-yQ/UserByRestId",
+		Variables: GraphqlVariables{
+			UserID: u_id,
+		},
+		Features: GraphqlFeatures{
+			RWebTipjarConsumptionEnabled:                              true,
+			ResponsiveWebGraphqlExcludeDirectiveEnabled:               true,
+			VerifiedPhoneLabelEnabled:                                 false,
+			ResponsiveWebGraphqlSkipUserProfileImageExtensionsEnabled: false,
+			ResponsiveWebGraphqlTimelineNavigationEnabled:             true,
+			SubscriptionsFeatureCanGiftPremium:                        true,
+			ResponsiveWebTwitterArticleNotesTabEnabled:                true,
+		},
+	}.String())
+	if err != nil {
+		panic(err)
+	}
+
+	var response UserResponse
+	err = api.do_http(url.String(), "", &response)
+	if err != nil {
+		return User{}, err
+	}
+	apiUser, err := response.ConvertToAPIUser()
+	if errors.Is(err, ErrDoesntExist) {
+		return User{}, err
+	}
+	if apiUser.ScreenName == "" {
+		if apiUser.IsBanned {
+			return User{}, ErrUserIsBanned
+		} else {
+			return User{}, ErrDoesntExist
+		}
+	}
+	if err != nil {
+		return User{}, fmt.Errorf("Error fetching user ID %d:\n  %w", u_id, err)
+	}
+	return ParseSingleUser(apiUser)
+}
+
 // Paginated Search
 // ----------------
 

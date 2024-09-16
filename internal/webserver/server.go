@@ -139,6 +139,8 @@ func (app *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/messages", http.HandlerFunc(app.Messages)).ServeHTTP(w, r)
 	case "nav-sidebar-poll-updates":
 		app.NavSidebarPollUpdates(w, r)
+	case "communities":
+		panic("not implemented")
 	default:
 		app.UserFeed(w, r)
 	}
