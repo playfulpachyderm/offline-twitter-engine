@@ -2,7 +2,7 @@
 # volume,  which is mounted in all the containers.  So modifying the filesystem (within the working dir)
 # is persistent between build steps.
 
-pipeline:
+steps:
   lint:
     image: offline-twitter/go
     commands:

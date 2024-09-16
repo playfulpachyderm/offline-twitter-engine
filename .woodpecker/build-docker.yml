@@ -1,7 +1,7 @@
 # https://jpetazzo.github.io/2015/09/03/do-not-use-docker-in-docker-for-ci/
 # https://woodpecker-ci.org/docs/usage/volumes
 
-pipeline:
+steps:
   docker-build-go:
     image: docker
     commands:
