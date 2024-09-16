@@ -5,7 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	log "github.com/sirupsen/logrus" // TODO: remove
+	log "github.com/sirupsen/logrus" // TODO: remove eventually
 	"golang.org/x/term"
 	"io/fs"
 	"os"
