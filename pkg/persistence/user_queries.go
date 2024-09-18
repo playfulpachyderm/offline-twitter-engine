@@ -73,28 +73,6 @@ func (p Profile) SaveUser(u *scraper.User) error {
 	return nil
 }
 
-// Check if the database has a User with the given user handle.
-//
-// args:
-// - handle: the user handle to search for
-//
-// returns:
-// - true if there is such a User in the database, false otherwise
-func (p Profile) UserExists(handle scraper.UserHandle) bool {
-	db := p.DB
-
-	var dummy string
-	err := db.QueryRow("select 1 from users where lower(handle) = lower(?)", handle).Scan(&dummy)
-	if err != nil {
-		if !errors.Is(err, sql.ErrNoRows) {
-			// A real error
-			panic(err)
-		}
-		return false
-	}
-	return true
-}
-
 // Retrieve a User from the database, by handle.
 //
 // args:
@@ -212,28 +190,8 @@ func (p Profile) NextFakeUserID() scraper.UserID {
 	return ret
 }
 
-func (p Profile) GetAllFollowedUsers() []scraper.UserHandle {
-	rows, err := p.DB.Query("select handle from users where is_followed = 1")
-	if err != nil {
-		panic(err)
-	}
-	defer rows.Close()
-
-	ret := []scraper.UserHandle{}
-
-	var tmp scraper.UserHandle
-
-	for rows.Next() {
-		err = rows.Scan(&tmp)
-		if err != nil {
-			panic(err)
-		}
-		ret = append(ret, tmp)
-	}
-
-	return ret
-}
-
+// TODO: This is only used in checking whether the media downloader should get the big or small version of
+// a profile image.  That should be rewritten
 func (p Profile) IsFollowing(user scraper.User) bool {
 	row := p.DB.QueryRow("select is_followed from users where id like ?", user.ID)
 	var ret bool

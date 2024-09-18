@@ -112,24 +112,6 @@ func TestHandleIsCaseInsensitive(t *testing.T) {
 	}
 }
 
-// Should correctly report whether the user exists in the database
-func TestUserExists(t *testing.T) {
-	require := require.New(t)
-	profile_path := "test_profiles/TestUserQueries"
-	profile := create_or_load_profile(profile_path)
-
-	user := create_dummy_user()
-
-	exists := profile.UserExists(user.Handle)
-	require.False(exists)
-
-	err := profile.SaveUser(&user)
-	require.NoError(err)
-
-	exists = profile.UserExists(user.Handle)
-	require.True(exists)
-}
-
 // Test scenarios relating to user content downloading
 func TestCheckUserContentDownloadNeeded(t *testing.T) {
 	assert := assert.New(t)

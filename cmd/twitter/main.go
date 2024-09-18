@@ -81,7 +81,7 @@ func main() {
 	log.SetLevel(logging_level)
 
 	if len(args) < 2 {
-		if len(args) == 1 && (args[0] == "list_followed" || args[0] == "webserver" || args[0] == "fetch_timeline" ||
+		if len(args) == 1 && (args[0] == "webserver" || args[0] == "fetch_timeline" ||
 			args[0] == "fetch_timeline_following_only" || args[0] == "fetch_inbox" || args[0] == "get_bookmarks" ||
 			args[0] == "get_notifications") {
 			// Doesn't need a target, so create a fake second arg
@@ -203,8 +203,6 @@ func main() {
 		follow_user(target, true)
 	case "unfollow":
 		follow_user(target, false)
-	case "list_followed":
-		list_followed()
 	case "like_tweet":
 		like_tweet(target)
 	case "unlike_tweet":
@@ -556,12 +554,6 @@ func like_tweet(tweet_identifier string) {
 		die(err.Error(), false, -1)
 	}
 	happy_exit("Liked the tweet.", nil)
-}
-
-func list_followed() {
-	for _, handle := range profile.GetAllFollowedUsers() {
-		fmt.Println(handle)
-	}
 }
 
 func start_webserver(addr string, should_auto_open bool) {
