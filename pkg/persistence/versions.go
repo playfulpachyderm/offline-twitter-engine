@@ -21,8 +21,9 @@ Please upgrade this application to a newer version to use this profile.  Or down
 	)
 }
 
-// The Nth entry is the migration that moves you from version N to version N+1.
+// Database starts at version 0.  First migration brings us to version 1
 var MIGRATIONS = []string{
+	// Version 1
 	`create table polls (rowid integer primary key,
 		    id integer unique not null check(typeof(id) = 'integer'),
 		    tweet_id integer not null,
@@ -297,6 +298,7 @@ var MIGRATIONS = []string{
 		    foreign key(chat_message_id) references chat_messages(id)
 		);
 		create index if not exists index_chat_message_urls_chat_message_id on chat_message_urls (chat_message_id);`,
+	// 30
 	`create table bookmarks(rowid integer primary key,
 		    sort_order integer not null, -- Can't be unique because "-1" is used as "unknown" value
 		    user_id integer not null,
@@ -354,6 +356,72 @@ var MIGRATIONS = []string{
 		    user_id not null references users(id),
 		    unique(notification_id, user_id)
 		);`,
+	`pragma foreign_keys = OFF;
+		begin exclusive transaction;
+		create table users_new (rowid integer primary key,
+		    id integer unique not null check(typeof(id) = 'integer'),
+		    display_name text not null,
+		    handle text not null,
+		    bio text,
+		    following_count integer,
+		    followers_count integer,
+		    location text,
+		    website text,
+		    join_date integer,
+		    is_private boolean default 0,
+		    is_verified boolean default 0,
+		    is_banned boolean default 0,
+		    is_deleted boolean default 0,
+		    profile_image_url text,
+		    profile_image_local_path text,
+		    banner_image_url text,
+		    banner_image_local_path text,
+		    pinned_tweet_id integer check(typeof(pinned_tweet_id) = 'integer' or pinned_tweet_id = ''),
+
+		    is_followed boolean default 0,
+		    is_id_fake boolean default 0,
+		    is_content_downloaded boolean default 0
+		);
+		create unique index index_active_users_handle_unique on users_new (handle) where is_banned = 0 and is_deleted = 0;
+
+		INSERT INTO users_new (rowid, id, display_name, handle, bio, following_count, followers_count, location,
+		    website, join_date, is_private, is_verified, is_banned, is_deleted, profile_image_url,
+		    profile_image_local_path, banner_image_url, banner_image_local_path, pinned_tweet_id, is_followed,
+		    is_id_fake, is_content_downloaded)
+		SELECT rowid, id, display_name, handle, bio, following_count, followers_count, location,
+		    website, join_date, is_private, is_verified, is_banned, is_deleted, profile_image_url,
+		    profile_image_local_path, banner_image_url, banner_image_local_path, pinned_tweet_id, is_followed,
+		    is_id_fake, is_content_downloaded
+		FROM users;
+
+		drop table users;
+		alter table users_new rename to users;
+
+		create view users_by_handle as
+		    with active_users as (
+		        select * from users where is_banned = 0 and is_deleted = 0
+		    ), inactive_users as (
+		        select * from users where is_banned = 1 or is_deleted = 1
+		    ), inactive_users_with_no_shadowing_active_user as (
+		        select * from inactive_users where not exists (
+		             -- Ensure no active user exists for this handle
+		            select 1 from active_users where active_users.handle = inactive_users.handle
+		        )
+		    )
+		    select * from users
+		     where is_banned = 0 and is_deleted = 0  -- select active users directly
+		           or users.id = (
+		             -- select the inactive user with the highest ID if no active user exists for the handle
+		             select max(id)
+		             from inactive_users_with_no_shadowing_active_user
+		             where users.handle = inactive_users_with_no_shadowing_active_user.handle
+		           )
+		  group by handle having id = max(id);
+
+		commit;
+		pragma foreign_keys = ON;
+		vacuum;
+		`,
 }
 var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
 

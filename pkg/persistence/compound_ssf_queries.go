@@ -425,7 +425,7 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
 
 	// From, to, by, and RT'd by user handles
 	if c.FromUserHandle != "" {
-		where_clauses = append(where_clauses, "tweets.user_id = (select id from users where handle like ?)")
+		where_clauses = append(where_clauses, "tweets.user_id = (select id from users_by_handle where handle like ?)")
 		bind_values = append(bind_values, c.FromUserHandle)
 	}
 	for _, to_user := range c.ToUserHandles {
@@ -433,11 +433,11 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
 		bind_values = append(bind_values, fmt.Sprintf("%%%s%%", to_user))
 	}
 	if c.RetweetedByUserHandle != "" {
-		where_clauses = append(where_clauses, "retweeted_by = (select id from users where handle like ?)")
+		where_clauses = append(where_clauses, "retweeted_by = (select id from users_by_handle where handle like ?)")
 		bind_values = append(bind_values, c.RetweetedByUserHandle)
 	}
 	if c.ByUserHandle != "" {
-		where_clauses = append(where_clauses, "by_user_id = (select id from users where handle like ?)")
+		where_clauses = append(where_clauses, "by_user_id = (select id from users_by_handle where handle like ?)")
 		bind_values = append(bind_values, c.ByUserHandle)
 	}
 	if c.ListID != 0 {
@@ -446,7 +446,7 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
 	}
 	if c.FollowedByUserHandle != "" {
 		where_clauses = append(where_clauses,
-			"by_user_id in (select followee_id from follows where follower_id = (select id from users where handle like ?))")
+			"by_user_id in (select followee_id from follows where follower_id = (select id from users_by_handle where handle like ?))")
 		bind_values = append(bind_values, c.FollowedByUserHandle)
 	}
 
@@ -532,7 +532,7 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
 	likes_sort_order_field := ""
 	if c.LikedByUserHandle != "" {
 		liked_by_filter_join_clause = " join likes filter_likes on tweets.id = filter_likes.tweet_id "
-		where_clauses = append(where_clauses, "filter_likes.user_id = (select id from users where handle like ?) ")
+		where_clauses = append(where_clauses, "filter_likes.user_id = (select id from users_by_handle where handle like ?) ")
 		bind_values = append(bind_values, c.LikedByUserHandle)
 		likes_sort_order_field = ", coalesce(filter_likes.sort_order, -1) likes_sort_order "
 
@@ -545,7 +545,7 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
 	bookmarks_sort_order_field := ""
 	if c.BookmarkedByUserHandle != "" {
 		bookmarked_by_filter_join_clause = " join bookmarks filter_bookmarks on tweets.id = filter_bookmarks.tweet_id "
-		where_clauses = append(where_clauses, "filter_bookmarks.user_id = (select id from users where handle like ?) ")
+		where_clauses = append(where_clauses, "filter_bookmarks.user_id = (select id from users_by_handle where handle like ?) ")
 		bind_values = append(bind_values, c.BookmarkedByUserHandle)
 		bookmarks_sort_order_field = ", coalesce(filter_bookmarks.sort_order, -1) bookmarks_sort_order "
 

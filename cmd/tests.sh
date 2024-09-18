@@ -360,7 +360,7 @@ tw fetch_tweet_only https://twitter.com/PandasAndVidya/status/156271472796842803
 test "$(sqlite3 twitter.db "select count(*) from tweets where id = 156271472796842803")" == "0"
 
 # Test that you can pass a session with the `.session` file extension too
-tw --session Offline_Twatter.session list_followed > /dev/null  # Dummy operation
+tw --session Offline_Twatter.session fetch_user Offline_Twatter  # Dummy operation
 
 
 # Test search

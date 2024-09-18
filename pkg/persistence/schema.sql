@@ -7,7 +7,7 @@ PRAGMA foreign_keys = on;
 create table users (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
     display_name text not null,
-    handle text unique not null,
+    handle text not null,
     bio text,
     following_count integer,
     followers_count integer,
@@ -28,6 +28,29 @@ create table users (rowid integer primary key,
     is_id_fake boolean default 0,
     is_content_downloaded boolean default 0
 );
+create unique index index_active_users_handle_unique on users (handle) where is_banned = 0 and is_deleted = 0;
+
+create view users_by_handle as
+    with active_users as (
+        select * from users where is_banned = 0 and is_deleted = 0
+    ), inactive_users as (
+        select * from users where is_banned = 1 or is_deleted = 1
+    ), inactive_users_with_no_shadowing_active_user as (
+        select * from inactive_users where not exists (
+             -- Ensure no active user exists for this handle
+            select 1 from active_users where active_users.handle = inactive_users.handle
+        )
+    )
+    select * from users
+     where is_banned = 0 and is_deleted = 0  -- select active users directly
+           or users.id = (
+             -- select the inactive user with the highest ID if no active user exists for the handle
+             select max(id)
+             from inactive_users_with_no_shadowing_active_user
+             where users.handle = inactive_users_with_no_shadowing_active_user.handle
+           )
+  group by handle having id = max(id);
+
 
 create table fake_user_sequence(latest_fake_id integer not null);
 insert into fake_user_sequence values(0x4000000000000000);

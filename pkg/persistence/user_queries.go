@@ -23,7 +23,8 @@ const USERS_ALL_SQL_FIELDS = `
 // - u: the User
 func (p Profile) SaveUser(u *scraper.User) error {
 	if u.IsNeedingFakeID {
-		err := p.DB.QueryRow("select id from users where lower(handle) = lower(?)", u.Handle).Scan(&u.ID)
+		// User is fake; check if we already have them, in order to proceed
+		err := p.DB.QueryRow("select id from users_by_handle where lower(handle) = lower(?)", u.Handle).Scan(&u.ID)
 		if errors.Is(err, sql.ErrNoRows) {
 			// We need to continue-- create a new fake user
 			u.ID = p.NextFakeUserID()
@@ -86,7 +87,7 @@ func (p Profile) GetUserByHandle(handle scraper.UserHandle) (scraper.User, error
 	var ret scraper.User
 	err := db.Get(&ret, `
 	    select `+USERS_ALL_SQL_FIELDS+`
-	      from users
+	      from users_by_handle
 	     where lower(handle) = lower(?)
 	`, handle)
 
