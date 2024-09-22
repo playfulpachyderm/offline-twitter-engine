@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -52,10 +53,9 @@ func TestModifyUser(t *testing.T) {
 	user := create_dummy_user()
 	user.DisplayName = "Display Name 1"
 	user.Location = "location1"
-	user.Handle = "handle 1"
+	user.Handle = scraper.UserHandle(fmt.Sprintf("handle %d", rand.Int31()))
 	user.IsPrivate = false
 	user.IsVerified = false
-	user.IsBanned = false
 	user.FollowersCount = 1000
 	user.JoinDate = scraper.TimestampFromUnix(1000)
 	user.ProfileImageUrl = "asdf"
@@ -72,7 +72,6 @@ func TestModifyUser(t *testing.T) {
 	user.Handle = new_handle
 	user.IsPrivate = true
 	user.IsVerified = true
-	user.IsBanned = true
 	user.FollowersCount = 2000
 	user.JoinDate = scraper.TimestampFromUnix(2000)
 	user.ProfileImageUrl = "asdf2"
@@ -91,13 +90,147 @@ func TestModifyUser(t *testing.T) {
 	assert.Equal("location2", new_user.Location)
 	assert.True(new_user.IsPrivate)
 	assert.True(new_user.IsVerified)
-	assert.True(new_user.IsBanned)
 	assert.Equal(2000, new_user.FollowersCount)
 	assert.Equal(int64(1000), new_user.JoinDate.Unix())
 	assert.Equal("asdf2", new_user.ProfileImageUrl)
 	assert.True(new_user.IsContentDownloaded)
 }
 
+func TestSetUserBannedDeleted(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	profile_path := "test_profiles/TestUserQueries"
+	profile := create_or_load_profile(profile_path)
+
+	user := create_dummy_user()
+	user.DisplayName = "Display Name 1"
+	user.Location = "location1"
+	user.Bio = "Some Bio"
+	user.Handle = scraper.UserHandle(fmt.Sprintf("handle %d", rand.Int31()))
+	user.FollowersCount = 1000
+	user.JoinDate = scraper.TimestampFromUnix(1000)
+	user.ProfileImageUrl = "asdf"
+	user.IsContentDownloaded = true
+
+	// Save the user so it can be modified
+	fmt.Println("---------- Saving the user for the first time; should do insert")
+	err := profile.SaveUser(&user)
+	require.NoError(err)
+
+	// Now the user deactivates
+	user.IsDeleted = true
+	fmt.Println("---------- Saving the user for the second time; should do update")
+	err = profile.SaveUser(&user)
+	require.NoError(err)
+	// Reload the modified user
+	new_user, err := profile.GetUserByID(user.ID)
+	require.NoError(err)
+
+	assert.True(new_user.IsDeleted)
+	assert.Equal(new_user.Handle, user.Handle)
+	assert.Equal(new_user.DisplayName, user.DisplayName)
+	assert.Equal(new_user.Location, user.Location)
+	assert.Equal(new_user.Bio, user.Bio)
+	assert.Equal(new_user.FollowersCount, user.FollowersCount)
+	assert.Equal(new_user.JoinDate, user.JoinDate)
+	assert.Equal(new_user.ProfileImageUrl, user.ProfileImageUrl)
+	assert.Equal(new_user.IsContentDownloaded, user.IsContentDownloaded)
+}
+
+func TestSaveAndLoadBannedDeletedUser(t *testing.T) {
+	require := require.New(t)
+
+	profile_path := "test_profiles/TestUserQueries"
+	profile := create_or_load_profile(profile_path)
+
+	user := scraper.User{
+		ID:       scraper.UserID(rand.Int31()),
+		Handle:   scraper.UserHandle(fmt.Sprintf("handle-%d", rand.Int31())),
+		IsBanned: true,
+	}
+
+	// Save the user, then reload it and ensure it's the same
+	err := profile.SaveUser(&user)
+	require.NoError(err)
+	new_user, err := profile.GetUserByID(user.ID)
+	require.NoError(err)
+
+	if diff := deep.Equal(new_user, user); diff != nil {
+		t.Error(diff)
+	}
+}
+
+func TestInsertUserWithDuplicateHandle(t *testing.T) {
+	require := require.New(t)
+	profile_path := "test_profiles/TestUserQueries"
+	profile := create_or_load_profile(profile_path)
+
+	user1 := create_dummy_user()
+	err := profile.SaveUser(&user1)
+	require.NoError(err)
+
+	user2 := create_dummy_user()
+	user2.Handle = user1.Handle
+	err = profile.SaveUser(&user2)
+	var conflict_err persistence.ErrConflictingUserHandle
+	require.ErrorAs(err, &conflict_err)
+	require.Equal(conflict_err.ConflictingUserID, user1.ID)
+
+	// Should have inserted user2
+	new_user2, err := profile.GetUserByID(user2.ID)
+	require.NoError(err)
+	if diff := deep.Equal(user2, new_user2); diff != nil {
+		t.Error(diff)
+	}
+
+	// user1 should be marked as deleted
+	new_user1, err := profile.GetUserByID(user1.ID)
+	require.NoError(err)
+	user1.IsDeleted = true // for equality check
+	if diff := deep.Equal(user1, new_user1); diff != nil {
+		t.Error(diff)
+	}
+}
+
+func TestReviveDeletedUserWithDuplicateHandle(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+	profile_path := "test_profiles/TestUserQueries"
+	profile := create_or_load_profile(profile_path)
+
+	// Create the first user (deleted)
+	user1 := create_dummy_user()
+	user1.DisplayName = "user1"
+	user1.IsDeleted = true
+	err := profile.SaveUser(&user1)
+	require.NoError(err)
+
+	// Create the second user (active)
+	user2 := create_dummy_user()
+	user2.Handle = user1.Handle
+	user2.DisplayName = "user2"
+	err = profile.SaveUser(&user2)
+	require.NoError(err)
+
+	// Reactivate the 1st user; should return the 2nd user's ID as a conflict
+	user1.IsDeleted = false
+	err = profile.SaveUser(&user1)
+	var conflict_err persistence.ErrConflictingUserHandle
+	require.ErrorAs(err, &conflict_err)
+	require.Equal(conflict_err.ConflictingUserID, user2.ID)
+
+	// User1 should be updated (no longer deleted)
+	new_user1, err := profile.GetUserByID(user1.ID)
+	require.NoError(err)
+	assert.False(new_user1.IsDeleted)
+	// User2 should be marked deleted
+	new_user2, err := profile.GetUserByID(user2.ID)
+	require.NoError(err)
+	assert.True(new_user2.IsDeleted)
+}
+
+// `profile.GetUserByHandle` should be case-insensitive
 func TestHandleIsCaseInsensitive(t *testing.T) {
 	profile_path := "test_profiles/TestUserQueries"
 	profile := create_or_load_profile(profile_path)

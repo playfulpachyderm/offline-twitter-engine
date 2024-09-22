@@ -7,21 +7,47 @@ import (
 	"path"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/mattn/go-sqlite3"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
+
+type ErrConflictingUserHandle struct {
+	ConflictingUserID scraper.UserID
+}
+
+func (e ErrConflictingUserHandle) Error() string {
+	return fmt.Sprintf("active user with given handle already exists (id: %d)", e.ConflictingUserID)
+}
 
 const USERS_ALL_SQL_FIELDS = `
 		id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private, is_verified,
 		is_banned, is_deleted, profile_image_url, profile_image_local_path, banner_image_url, banner_image_local_path,
 		pinned_tweet_id, is_content_downloaded, is_followed`
 
-// Save the given User to the database.
-// If the User is already in the database, it will update most of its attributes (follower count, etc)
+// User save strategy:
 //
-// args:
-// - u: the User
+//  1. Check if the user needs a fake ID; if so, assign one
+//  2. Try to execute an update
+//     2a. if the user is banned or deleted, don't overwrite other fields, blanking them
+//     2b. if the user exists but `handle` conflicts with an active user, do conflict handling
+//  3. If the user doesn't already exist, execute an insert.  Do conflict handling if applicable
+//
+// Conflict handling:
+//
+//  1. Look up the ID of the user with conflicting handle
+//  2. TODO: handle case where the previous user has a fake ID
+//     May have to rescrape that user's tweets to figure out if they're the same user or not.
+//     Strategy 1: assume they're the same users
+//     - Execute a full update on the old user, including their ID (we have a real ID for them now)
+//     - Update all the other tables (tweets, follows, lists, etc) with the new ID
+//     Strategy 2: assume they're different users
+//     - Mark the old user as deactivated and be done with it
+//  3. Mark the old user as deactivated, eliminating the conflict
+//  4. Re-save the new user
+//  5. Return an ErrConflictingUserHandle, notifying the caller of the conflict
 func (p Profile) SaveUser(u *scraper.User) error {
+	// First, check if the user needs a fake ID, and generate one if needed
 	if u.IsNeedingFakeID {
 		// User is fake; check if we already have them, in order to proceed
 		err := p.DB.QueryRow("select id from users_by_handle where lower(handle) = lower(?)", u.Handle).Scan(&u.ID)
@@ -39,39 +65,121 @@ func (p Profile) SaveUser(u *scraper.User) error {
 		}
 	}
 
-	_, err := p.DB.NamedExec(`
+	// Handler function to deal with UNIQUE constraint violations on `handle`.
+	//
+	// We know the UNIQUE violation must be on `handle`, because we checked for users with this ID
+	// above (`update` query).
+	handle_conflict := func() error {
+		var old_user scraper.User
+		err := p.DB.Get(&old_user,
+			`select id, is_id_fake from users where handle = ? and is_banned = 0 and is_deleted = 0`,
+			u.Handle,
+		)
+		if err != nil {
+			panic(err)
+		}
+		if old_user.IsIdFake {
+			panic("TODO: user with fake ID")
+		} else {
+			// 1. The being-saved user ID doesn't exist yet (or was previously inactive)
+			// 2. There's another user with the same handle who's currently considered active
+			// 3. Their ID is not fake.
+			// 4. The being-saved user is also understood to be active (otherwise a UNIQUE handle
+			//    conflict wouldn't have occurred)
+			//
+			// Since we're saving an active user, the old user is presumably no longer active.
+			// They will need to be rescraped when posssible, to find out what's going on.  For
+			// now, we will just mark them as deleted.
+			_, err := p.DB.Exec(`update users set is_deleted=1 where id = ?`, old_user.ID)
+			if err != nil {
+				panic(err)
+			}
+			// Now we can save our new user.  Should succeed since the conflict is cleared:
+			err = p.SaveUser(u)
+			if err != nil {
+				panic(err)
+			}
+			// Notify caller of the duplicate for rescraping
+			return ErrConflictingUserHandle{ConflictingUserID: old_user.ID}
+		}
+	}
+
+	// Try to treat it like an `update` and see if it works
+	var result sql.Result
+	var err error
+	if u.IsBanned || u.IsDeleted {
+		// If user is banned or deleted, it's a stub, so don't update other fields
+		result, err = p.DB.NamedExec(`update users set is_deleted=:is_deleted, is_banned=:is_banned where id = :id`, u)
+	} else {
+		// This could be re-activating a previously deleted / banned user
+		result, err = p.DB.NamedExec(`
+		    update users
+		       set handle=:handle,
+		           bio=:bio,
+		           display_name=:display_name,
+		           following_count=:following_count,
+		           followers_count=:followers_count,
+		           location=:location,
+		           website=:website,
+		           is_private=:is_private,
+		           is_verified=:is_verified,
+		           is_banned=:is_banned,
+		           is_deleted=:is_deleted,
+		           profile_image_url=:profile_image_url,
+		           profile_image_local_path=:profile_image_local_path,
+		           banner_image_url=:banner_image_url,
+		           banner_image_local_path=:banner_image_local_path,
+		           pinned_tweet_id=:pinned_tweet_id,
+		           is_content_downloaded=(is_content_downloaded or :is_content_downloaded)
+		     where id = :id
+		`, u)
+	}
+	if err != nil {
+		// Check for UNIQUE constraint violation on `handle` field
+		var sqliteErr sqlite3.Error
+		is_ok := errors.As(err, &sqliteErr)
+		if is_ok && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique {
+			return handle_conflict()
+		} else {
+			// Unexpected error
+			return fmt.Errorf("Error executing SaveUser(%s):\n  %w", u.Handle, err)
+		}
+	}
+	// If a row was updated, then the User already exists and was updated successfully; we're done
+	rows_affected, err := result.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+	if rows_affected > 0 {
+		return nil
+	}
+
+	// It's a new user.  Try to insert it:
+	_, err = p.DB.NamedExec(`
 	    insert into users (id, display_name, handle, bio, following_count, followers_count, location, website, join_date, is_private,
 	                       is_verified, is_banned, is_deleted, profile_image_url, profile_image_local_path, banner_image_url,
 	                       banner_image_local_path, pinned_tweet_id, is_content_downloaded, is_id_fake)
 	    values (:id, :display_name, :handle, :bio, :following_count, :followers_count, :location, :website, :join_date, :is_private,
 	            :is_verified, :is_banned, :is_deleted, :profile_image_url, :profile_image_local_path, :banner_image_url,
 	            :banner_image_local_path, :pinned_tweet_id, :is_content_downloaded, :is_id_fake)
-	        on conflict do update
-	       set handle=:handle,
-	           bio=:bio,
-	           display_name=:display_name,
-	           following_count=:following_count,
-	           followers_count=:followers_count,
-	           location=:location,
-	           website=:website,
-	           is_private=:is_private,
-	           is_verified=:is_verified,
-	           is_banned=:is_banned,
-	           is_deleted=:is_deleted,
-	           profile_image_url=:profile_image_url,
-	           profile_image_local_path=:profile_image_local_path,
-	           banner_image_url=:banner_image_url,
-	           banner_image_local_path=:banner_image_local_path,
-	           pinned_tweet_id=:pinned_tweet_id,
-	           is_content_downloaded=(is_content_downloaded or :is_content_downloaded)
 	    `,
 		u,
 	)
-	if err != nil {
-		return fmt.Errorf("Error executing SaveUser(%s):\n  %w", u.Handle, err)
+	if err == nil {
+		// It worked; user is inserted, we're done
+		return nil
 	}
 
-	return nil
+	// If execution reaches this point, then an error has occurred; err is not nil.
+	// Check if it's a UNIQUE CONSTRAINT FAILED:
+	var sqliteErr sqlite3.Error
+	is_ok := errors.As(err, &sqliteErr)
+	if is_ok && sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique { // Conflict detected
+		return handle_conflict()
+	} else {
+		// Some other error
+		return fmt.Errorf("Error executing SaveUser(%s):\n  %w", u.Handle, err)
+	}
 }
 
 // Retrieve a User from the database, by handle.
