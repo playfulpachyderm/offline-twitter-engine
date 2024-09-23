@@ -181,6 +181,7 @@ func GetUser(handle UserHandle) (User, error) {
 	}
 	return session.GetUser(handle)
 }
+
 // Calls API#GetUserByID and returns the parsed result
 func GetUserByID(u_id UserID) (User, error) {
 	session, err := NewGuestSession() // This endpoint works better if you're not logged in

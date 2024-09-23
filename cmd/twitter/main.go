@@ -291,7 +291,7 @@ func _fetch_user_by_id(id scraper.UserID) error {
 		// Handle and display name won't be updated if the user exists.
 		user = scraper.User{ID: id, DisplayName: "<Unknown User>", Handle: "<UNKNOWN USER>", IsDeleted: true}
 	} else if err != nil {
-		return err
+		return fmt.Errorf("scraping error on user ID %d: %w", id, err)
 	}
 	log.Debugf("%#v\n", user)
 
