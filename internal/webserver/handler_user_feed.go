@@ -24,7 +24,7 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 			app.error_404(w, r)
 			return
 		}
-		panic_if(app.Profile.SaveUser(&user))
+		panic_if(app.Profile.SaveUser(&user)) // TODO: handle conflicting users
 		panic_if(app.Profile.DownloadUserContentFor(&user, &app.API))
 	} else if err != nil {
 		panic(err)

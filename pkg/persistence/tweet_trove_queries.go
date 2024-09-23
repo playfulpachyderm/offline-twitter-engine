@@ -13,7 +13,28 @@ import (
 func (p Profile) SaveTweetTrove(trove TweetTrove, should_download bool, api *API) {
 	for i, u := range trove.Users {
 		err := p.SaveUser(&u)
-		if err != nil {
+		// Check for handle conflicts and handle them in place
+		// TODO: this is hacky, it doesn't go here.  We should return a list of conflicting users
+		// who were marked as deleted, and then let the callee re-scrape and re-save them.
+		var conflict_err ErrConflictingUserHandle
+		if errors.As(err, &conflict_err) {
+			fmt.Printf(
+				"Conflicting user handle found (ID %d); old user has been marked deleted.  Rescraping them\n",
+				conflict_err.ConflictingUserID,
+			)
+			user, err := GetUserByID(conflict_err.ConflictingUserID)
+			if errors.Is(err, ErrDoesntExist) {
+				// Mark them as deleted.
+				// Handle and display name won't be updated if the user exists.
+				user = User{ID: conflict_err.ConflictingUserID, DisplayName: "<Unknown User>", Handle: "<UNKNOWN USER>", IsDeleted: true}
+			} else if err != nil {
+				panic(fmt.Errorf("error scraping conflicting user (ID %d): %w", conflict_err.ConflictingUserID, err))
+			}
+			err = p.SaveUser(&user)
+			if err != nil {
+				panic(fmt.Errorf("error saving rescraped conflicting user with ID %d and handle %q: %w", user.ID, user.Handle, err))
+			}
+		} else if err != nil {
 			panic(fmt.Errorf("Error saving user with ID %d and handle %s:\n  %w", u.ID, u.Handle, err))
 		}
 		fmt.Println(u.Handle, u.ID)

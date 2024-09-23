@@ -247,6 +247,14 @@ test $(sqlite3 twitter.db "select count(*) from users where handle like '9Monsie
 test $(sqlite3 twitter.db "select count(*) from users where handle like '9MonsieurChat9' and not is_deleted") = "1"
 test $(sqlite3 twitter.db "select is_deleted from users where id = 1615394007961731072") = "1"
 
+# Fetch a tweet from such a new account with the same handle as an old one
+sqlite3 twitter.db "delete from users where handle like '9MonsieurChat9' and not is_deleted"
+test $(sqlite3 twitter.db "select count(*) from users where handle like '9MonsieurChat9'") = "1"
+tw fetch_tweet https://x.com/9MonsieurChat9/status/1834121200584589600 # Should update the user as well
+test $(sqlite3 twitter.db "select count(*) from users where handle like '9MonsieurChat9'") = "2"
+test $(sqlite3 twitter.db "select count(*) from users where handle like '9MonsieurChat9' and not is_deleted") = "1"
+test $(sqlite3 twitter.db "select is_deleted from users where id = 1615394007961731072") = "1"
+
 
 # Test tweets with URLs
 tw fetch_user RoninGreg

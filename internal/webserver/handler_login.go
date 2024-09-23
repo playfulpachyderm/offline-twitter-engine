@@ -74,7 +74,7 @@ func (app *Application) after_login(w http.ResponseWriter, r *http.Request, api 
 		app.error_404(w, r)
 		return
 	}
-	panic_if(app.Profile.SaveUser(&user))
+	panic_if(app.Profile.SaveUser(&user)) // TODO: handle conflicting users
 	panic_if(app.Profile.DownloadUserContentFor(&user, &app.API))
 
 	// Now that the user is scraped for sure, set them as the logged-in user
