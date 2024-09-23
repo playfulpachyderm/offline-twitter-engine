@@ -181,6 +181,14 @@ func GetUser(handle UserHandle) (User, error) {
 	}
 	return session.GetUser(handle)
 }
+// Calls API#GetUserByID and returns the parsed result
+func GetUserByID(u_id UserID) (User, error) {
+	session, err := NewGuestSession() // This endpoint works better if you're not logged in
+	if err != nil {
+		return User{}, err
+	}
+	return session.GetUserByID(u_id)
+}
 
 /**
  * Make a filename for the profile image, that hopefully won't clobber other ones

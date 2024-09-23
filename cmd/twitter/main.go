@@ -284,12 +284,39 @@ func create_profile(target_dir string) {
 	}
 }
 
-/**
- * Scrape a user and save it in the database.
- *
- * args:
- * - handle: e.g., "michaelmalice"
- */
+func _fetch_user_by_id(id scraper.UserID) error {
+	user, err := scraper.GetUserByID(id)
+	if errors.Is(err, scraper.ErrDoesntExist) {
+		// Mark them as deleted.
+		// Handle and display name won't be updated if the user exists.
+		user = scraper.User{ID: id, DisplayName: "<Unknown User>", Handle: "<UNKNOWN USER>", IsDeleted: true}
+	} else if err != nil {
+		return err
+	}
+	log.Debugf("%#v\n", user)
+
+	err = profile.SaveUser(&user)
+	var conflict_err persistence.ErrConflictingUserHandle
+	if errors.As(err, &conflict_err) {
+		log.Warnf(
+			"Conflicting user handle found (ID %d); old user has been marked deleted.  Rescraping them",
+			conflict_err.ConflictingUserID,
+		)
+		if err := _fetch_user_by_id(conflict_err.ConflictingUserID); err != nil {
+			return fmt.Errorf("error scraping conflicting user (ID %d): %w", conflict_err.ConflictingUserID, err)
+		}
+	} else if err != nil {
+		return fmt.Errorf("error saving user: %w", err)
+	}
+
+	user, err = profile.GetUserByID(user.ID)
+	if err != nil {
+		panic(fmt.Sprintf("User not found for some reason: %s", err.Error()))
+	}
+	download_user_content(user.Handle)
+	return nil
+}
+
 func fetch_user(handle scraper.UserHandle) {
 	user, err := scraper.GetUser(handle)
 	if errors.Is(err, scraper.ErrDoesntExist) {
@@ -303,11 +330,20 @@ func fetch_user(handle scraper.UserHandle) {
 	} else if is_scrape_failure(err) {
 		die(err.Error(), false, -1)
 	}
-	log.Debug(user)
+	log.Debugf("%#v\n", user)
 
 	err = profile.SaveUser(&user)
-	if err != nil {
-		die(fmt.Sprintf("Error saving user: %s", err.Error()), false, 4)
+	var conflict_err persistence.ErrConflictingUserHandle
+	if errors.As(err, &conflict_err) {
+		log.Warnf(
+			"Conflicting user handle found (ID %d); old user has been marked deleted.  Rescraping them",
+			conflict_err.ConflictingUserID,
+		)
+		if err := _fetch_user_by_id(conflict_err.ConflictingUserID); err != nil {
+			die(fmt.Sprintf("error scraping conflicting user (ID %d): %s", conflict_err.ConflictingUserID, err.Error()), false, 4)
+		}
+	} else if err != nil {
+		die(fmt.Sprintf("error saving user: %s", err.Error()), false, 4)
 	}
 
 	download_user_content(handle)
@@ -315,22 +351,10 @@ func fetch_user(handle scraper.UserHandle) {
 }
 
 func fetch_user_by_id(id scraper.UserID) {
-	session, err := scraper.NewGuestSession() // This endpoint works better if you're not logged in
+	err := _fetch_user_by_id(id)
 	if err != nil {
-		panic(err)
+		die(err.Error(), false, -1)
 	}
-	user, err := session.GetUserByID(id)
-	if err != nil {
-		panic(err)
-	}
-	log.Debug(user)
-
-	err = profile.SaveUser(&user)
-	if err != nil {
-		die(fmt.Sprintf("Error saving user: %s", err.Error()), false, 4)
-	}
-
-	download_user_content(user.Handle)
 	happy_exit("Saved the user", nil)
 }
 

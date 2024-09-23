@@ -114,14 +114,11 @@ func TestSetUserBannedDeleted(t *testing.T) {
 	user.IsContentDownloaded = true
 
 	// Save the user so it can be modified
-	fmt.Println("---------- Saving the user for the first time; should do insert")
 	err := profile.SaveUser(&user)
 	require.NoError(err)
 
 	// Now the user deactivates
-	user.IsDeleted = true
-	fmt.Println("---------- Saving the user for the second time; should do update")
-	err = profile.SaveUser(&user)
+	err = profile.SaveUser(&scraper.User{ID: user.ID, IsDeleted: true})
 	require.NoError(err)
 	// Reload the modified user
 	new_user, err := profile.GetUserByID(user.ID)
