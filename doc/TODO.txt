@@ -16,7 +16,8 @@ TODO: videos-view-count
 
 TODO video-not-downloading: https://twitter.com/JustinPulitzer/status/1496709662602932224
 
-TODO get-user-tweets-user-doesn't-exist
+TODO get-user-tweets-user-not-in-database
+- subcommand `get_user_tweets` should fetch the user first instead of just failing
 
 TODO bash-completions
 - Should have bash completions.
@@ -95,13 +96,8 @@ TODO: login-routes-tests
 - Make the scraper.API object injectable somehow (get rid of singleton pattern) and add tests for login and change-session sequences
 - Also test profile.ListSessions()
 
-TODO: webserver-session-arg-active-user
-- make the active user get set on initializing the Application object if a --session flag is given
-
-TODO: show-errors-in-UI
-- if an HTTP request fails, show an error in the UI somehow
-  - scrape failed due to rate limiting
-  - non-HTMX 500 errors now show a weird HTML page
+TODO: non-htmx-500-errors
+- non-HTMX 500 errors show a weird HTML page
 
 TODO: refactor-compound_queries_test-file
 - Move the tests for user feeds into the compound_queries_ssf_test file
@@ -117,6 +113,13 @@ TODO: search-terms-highlighted
 
 TODO: profile-image-template
 - There are a lot of places that use a circle profile image aside from author-infos
+
+TODO: send-message-last-read-event
+- When a user sends a message, their last-read-event should be updated to that message ID immediately (no few-second delay in UI)
+
+TODO: emoji-thumb-remove-skin-tones
+- twitter doesn't support skin tones on emojis.  Rewrite the emoji database json file to remove skin tones
+- also remove whatever uses `crypto.subtle` to load the emoji list
 
 Windows Build
 -------------

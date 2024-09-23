@@ -1,0 +1,17 @@
+Jul 31 12:53:49 razer-kubuntu twitter[259247]: panic: Error downloading user content for user with ID 173057927 and handle catalinmpit:
+Jul 31 12:53:49 razer-kubuntu twitter[259247]:   Error writing to path profile_images/catalinmpit_profile_TGBIEZR3_normal.jpg, url https://pbs.twimg.com/profile_images/1807854220642488320/TGBIEZR3_normal.jpg:
+Jul 31 12:53:49 razer-kubuntu twitter[259247]:   write profile_images/catalinmpit_profile_TGBIEZR3_normal.jpg: no space left on device
+Jul 31 12:53:49 razer-kubuntu twitter[259247]: goroutine 265349 [running]:
+Jul 31 12:53:49 razer-kubuntu twitter[259247]: gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence.Profile.SaveTweetTrove({{0xbd1a78?, 0x1?}, 0xc0000d15f0?}, {0xc00059e810, 0xc00059e840, 0xc00059e870, 0xc00059e8a0, 0xc00059e8d0, 0xc00059e900, {0xf24910, ...}, ...}, .>
+Jul 31 12:53:49 razer-kubuntu twitter[259247]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence/tweet_trove_queries.go:49 +0x2445
+Jul 31 12:53:49 razer-kubuntu twitter[259247]: created by gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).background_scrape
+Jul 31 12:53:49 razer-kubuntu twitter[259247]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/stopwatch.go:41 +0x388
+
+
+Jul 31 12:53:51 razer-kubuntu twitter[895782]: Could not load profile: Error checking database version:
+Jul 31 12:53:51 razer-kubuntu twitter[895782]:   disk I/O error: no space left on device
+Jul 31 12:53:51 razer-kubuntu twitter[895782]: Usage: twitter [--profile <profile_dir>] [--session <session_name>] [<flags>] <operation> <TARGET>
+
+
+
+https://github.com/mattn/go-sqlite3/blob/master/error.go
