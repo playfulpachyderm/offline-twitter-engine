@@ -12,18 +12,18 @@ type Space struct {
 	State                string    `db:"state"`
 	Title                string    `db:"title"`
 	CreatedAt            Timestamp `db:"created_at"`
-	StartedAt            Timestamp
+	StartedAt            Timestamp `db:"started_at"`
 	EndedAt              Timestamp `db:"ended_at"`
-	UpdatedAt            Timestamp
-	IsAvailableForReplay bool
-	ReplayWatchCount     int
-	LiveListenersCount   int
+	UpdatedAt            Timestamp `db:"updated_at"`
+	IsAvailableForReplay bool      `db:"is_available_for_replay"`
+	ReplayWatchCount     int       `db:"replay_watch_count"`
+	LiveListenersCount   int       `db:"live_listeners_count"`
 	ParticipantIds       []UserID
 
-	CreatedById UserID
+	CreatedById UserID `db:"created_by_id"`
 	TweetID     TweetID
 
-	IsDetailsFetched bool
+	IsDetailsFetched bool `db:"is_details_fetched"`
 }
 
 func (space Space) FormatDuration() string {

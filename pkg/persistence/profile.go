@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 
 	sql "github.com/jmoiron/sqlx"
-	"github.com/jmoiron/sqlx/reflectx"
 	_ "github.com/mattn/go-sqlite3"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
@@ -58,8 +57,6 @@ func NewProfile(target_dir string) (Profile, error) {
 	fmt.Printf("Creating............. %s\n", sqlite_file)
 	db := sql.MustOpen("sqlite3", sqlite_file+"?_foreign_keys=on")
 	db.MustExec(sql_init)
-	InitializeDatabaseVersion(db)
-	db.Mapper = reflectx.NewMapperFunc("db", ToSnakeCase)
 
 	// Create `profile_images`
 	fmt.Printf("Creating............. %s/\n", profile_images_dir)
@@ -119,7 +116,6 @@ func LoadProfile(profile_dir string) (Profile, error) {
 	}
 
 	db := sql.MustOpen("sqlite3", fmt.Sprintf("%s?_foreign_keys=on&_journal_mode=WAL", sqlite_file))
-	db.Mapper = reflectx.NewMapperFunc("db", ToSnakeCase)
 
 	ret := Profile{
 		ProfileDir: profile_dir,
