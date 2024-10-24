@@ -129,6 +129,10 @@ func TestParseNotificationsPage(t *testing.T) {
 	assert.True(is_ok)
 	assert.True(notif12.HasDetail)
 
+	notif13, is_ok := tweet_trove.Notifications["FDzeDIfVUAIAAAABiJONcrvLSfVQeHf9GlI"]
+	assert.True(is_ok)
+	assert.Equal(NOTIFICATION_TYPE_FOLLOW, notif13.Type)
+
 	// TODO: communities
 	// notif12, is_ok := tweet_trove.Notifications["FDzeDIfVUAIAAAABiJONco_yJRHPBNsDH88"]
 	// assert.True(is_ok)

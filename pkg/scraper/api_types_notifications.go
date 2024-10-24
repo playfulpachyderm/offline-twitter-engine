@@ -131,21 +131,25 @@ func (t *TweetResponse) ToTweetTroveAsNotifications(current_user_id UserID) (Twe
 			}
 			notification.UserID = current_user_id
 			notification.SortIndex = entry.SortIndex
-			if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "replied") {
-				notification.Type = NOTIFICATION_TYPE_REPLY
-			} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "recommended") {
-				notification.Type = NOTIFICATION_TYPE_RECOMMENDED_POST
-			} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "quoted") {
-				notification.Type = NOTIFICATION_TYPE_QUOTE_TWEET
-			} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "mentioned") {
-				notification.Type = NOTIFICATION_TYPE_MENTION
-			} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "live_broadcast") {
-				// TODO: broadcast
-				notification.Type = NOTIFICATION_TYPE_USER_IS_LIVE
-			} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "community_tweet_pinned") {
-				// TODO: communities
-				delete(ret.Notifications, notification.ID)
-				continue
+
+			// Determine a notification type if there isn't one yet
+			if notification.Type == 0 {
+				if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "replied") {
+					notification.Type = NOTIFICATION_TYPE_REPLY
+				} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "recommended") {
+					notification.Type = NOTIFICATION_TYPE_RECOMMENDED_POST
+				} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "quoted") {
+					notification.Type = NOTIFICATION_TYPE_QUOTE_TWEET
+				} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "mentioned") {
+					notification.Type = NOTIFICATION_TYPE_MENTION
+				} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "live_broadcast") {
+					// TODO: broadcast
+					notification.Type = NOTIFICATION_TYPE_USER_IS_LIVE
+				} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "community_tweet_pinned") {
+					// TODO: communities
+					delete(ret.Notifications, notification.ID)
+					continue
+				}
 			}
 
 			if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "multiple") {
