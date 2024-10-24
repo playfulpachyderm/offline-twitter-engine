@@ -466,3 +466,4 @@ create table notification_users (rowid integer primary key,
 create table database_version(rowid integer primary key,
     version_number integer not null unique
 );
+insert into database_version(version_number) values (32);

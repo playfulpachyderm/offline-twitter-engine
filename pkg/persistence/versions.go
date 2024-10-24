@@ -3,8 +3,6 @@ package persistence
 import (
 	"fmt"
 
-	sql "github.com/jmoiron/sqlx"
-
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/terminal_utils"
 )
 
@@ -424,12 +422,6 @@ var MIGRATIONS = []string{
 		`,
 }
 var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
-
-// This should only get called on a newly created Profile.
-// Subsequent updates should change the number, not insert a new row.
-func InitializeDatabaseVersion(db *sql.DB) {
-	db.MustExec("insert into database_version (version_number) values (?)", ENGINE_DATABASE_VERSION)
-}
 
 func (p Profile) GetDatabaseVersion() (int, error) {
 	row := p.DB.QueryRow("select version_number from database_version")
