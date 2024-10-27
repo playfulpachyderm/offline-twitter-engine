@@ -492,7 +492,7 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 					continue
 				}
 				if item.Item.ItemContent.ItemType == "TimelineTweetComposer" {
-					// Composer button
+					// Composer button (timeline module version)
 					continue
 				}
 				trove, err := item.Item.ItemContent.TweetResults.ToTweetTrove()
@@ -516,6 +516,10 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 	} else if e.Content.EntryType == "TimelineTimelineItem" {
 		if e.Content.ItemContent.ItemType == "TimelineTombstone" {
 			// TODO: user feed tombstone entries
+			return NewTweetTrove()
+		}
+		if e.Content.ItemContent.ItemType == "TimelineTweetComposer" {
+			// Composer button (regular thread version)
 			return NewTweetTrove()
 		}
 		if strings.Split(e.EntryID, "-")[0] == "messageprompt" {
