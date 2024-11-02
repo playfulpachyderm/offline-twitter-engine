@@ -402,17 +402,18 @@ func NewFeed() Feed {
 	}
 }
 
-func (p Profile) GetNotificationsForUser(u_id UserID, cursor int64) Feed {
+func (p Profile) GetNotificationsForUser(u_id UserID, cursor int64, count int64) Feed {
 	// Get the notifications
 	var notifications []Notification
 	err := p.DB.Select(&notifications,
 		`select id, type, sent_at, sort_index, user_id, ifnull(action_user_id, 0) action_user_id,
 		        ifnull(action_tweet_id, 0) action_tweet_id, ifnull(action_retweet_id, 0) action_retweet_id, has_detail, last_scraped_at
 		   from notifications
-		  where sort_index < ? or ?
+		  where (sort_index < ? or ?)
 		    and user_id = ?
 		  order by sort_index desc
-	`, cursor, cursor == 0, u_id)
+		  limit ?
+	`, cursor, cursor == 0, u_id, count)
 	if err != nil {
 		panic(err)
 	}
@@ -510,8 +511,18 @@ func (p Profile) GetNotificationsForUser(u_id UserID, cursor int64) Feed {
 	// TODO: proper user id
 	p.fill_content(&ret.TweetTrove, UserID(0))
 
-	// TODO:
-	// ret.CursorBottom = ??
-
+	// Set the bottom cursor value
+	ret.CursorBottom = Cursor{}
+	if len(ret.Items) < int(count) {
+		ret.CursorBottom.CursorPosition = CURSOR_END
+	} else {
+		ret.CursorBottom.CursorPosition = CURSOR_MIDDLE
+		last_item := ret.Items[len(ret.Items)-1]
+		last_notif, is_ok := ret.Notifications[last_item.NotificationID]
+		if !is_ok {
+			panic("last item isn't a notification???")
+		}
+		ret.CursorBottom.CursorValue = int(last_notif.SortIndex) // TODO: CursorValue should be int64
+	}
 	return ret
 }

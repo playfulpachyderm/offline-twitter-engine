@@ -906,4 +906,14 @@ func TestNotifications(t *testing.T) {
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".notification")), 6)
+
+	// Show more
+	recorder = httptest.NewRecorder()
+	req = httptest.NewRequest("GET", "/notifications?cursor=1726604756351", nil)
+	req.Header.Set("HX-Request", "true")
+	app.ServeHTTP(recorder, req)
+	resp = recorder.Result()
+	root, err = html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".notification")), 5)
 }

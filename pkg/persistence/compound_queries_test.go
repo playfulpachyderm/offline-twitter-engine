@@ -325,7 +325,7 @@ func TestNotificationsFeed(t *testing.T) {
 	profile, err := persistence.LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
-	feed := profile.GetNotificationsForUser(UserID(1488963321701171204), 12345678912345)
+	feed := profile.GetNotificationsForUser(UserID(1488963321701171204), 0, 6)
 	assert.Len(feed.TweetTrove.Notifications, 6)
 	assert.Len(feed.TweetTrove.Tweets, 3)
 	assert.Len(feed.TweetTrove.Retweets, 1)
@@ -352,4 +352,30 @@ func TestNotificationsFeed(t *testing.T) {
 	assert.Equal(feed.Items[4].NotificationID, NotificationID("FKncQJGVgAQAAAABSQ3bEaTgXL-G8wObqVY"))
 	assert.Equal(feed.Items[5].NotificationID, NotificationID("FKncQJGVgAQAAAABSQ3bEaTgXL8f40e77r4"))
 	assert.Equal(feed.Items[5].TweetID, TweetID(1826778617705115868))
+
+	assert.Equal(feed.CursorBottom.CursorPosition, persistence.CURSOR_MIDDLE)
+	assert.Equal(feed.CursorBottom.CursorValue, 1723494244885)
+
+	// Paginated version
+	// -----------------
+
+	// Limit 3, after sort_index of the 1st one above
+	feed = profile.GetNotificationsForUser(UserID(1488963321701171204), 1726604756351, 3)
+	assert.Len(feed.TweetTrove.Notifications, 3)
+
+	assert.Len(feed.Items, 3)
+	assert.Equal(feed.Items[0].NotificationID, NotificationID("FDzeDIfVUAIAAvsBiJONcqYgiLgXOolO9t0"))
+	assert.Equal(feed.Items[1].NotificationID, NotificationID("FKncQJGVgAQAAAABSQ3bEaTgXL8VBxefepo"))
+	assert.Equal(feed.Items[2].NotificationID, NotificationID("FKncQJGVgAQAAAABSQ3bEaTgXL_S11Ev36g"))
+
+	assert.Equal(feed.CursorBottom.CursorPosition, persistence.CURSOR_MIDDLE)
+	assert.Equal(feed.CursorBottom.CursorValue, 1724251072880)
+
+	// At end of feed
+	// --------------
+
+	// cursor = last notification's sort index
+	feed = profile.GetNotificationsForUser(UserID(1488963321701171204), 1723494244885, 3)
+	assert.Len(feed.Items, 0)
+	assert.Equal(feed.CursorBottom.CursorPosition, persistence.CURSOR_END)
 }
