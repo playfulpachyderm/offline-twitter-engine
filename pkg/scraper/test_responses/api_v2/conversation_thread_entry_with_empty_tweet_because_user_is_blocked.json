@@ -1,0 +1,207 @@
+{
+    "entryId": "conversationthread-1479541054475239424",
+    "sortIndex": "7743831717444079605",
+    "content":
+    {
+        "entryType": "TimelineTimelineModule",
+        "__typename": "TimelineTimelineModule",
+        "items":
+        [
+            {
+                "entryId": "conversationthread-1479541054475239424-tweet-1479541054475239424",
+                "item":
+                {
+                    "itemContent":
+                    {
+                        "itemType": "TimelineTweet",
+                        "__typename": "TimelineTweet",
+                        "tweet_results":
+                        {},
+                        "tweetDisplayType": "Tweet"
+                    },
+                    "clientEventInfo":
+                    {
+                        "details":
+                        {
+                            "conversationDetails":
+                            {
+                                "conversationSection": "HighQuality"
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "entryId": "conversationthread-1479541054475239424-tweet-1479547508485496837",
+                "item":
+                {
+                    "itemContent":
+                    {
+                        "itemType": "TimelineTweet",
+                        "__typename": "TimelineTweet",
+                        "tweet_results":
+                        {
+                            "result":
+                            {
+                                "__typename": "Tweet",
+                                "rest_id": "1479547508485496837",
+                                "has_birdwatch_notes": false,
+                                "core":
+                                {
+                                    "user_results":
+                                    {
+                                        "result":
+                                        {
+                                            "__typename": "User",
+                                            "id": "VXNlcjo3MzI2NzIyNTI4MTEwMjIzMzk=",
+                                            "rest_id": "732672252811022339",
+                                            "affiliates_highlighted_label":
+                                            {},
+                                            "has_graduated_access": true,
+                                            "is_blue_verified": false,
+                                            "profile_image_shape": "Circle",
+                                            "legacy":
+                                            {
+                                                "can_dm": true,
+                                                "can_media_tag": false,
+                                                "created_at": "Tue May 17 20:40:52 +0000 2016",
+                                                "default_profile": true,
+                                                "default_profile_image": false,
+                                                "description": "Aspiring product manager 🤠 | #OneHumanity Spread #love. Not hate, y'all! ♥️☮️🕊️✌️ | #aspie #psychology #tech #AI | he/him",
+                                                "entities":
+                                                {
+                                                    "description":
+                                                    {
+                                                        "urls":
+                                                        []
+                                                    }
+                                                },
+                                                "fast_followers_count": 0,
+                                                "favourites_count": 85898,
+                                                "followers_count": 842,
+                                                "friends_count": 2186,
+                                                "has_custom_timelines": true,
+                                                "is_translator": false,
+                                                "listed_count": 9,
+                                                "location": "#fckracism #wirsindmehr",
+                                                "media_count": 1918,
+                                                "name": "Sir Bughunter 🇩🇪🇪🇺🇺🇦",
+                                                "normal_followers_count": 842,
+                                                "pinned_tweet_ids_str":
+                                                [],
+                                                "possibly_sensitive": false,
+                                                "profile_banner_url": "https://pbs.twimg.com/profile_banners/732672252811022339/1645895392",
+                                                "profile_image_url_https": "https://pbs.twimg.com/profile_images/1106590724404006912/h1fO4z21_normal.jpg",
+                                                "profile_interstitial_type": "",
+                                                "screen_name": "sirbughunter",
+                                                "statuses_count": 78110,
+                                                "translator_type": "none",
+                                                "verified": false,
+                                                "want_retweets": false,
+                                                "withheld_in_countries":
+                                                []
+                                            }
+                                        }
+                                    }
+                                },
+                                "unmention_data":
+                                {},
+                                "edit_control":
+                                {
+                                    "edit_tweet_ids":
+                                    [
+                                        "1479547508485496837"
+                                    ],
+                                    "editable_until_msecs": "1641588389343",
+                                    "is_edit_eligible": true,
+                                    "edits_remaining": "5"
+                                },
+                                "is_translatable": false,
+                                "views":
+                                {
+                                    "state": "Enabled"
+                                },
+                                "source": "<a href=\"http://twitter.com/download/android\" rel=\"nofollow\">Twitter for Android</a>",
+                                "legacy":
+                                {
+                                    "bookmark_count": 0,
+                                    "bookmarked": false,
+                                    "created_at": "Fri Jan 07 20:16:29 +0000 2022",
+                                    "conversation_id_str": "1479540319410696192",
+                                    "display_text_range":
+                                    [
+                                        31,
+                                        70
+                                    ],
+                                    "entities":
+                                    {
+                                        "user_mentions":
+                                        [
+                                            {
+                                                "id_str": "44067298",
+                                                "name": "Michael Malice",
+                                                "screen_name": "michaelmalice",
+                                                "indices":
+                                                [
+                                                    16,
+                                                    30
+                                                ]
+                                            }
+                                        ],
+                                        "urls":
+                                        [],
+                                        "hashtags":
+                                        [],
+                                        "symbols":
+                                        []
+                                    },
+                                    "favorite_count": 0,
+                                    "favorited": false,
+                                    "full_text": "@RaputeHurryPlz @michaelmalice Oohh, you like being on block lists? ♥️",
+                                    "is_quote_status": false,
+                                    "lang": "en",
+                                    "quote_count": 0,
+                                    "reply_count": 0,
+                                    "retweet_count": 0,
+                                    "retweeted": false,
+                                    "user_id_str": "732672252811022339",
+                                    "id_str": "1479547508485496837"
+                                },
+                                "quick_promote_eligibility":
+                                {
+                                    "eligibility": "IneligibleNotProfessional"
+                                }
+                            }
+                        },
+                        "tweetDisplayType": "Tweet"
+                    },
+                    "clientEventInfo":
+                    {
+                        "details":
+                        {
+                            "conversationDetails":
+                            {
+                                "conversationSection": "HighQuality"
+                            },
+                            "timelinesDetails":
+                            {
+                                "controllerData": "DAACDAAEDAABCgABFSACEGAHgYEKAAIAAAAACCBACAAAAAA="
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "displayType": "VerticalConversation",
+        "clientEventInfo":
+        {
+            "details":
+            {
+                "conversationDetails":
+                {
+                    "conversationSection": "HighQuality"
+                }
+            }
+        }
+    }
+}
