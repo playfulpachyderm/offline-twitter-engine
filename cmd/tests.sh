@@ -302,7 +302,7 @@ test $(sqlite3 twitter.db "select is_stub from tweets where id = 145452142414465
 test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454522147750260742") = 1
 test $(sqlite3 twitter.db "select is_stub from tweets where id = 1454526270809726977") = 0
 # Check that it downloaded the fetchable user's profile image
-test $(find profile_images/itsbackwereover_profile* | wc -l) -ne 0
+test $(find profile_images/WhaleTherapist_profile* | wc -l) -ne 0
 
 
 # Test an expanding ("Show more") tweet
