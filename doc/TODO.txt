@@ -121,3 +121,8 @@ TODO: emoji-rewrite (#webserver)
 
 TODO: windows-session-list (#release, #windows)
 - Check that sessions load as @Offline_Twatter instead of @test\Offline_Twatter on Windows
+
+TODO: conversation-thread-missing-tweets
+- In a conversation thread (replies under a tweet), if a user is blocked, the tweet response can be empty
+- These are just completely invisible on Twitter (render as nothing)
+- e.g.: https://x.com/sirbughunter/status/1479540319410696192

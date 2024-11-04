@@ -463,7 +463,7 @@ func (e *APIV2Entry) ParseID() (string, TweetID) {
 func (e APIV2Entry) ToTweetTrove() TweetTrove {
 	defer func() {
 		if obj := recover(); obj != nil {
-			log.Warnf("Panic while decoding entry: %s\n", e.OriginalJSON)
+			log.Errorf("Panic while decoding entry: %s\n", e.OriginalJSON)
 			panic(obj)
 		}
 	}()
@@ -499,6 +499,8 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 				if errors.Is(err, ErrorIsTombstone) {
 					// TODO: do something with tombstones in replies to a Tweet Detail
 					// For now, just ignore tombstones in the replies
+				} else if errors.Is(err, ERR_NO_TWEET) {
+					// TODO: handle this; some information can be recovered, we're just throwing it out
 				} else if err != nil {
 					panic(err)
 				}

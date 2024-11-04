@@ -700,6 +700,16 @@ func TestAPIV2ConversationThreadWithTombstones(t *testing.T) {
 	assert.Len(trove.Retweets, 0)
 }
 
+func TestAPIV2ConversationThreadEntryWithEmptyTweet(t *testing.T) {
+	data, err := os.ReadFile("test_responses/api_v2/conversation_thread_entry_with_empty_tweet_because_user_is_blocked.json")
+	require.NoError(t, err)
+
+	var resp APIV2Entry
+	err = json.Unmarshal(data, &resp)
+	require.NoError(t, err)
+	_ = resp.ToTweetTrove()
+}
+
 func TestTweetWithWarning(t *testing.T) {
 	assert := assert.New(t)
 	data, err := os.ReadFile("test_responses/api_v2/tweet_with_warning.json")
