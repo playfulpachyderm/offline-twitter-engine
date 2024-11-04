@@ -351,3 +351,11 @@ v0.6.17
 -------
 
 - BUGFIX: fix a series of bugs relating to inactive users and duplicate user handles
+
+v0.6.18
+-------
+
+- BUGFIX: fix scraper crashing on "composer" entry in threads
+- BUGFIX: fix "User followed you" notifications sometimes parsing as "New recommended post"
+- BUGFIX: emojis with skin tones now work in DMs
+- Notifications page is now paginated in web UI

@@ -1,33 +1,32 @@
-TODO user-images-extract-to-table:
-User profile images and banner images => extract to table.  Add `is_downloaded` column.  Add test for double-downloading a user, shouldn't change the write-times on these files
+TODO: user-images-extract-to-table
+- User profile images and banner images => extract to table.  Add `is_downloaded` column.  Add test for double-downloading a user, shouldn't change the write-times on these files
 
-TODO update-all
+TODO: update-all
 
-TODO broadcast-cards
-panic: Unknown card type: 3691233323:periscope_broadcast
-panic: Unknown card type: 745291183405076480:broadcast
+TODO: broadcast-cards (#scraper)
+- panic: Unknown card type: 3691233323:periscope_broadcast
+- panic: Unknown card type: 745291183405076480:broadcast
 
-TODO video-bitrates
+TODO: video-bitrates (#scraper)
 - add "bitrate" and "available bitrates" fields
 - option to upgrade or downgrade video quality
 
-TODO: videos-view-count
-- videos don't parse properly in APIv2
+TODO: videos-view-count (#scraper, #scraper-bug)
+- video view counts don't parse properly in APIv2
 
-TODO video-not-downloading: https://twitter.com/JustinPulitzer/status/1496709662602932224
+TODO: video-not-downloading (#scraper, #scraper-bug)
+- https://twitter.com/JustinPulitzer/status/1496709662602932224
 
-TODO get-user-tweets-user-not-in-database
+TODO: get-user-tweets-user-not-in-database (#scraper)
 - subcommand `get_user_tweets` should fetch the user first instead of just failing
 
-TODO bash-completions
-- Should have bash completions.
+TODO: bash-completions
 
-TODO twitter-spaces
-- add `is_details_available` flag
+TODO: twitter-spaces-add-is-details-available-flag (#scraper, #spaces)
 
-TODO authenticated-requests
-- media tab
-- quote-tweets
+TODO: scrape-media-tab (#scraper)
+
+TODO: scrape-quote-tweets (#scraper)
 
 TODO post-tweets
 - post tweets
@@ -35,14 +34,14 @@ TODO post-tweets
   - quote-tweet a tweet
 - retweet a tweet
 
-TODO spaces-fetch-participants-info
+TODO spaces-fetch-participants-info (#scraper)
 - some user information is available in a Spaces result.  Right now we just render them as null users (handle = "", id = 0) if they're not fetched already
 - distinguish whether someone was an admin in the space or not
 
-TODO spaces-fetch-sharings
+TODO spaces-fetch-sharings (#scraper, #spaces)
 - you can fetch the stuff that was posted in the jumbotron
 
-TODO tweets-with-italics
+TODO tweets-with-italics (#scraper)
 - https://twitter.com/exit_org/status/1656813511572443141
 
 TODO authenticated-only-request-warning
@@ -52,14 +51,14 @@ TODO authenticated-only-request-warning
 TODO unknown-user-upgrading
 - if an unknown user (created to satisfy SQLite integrity check on user_id foreign key) has user details fetched, the "Join Date" and other zero-value fields should update with the new value
 
-TODO apiv2-tombstones
+TODO apiv2-tombstones (#scraper)
 - on Tweet Detail:
   - tombstones in replies to the focused tweet
 - on User Feed:
   - tombstones (e.g, "Age restricted") that show up as top-level entries
     - keep in mind that these might be retweets; the entry-id is the RetweetID, not the TweetID
 
-TODO tidy-up-command-line-flags
+TODO: tidy-up-command-line-flags
 - make flags that are part of a subcommand go after that subcommand (e.g., `twitter get_user_tweets -n 200 ...`)
 
 TODO: mobile-requests
@@ -71,58 +70,54 @@ TODO: search-bottom-cursor
 - As first step, need helper function that returns the []Instruction element in a APIV2Response (not just the MainInstruction which is TimelineAddEntries)
 	- since different requests have different paths to the Instructions, e.g., Data.User.Result.Timeline.Timeline.Instructions vs Data.Home.HomeTimelineUrt.Instructions, etc
 
-TODO: newer-version-tombstone
+TODO: newer-version-tombstone (#scraper)
 - Preserve tombstone after re-scraping
 
-TODO: failed-tweets
+TODO: failed-tweets (#scraper, #scraper-bug)
 - https://twitter.com/_HARVEY__DENT_/status/1755665502385377720
 - "Empty tweet": https://twitter.com/wispem_wantex/status/1581333495393107968
 
 TODO: new-content-type
 - https://twitter.com/itsbackwereover/status/1757947530506043872
 
-Webserver
----------
+TODO: mark-invalidated-sessions-invalid
+- When a session is marked invalid by Twitter, it should be marked as such and surfaced in the UI
 
-TODO: SQL-logger
+TODO: SQL-logger (#webserver)
 
-TODO const-select-fields
+TODO: const-select-fields (#webserver)
 - There's a few queries that use "select ..." and write out all the fields.  Put the field names in one spot
 
-TODO compound-query-structs
+TODO: compound-query-structs (#webserver)
 - Right now the result structs for the compound queries (e.g., "Feed", "TweetDetail") are in the `persistence` package.  They don't go there probably
 
-TODO: login-routes-tests
+TODO: login-routes-tests (#webserver)
 - Make the scraper.API object injectable somehow (get rid of singleton pattern) and add tests for login and change-session sequences
 - Also test profile.ListSessions()
 
-TODO: non-htmx-500-errors
+TODO: non-htmx-500-errors (#webserver)
 - non-HTMX 500 errors show a weird HTML page
 
-TODO: refactor-compound_queries_test-file
+TODO: refactor-compound_queries_test-file (#webserver)
 - Move the tests for user feeds into the compound_queries_ssf_test file
 
-TODO: incomplete-threads
+TODO: incomplete-threads (#webserver)
 - when previous tweet in thread is missing, put a "fetch tweet" button to get it
 
-TODO: dms
-- add search
+TODO: dms-search (#webserver, #dms)
 
-TODO: search-terms-highlighted
+TODO: search-terms-highlighted (#webserver)
 - on Search page, highlight matches for the search keywords
 
-TODO: profile-image-template
+TODO: profile-image-template (#webserver)
 - There are a lot of places that use a circle profile image aside from author-infos
 
-TODO: send-message-last-read-event
+TODO: send-message-last-read-event (#webserver)
 - When a user sends a message, their last-read-event should be updated to that message ID immediately (no few-second delay in UI)
 
-TODO: emoji-thumb-remove-skin-tones
-- twitter doesn't support skin tones on emojis.  Rewrite the emoji database json file to remove skin tones
-- also remove whatever uses `crypto.subtle` to load the emoji list
+TODO: emoji-rewrite (#webserver)
+- get rid of the "database.js" stuff in the emoji picker
+  - remove whatever uses `crypto.subtle` to load the emoji list
 
-Windows Build
--------------
-
-TODO: windows-session-list
+TODO: windows-session-list (#release, #windows)
 - Check that sessions load as @Offline_Twatter instead of @test\Offline_Twatter on Windows
