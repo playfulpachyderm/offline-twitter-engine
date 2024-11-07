@@ -11,7 +11,6 @@
   </a>
 {{end}}
 
-<!-- TODO: How to use this in a User Feed without a ton of prop-drilling? -->
 {{define "circle-profile-img-no-link"}}
   <a class="profile-image"
   	hx-trigger="click consume"

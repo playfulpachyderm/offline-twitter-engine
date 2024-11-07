@@ -12,7 +12,7 @@
 
     <div class="user-header__info-container">
       <div class="row">
-        {{template "author-info" .}}
+        {{template "author-info-no-link" .}}
         {{template "following-button" .}}
       </div>
       <div class="user-header__bio">
