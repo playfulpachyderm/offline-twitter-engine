@@ -358,4 +358,14 @@ v0.6.18
 - BUGFIX: fix scraper crashing on "composer" entry in threads
 - BUGFIX: fix "User followed you" notifications sometimes parsing as "New recommended post"
 - BUGFIX: emojis with skin tones now work in DMs
-- Notifications page is now paginated in web UI
+- UI improvements:
+	- Notifications page is now paginated in web UI
+
+v0.6.19
+-------
+
+- BUGFIX: fix the scraper `GetUser` function which was broken by an upstream change
+- UI improvements:
+	- Profile and banner images in user feed header can now be clicked to open full-size versions
+	- Reply previews in DMs now include the username who's being replied to
+- Notifications can now be marked as "read" via command line and web UI

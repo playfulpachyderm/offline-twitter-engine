@@ -109,7 +109,7 @@ TODO: dms-search (#webserver, #dms)
 TODO: search-terms-highlighted (#webserver)
 - on Search page, highlight matches for the search keywords
 
-TODO: profile-image-template (#webserver)
+TODO: profile-image-template (#webserver, #code-quality)
 - There are a lot of places that use a circle profile image aside from author-infos
 
 TODO: send-message-last-read-event (#webserver)
@@ -126,3 +126,10 @@ TODO: conversation-thread-missing-tweets
 - In a conversation thread (replies under a tweet), if a user is blocked, the tweet response can be empty
 - These are just completely invisible on Twitter (render as nothing)
 - e.g.: https://x.com/sirbughunter/status/1479540319410696192
+
+TODO: scrape-user-feed-removes-pinned-tweet (#scraper, #scraper-bug)
+- Scraping a user feed unsets the user's pinned tweet
+
+TOOD: notifications-duplicate-bug (#scraper, #scraper-bug)
+- Older notifications often appear to get duplicated, sometimes quite a few times
+- Probably related to the fact that notifications can replace old ones but we just treat them as a new notification instance
