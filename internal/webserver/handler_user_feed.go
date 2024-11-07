@@ -18,7 +18,7 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	user, err := app.Profile.GetUserByHandle(scraper.UserHandle(parts[0]))
 	if errors.Is(err, persistence.ErrNotInDatabase) {
 		if !app.IsScrapingDisabled {
-			user, err = scraper.GetUser(scraper.UserHandle(parts[0]))
+			user, err = app.API.GetUser(scraper.UserHandle(parts[0]))
 		}
 		if err != nil { // ErrDoesntExist or otherwise
 			app.error_404(w, r)

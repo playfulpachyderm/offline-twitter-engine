@@ -22,7 +22,7 @@ func (p Profile) SaveTweetTrove(trove TweetTrove, should_download bool, api *API
 				"Conflicting user handle found (ID %d); old user has been marked deleted.  Rescraping them\n",
 				conflict_err.ConflictingUserID,
 			)
-			user, err := GetUserByID(conflict_err.ConflictingUserID)
+			user, err := api.GetUserByID(conflict_err.ConflictingUserID)
 			if errors.Is(err, ErrDoesntExist) {
 				// Mark them as deleted.
 				// Handle and display name won't be updated if the user exists.

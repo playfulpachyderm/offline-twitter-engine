@@ -285,7 +285,7 @@ func create_profile(target_dir string) {
 }
 
 func _fetch_user_by_id(id scraper.UserID) error {
-	user, err := scraper.GetUserByID(id)
+	user, err := api.GetUserByID(id)
 	if errors.Is(err, scraper.ErrDoesntExist) {
 		// Mark them as deleted.
 		// Handle and display name won't be updated if the user exists.
@@ -318,7 +318,7 @@ func _fetch_user_by_id(id scraper.UserID) error {
 }
 
 func fetch_user(handle scraper.UserHandle) {
-	user, err := scraper.GetUser(handle)
+	user, err := api.GetUser(handle)
 	if errors.Is(err, scraper.ErrDoesntExist) {
 		// There's several reasons we could get a ErrDoesntExist:
 		//   1. account never existed (user made a CLI typo)

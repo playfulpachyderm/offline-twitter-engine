@@ -90,7 +90,7 @@ func (t1 *TweetTrove) MergeWith(t2 TweetTrove) {
 /**
  * Tries to fetch every User that's been identified in a tombstone in this trove
  */
-func (trove *TweetTrove) FetchTombstoneUsers() {
+func (trove *TweetTrove) FetchTombstoneUsers(api *API) {
 	for _, handle := range trove.TombstoneUsers {
 		// Skip fetching if this user is already in the trove
 		user, already_fetched := trove.FindUserByHandle(handle)
@@ -110,7 +110,7 @@ func (trove *TweetTrove) FetchTombstoneUsers() {
 		}
 
 		log.Debug("Getting tombstone user: " + handle)
-		user, err := GetUser(handle)
+		user, err := api.GetUser(handle)
 		if errors.Is(err, ErrDoesntExist) {
 			user = GetUnknownUserWithHandle(handle)
 			user.IsDeleted = true
@@ -187,7 +187,7 @@ func (trove *TweetTrove) FillSpaceDetails(api *API) error {
 }
 
 func (trove *TweetTrove) PostProcess(api *API) error {
-	trove.FetchTombstoneUsers()
+	trove.FetchTombstoneUsers(api)
 	trove.FillMissingUserIDs()
 	err := trove.FillSpaceDetails(api)
 	if err != nil {

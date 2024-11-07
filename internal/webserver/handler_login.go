@@ -69,7 +69,7 @@ func (app *Application) after_login(w http.ResponseWriter, r *http.Request, api 
 	app.Profile.SaveSession(api)
 
 	// Ensure the user is downloaded
-	user, err := scraper.GetUser(api.UserHandle)
+	user, err := api.GetUser(api.UserHandle)
 	if err != nil { // ErrDoesntExist or otherwise
 		app.error_404(w, r)
 		return
