@@ -2,6 +2,7 @@
   <div class="user-header">
     {{if .BannerImageLocalPath}}
       <img class="user-header__profile-banner-image"
+        onclick="image_carousel.querySelector('img').src = this.src; image_carousel.showModal();"
         {{if .IsContentDownloaded}}
           src="/content/profile_images/{{.BannerImageLocalPath}}"
         {{else}}
