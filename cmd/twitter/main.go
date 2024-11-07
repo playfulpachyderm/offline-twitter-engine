@@ -285,7 +285,7 @@ func create_profile(target_dir string) {
 }
 
 func _fetch_user_by_id(id scraper.UserID) error {
-	user, err := api.GetUserByID(id)
+	user, err := scraper.GetUserByID(id)
 	if errors.Is(err, scraper.ErrDoesntExist) {
 		// Mark them as deleted.
 		// Handle and display name won't be updated if the user exists.
