@@ -75,7 +75,7 @@ func (api *API) MarkNotificationsAsRead() error {
 	rslt := struct {
 		Cursor string `json:"cursor"`
 	}{}
-	err = api.do_http_POST("https://twitter.com/i/api/2/notifications/all/last_seen_cursor.json", "cursor=" + cursor, &rslt)
+	err = api.do_http_POST("https://twitter.com/i/api/2/notifications/all/last_seen_cursor.json", "cursor="+cursor, &rslt)
 	if err != nil {
 		return err
 	}
