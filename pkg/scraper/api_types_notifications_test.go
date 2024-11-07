@@ -163,6 +163,9 @@ func TestParseNotificationsPage(t *testing.T) {
 	bottom_cursor := resp.GetCursor()
 	assert.Equal("DAACDAABCgABFKncQJGVgAQIAAIAAAABCAADSQ3bEQgABIsN6BEACwACAAAAC0FaRkxRSXFNLTJJAAA", bottom_cursor)
 	assert.False(resp.IsEndOfFeed())
+
+	// Test cursor-top
+	assert.Equal(resp.GetCursorTop(), "DAABDAABCgABFKncQJGVgAQIAAIAAAABCAADSQ3bEQgABIsN6BEACwACAAAAC0FaR0lLcUhkUVhrAAA")
 }
 
 func TestParseNotificationsEndOfFeed(t *testing.T) {

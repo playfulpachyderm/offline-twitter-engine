@@ -83,7 +83,7 @@ func main() {
 	if len(args) < 2 {
 		if len(args) == 1 && (args[0] == "webserver" || args[0] == "fetch_timeline" ||
 			args[0] == "fetch_timeline_following_only" || args[0] == "fetch_inbox" || args[0] == "get_bookmarks" ||
-			args[0] == "get_notifications") {
+			args[0] == "get_notifications" || args[0] == "mark_notifications_as_read") {
 			// Doesn't need a target, so create a fake second arg
 			args = append(args, "")
 		} else {
@@ -195,6 +195,8 @@ func main() {
 		fetch_timeline(true)
 	case "get_notifications":
 		get_notifications(*how_many)
+	case "mark_notifications_as_read":
+		mark_notification_as_read()
 	case "download_tweet_content":
 		download_tweet_content(target)
 	case "search":
@@ -663,4 +665,11 @@ func get_notifications(how_many int) {
 	happy_exit(fmt.Sprintf("Saved %d notifications, %d tweets and %d users",
 		len(trove.Notifications), len(trove.Tweets), len(trove.Users),
 	), nil)
+}
+
+func mark_notification_as_read() {
+	if err := api.MarkNotificationsAsRead(); err != nil {
+		panic(err)
+	}
+	happy_exit("Notifications marked as read", nil)
 }

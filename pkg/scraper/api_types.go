@@ -526,6 +526,17 @@ func (t *TweetResponse) GetCursor() string {
 	return ""
 }
 
+func (t *TweetResponse) GetCursorTop() string {
+	for _, instr := range t.Timeline.Instructions {
+		for _, entry := range instr.AddEntries.Entries {
+			if strings.Contains(entry.EntryID, "cursor-top") {
+				return entry.Content.Operation.Cursor.Value
+			}
+		}
+	}
+	return ""
+}
+
 /**
  * Test for one case of end-of-feed.  Cursor increments on each request for some reason, but
  * there's no new content.  This seems to happen when there's a pinned tweet.

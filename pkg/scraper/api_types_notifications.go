@@ -63,6 +63,25 @@ func (api *API) GetNotifications(how_many int) (TweetTrove, int64, error) {
 	return trove, resp.CheckUnreadNotifications(), nil
 }
 
+func (api *API) MarkNotificationsAsRead() error {
+	resp, err := api.GetNotificationsPage("")
+	if err != nil {
+		return err
+	}
+	cursor := resp.GetCursorTop()
+	if cursor == "" {
+		panic(fmt.Sprintf("No top cursor found: \n%#v", resp))
+	}
+	rslt := struct {
+		Cursor string `json:"cursor"`
+	}{}
+	api.do_http_POST("https://twitter.com/i/api/2/notifications/all/last_seen_cursor.json", "cursor=" + cursor, &rslt)
+	if rslt.Cursor == "" {
+		panic("got blank cursor back...?")
+	}
+	return nil
+}
+
 // Check a Notifications result for unread notifications.  Returns `0` if there are none.
 func (t TweetResponse) CheckUnreadNotifications() int64 {
 	for _, instr := range t.Timeline.Instructions {
