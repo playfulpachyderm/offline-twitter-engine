@@ -12,6 +12,12 @@
             <div class="dm-replying-to__label labelled-icon">
               <img class="svg-icon" src="/static/icons/replying_to.svg" width="24" height="24" />
               <label>Replying to</label>
+              <span class="dm-replying-to__username"
+                data-replying-to-message-id="{{ .InReplyToID }}"
+                onclick="handleReplyingToClicked(this)"
+              >
+                {{ (user (dm_message .InReplyToID).SenderID).DisplayName }}
+              </span>
             </div>
             <div class="dm-replying-to__preview-text"
               data-replying-to-message-id="{{ .InReplyToID }}"
@@ -312,6 +318,10 @@
     /**
      * Define callback on-click handler for 'replying-to' previews; they should scroll the replied-to
      * message into view, if possible.
+     *
+     * Takes an element holding the data instead of the data itself, because the composer box and
+     * actual messages share this function; the composer box's "data-replying-to-message-id" can
+     * change.
      */
     function handleReplyingToClicked(replying_to_box) {
       const replied_to_id = replying_to_box.getAttribute("data-replying-to-message-id");

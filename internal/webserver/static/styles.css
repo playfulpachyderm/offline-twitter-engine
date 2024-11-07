@@ -1463,7 +1463,7 @@ main {
 		}
 	}
 
-	.dm-replying-to__preview-text {
+	.dm-replying-to__preview-text, .dm-replying-to__username {
 		cursor: pointer;
 	}
 }
