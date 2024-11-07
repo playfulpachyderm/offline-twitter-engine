@@ -314,10 +314,10 @@ test "$(sqlite3 twitter.db "select text from tweets where id = 16496003547475722
 
 # Test updating a tombstone (e.g., the QT-ing user is blocked but acct is not priv)
 tw fetch_tweet https://twitter.com/michaelmalice/status/1479540552081326085
-test "$(sqlite3 twitter.db "select tombstone_type, text from tweets where id = 1479540319410696192")" = "3|"
+test "$(sqlite3 twitter.db "select tombstone_type is null, text from tweets where id = 1479540319410696192")" = "0|"
 
 tw fetch_tweet_only 1479540319410696192  # Should remove the tombstone type and update the text
-test "$(sqlite3 twitter.db "select tombstone_type, text from tweets where id = 1479540319410696192")" = "|Eyyy! Look! Another one on my block list! Well done @michaelmalice, you silck person."
+test "$(sqlite3 twitter.db "select tombstone_type is null, text from tweets where id = 1479540319410696192")" = "1|Eyyy! Look! Another one on my block list! Well done @michaelmalice, you silck person."
 
 
 # Test no-clobbering of num_likes/num_retweets etc when a tweet gets deleted/tombstoned
