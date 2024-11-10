@@ -98,7 +98,20 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 		panic_if(json.Unmarshal(data_, &data))
 		panic_if(app.API.SendDMReaction(room_id, data.MessageID, data.Reacc))
 
-		dm_message := global_data.Messages[data.MessageID]
+		dm_message, is_ok := global_data.Messages[data.MessageID]
+		if !is_ok {
+			// TODO: this seems kind of silly to use global data in the first place; it's unlikely
+			// to have the relevant tweet in it, since it just gets the one latest tweet from the
+			// convo.  This handler should be pulled out and just fetch the tweet directly--
+			// performance probably doesn't matter, but it's spaghetti code otherwise
+			trove_with_dm_message, err := app.Profile.GetChatMessage(data.MessageID)
+			panic_if(err)
+			global_data.MergeWith(trove_with_dm_message)
+			dm_message, is_ok = global_data.Messages[data.MessageID]
+			if !is_ok {
+				panic(global_data)
+			}
+		}
 		dm_message.Reactions[app.ActiveUser.ID] = scraper.DMReaction{
 			ID:          0, // Hopefully will be OK temporarily
 			DMMessageID: dm_message.ID,

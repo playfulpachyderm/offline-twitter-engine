@@ -110,8 +110,10 @@ func TestSaveAndLoadChatMessage(t *testing.T) {
 	require.NoError(err)
 
 	// Reload it
-	new_message, err := profile.GetChatMessage(message.ID)
+	trove_with_new_message, err := profile.GetChatMessage(message.ID)
 	require.NoError(err)
+	new_message, is_ok := trove_with_new_message.Messages[message.ID]
+	require.True(is_ok)
 
 	if diff := deep.Equal(message, new_message); diff != nil {
 		t.Error(diff)
@@ -145,8 +147,10 @@ func TestAddReactionToChatMessage(t *testing.T) {
 	require.NoError(profile.SaveChatMessage(message))
 
 	// Reload it
-	new_message, err := profile.GetChatMessage(message.ID)
+	trove_with_new_message, err := profile.GetChatMessage(message.ID)
 	require.NoError(err)
+	new_message, is_ok := trove_with_new_message.Messages[message.ID]
+	require.True(is_ok)
 
 	if diff := deep.Equal(message, new_message); diff != nil {
 		t.Error(diff)

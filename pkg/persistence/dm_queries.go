@@ -169,27 +169,27 @@ func (p Profile) SaveChatMessage(m DMMessage) error {
 	return nil
 }
 
-// Get a single chat message, filling its attachment contents.
-//
-// This function is only used in tests.
-func (p Profile) GetChatMessage(id DMMessageID) (ret DMMessage, err error) {
-	err = p.DB.Get(&ret, `
+// Get a single chat message, filling its attachment contents.  Returns a TweetTrove because a
+// message can have a tweet attachment, etc.
+func (p Profile) GetChatMessage(id DMMessageID) (TweetTrove, error) {
+	trove := NewTweetTrove()
+	var msg DMMessage
+	err := p.DB.Get(&msg, `
 		select `+CHAT_MESSAGES_ALL_SQL_FIELDS+`
 		  from chat_messages
 		 where id = ?
 		`, id,
 	)
 	if err != nil {
-		return ret, fmt.Errorf("Error getting chat message %d:\n  %w", id, err)
+		return trove, fmt.Errorf("Error getting chat message %d:\n  %w", id, err)
 	}
-	ret.Reactions = make(map[UserID]DMReaction)
+	msg.Reactions = make(map[UserID]DMReaction)
 
 	// This is a bit circuitous, but it doesn't matter because this function is only used in tests
-	trove := NewTweetTrove()
-	trove.Messages[ret.ID] = ret
+	trove.Messages[msg.ID] = msg
 	p.fill_dm_contents(&trove)
 
-	return trove.Messages[ret.ID], nil
+	return trove, nil
 }
 
 type DMChatView struct {
