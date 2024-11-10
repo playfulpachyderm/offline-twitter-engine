@@ -92,7 +92,10 @@
     <div class="dm-message__reactions">
       {{range .Reactions}}
         {{$sender := (user .SenderID)}}
-        <span title="{{$sender.DisplayName}} (@{{$sender.Handle}})">{{.Emoji}}</span>
+        <span
+          class="dm-message__reacc {{if (eq $sender.ID (active_user).ID)}} dm-message__reacc--ours{{end}}"
+          title="{{$sender.DisplayName}} (@{{$sender.Handle}})"
+        >{{.Emoji}}</span>
       {{end}}
     </div>
     <div class="sent-at">

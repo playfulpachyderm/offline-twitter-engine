@@ -1429,11 +1429,22 @@ main {
 	}
 	.dm-message__reactions {
 		display: flex;
-		padding: 0 4em;
+		font-size: 1.1em;
+		padding: 0 3.5em;
 		cursor: default;
 
 		.our-message & {
 			flex-direction: row-reverse;
+		}
+	}
+	.dm-message__reacc {
+		padding: 0.1em 0.2em;
+
+		&.dm-message__reacc--ours {
+			border-radius: 50%;
+			text-shadow: 0 0 3px black;
+			outline: 1px solid var(--color-twitter-blue);
+			background-color: var(--color-twitter-blue-extra-light);
 		}
 	}
 
