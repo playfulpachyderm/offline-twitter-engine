@@ -9,9 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/net/html"
-
-	"gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 func TestTimeline(t *testing.T) {
@@ -58,15 +55,8 @@ func TestUserFeedTimeline(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	// Boilerplate for setting an active user
-	app := webserver.NewApp(profile)
-	app.IsScrapingDisabled = true
-	app.ActiveUser = scraper.User{ID: 1488963321701171204, Handle: "Offline_Twatter"} // Simulate a login
-
 	// Chat list
-	recorder := httptest.NewRecorder()
-	app.ServeHTTP(recorder, httptest.NewRequest("GET", "/timeline", nil))
-	resp := recorder.Result()
+	resp := do_request_with_active_user(httptest.NewRequest("GET", "/timeline", nil))
 	require.Equal(resp.StatusCode, 200)
 
 	root, err := html.Parse(resp.Body)

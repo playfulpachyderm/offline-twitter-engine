@@ -9,23 +9,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/net/html"
-
-	"gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 func TestBookmarksTab(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	// Boilerplate for setting an active user
-	app := webserver.NewApp(profile)
-	app.IsScrapingDisabled = true
-	app.ActiveUser = scraper.User{ID: 1488963321701171204, Handle: "Offline_Twatter"} // Simulate a login
-
-	recorder := httptest.NewRecorder()
-	app.ServeHTTP(recorder, httptest.NewRequest("GET", "/bookmarks", nil))
-	resp := recorder.Result()
+	resp := do_request_with_active_user(httptest.NewRequest("GET", "/bookmarks", nil))
 	require.Equal(resp.StatusCode, 200)
 
 	root, err := html.Parse(resp.Body)
@@ -34,9 +24,7 @@ func TestBookmarksTab(t *testing.T) {
 	assert.Len(tweets, 2)
 
 	// Double check pagination works properly
-	recorder = httptest.NewRecorder()
-	app.ServeHTTP(recorder, httptest.NewRequest("GET", "/bookmarks?cursor=1800452344077464795", nil))
-	resp = recorder.Result()
+	resp = do_request_with_active_user(httptest.NewRequest("GET", "/bookmarks?cursor=1800452344077464795", nil))
 	require.Equal(resp.StatusCode, 200)
 
 	root, err = html.Parse(resp.Body)

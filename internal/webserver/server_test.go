@@ -11,6 +11,7 @@ import (
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 type CapturingWriter struct {
@@ -40,10 +41,21 @@ func selector(s string) cascadia.Sel {
 	return ret
 }
 
+// Run an HTTP request against the app and return the response
 func do_request(req *http.Request) *http.Response {
 	recorder := httptest.NewRecorder()
 	app := webserver.NewApp(profile)
 	app.IsScrapingDisabled = true
+	app.ServeHTTP(recorder, req)
+	return recorder.Result()
+}
+
+// Run an HTTP request against the app, with an Active User set, and return the response
+func do_request_with_active_user(req *http.Request) *http.Response {
+	recorder := httptest.NewRecorder()
+	app := webserver.NewApp(profile)
+	app.IsScrapingDisabled = true
+	app.ActiveUser = scraper.User{ID: 1488963321701171204, Handle: "Offline_Twatter"} // Simulate a login
 	app.ServeHTTP(recorder, req)
 	return recorder.Result()
 }

@@ -9,9 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/net/html"
-
-	"gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 // Loading the index page should work if you're logged in
@@ -19,15 +16,8 @@ func TestMessagesIndexPage(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	// Boilerplate for setting an active user
-	app := webserver.NewApp(profile)
-	app.IsScrapingDisabled = true
-	app.ActiveUser = scraper.User{ID: 1488963321701171204, Handle: "Offline_Twatter"} // Simulate a login
-
 	// Chat list
-	recorder := httptest.NewRecorder()
-	app.ServeHTTP(recorder, httptest.NewRequest("GET", "/messages", nil))
-	resp := recorder.Result()
+	resp := do_request_with_active_user(httptest.NewRequest("GET", "/messages", nil))
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".chat-list .chat-list-entry")), 2)
@@ -39,15 +29,8 @@ func TestMessagesRoom(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	// Boilerplate for setting an active user
-	app := webserver.NewApp(profile)
-	app.IsScrapingDisabled = true
-	app.ActiveUser = scraper.User{ID: 1488963321701171204, Handle: "Offline_Twatter"} // Simulate a login
-
 	// Chat detail
-	recorder := httptest.NewRecorder()
-	app.ServeHTTP(recorder, httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328", nil))
-	resp := recorder.Result()
+	resp := do_request_with_active_user(httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328", nil))
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".chat-list .chat-list-entry")), 2) // Chat list still renders
@@ -72,17 +55,10 @@ func TestMessagesRoomPollForUpdates(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	// Boilerplate for setting an active user
-	app := webserver.NewApp(profile)
-	app.IsScrapingDisabled = true
-	app.ActiveUser = scraper.User{ID: 1488963321701171204, Handle: "Offline_Twatter"} // Simulate a login
-
 	// Chat detail
-	recorder := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129141", nil)
 	req.Header.Set("HX-Request", "true")
-	app.ServeHTTP(recorder, req)
-	resp := recorder.Result()
+	resp := do_request_with_active_user(req)
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".dm-message")), 3)
@@ -106,17 +82,10 @@ func TestMessagesRoomPollForUpdatesEmptyResult(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	// Boilerplate for setting an active user
-	app := webserver.NewApp(profile)
-	app.IsScrapingDisabled = true
-	app.ActiveUser = scraper.User{ID: 1488963321701171204, Handle: "Offline_Twatter"} // Simulate a login
-
 	// Chat detail
-	recorder := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129144", nil)
 	req.Header.Set("HX-Request", "true")
-	app.ServeHTTP(recorder, req)
-	resp := recorder.Result()
+	resp := do_request_with_active_user(req)
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".dm-message")), 0)
@@ -140,17 +109,10 @@ func TestMessagesPaginate(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	// Boilerplate for setting an active user
-	app := webserver.NewApp(profile)
-	app.IsScrapingDisabled = true
-	app.ActiveUser = scraper.User{ID: 1488963321701171204, Handle: "Offline_Twatter"} // Simulate a login
-
 	// Chat detail
-	recorder := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328?cursor=1686025129142", nil)
 	req.Header.Set("HX-Request", "true")
-	app.ServeHTTP(recorder, req)
-	resp := recorder.Result()
+	resp := do_request_with_active_user(req)
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".dm-message")), 2)
