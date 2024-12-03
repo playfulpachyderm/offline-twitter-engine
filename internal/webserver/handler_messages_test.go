@@ -1,8 +1,8 @@
 package webserver_test
 
 import (
-	"testing"
 	"strings"
+	"testing"
 
 	"net/http/httptest"
 
@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/net/html"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 	"gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 func TestMessagesIndexPageRequiresActiveUser(t *testing.T) {
@@ -179,6 +179,9 @@ func TestMessagesMarkAsRead(t *testing.T) {
 func TestMessagesSend(t *testing.T) {
 	require := require.New(t)
 
-	resp := do_request_with_active_user(httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328/send", strings.NewReader(`{"text": "bleh"}`)))
+	resp := do_request_with_active_user(httptest.NewRequest("GET",
+		"/messages/1488963321701171204-1178839081222115328/send",
+		strings.NewReader(`{"text": "bleh"}`),
+	))
 	require.Equal(401, resp.StatusCode)
 }
