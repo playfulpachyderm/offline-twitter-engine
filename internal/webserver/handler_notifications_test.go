@@ -11,6 +11,14 @@ import (
 	"golang.org/x/net/html"
 )
 
+func TestNotificationsRequiresActiveSession(t *testing.T) {
+	require := require.New(t)
+
+	req := httptest.NewRequest("GET", "/notifications", nil)
+	resp := do_request(req)
+	require.Equal(401, resp.StatusCode)
+}
+
 func TestNotifications(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
@@ -18,6 +26,7 @@ func TestNotifications(t *testing.T) {
 	// Notifications page
 	req := httptest.NewRequest("GET", "/notifications", nil)
 	resp := do_request_with_active_user(req)
+	require.Equal(200, resp.StatusCode)
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".notification")), 6)
@@ -29,4 +38,12 @@ func TestNotifications(t *testing.T) {
 	root, err = html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".notification")), 5)
+}
+
+// When scraping is disabled, marking notifs as read should 401
+func TestNotificationsMarkAsRead(t *testing.T) {
+	require := require.New(t)
+
+	resp := do_request_with_active_user(httptest.NewRequest("GET", "/notifications/mark-all-as-read", nil))
+	require.Equal(401, resp.StatusCode)
 }

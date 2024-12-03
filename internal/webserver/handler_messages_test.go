@@ -185,3 +185,39 @@ func TestMessagesSend(t *testing.T) {
 	))
 	require.Equal(401, resp.StatusCode)
 }
+
+// When scraping is disabled, sending a reacc should 401
+func TestMessagesSendReacc(t *testing.T) {
+	require := require.New(t)
+
+	resp := do_request_with_active_user(httptest.NewRequest("GET",
+		"/messages/1488963321701171204-1178839081222115328/reacc",
+		strings.NewReader(`{"message_id": "1", "reacc": ":)"}`),
+	))
+	require.Equal(401, resp.StatusCode)
+}
+
+func TestMessagesRefreshConversationsList(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	// No active chat
+	req := httptest.NewRequest("GET", "/messages/refresh-list", nil)
+	req.Header.Set("HX-Request", "true")
+	resp := do_request_with_active_user(req)
+	require.Equal(200, resp.StatusCode)
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".chat-list-entry")), 2)
+	assert.Len(cascadia.QueryAll(root, selector(".chat-list-entry.chat-list-entry--active-chat")), 0)
+
+	// With an active chat
+	req1 := httptest.NewRequest("GET", "/messages/refresh-list?active-chat=1488963321701171204-1178839081222115328", nil)
+	req1.Header.Set("HX-Request", "true")
+	resp1 := do_request_with_active_user(req1)
+	require.Equal(200, resp1.StatusCode)
+	root1, err := html.Parse(resp1.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root1, selector(".chat-list-entry")), 2)
+	assert.Len(cascadia.QueryAll(root1, selector(".chat-list-entry.chat-list-entry--active-chat")), 1)
+}

@@ -102,6 +102,10 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 
 	// Handle reactions
 	if len(parts) == 1 && parts[0] == "reacc" {
+		if app.IsScrapingDisabled {
+			app.error_401(w, r)
+			return
+		}
 		var data struct {
 			MessageID scraper.DMMessageID `json:"message_id,string"`
 			Reacc     string              `json:"reacc"`

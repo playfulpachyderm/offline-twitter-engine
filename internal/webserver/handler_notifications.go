@@ -8,6 +8,12 @@ import (
 
 func (app *Application) Notifications(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'Notifications' handler (path: %q)", r.URL.Path)
+
+	if app.ActiveUser.ID == 0 {
+		app.error_401(w, r)
+		return
+	}
+
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	if parts[0] == "mark-all-as-read" {
 		app.NotificationsMarkAsRead(w, r)
@@ -36,6 +42,10 @@ func (app *Application) Notifications(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) NotificationsMarkAsRead(w http.ResponseWriter, r *http.Request) {
+	if app.IsScrapingDisabled {
+		app.error_401(w, r)
+		return
+	}
 	err := app.API.MarkNotificationsAsRead()
 	if err != nil {
 		panic(err)
