@@ -13,7 +13,7 @@
           <label class="nav-sidebar__button-label">Home</label>
         </li>
       </a>
-      <a onclick="document.querySelector('#search-bar').focus()">
+      <a onclick="document.querySelector('#searchBar').focus()">
         <li class="button labelled-icon">
           <img class="svg-icon" src="/static/icons/explore.svg" width="24" height="24" />
           <label class="nav-sidebar__button-label">Explore</label>

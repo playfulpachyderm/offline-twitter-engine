@@ -21,6 +21,23 @@
             });
         }
       </script>
+
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          /**
+           * Consider HTTP 4xx and 500 errors to contain valid HTMX, and swap them as usual
+           */
+          document.body.addEventListener('htmx:beforeSwap', function(e) {
+            if (e.detail.xhr.status === 500) {
+              e.detail.shouldSwap = true;
+              e.detail.isError = true;
+            } else if (e.detail.xhr.status >= 400 && e.detail.xhr.status < 500) {
+              e.detail.shouldSwap = true;
+              e.detail.isError = false;
+            }
+          });
+        });
+      </script>
     </head>
     <body>
       <header class="row search-bar">
@@ -28,10 +45,11 @@
           <img class="svg-icon" src="/static/icons/back.svg" width="24" height="24"/>
         </a>
         <form class="search-bar__form" hx-get="/search" hx-push-url="true" hx-target="body" hx-swap="innerHTML show:window:top">
-          <input id="search-bar" class="search-bar__input"
+          <input id="searchBar" class="search-bar__input"
             name="q"
             placeholder="Search" type="text"
             {{with (search_text)}} value="{{.}}" {{end}}
+            required
           />
         </form>
       </header>

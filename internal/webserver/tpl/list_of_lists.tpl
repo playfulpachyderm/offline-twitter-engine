@@ -11,7 +11,7 @@
       <input name="name" />
       <input type="submit" value="Create" />
     </form>
-    <button onclick="document.querySelector('#newListDialog').close()">Cancel</button>
+    <button onclick="newListDialog.close()">Cancel</button>
   </dialog>
 
   <div class="list-of-lists">
