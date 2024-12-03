@@ -33,6 +33,11 @@ func (app *Application) message_mark_as_read(w http.ResponseWriter, r *http.Requ
 	c.PageSize = 1
 	chat_contents := app.Profile.GetChatRoomMessagesByCursor(c)
 	last_message_id := chat_contents.MessageIDs[len(chat_contents.MessageIDs)-1]
+	if app.IsScrapingDisabled {
+		app.InfoLog.Printf("Would have scraped: %s", r.URL.Path)
+		app.error_401(w, r)
+		return
+	}
 	panic_if(app.API.MarkDMChatRead(room_id, last_message_id))
 	room := chat_contents.Rooms[room_id]
 	participant, is_ok := room.Participants[app.ActiveUser.ID]
@@ -42,7 +47,7 @@ func (app *Application) message_mark_as_read(w http.ResponseWriter, r *http.Requ
 	participant.LastReadEventID = last_message_id
 	room.Participants[app.ActiveUser.ID] = participant
 	panic_if(app.Profile.SaveChatRoom(room))
-	app.toast(w, r, Toast{
+	app.toast(w, r, 200, Toast{
 		Title:          "Success",
 		Message:        `Conversation marked as "read"`,
 		Type:           "success",
@@ -65,7 +70,11 @@ func (app *Application) message_send(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		in_reply_to_id = 0
 	}
-
+	if app.IsScrapingDisabled {
+		app.InfoLog.Printf("Would have scraped: %s", r.URL.Path)
+		app.error_401(w, r)
+		return
+	}
 	trove, err := app.API.SendDMMessage(room_id, message_data.Text, scraper.DMMessageID(in_reply_to_id))
 	if err != nil {
 		panic(err)
@@ -81,6 +90,10 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 	is_sending := len(parts) == 1 && parts[0] == "send"
 
 	chat_view_data, global_data := app.get_message_global_data()
+	if _, is_ok := chat_view_data.Rooms[room_id]; !is_ok {
+		app.error_404(w, r)
+		return
+	}
 
 	if len(parts) == 1 && parts[0] == "mark-as-read" {
 		app.message_mark_as_read(w, r)

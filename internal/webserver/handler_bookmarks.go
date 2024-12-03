@@ -15,7 +15,7 @@ func (app *Application) Bookmarks(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Has("scrape") {
 		if app.IsScrapingDisabled {
 			app.InfoLog.Printf("Would have scraped: %s", r.URL.Path)
-			http.Error(w, "Scraping is disabled (are you logged in?)", 401) // TODO: toast
+			app.error_401(w, r)
 			return
 		}
 

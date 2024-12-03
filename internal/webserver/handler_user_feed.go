@@ -42,7 +42,7 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Has("scrape") {
 		if app.IsScrapingDisabled {
 			app.InfoLog.Printf("Would have scraped: %s", r.URL.Path)
-			http.Error(w, "Scraping is disabled (are you logged in?)", 401)
+			app.error_401(w, r)
 			return
 		}
 
@@ -155,7 +155,7 @@ func (app *Application) UserFollowees(w http.ResponseWriter, r *http.Request, us
 	if r.URL.Query().Has("scrape") {
 		if app.IsScrapingDisabled {
 			app.InfoLog.Printf("Would have scraped: %s", r.URL.Path)
-			http.Error(w, "Scraping is disabled (are you logged in?)", 401)
+			app.error_401(w, r)
 			return
 		}
 
@@ -181,7 +181,7 @@ func (app *Application) UserFollowers(w http.ResponseWriter, r *http.Request, us
 	if r.URL.Query().Has("scrape") {
 		if app.IsScrapingDisabled {
 			app.InfoLog.Printf("Would have scraped: %s", r.URL.Path)
-			http.Error(w, "Scraping is disabled (are you logged in?)", 401)
+			app.error_401(w, r)
 			return
 		}
 

@@ -24,23 +24,46 @@ func TestListsIndex(t *testing.T) {
 	assert.True(t, len(cascadia.QueryAll(root, selector(".list-preview"))) >= 2)
 }
 
-func TestListDetail(t *testing.T) {
+// Show the users who are on a List
+func TestListDetailUsers(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	// Users
 	resp := do_request(httptest.NewRequest("GET", "/lists/1/users", nil))
 	require.Equal(resp.StatusCode, 200)
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".users-list .author-info")), 5)
+}
 
-	// Feed
-	resp1 := do_request(httptest.NewRequest("GET", "/lists/2", nil))
-	require.Equal(resp1.StatusCode, 200)
-	root1, err := html.Parse(resp1.Body)
+// Show the timeline geenrated for a List
+func TestListFeed(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/lists/2", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	assert.Len(cascadia.QueryAll(root1, selector(".timeline > .tweet")), 3)
+	assert.Len(cascadia.QueryAll(root, selector(".timeline > .tweet")), 3)
+
+	// With pagination
+	req1 := httptest.NewRequest("GET", "/lists/2?cursor=1629523652000", nil)
+	req1.Header.Set("HX-Request", "true")
+	resp1 := do_request(req1)
+	require.Equal(resp1.StatusCode, 200)
+	root2, err := html.Parse(resp1.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root2, selector(":not(.tweet__quoted-tweet) > .tweet")), 2)
+}
+
+func TestListFeedInvalidCursor(t *testing.T) {
+	require := require.New(t)
+
+	req := httptest.NewRequest("GET", "/lists/2?cursor=asdf", nil)
+	req.Header.Set("HX-Request", "true")
+	resp := do_request(req)
+	require.Equal(resp.StatusCode, 400)
 }
 
 func TestListDetailDoesntExist(t *testing.T) {
@@ -89,7 +112,23 @@ func TestListAddAndDeleteUser(t *testing.T) {
 	assert.Len(cascadia.QueryAll(root, selector(".users-list .author-info")), 2)
 }
 
-func TestCreateNewList(t *testing.T) {
+// Adding invalid users should 400
+func TestListAddInvalidUser(t *testing.T) {
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/lists/2/add_user?user_handle=jkwfjekj", nil))
+	require.Equal(resp.StatusCode, 400)
+}
+
+// Deleting invalid users should 400
+func TestListRemoveInvalidUser(t *testing.T) {
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/lists/2/remove_user?user_handle=fwefjkl", nil))
+	require.Equal(resp.StatusCode, 400)
+}
+
+func TestCreateNewListThenDelete(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
@@ -111,4 +150,16 @@ func TestCreateNewList(t *testing.T) {
 	root, err = html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".list-preview")), num_lists+1)
+
+	// Delete it; should redirect back to Lists index page
+	resp_delete := do_request(httptest.NewRequest("DELETE", fmt.Sprintf("/lists/%d", num_lists+1), nil))
+	require.Equal(resp_delete.StatusCode, 302)
+	require.Equal("/lists", resp_delete.Header.Get("Location"))
+
+	// Should be N lists again
+	resp = do_request(httptest.NewRequest("GET", "/lists", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err = html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Len(cascadia.QueryAll(root, selector(".list-preview")), num_lists)
 }

@@ -40,7 +40,7 @@ func (app *Application) NotificationsMarkAsRead(w http.ResponseWriter, r *http.R
 	if err != nil {
 		panic(err)
 	}
-	app.toast(w, r, Toast{
+	app.toast(w, r, 200, Toast{
 		Title:          "Success",
 		Message:        `Notifications marked as "read"`,
 		Type:           "success",

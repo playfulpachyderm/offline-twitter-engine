@@ -2,6 +2,7 @@ package webserver_test
 
 import (
 	"testing"
+	"strings"
 
 	"net/http/httptest"
 
@@ -9,7 +10,31 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/net/html"
+
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	"gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver"
 )
+
+func TestMessagesIndexPageRequiresActiveUser(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	// HTMX version
+	req := httptest.NewRequest("GET", "/messages", nil)
+	req.Header.Set("HX-Request", "true")
+	resp := do_request(req) // No active user
+	require.Equal(401, resp.StatusCode)
+	// Piggyback in testing of HTMX 401 toasts
+	assert.Equal("beforeend", resp.Header.Get("HX-Reswap"))
+	assert.Equal("#toasts", resp.Header.Get("HX-Retarget"))
+	assert.Equal("false", resp.Header.Get("HX-Push-Url"))
+
+	// Non-HTMX version
+	req1 := httptest.NewRequest("GET", "/messages", nil)
+	resp1 := do_request(req1) // No active user
+	require.Equal(401, resp1.StatusCode)
+	assert.Equal("", resp1.Header.Get("HX-Reswap")) // HX-* stuff should be unset
+}
 
 // Loading the index page should work if you're logged in
 func TestMessagesIndexPage(t *testing.T) {
@@ -18,10 +43,30 @@ func TestMessagesIndexPage(t *testing.T) {
 
 	// Chat list
 	resp := do_request_with_active_user(httptest.NewRequest("GET", "/messages", nil))
+	require.Equal(200, resp.StatusCode)
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".chat-list .chat-list-entry")), 2)
 	assert.Len(cascadia.QueryAll(root, selector(".chat-view .dm-message")), 0) // No messages until you click on one
+}
+
+// Users should only be able to open chats they're a member of
+func TestMessagesRoomRequiresCorrectUser(t *testing.T) {
+	require := require.New(t)
+
+	// No active user
+	resp := do_request(httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328", nil))
+	require.Equal(401, resp.StatusCode)
+
+	// Wrong user (not in the chat)
+	// Copied from `do_request_with_active_user`
+	recorder := httptest.NewRecorder()
+	app := webserver.NewApp(profile)
+	app.IsScrapingDisabled = true
+	app.ActiveUser = scraper.User{ID: 782982734, Handle: "Not a real user"} // Simulate a login
+	app.WithMiddlewares().ServeHTTP(recorder, httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328", nil))
+	resp2 := recorder.Result()
+	require.Equal(404, resp2.StatusCode)
 }
 
 // Open a chat room
@@ -31,6 +76,7 @@ func TestMessagesRoom(t *testing.T) {
 
 	// Chat detail
 	resp := do_request_with_active_user(httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328", nil))
+	require.Equal(200, resp.StatusCode)
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".chat-list .chat-list-entry")), 2) // Chat list still renders
@@ -59,6 +105,7 @@ func TestMessagesRoomPollForUpdates(t *testing.T) {
 	req := httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129141", nil)
 	req.Header.Set("HX-Request", "true")
 	resp := do_request_with_active_user(req)
+	require.Equal(200, resp.StatusCode)
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".dm-message")), 3)
@@ -86,6 +133,7 @@ func TestMessagesRoomPollForUpdatesEmptyResult(t *testing.T) {
 	req := httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328?poll&latest_timestamp=1686025129144", nil)
 	req.Header.Set("HX-Request", "true")
 	resp := do_request_with_active_user(req)
+	require.Equal(200, resp.StatusCode)
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".dm-message")), 0)
@@ -113,7 +161,24 @@ func TestMessagesPaginate(t *testing.T) {
 	req := httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328?cursor=1686025129142", nil)
 	req.Header.Set("HX-Request", "true")
 	resp := do_request_with_active_user(req)
+	require.Equal(200, resp.StatusCode)
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".dm-message")), 2)
+}
+
+// When scraping is disabled, marking as read should 401
+func TestMessagesMarkAsRead(t *testing.T) {
+	require := require.New(t)
+
+	resp := do_request_with_active_user(httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328/mark-as-read", nil))
+	require.Equal(resp.StatusCode, 401)
+}
+
+// When scraping is disabled, sending a message should 401
+func TestMessagesSend(t *testing.T) {
+	require := require.New(t)
+
+	resp := do_request_with_active_user(httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328/send", strings.NewReader(`{"text": "bleh"}`)))
+	require.Equal(401, resp.StatusCode)
 }
