@@ -166,7 +166,7 @@
           <a class="button" hx-post="/messages/{{ $room.ID }}/mark-as-read" title="Mark as read">
             <img class="svg-icon" src="/static/icons/eye.svg" width="24" height="24" />
           </a>
-          <a class="button" hx-post="/messages/{{ $room.ID }}?scrape" hx-target="#chat-view" hx-swap="outerHTML" title="Refresh">
+          <a class="button" hx-post="/messages/{{ $room.ID }}?scrape" hx-target="#chat-view" hx-swap="outerHTML" title="Refresh" hx-indicator=".chat-messages">
             <img class="svg-icon" src="/static/icons/refresh.svg" width="24" height="24" />
           </a>
         </div>
@@ -177,6 +177,10 @@
         {{template "conversation-top" .}}
         {{template "messages-with-poller" .}}
       {{end}}
+      <div class="htmx-spinner">
+        <div class="htmx-spinner__background"></div>
+        <img class="svg-icon htmx-spinner__icon" src="/static/icons/spinner.svg" />
+      </div>
     </div>
     {{if .ActiveRoomID}}
       <div class="dm-composer">
