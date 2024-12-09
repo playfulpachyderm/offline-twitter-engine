@@ -54,16 +54,14 @@ func TestUserFeedWithCursor(t *testing.T) {
 	require := require.New(t)
 
 	// With a cursor
-	resp := do_request(httptest.NewRequest("GET", "/cernovich?cursor=1631935701000", nil))
+	req := httptest.NewRequest("GET", "/cernovich?cursor=1631935701000", nil)
+	req.Header.Set("HX-Request", "true")
+	resp := do_request(req)
 	require.Equal(resp.StatusCode, 200)
 
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	title_node := cascadia.Query(root, selector("title"))
-	assert.Equal(title_node.FirstChild.Data, "@Cernovich | Offline Twitter")
-
-	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
-	assert.Len(tweet_nodes, 2)
+	assert.Len(cascadia.QueryAll(root, selector(":not(.tweet__quoted-tweet) > .tweet")), 2)
 }
 
 func TestUserFeedWithCursorBadNumber(t *testing.T) {

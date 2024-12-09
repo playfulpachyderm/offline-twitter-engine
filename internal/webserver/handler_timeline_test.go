@@ -11,6 +11,8 @@ import (
 	"golang.org/x/net/html"
 )
 
+// TODO: deprecated-offline-follows
+
 func TestTimeline(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
@@ -31,15 +33,14 @@ func TestTimelineWithCursor(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	resp := do_request(httptest.NewRequest("GET", "/timeline/offline?cursor=1631935701000", nil))
+	req := httptest.NewRequest("GET", "/timeline/offline?cursor=1631935701000", nil)
+	req.Header.Set("HX-Request", "true")
+	resp := do_request(req)
 	require.Equal(resp.StatusCode, 200)
 
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	title_node := cascadia.Query(root, selector("title"))
-	assert.Equal(title_node.FirstChild.Data, "Timeline | Offline Twitter")
-
-	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
+	tweet_nodes := cascadia.QueryAll(root, selector(":not(.tweet__quoted-tweet) > .tweet"))
 	assert.Len(tweet_nodes, 10)
 }
 

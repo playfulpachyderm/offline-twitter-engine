@@ -52,7 +52,6 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 		if search_text == "" {
 			app.error_400_with_message(w, r, "Empty search query")
 			return
-			// TODO: return an actual page
 		}
 		http.Redirect(w, r, fmt.Sprintf("/search/%s", url.PathEscape(search_text)), 302)
 		return
@@ -116,7 +115,6 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		app.error_400_with_message(w, r, err.Error())
 		return
-		// TODO: return actual page
 	}
 	err = parse_cursor_value(&c, r)
 	if err != nil {

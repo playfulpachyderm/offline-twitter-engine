@@ -7,6 +7,8 @@ import (
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
+// TODO: deprecated-offline-follows
+
 func (app *Application) UserFollow(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'UserFollow' handler (path: %q)", r.URL.Path)
 

@@ -52,11 +52,22 @@ func TestSearchWithCursor(t *testing.T) {
 	assert.Len(cascadia.QueryAll(root, selector(".timeline > .tweet")), 3)
 
 	// Add a cursor with the 1st tweet's posted_at time
-	resp = do_request(httptest.NewRequest("GET", "/search/who%20are?cursor=1628979529000", nil))
+	req := httptest.NewRequest("GET", "/search/who%20are?cursor=1628979529000", nil)
+	req.Header.Set("HX-Request", "true")
+	resp = do_request(req)
 	require.Equal(resp.StatusCode, 200)
 	root, err = html.Parse(resp.Body)
 	require.NoError(err)
-	assert.Len(cascadia.QueryAll(root, selector(".timeline > .tweet")), 2)
+	assert.Len(cascadia.QueryAll(root, selector(":not(.tweet__quoted-tweet) > .tweet")), 2)
+}
+
+func TestSearchWithInvalidCursorShould400(t *testing.T) {
+	require := require.New(t)
+
+	req := httptest.NewRequest("GET", "/search/who%20are?cursor=asdf", nil)
+	req.Header.Set("HX-Request", "true")
+	resp := do_request(req)
+	require.Equal(resp.StatusCode, 400)
 }
 
 func TestSearchWithSortOrder(t *testing.T) {

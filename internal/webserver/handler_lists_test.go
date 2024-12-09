@@ -100,7 +100,7 @@ func TestListAddAndDeleteUser(t *testing.T) {
 	assert.Len(cascadia.QueryAll(root, selector(".users-list .author-info")), 3)
 
 	// Delete a user
-	resp_remove := do_request(httptest.NewRequest("GET", "/lists/2/remove_user?user_handle=cernovich", nil))
+	resp_remove := do_request(httptest.NewRequest("GET", "/lists/2/remove_user?user_handle=@cernovich", nil))
 	require.Equal(resp_remove.StatusCode, 302)
 	require.Equal("/lists/2/users", resp_remove.Header.Get("Location"))
 

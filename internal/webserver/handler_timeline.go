@@ -14,6 +14,8 @@ type TimelineData struct {
 	ActiveTab string
 }
 
+// TODO: deprecated-offline-follows
+
 func (app *Application) OfflineTimeline(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'Timeline' handler (path: %q)", r.URL.Path)
 
