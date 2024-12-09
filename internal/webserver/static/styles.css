@@ -1438,7 +1438,7 @@ main {
 		}
 	}
 	.dm-message__reacc {
-		padding: 0.1em 0.2em;
+		padding: 0em 0.1em;
 
 		&.dm-message__reacc--ours {
 			border-radius: 50%;
