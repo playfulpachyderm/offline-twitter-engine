@@ -369,3 +369,12 @@ v0.6.19
 	- Profile and banner images in user feed header can now be clicked to open full-size versions
 	- Reply previews in DMs now include the username who's being replied to
 - Notifications can now be marked as "read" via command line and web UI
+
+v0.6.20
+-------
+
+- BUGFIX: fix sending a reacc causing an error if it's not on the latest message in the chat
+- BUGFIX: various fixes around error toasts
+- UI improvements:
+	- reaccs: add a little circle around the logged-in user's reaccs, to indicate them better
+	- "refresh chat room" button now puts a spinner on the chat while it's refreshing

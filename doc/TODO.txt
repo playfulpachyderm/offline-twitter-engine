@@ -122,7 +122,7 @@ TODO: emoji-rewrite (#webserver)
 TODO: windows-session-list (#release, #windows)
 - Check that sessions load as @Offline_Twatter instead of @test\Offline_Twatter on Windows
 
-TODO: conversation-thread-missing-tweets
+TODO: conversation-thread-missing-tweets (#scraper, #scraper-bug)
 - In a conversation thread (replies under a tweet), if a user is blocked, the tweet response can be empty
 - These are just completely invisible on Twitter (render as nothing)
 - e.g.: https://x.com/sirbughunter/status/1479540319410696192
@@ -133,3 +133,21 @@ TODO: scrape-user-feed-removes-pinned-tweet (#scraper, #scraper-bug)
 TOOD: notifications-duplicate-bug (#scraper, #scraper-bug)
 - Older notifications often appear to get duplicated, sometimes quite a few times
 - Probably related to the fact that notifications can replace old ones but we just treat them as a new notification instance
+
+TODO: dm-reaccs-popup-list (#dms, #webserver, #reaccs)
+- on-click popup showing who sent which reacc
+
+TODO: detect-banned-users-when-scraping-tweets (#scraper, #scraper-bug)
+- banned users aren't detected when scraping tweets
+
+TODO: sqlite-query-optimizing
+- https://sqlite.org/cli.html#index_recommendations_sqlite_expert_
+- https://sqlite.org/eqp.html
+
+TODO: htmx-scrollBehavior (#webserver, #ux)
+- Investigate `htmx.config.scrollBehavior = "smooth"`: https://htmx.org/migration-guide-htmx-1/
+
+TODO: deprecated-offline-follows
+- Offline Follows doesn't do much userful anymore
+
+TODO: offline-timeline-vs-user-timeline
