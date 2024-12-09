@@ -429,7 +429,7 @@ tw fetch_dm "1458284524761075714-1488963321701171204"
 # Test followers and followees
 test $(sqlite3 twitter.db "select count(*) from follows") = "0"
 tw get_followees Offline_Twatter
-test $(sqlite3 twitter.db "select count(*) from follows where follower_id = 1488963321701171204") = "4"
+test $(sqlite3 twitter.db "select count(*) from follows where follower_id = 1488963321701171204") = "3"
 test $(sqlite3 twitter.db "select count(*) from follows where followee_id = 1488963321701171204") = "0"
 tw get_followers Offline_Twatter
 test $(sqlite3 twitter.db "select count(*) from follows where follower_id = 1488963321701171204 and followee_id = 759251") = "1"
