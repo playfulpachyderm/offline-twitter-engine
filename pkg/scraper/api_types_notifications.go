@@ -171,6 +171,10 @@ func (t *TweetResponse) ToTweetTroveAsNotifications(current_user_id UserID) (Twe
 					// TODO: communities
 					delete(ret.Notifications, notification.ID)
 					continue
+				} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "promotion_premium") {
+					// Native ad for buying X Premium; ignore
+					delete(ret.Notifications, notification.ID)
+					continue
 				}
 			}
 

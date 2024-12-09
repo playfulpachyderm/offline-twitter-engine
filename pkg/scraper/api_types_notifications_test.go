@@ -138,6 +138,10 @@ func TestParseNotificationsPage(t *testing.T) {
 	// assert.True(is_ok)
 	// assert.Equal(NOTIFICATION_TYPE_COMMUNITY_PINNED_POST, notif12.Type)
 
+	// Ad for X Premium
+	_, is_ok = tweet_trove.Notifications["FKncQJGVgAQAAAABSQ3bEak9zbD6K-zcrss"]
+	assert.False(is_ok)
+
 	// Check users
 	for _, u_id := range []UserID{1458284524761075714, 28815778, 1633158398555353096} {
 		_, is_ok := tweet_trove.Users[u_id]
