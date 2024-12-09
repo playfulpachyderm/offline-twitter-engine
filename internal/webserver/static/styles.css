@@ -1429,7 +1429,6 @@ main {
 	}
 	.dm-message__reactions {
 		display: flex;
-		font-size: 1.1em;
 		padding: 0 3.5em;
 		cursor: default;
 
@@ -1438,7 +1437,9 @@ main {
 		}
 	}
 	.dm-message__reacc {
-		padding: 0em 0.1em;
+		width: 1.5em;
+		height: 1.5em;
+		text-align: center;
 
 		&.dm-message__reacc--ours {
 			border-radius: 50%;
