@@ -63,7 +63,7 @@ steps:
       # TODO: The CI server appears to have been IP-banned.  Replacing login with session-file secret for now
       # - twitter login offline_twatter "$OFFLINE_TWATTER_PASSWD"
       - echo "$OFFLINE_TWATTER_SESSION_FILE" > Offline_Twatter.session  # Write the session file
-      - twitter fetch_user pcmonk
+      - twitter --session Offline_Twatter fetch_user pcmonk
       - twitter --session Offline_Twatter get_user_tweets pcmonk
       - (cd ../cmd && ./compile.sh $version)
       - which ../cmd/tw
