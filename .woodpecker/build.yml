@@ -56,7 +56,7 @@ steps:
       - curl https://apt.playfulpachyderm.com/KEY.gpg | sudo apt-key add -
       - echo "deb https://apt.playfulpachyderm.com/ ./" | sudo tee /etc/apt/sources.list.d/offline_twitter.list
       - sudo apt update
-      - sudo apt install -y offline-twitter-engine
+      - sudo apt install -y offline-twitter
       - which twitter
       - twitter create_profile outdated_profile
       - cd outdated_profile
