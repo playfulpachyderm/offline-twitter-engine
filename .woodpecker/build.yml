@@ -67,7 +67,7 @@ steps:
       - twitter --session Offline_Twatter get_user_tweets pcmonk
       - (cd ../cmd && ./compile.sh $version)
       - which ../cmd/tw
-      - ../cmd/tw fetch_user pcmonk
+      - ../cmd/tw --session Offline_Twatter fetch_user pcmonk
 
   dpkg_build_and_upload:
     when:
