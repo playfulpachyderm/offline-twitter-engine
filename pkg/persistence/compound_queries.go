@@ -17,7 +17,7 @@ var (
 const TWEETS_ALL_SQL_FIELDS = `
 		tweets.id id, tweets.user_id, text, posted_at, num_likes, num_retweets, num_replies, num_quote_tweets, in_reply_to_id,
 		quoted_tweet_id, mentions, reply_mentions, hashtags, ifnull(space_id, '') space_id,
-		ifnull(tombstone_types.short_name, "") tombstone_type, ifnull(tombstone_types.tombstone_text, "") tombstone_text,
+		ifnull(tombstone_types.short_name, '') tombstone_type, ifnull(tombstone_types.tombstone_text, '') tombstone_text,
 		case when likes.user_id is null then 0 else 1 end is_liked_by_current_user,
 		is_expandable, is_stub, is_content_downloaded, is_conversation_scraped, last_scraped_at`
 

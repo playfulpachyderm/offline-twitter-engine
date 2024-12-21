@@ -599,7 +599,7 @@ func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error
      ` + liked_by_filter_join_clause + `
      ` + bookmarked_by_filter_join_clause + `
      ` + where_clause + ` ` + c.SortOrder.OrderByClause() + ` limit ?
-    )` + c.SortOrder.OrderByClause() + ` limit ?`
+   ) ` + c.SortOrder.OrderByClause() + ` limit ?`
 
 	bind_values = append([]interface{}{current_user_id}, bind_values...)
 	bind_values = append(bind_values, c.PageSize)

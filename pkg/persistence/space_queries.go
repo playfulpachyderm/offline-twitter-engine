@@ -22,8 +22,8 @@ func (p Profile) SaveSpace(s scraper.Space) error {
 		    on conflict do update
 		   set id=:id,
 		       created_by_id=case when created_by_id is not null then created_by_id else nullif(:created_by_id, 0) end,
-		       short_url=case when short_url == "" then :short_url else short_url end,
-		       state=case when :state != "" then :state else state end,
+		       short_url=case when short_url == '' then :short_url else short_url end,
+		       state=case when :state != '' then :state else state end,
 		       title=case when :is_details_fetched then :title else title end,
 		       updated_at=max(:updated_at, updated_at),
 		       ended_at=max(:ended_at, ended_at),

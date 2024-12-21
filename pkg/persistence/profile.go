@@ -48,7 +48,7 @@ func NewProfile(target_dir string) (Profile, error) {
 
 	// Create the directory
 	fmt.Printf("Creating new profile: %s\n", target_dir)
-	err := os.Mkdir(target_dir, os.FileMode(0755))
+	err := os.Mkdir(target_dir, os.FileMode(0o755))
 	if err != nil {
 		return Profile{}, fmt.Errorf("Error creating directory %q:\n  %w", target_dir, err)
 	}
@@ -60,41 +60,41 @@ func NewProfile(target_dir string) (Profile, error) {
 
 	// Create `profile_images`
 	fmt.Printf("Creating............. %s/\n", profile_images_dir)
-	err = os.Mkdir(profile_images_dir, os.FileMode(0755))
+	err = os.Mkdir(profile_images_dir, os.FileMode(0o755))
 	if err != nil {
 		return Profile{}, fmt.Errorf("Error creating %q:\n  %w", profile_images_dir, err)
 	}
 	// Put the default profile image in it
 	fmt.Printf("Creating............. %s/\n", default_profile_image_file)
-	err = os.WriteFile(default_profile_image_file, default_profile_image, os.FileMode(0644))
+	err = os.WriteFile(default_profile_image_file, default_profile_image, os.FileMode(0o644))
 	if err != nil {
 		return Profile{}, fmt.Errorf("Error creating default profile image file %q:\n  %w", default_profile_image, err)
 	}
 
 	// Create `link_thumbnail_images`
 	fmt.Printf("Creating............. %s/\n", link_thumbnails_dir)
-	err = os.Mkdir(link_thumbnails_dir, os.FileMode(0755))
+	err = os.Mkdir(link_thumbnails_dir, os.FileMode(0o755))
 	if err != nil {
 		return Profile{}, fmt.Errorf("Error creating %q:\n  %w", link_thumbnails_dir, err)
 	}
 
 	// Create `images`
 	fmt.Printf("Creating............. %s/\n", images_dir)
-	err = os.Mkdir(images_dir, os.FileMode(0755))
+	err = os.Mkdir(images_dir, os.FileMode(0o755))
 	if err != nil {
 		return Profile{}, fmt.Errorf("Error creating %q:\n  %w", images_dir, err)
 	}
 
 	// Create `videos`
 	fmt.Printf("Creating............. %s/\n", videos_dir)
-	err = os.Mkdir(videos_dir, os.FileMode(0755))
+	err = os.Mkdir(videos_dir, os.FileMode(0o755))
 	if err != nil {
 		return Profile{}, fmt.Errorf("Error creating %q:\n  %w", videos_dir, err)
 	}
 
 	// Create `video_thumbnails`
 	fmt.Printf("Creating............. %s/\n", video_thumbnails_dir)
-	err = os.Mkdir(video_thumbnails_dir, os.FileMode(0755))
+	err = os.Mkdir(video_thumbnails_dir, os.FileMode(0o755))
 	if err != nil {
 		return Profile{}, fmt.Errorf("Error creating %q:\n  %w", video_thumbnails_dir, err)
 	}
