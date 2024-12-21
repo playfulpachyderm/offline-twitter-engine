@@ -372,17 +372,26 @@ func fetch_tweet_only(tweet_identifier string) {
 		die(err.Error(), false, -1)
 	}
 
-	tweet, err := api.GetTweet(tweet_id)
-	if is_scrape_failure(err) || errors.Is(err, scraper.ErrRateLimited) {
+	trove, err := api.GetTweetFullAPIV2(tweet_id, 1)
+	if err != nil {
 		die(fmt.Sprintf("Error fetching tweet: %s", err.Error()), false, -1)
 	}
+
+	// Find the main tweet and update its "is_conversation_downloaded" and "last_scraped_at"
+	tweet, ok := trove.Tweets[tweet_id]
+	if !ok {
+		panic("Trove didn't contain its own tweet!")
+	}
+	tweet.LastScrapedAt = scraper.Timestamp{time.Now()}
+	tweet.IsConversationScraped = true
+
 	log.Debug(tweet)
 
 	err2 := profile.SaveTweet(tweet)
 	if err2 != nil {
 		die(fmt.Sprintf("Error saving tweet: %s", err2.Error()), false, 4)
 	}
-	happy_exit("Saved the tweet", err)
+	happy_exit("Saved the tweet", nil)
 }
 
 /**

@@ -3,7 +3,6 @@ package scraper
 import (
 	"database/sql/driver"
 	"errors"
-	"fmt"
 	"strings"
 )
 
@@ -73,29 +72,4 @@ type Tweet struct {
 	IsContentDownloaded   bool      `db:"is_content_downloaded"`
 	IsConversationScraped bool      `db:"is_conversation_scraped"`
 	LastScrapedAt         Timestamp `db:"last_scraped_at"`
-}
-// Get a single tweet with no replies from the API.
-//
-// args:
-// - id: the ID of the tweet to get
-//
-// returns: the single Tweet
-func (api *API) GetTweet(id TweetID) (Tweet, error) {
-	resp, err := api.GetTweetDetail(id, "")
-	if err != nil {
-		return Tweet{}, fmt.Errorf("Error getting tweet detail: %d\n  %w", id, err)
-	}
-	trove, err := resp.ToTweetTrove()
-	if err != nil {
-		return Tweet{}, err
-	}
-
-	// Find the main tweet and update its "is_conversation_downloaded" and "last_scraped_at"
-	tweet, ok := trove.Tweets[id]
-	if !ok {
-		panic("Trove didn't contain its own tweet!")
-	}
-	tweet.LastScrapedAt = Timestamp{time.Now()}
-	tweet.IsConversationScraped = true
-	return tweet, nil
 }
