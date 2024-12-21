@@ -26,6 +26,9 @@ type Space struct {
 	IsDetailsFetched bool `db:"is_details_fetched"`
 }
 
+// TODO: view-layer
+// - view helpers should go in a view layer
+
 func (space Space) FormatDuration() string {
 	duration := space.EndedAt.Time.Sub(space.StartedAt.Time)
 	h := int(duration.Hours())
@@ -36,15 +39,4 @@ func (space Space) FormatDuration() string {
 		return fmt.Sprintf("%dh%02dm", h, m)
 	}
 	return fmt.Sprintf("%dm%02ds", m, s)
-}
-
-func ParseAPISpace(apiCard APICard) Space {
-	ret := Space{}
-	ret.ID = SpaceID(apiCard.BindingValues.ID.StringValue)
-	ret.ShortUrl = apiCard.ShortenedUrl
-
-	// Indicate that this Space needs its details fetched still
-	ret.IsDetailsFetched = false
-
-	return ret
 }

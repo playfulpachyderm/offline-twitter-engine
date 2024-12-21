@@ -21,7 +21,9 @@ func TestParseAPIDMMessage(t *testing.T) {
 	err = json.Unmarshal(data, &api_message)
 	require.NoError(t, err)
 
-	message := ParseAPIDMMessage(api_message)
+	trove := api_message.ToTweetTrove()
+	message, is_ok := trove.Messages[DMMessageID(api_message.ID)]
+	require.True(t, is_ok)
 	assert.Equal(message.ID, DMMessageID(1663623203644751885))
 	assert.Equal(message.SentAt, TimestampFromUnixMilli(1685473655064))
 	assert.Equal(message.DMChatRoomID, DMChatRoomID("1458284524761075714-1488963321701171204"))
@@ -41,7 +43,9 @@ func TestParseAPIDMMessageWithReaction(t *testing.T) {
 	err = json.Unmarshal(data, &api_message)
 	require.NoError(t, err)
 
-	message := ParseAPIDMMessage(api_message)
+	trove := api_message.ToTweetTrove()
+	message, is_ok := trove.Messages[DMMessageID(api_message.ID)]
+	require.True(t, is_ok)
 	assert.Equal(message.ID, DMMessageID(1663623062195957773))
 	require.Len(t, message.Reactions, 1)
 

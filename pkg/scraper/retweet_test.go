@@ -13,16 +13,23 @@ import (
 
 func TestParseSingleRetweet(t *testing.T) {
 	assert := assert.New(t)
+	require := require.New(t)
 	data, err := os.ReadFile("test_responses/tweet_that_is_a_retweet.json")
 	if err != nil {
 		panic(err)
 	}
 	var api_tweet APITweet
 	err = json.Unmarshal(data, &api_tweet)
-	require.NoError(t, err)
+	require.NoError(err)
 
-	retweet, err := ParseSingleRetweet(api_tweet)
-	require.NoError(t, err)
+	trove, err := api_tweet.ToTweetTrove()
+	require.NoError(err)
+
+	require.Len(trove.Tweets, 0)
+	require.Len(trove.Retweets, 1)
+
+	retweet, is_ok := trove.Retweets[TweetID(1404270043018448896)]
+	require.True(is_ok)
 
 	assert.Equal(TweetID(1404270043018448896), retweet.RetweetID)
 	assert.Equal(TweetID(1404269989646028804), retweet.TweetID)

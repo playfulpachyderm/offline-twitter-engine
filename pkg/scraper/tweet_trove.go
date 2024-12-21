@@ -195,3 +195,13 @@ func (trove *TweetTrove) PostProcess(api *API) error {
 	}
 	return nil
 }
+
+func (t TweetTrove) GetOldestMessage(id DMChatRoomID) DMMessageID {
+	oldest := DMMessageID(^uint(0) >> 1) // Max integer
+	for _, m := range t.Messages {
+		if m.ID < oldest && m.DMChatRoomID == id {
+			oldest = m.ID
+		}
+	}
+	return oldest
+}

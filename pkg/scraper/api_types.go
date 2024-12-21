@@ -4,6 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
+	"log"
+	"net/url"
+	"path"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -19,6 +23,19 @@ type APIMedia struct {
 		Width  int `json:"width"`
 		Height int `json:"height"`
 	} `json:"original_info"`
+}
+
+func ParseAPIMedia(apiMedia APIMedia) Image {
+	local_filename := get_prefixed_path(path.Base(apiMedia.MediaURLHttps))
+
+	return Image{
+		ID:            ImageID(apiMedia.ID),
+		RemoteURL:     apiMedia.MediaURLHttps,
+		Width:         apiMedia.OriginalInfo.Width,
+		Height:        apiMedia.OriginalInfo.Height,
+		LocalFilename: local_filename,
+		IsDownloaded:  false,
+	}
 }
 
 type SortableVariants []struct {
@@ -137,6 +154,164 @@ type APICard struct {
 	} `json:"binding_values"`
 }
 
+func ParseAPIPoll(apiCard APICard) Poll {
+	card_url, err := url.Parse(apiCard.ShortenedUrl)
+	if err != nil {
+		panic(err)
+	}
+	id := int_or_panic(card_url.Hostname())
+
+	ret := Poll{}
+	ret.ID = PollID(id)
+	ret.NumChoices = parse_num_choices(apiCard.Name)
+	ret.VotingDuration = int_or_panic(apiCard.BindingValues.DurationMinutes.StringValue) * 60
+	ret.VotingEndsAt, err = TimestampFromString(apiCard.BindingValues.EndDatetimeUTC.StringValue)
+	if err != nil {
+		panic(err)
+	}
+	ret.LastUpdatedAt, err = TimestampFromString(apiCard.BindingValues.LastUpdatedAt.StringValue)
+	if err != nil {
+		panic(err)
+	}
+
+	ret.Choice1 = apiCard.BindingValues.Choice1.StringValue
+	ret.Choice1_Votes = int_or_panic(apiCard.BindingValues.Choice1_Count.StringValue)
+	ret.Choice2 = apiCard.BindingValues.Choice2.StringValue
+	ret.Choice2_Votes = int_or_panic(apiCard.BindingValues.Choice2_Count.StringValue)
+
+	if ret.NumChoices > 2 {
+		ret.Choice3 = apiCard.BindingValues.Choice3.StringValue
+		ret.Choice3_Votes = int_or_panic(apiCard.BindingValues.Choice3_Count.StringValue)
+	}
+	if ret.NumChoices > 3 {
+		ret.Choice4 = apiCard.BindingValues.Choice4.StringValue
+		ret.Choice4_Votes = int_or_panic(apiCard.BindingValues.Choice4_Count.StringValue)
+	}
+
+	return ret
+}
+
+func parse_num_choices(card_name string) int {
+	if strings.Index(card_name, "poll") != 0 || strings.Index(card_name, "choice") != 5 {
+		panic("Not valid card name: " + card_name)
+	}
+
+	return int_or_panic(card_name[4:5])
+}
+
+func ParseAPIVideo(apiVideo APIExtendedMedia) Video {
+	variants := apiVideo.VideoInfo.Variants
+	sort.Sort(variants)
+	video_remote_url := variants[0].URL
+
+	var view_count int
+
+	r := apiVideo.Ext.MediaStats.R
+
+	switch r.(type) {
+	case string:
+		view_count = 0
+	case map[string]interface{}:
+		OK_entry, ok := r.(map[string]interface{})["ok"]
+		if !ok {
+			panic("No 'ok' value found in the R!")
+		}
+		view_count_str, ok := OK_entry.(map[string]interface{})["viewCount"]
+		view_count = int_or_panic(view_count_str.(string))
+		if !ok {
+			panic("No 'viewCount' value found in the OK!")
+		}
+	}
+
+	video_parsed_url, err := url.Parse(video_remote_url)
+	if err != nil {
+		panic(err)
+	}
+
+	local_filename := get_prefixed_path(path.Base(video_parsed_url.Path))
+
+	return Video{
+		ID:            VideoID(apiVideo.ID),
+		Width:         apiVideo.OriginalInfo.Width,
+		Height:        apiVideo.OriginalInfo.Height,
+		RemoteURL:     video_remote_url,
+		LocalFilename: local_filename,
+
+		ThumbnailRemoteUrl: apiVideo.MediaURLHttps,
+		ThumbnailLocalPath: get_prefixed_path(path.Base(apiVideo.MediaURLHttps)),
+		Duration:           apiVideo.VideoInfo.Duration,
+		ViewCount:          view_count,
+
+		IsDownloaded:    false,
+		IsBlockedByDMCA: false,
+		IsGeoblocked:    apiVideo.ExtMediaAvailability.Reason == "Geoblocked",
+		IsGif:           apiVideo.Type == "animated_gif",
+	}
+}
+
+func ParseAPIUrlCard(apiCard APICard) Url {
+	values := apiCard.BindingValues
+	ret := Url{}
+	ret.HasCard = true
+
+	ret.Domain = values.Domain.Value
+	ret.Title = values.Title.Value
+	ret.Description = values.Description.Value
+	ret.IsContentDownloaded = false
+	ret.CreatorID = UserID(values.Creator.UserValue.Value)
+	ret.SiteID = UserID(values.Site.UserValue.Value)
+
+	var thumbnail_url string
+
+	if apiCard.Name == "summary_large_image" || apiCard.Name == "summary" {
+		thumbnail_url = values.Thumbnail.ImageValue.Url
+	} else if apiCard.Name == "player" {
+		thumbnail_url = values.PlayerImage.ImageValue.Url
+	} else if apiCard.Name == "unified_card" {
+		// TODO: Grok chat previews
+		log.Print("Grok chat card, not implemented yet-- skipping")
+	} else {
+		panic("Unknown card type: " + apiCard.Name)
+	}
+
+	if thumbnail_url != "" {
+		ret.HasThumbnail = true
+		ret.ThumbnailRemoteUrl = thumbnail_url
+		ret.ThumbnailLocalPath = get_thumbnail_local_path(thumbnail_url)
+		ret.ThumbnailWidth = values.Thumbnail.ImageValue.Width
+		ret.ThumbnailHeight = values.Thumbnail.ImageValue.Height
+	}
+
+	return ret
+}
+
+func get_prefixed_path(p string) string {
+	local_prefix_regex := regexp.MustCompile(`^[\w-]{2}`)
+	local_prefix := local_prefix_regex.FindString(p)
+	if len(local_prefix) != 2 {
+		panic(fmt.Sprintf("Unable to extract a 2-letter prefix for filename %s", p))
+	}
+	return path.Join(local_prefix, p)
+}
+
+func get_thumbnail_local_path(remote_url string) string {
+	u, err := url.Parse(remote_url)
+	if err != nil {
+		panic(err)
+	}
+	if u.RawQuery == "" {
+		return path.Base(u.Path)
+	}
+	query_params, err := url.ParseQuery(u.RawQuery)
+	if err != nil {
+		panic(err)
+	}
+
+	return get_prefixed_path(
+		fmt.Sprintf("%s_%s.%s", path.Base(u.Path), query_params["name"][0], query_params["format"][0]),
+	)
+}
+
 type APITweet struct {
 	ID               int64  `json:"id_str,string"`
 	ConversationID   int64  `json:"conversation_id_str,string"`
@@ -182,6 +357,171 @@ type APITweet struct {
 	Card          APICard `json:"card"`
 	TombstoneText string
 	IsExpandable  bool
+}
+
+func (t APITweet) ToTweetTrove() (TweetTrove, error) {
+	ret := NewTweetTrove()
+	if t.RetweetedStatusIDStr == "" {
+		// Parse as a Tweet
+		new_tweet, err := ParseSingleTweet(t)
+		if err != nil {
+			return ret, err
+		}
+		ret.Tweets[new_tweet.ID] = new_tweet
+		for _, space := range new_tweet.Spaces {
+			ret.Spaces[space.ID] = space
+		}
+	} else {
+		// Parse as a Retweet
+		new_retweet := Retweet{}
+		var err error
+
+		t.NormalizeContent()
+
+		new_retweet.RetweetID = TweetID(t.ID)
+		new_retweet.TweetID = TweetID(t.RetweetedStatusID)
+		new_retweet.RetweetedByID = UserID(t.UserID)
+		new_retweet.RetweetedAt, err = TimestampFromString(t.CreatedAt)
+		if err != nil {
+			return ret, err
+		}
+		ret.Retweets[new_retweet.RetweetID] = new_retweet
+	}
+	return ret, nil
+}
+
+// Turn an APITweet, as returned from the scraper, into a properly structured Tweet object
+func ParseSingleTweet(t APITweet) (ret Tweet, err error) {
+	t.NormalizeContent()
+
+	ret.ID = TweetID(t.ID)
+	ret.UserID = UserID(t.UserID)
+	ret.UserHandle = UserHandle(t.UserHandle)
+	ret.Text = t.FullText
+	ret.IsExpandable = t.IsExpandable
+
+	// Process "posted-at" date and time
+	if t.TombstoneText == "" { // Skip time parsing for tombstones
+		ret.PostedAt, err = TimestampFromString(t.CreatedAt)
+		if err != nil {
+			if ret.ID == 0 {
+				return Tweet{}, fmt.Errorf("unable to parse tweet: %w", ERR_NO_TWEET)
+			}
+			return Tweet{}, fmt.Errorf("Error parsing time on tweet ID %d:\n  %w", ret.ID, err)
+		}
+	}
+
+	ret.NumLikes = t.FavoriteCount
+	ret.NumRetweets = t.RetweetCount
+	ret.NumReplies = t.ReplyCount
+	ret.NumQuoteTweets = t.QuoteCount
+	ret.InReplyToID = TweetID(t.InReplyToStatusID)
+	ret.QuotedTweetID = TweetID(t.QuotedStatusID)
+
+	// Process URLs and link previews
+	for _, url := range t.Entities.URLs {
+		var url_object Url
+		if t.Card.ShortenedUrl == url.ShortenedUrl {
+			if t.Card.Name == "3691233323:audiospace" {
+				// This "url" is just a link to a Space.  Don't process it as a Url
+				continue
+			}
+			url_object = ParseAPIUrlCard(t.Card)
+		}
+		url_object.Text = url.ExpandedURL
+		url_object.ShortText = url.ShortenedUrl
+		url_object.TweetID = ret.ID
+
+		// Skip it if it's just the quoted tweet
+		_, id, is_ok := TryParseTweetUrl(url.ExpandedURL)
+		if is_ok && id == ret.QuotedTweetID {
+			continue
+		}
+
+		ret.Urls = append(ret.Urls, url_object)
+	}
+
+	// Process images
+	for _, media := range t.Entities.Media {
+		if media.Type != "photo" {
+			// Videos now have an entry in "Entities.Media" but they can be ignored; the useful bit is in ExtendedEntities
+			// So skip ones that aren't "photo"
+			continue
+		}
+		new_image := ParseAPIMedia(media)
+		new_image.TweetID = ret.ID
+		ret.Images = append(ret.Images, new_image)
+	}
+
+	// Process hashtags
+	for _, hashtag := range t.Entities.Hashtags {
+		ret.Hashtags = append(ret.Hashtags, hashtag.Text)
+	}
+
+	// Process `@` mentions and reply-mentions
+	for _, mention := range t.Entities.Mentions {
+		ret.Mentions = append(ret.Mentions, mention.UserName)
+	}
+	for _, mention := range strings.Split(t.Entities.ReplyMentions, " ") {
+		if mention != "" {
+			if mention[0] != '@' {
+				panic(fmt.Errorf("Unknown ReplyMention value %q:\n  %w", t.Entities.ReplyMentions, EXTERNAL_API_ERROR))
+			}
+			ret.ReplyMentions = append(ret.ReplyMentions, mention[1:])
+		}
+	}
+
+	// Process videos
+	for _, entity := range t.ExtendedEntities.Media {
+		if entity.Type != "video" && entity.Type != "animated_gif" {
+			continue
+		}
+
+		new_video := ParseAPIVideo(entity)
+		new_video.TweetID = ret.ID
+		ret.Videos = append(ret.Videos, new_video)
+
+		// Remove the thumbnail from the Images list
+		updated_imgs := []Image{}
+		for _, img := range ret.Images {
+			if VideoID(img.ID) != new_video.ID {
+				updated_imgs = append(updated_imgs, img)
+			}
+		}
+		ret.Images = updated_imgs
+	}
+
+	// Process polls
+	if strings.Index(t.Card.Name, "poll") == 0 {
+		poll := ParseAPIPoll(t.Card)
+		poll.TweetID = ret.ID
+		ret.Polls = []Poll{poll}
+	}
+
+	// Process spaces
+	if t.Card.Name == "3691233323:audiospace" {
+		space := Space{}
+		space.ID = SpaceID(t.Card.BindingValues.ID.StringValue)
+		space.ShortUrl = t.Card.ShortenedUrl
+
+		// Indicate that this Space needs its details fetched still
+		space.IsDetailsFetched = false
+
+		ret.Spaces = []Space{space}
+		ret.SpaceID = space.ID
+	}
+
+	// Process tombstones and other metadata
+	ret.TombstoneType = t.TombstoneText
+	ret.IsStub = !(ret.TombstoneType == "")
+	ret.LastScrapedAt = TimestampFromUnix(0) // Caller will change this for the tweet that was actually scraped
+	ret.IsConversationScraped = false        // Safe due to the "No Worsening" principle
+
+	// Extra data that can help piece together tombstoned tweet info
+	ret.in_reply_to_user_id = UserID(t.InReplyToUserID)
+	ret.in_reply_to_user_handle = UserHandle(t.InReplyToScreenName)
+
+	return
 }
 
 func (t *APITweet) NormalizeContent() {
@@ -258,6 +598,54 @@ type APIUser struct {
 	Verified             bool     `json:"verified"`
 	IsBanned             bool
 	DoesntExist          bool
+}
+
+// Turn an APIUser, as returned from the scraper, into a properly structured User object
+func ParseSingleUser(apiUser APIUser) (ret User, err error) {
+	if apiUser.DoesntExist {
+		// User may have been deleted, or there was a typo.  There's no data to parse
+		if apiUser.ScreenName == "" {
+			panic("ScreenName is empty!")
+		}
+		ret = GetUnknownUserWithHandle(UserHandle(apiUser.ScreenName))
+		return
+	}
+	ret.ID = UserID(apiUser.ID)
+	ret.Handle = UserHandle(apiUser.ScreenName)
+	if apiUser.IsBanned {
+		// Banned users won't have any further info, so just return here
+		ret.IsBanned = true
+		return
+	}
+	ret.DisplayName = apiUser.Name
+	ret.Bio = apiUser.Description
+	ret.FollowingCount = apiUser.FriendsCount
+	ret.FollowersCount = apiUser.FollowersCount
+	ret.Location = apiUser.Location
+	if len(apiUser.Entities.URL.Urls) > 0 {
+		ret.Website = apiUser.Entities.URL.Urls[0].ExpandedURL
+	}
+	ret.JoinDate, err = TimestampFromString(apiUser.CreatedAt)
+	if err != nil {
+		err = fmt.Errorf("Error parsing time on user ID %d: %w", ret.ID, err)
+		return
+	}
+	ret.IsPrivate = apiUser.Protected
+	ret.IsVerified = apiUser.Verified
+	ret.ProfileImageUrl = apiUser.ProfileImageURLHTTPS
+
+	if regexp.MustCompile(`_normal\.\w{2,4}`).MatchString(ret.ProfileImageUrl) {
+		ret.ProfileImageUrl = strings.ReplaceAll(ret.ProfileImageUrl, "_normal.", ".")
+	}
+	ret.BannerImageUrl = apiUser.ProfileBannerURL
+
+	ret.ProfileImageLocalPath = ret.compute_profile_image_local_path()
+	ret.BannerImageLocalPath = ret.compute_banner_image_local_path()
+
+	if len(apiUser.PinnedTweetIdsStr) > 0 {
+		ret.PinnedTweetID = TweetID(idstr_to_int(apiUser.PinnedTweetIdsStr[0]))
+	}
+	return
 }
 
 type APINotification struct {
@@ -565,22 +953,11 @@ func (t *TweetResponse) ToTweetTrove() (TweetTrove, error) {
 	ret := NewTweetTrove()
 
 	for _, single_tweet := range t.GlobalObjects.Tweets {
-		if single_tweet.RetweetedStatusIDStr == "" {
-			new_tweet, err := ParseSingleTweet(single_tweet)
-			if err != nil {
-				return ret, err
-			}
-			ret.Tweets[new_tweet.ID] = new_tweet
-			for _, space := range new_tweet.Spaces {
-				ret.Spaces[space.ID] = space
-			}
-		} else {
-			new_retweet, err := ParseSingleRetweet(single_tweet)
-			if err != nil {
-				return ret, err
-			}
-			ret.Retweets[new_retweet.RetweetID] = new_retweet
+		trove, err := single_tweet.ToTweetTrove()
+		if err != nil {
+			return ret, err
 		}
+		ret.MergeWith(trove)
 	}
 
 	for _, user := range t.GlobalObjects.Users {
@@ -597,10 +974,14 @@ func (t *TweetResponse) ToTweetTrove() (TweetTrove, error) {
 	return ret, nil
 }
 
-func idstr_to_int(idstr string) int64 {
-	id, err := strconv.Atoi(idstr)
+func idstr_to_int(s string) int64 {
+	return int64(int_or_panic(s))
+}
+
+func int_or_panic(s string) int {
+	result, err := strconv.Atoi(s)
 	if err != nil {
 		panic(err)
 	}
-	return int64(id)
+	return result
 }

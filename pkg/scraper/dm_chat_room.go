@@ -1,11 +1,5 @@
 package scraper
 
-import (
-	"fmt"
-	"net/url"
-	"path"
-)
-
 type DMChatRoomID string
 
 // A participant in a chat room.
@@ -45,50 +39,12 @@ type DMChatRoom struct {
 	Participants  map[UserID]DMChatParticipant
 }
 
+// TODO: view-layer
+// - view helpers should go in a view layer
 func (r DMChatRoom) GetParticipantIDs() []UserID {
 	ret := []UserID{}
 	for user_id := range r.Participants {
 		ret = append(ret, user_id)
-	}
-	return ret
-}
-
-func ParseAPIDMChatRoom(api_room APIDMConversation, current_user_id UserID) DMChatRoom {
-	ret := DMChatRoom{}
-	ret.ID = DMChatRoomID(api_room.ConversationID)
-	ret.Type = api_room.Type
-	ret.LastMessagedAt = TimestampFromUnixMilli(int64(api_room.SortTimestamp))
-	ret.IsNSFW = api_room.NSFW
-
-	if ret.Type == "GROUP_DM" {
-		ret.CreatedAt = TimestampFromUnixMilli(int64(api_room.CreateTime))
-		ret.CreatedByUserID = UserID(api_room.CreatedByUserID)
-		ret.Name = api_room.Name
-		ret.AvatarImageRemoteURL = api_room.AvatarImage
-		tmp_url, err := url.Parse(ret.AvatarImageRemoteURL)
-		if err != nil {
-			panic(err)
-		}
-		ret.AvatarImageLocalPath = fmt.Sprintf("%s_avatar_%s.%s", ret.ID, path.Base(tmp_url.Path), tmp_url.Query().Get("format"))
-	}
-
-	ret.Participants = make(map[UserID]DMChatParticipant)
-	for _, api_participant := range api_room.Participants {
-		participant := DMChatParticipant{}
-		participant.UserID = UserID(api_participant.UserID)
-		participant.DMChatRoomID = ret.ID
-		participant.LastReadEventID = DMMessageID(api_participant.LastReadEventID)
-
-		// Process chat settings if this is the logged-in user
-		if participant.UserID == current_user_id {
-			participant.IsNotificationsDisabled = api_room.NotificationsDisabled
-			participant.IsReadOnly = api_room.ReadOnly
-			participant.IsTrusted = api_room.Trusted
-			participant.IsMuted = api_room.Muted
-			participant.Status = api_room.Status
-			participant.IsChatSettingsValid = true
-		}
-		ret.Participants[participant.UserID] = participant
 	}
 	return ret
 }

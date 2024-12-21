@@ -1390,7 +1390,19 @@ func (api API) GetUser(handle UserHandle) (User, error) {
 	return ParseSingleUser(apiUser)
 }
 
+// Calls API#GetUserByID and returns the parsed result
+func GetUserByID(u_id UserID) (User, error) {
+	session, err := NewGuestSession() // This endpoint works better if you're not logged in
+	if err != nil {
+		return User{}, err
+	}
+	return session.GetUserByID(u_id)
+}
+
 func (api API) GetUserByID(u_id UserID) (User, error) {
+	if u_id == UserID(0) {
+		panic("No Users with ID 0")
+	}
 	url, err := url.Parse(GraphqlURL{
 		BaseUrl: "https://x.com/i/api/graphql/Qw77dDjp9xCpUY-AXwt-yQ/UserByRestId",
 		Variables: GraphqlVariables{

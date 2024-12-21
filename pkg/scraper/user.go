@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"path"
 	"regexp"
-	"strings"
-
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/terminal_utils"
 )
 
 const DEFAULT_PROFILE_IMAGE_URL = "https://abs.twimg.com/sticky/default_profile_images/default_profile.png"
@@ -14,14 +11,6 @@ const DEFAULT_PROFILE_IMAGE = "default_profile.png"
 
 type UserID int64
 type UserHandle string
-
-func JoinArrayOfHandles(handles []UserHandle) string {
-	ret := []string{}
-	for _, h := range handles {
-		ret = append(ret, string(h))
-	}
-	return strings.Join(ret, ",")
-}
 
 type User struct {
 	ID                    UserID     `db:"id"`
@@ -49,40 +38,6 @@ type User struct {
 	IsContentDownloaded bool `db:"is_content_downloaded"`
 	IsNeedingFakeID     bool
 	IsIdFake            bool `db:"is_id_fake"`
-}
-
-func (u User) String() string {
-	var verified string
-	if u.IsVerified {
-		verified = "[\u2713]"
-	}
-	ret := fmt.Sprintf(
-		`%s%s
-@%s
-    %s
-
-Following: %d      Followers: %d
-
-Joined %s
-%s
-%s
-`,
-		u.DisplayName,
-		verified,
-		u.Handle,
-		terminal_utils.WrapText(u.Bio, 60),
-		u.FollowingCount,
-		u.FollowersCount,
-		terminal_utils.FormatDate(u.JoinDate.Time),
-		u.Location,
-		u.Website,
-	)
-	if u.PinnedTweet != nil {
-		ret += "\n" + terminal_utils.WrapText(u.PinnedTweet.Text, 60)
-	} else {
-		println("Pinned tweet id:", u.PinnedTweetID)
-	}
-	return ret
 }
 
 func GetUnknownUser() User {
@@ -123,63 +78,6 @@ func GetUnknownUserWithHandle(handle UserHandle) User {
 		IsNeedingFakeID: true,
 		IsIdFake:        true,
 	}
-}
-
-// Turn an APIUser, as returned from the scraper, into a properly structured User object
-func ParseSingleUser(apiUser APIUser) (ret User, err error) {
-	if apiUser.DoesntExist {
-		// User may have been deleted, or there was a typo.  There's no data to parse
-		if apiUser.ScreenName == "" {
-			panic("ScreenName is empty!")
-		}
-		ret = GetUnknownUserWithHandle(UserHandle(apiUser.ScreenName))
-		return
-	}
-	ret.ID = UserID(apiUser.ID)
-	ret.Handle = UserHandle(apiUser.ScreenName)
-	if apiUser.IsBanned {
-		// Banned users won't have any further info, so just return here
-		ret.IsBanned = true
-		return
-	}
-	ret.DisplayName = apiUser.Name
-	ret.Bio = apiUser.Description
-	ret.FollowingCount = apiUser.FriendsCount
-	ret.FollowersCount = apiUser.FollowersCount
-	ret.Location = apiUser.Location
-	if len(apiUser.Entities.URL.Urls) > 0 {
-		ret.Website = apiUser.Entities.URL.Urls[0].ExpandedURL
-	}
-	ret.JoinDate, err = TimestampFromString(apiUser.CreatedAt)
-	if err != nil {
-		err = fmt.Errorf("Error parsing time on user ID %d: %w", ret.ID, err)
-		return
-	}
-	ret.IsPrivate = apiUser.Protected
-	ret.IsVerified = apiUser.Verified
-	ret.ProfileImageUrl = apiUser.ProfileImageURLHTTPS
-
-	if regexp.MustCompile(`_normal\.\w{2,4}`).MatchString(ret.ProfileImageUrl) {
-		ret.ProfileImageUrl = strings.ReplaceAll(ret.ProfileImageUrl, "_normal.", ".")
-	}
-	ret.BannerImageUrl = apiUser.ProfileBannerURL
-
-	ret.ProfileImageLocalPath = ret.compute_profile_image_local_path()
-	ret.BannerImageLocalPath = ret.compute_banner_image_local_path()
-
-	if len(apiUser.PinnedTweetIdsStr) > 0 {
-		ret.PinnedTweetID = TweetID(idstr_to_int(apiUser.PinnedTweetIdsStr[0]))
-	}
-	return
-}
-
-// Calls API#GetUserByID and returns the parsed result
-func GetUserByID(u_id UserID) (User, error) {
-	session, err := NewGuestSession() // This endpoint works better if you're not logged in
-	if err != nil {
-		return User{}, err
-	}
-	return session.GetUserByID(u_id)
 }
 
 /**

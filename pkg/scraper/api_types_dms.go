@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html"
 	"net/url"
+	"path"
 	"strings"
 
 	"github.com/google/uuid"
@@ -77,36 +78,104 @@ func (m *APIDMMessage) NormalizeContent() {
 	m.MessageData.Text = strings.TrimSpace(m.MessageData.Text)
 }
 
-func (m APIDMMessage) ToTweetTrove() TweetTrove {
+func (api_msg APIDMMessage) ToTweetTrove() TweetTrove {
 	ret := NewTweetTrove()
-	if m.ID == 0 {
+	if api_msg.ID == 0 {
 		return ret
 	}
 
-	m.NormalizeContent()
-	result := ParseAPIDMMessage(m)
+	api_msg.NormalizeContent()
+
+	msg := DMMessage{}
+	msg.ID = DMMessageID(api_msg.ID)
+	msg.SentAt = TimestampFromUnixMilli(int64(api_msg.Time))
+	msg.DMChatRoomID = DMChatRoomID(api_msg.ConversationID)
+	msg.SenderID = UserID(api_msg.MessageData.SenderID)
+	msg.Text = api_msg.MessageData.Text
+
+	msg.InReplyToID = DMMessageID(api_msg.MessageData.ReplyData.ID) // Will be "0" if not a reply
+
+	msg.Reactions = make(map[UserID]DMReaction)
+	for _, api_reacc := range api_msg.MessageReactions {
+		reacc := DMReaction{}
+		reacc.ID = DMMessageID(api_reacc.ID)
+		reacc.SenderID = UserID(api_reacc.SenderID)
+		reacc.SentAt = TimestampFromUnixMilli(int64(api_reacc.Time))
+		reacc.Emoji = api_reacc.Emoji
+		reacc.DMMessageID = msg.ID
+		msg.Reactions[reacc.SenderID] = reacc
+	}
+	if api_msg.MessageData.Attachment.Photo.ID != 0 {
+		new_image := ParseAPIMedia(api_msg.MessageData.Attachment.Photo)
+		new_image.DMMessageID = msg.ID
+		msg.Images = []Image{new_image}
+	}
+	if api_msg.MessageData.Attachment.Video.ID != 0 {
+		entity := api_msg.MessageData.Attachment.Video
+		if entity.Type == "video" || entity.Type == "animated_gif" {
+			new_video := ParseAPIVideo(entity)
+			new_video.DMMessageID = msg.ID
+			msg.Videos = append(msg.Videos, new_video)
+		}
+	}
+
+	// Process URLs and link previews
+	for _, url := range api_msg.MessageData.Entities.URLs {
+		// Skip it if it's an embedded tweet
+		_, id, is_ok := TryParseTweetUrl(url.ExpandedURL)
+		if is_ok && id == TweetID(api_msg.MessageData.Attachment.Tweet.Status.ID) {
+			continue
+		}
+		// Skip it if it's an embedded image
+		if api_msg.MessageData.Attachment.Photo.URL == url.ShortenedUrl {
+			continue
+		}
+		// Skip it if it's an embedded video
+		if api_msg.MessageData.Attachment.Video.URL == url.ShortenedUrl {
+			continue
+		}
+
+		var new_url Url
+		if api_msg.MessageData.Attachment.Card.ShortenedUrl == url.ShortenedUrl {
+			if api_msg.MessageData.Attachment.Card.Name == "3691233323:audiospace" {
+				// This "url" is just a link to a Space.  Don't process it as a Url
+				// TODO: ...but do process it as a Space?
+				continue
+			}
+			new_url = ParseAPIUrlCard(api_msg.MessageData.Attachment.Card)
+		}
+		new_url.Text = url.ExpandedURL
+		new_url.ShortText = url.ShortenedUrl
+		new_url.DMMessageID = msg.ID
+		msg.Urls = append(msg.Urls, new_url)
+	}
 
 	// Parse tweet attachment
-	if m.MessageData.Attachment.Tweet.Status.ID != 0 {
-		u, err := ParseSingleUser(m.MessageData.Attachment.Tweet.Status.User)
+	if api_msg.MessageData.Attachment.Tweet.Status.ID != 0 {
+		u, err := ParseSingleUser(api_msg.MessageData.Attachment.Tweet.Status.User)
 		if err != nil {
 			panic(err)
 		}
 		ret.Users[u.ID] = u
 
-		t, err := ParseSingleTweet(m.MessageData.Attachment.Tweet.Status.APITweet)
+		t, err := ParseSingleTweet(api_msg.MessageData.Attachment.Tweet.Status.APITweet)
 		if err != nil {
 			panic(err)
 		}
 		t.UserID = u.ID
 		ret.Tweets[t.ID] = t
-		result.EmbeddedTweetID = t.ID
+		msg.EmbeddedTweetID = t.ID
 	}
-	ret.Messages[result.ID] = result
-
-	// TODO: parse attached images and videos
+	ret.Messages[msg.ID] = msg
 
 	return ret
+}
+
+type APIDMResponse struct {
+	InboxInitialState    APIInbox `json:"inbox_initial_state"`
+	InboxTimeline        APIInbox `json:"inbox_timeline"`
+	ConversationTimeline APIInbox `json:"conversation_timeline"`
+	UserEvents           APIInbox `json:"user_events"`
 }
 
 type APIDMConversation struct {
@@ -179,13 +248,6 @@ type APIInbox struct {
 	Conversations map[string]APIDMConversation `json:"conversations"`
 }
 
-type APIDMResponse struct {
-	InboxInitialState    APIInbox `json:"inbox_initial_state"`
-	InboxTimeline        APIInbox `json:"inbox_timeline"`
-	ConversationTimeline APIInbox `json:"conversation_timeline"`
-	UserEvents           APIInbox `json:"user_events"`
-}
-
 func (r APIInbox) ToTweetTrove(current_user_id UserID) TweetTrove {
 	ret := NewTweetTrove()
 
@@ -211,8 +273,8 @@ func (r APIInbox) ToTweetTrove(current_user_id UserID) TweetTrove {
 
 		ret.MergeWith(entry.Message.ToTweetTrove())
 	}
-	for _, room := range r.Conversations {
-		result := ParseAPIDMChatRoom(room, current_user_id)
+	for _, api_room := range r.Conversations {
+		result := ParseAPIDMChatRoom(api_room, current_user_id)
 		ret.Rooms[result.ID] = result
 	}
 	for _, u := range r.Users {
@@ -223,6 +285,46 @@ func (r APIInbox) ToTweetTrove(current_user_id UserID) TweetTrove {
 		ret.Users[result.ID] = result
 	}
 	return ret
+}
+
+func ParseAPIDMChatRoom(api_room APIDMConversation, current_user_id UserID) DMChatRoom {
+	result := DMChatRoom{}
+	result.ID = DMChatRoomID(api_room.ConversationID)
+	result.Type = api_room.Type
+	result.LastMessagedAt = TimestampFromUnixMilli(int64(api_room.SortTimestamp))
+	result.IsNSFW = api_room.NSFW
+
+	if result.Type == "GROUP_DM" {
+		result.CreatedAt = TimestampFromUnixMilli(int64(api_room.CreateTime))
+		result.CreatedByUserID = UserID(api_room.CreatedByUserID)
+		result.Name = api_room.Name
+		result.AvatarImageRemoteURL = api_room.AvatarImage
+		tmp_url, err := url.Parse(result.AvatarImageRemoteURL)
+		if err != nil {
+			panic(err)
+		}
+		result.AvatarImageLocalPath = fmt.Sprintf("%s_avatar_%s.%s", result.ID, path.Base(tmp_url.Path), tmp_url.Query().Get("format"))
+	}
+
+	result.Participants = make(map[UserID]DMChatParticipant)
+	for _, api_participant := range api_room.Participants {
+		participant := DMChatParticipant{}
+		participant.UserID = UserID(api_participant.UserID)
+		participant.DMChatRoomID = result.ID
+		participant.LastReadEventID = DMMessageID(api_participant.LastReadEventID)
+
+		// Process chat settings if this is the logged-in user
+		if participant.UserID == current_user_id {
+			participant.IsNotificationsDisabled = api_room.NotificationsDisabled
+			participant.IsReadOnly = api_room.ReadOnly
+			participant.IsTrusted = api_room.Trusted
+			participant.IsMuted = api_room.Muted
+			participant.Status = api_room.Status
+			participant.IsChatSettingsValid = true
+		}
+		result.Participants[participant.UserID] = participant
+	}
+	return result
 }
 
 func (api *API) GetDMInbox() (APIInbox, error) {
@@ -283,6 +385,30 @@ func (api *API) GetDMInbox() (APIInbox, error) {
 	err = api.do_http(url.String(), "", &result)
 	result.InboxInitialState.Status = result.InboxInitialState.InboxTimelines.Trusted.Status
 	return result.InboxInitialState, err
+}
+func (api *API) GetInbox(how_many int) (TweetTrove, string, error) {
+	if !api.IsAuthenticated {
+		return TweetTrove{}, "", ErrLoginRequired
+	}
+	dm_response, err := api.GetDMInbox()
+	if err != nil {
+		panic(err)
+	}
+
+	trove := dm_response.ToTweetTrove(api.UserID)
+	cursor := dm_response.Cursor
+	next_cursor_id := dm_response.InboxTimelines.Trusted.MinEntryID
+	for len(trove.Rooms) < how_many && dm_response.Status != "AT_END" {
+		dm_response, err = api.GetInboxTrusted(next_cursor_id)
+		if err != nil {
+			panic(err)
+		}
+		next_trove := dm_response.ToTweetTrove(api.UserID)
+		next_cursor_id = dm_response.MinEntryID
+		trove.MergeWith(next_trove)
+	}
+
+	return trove, cursor, nil
 }
 
 func (api *API) GetInboxTrusted(oldest_id int) (APIInbox, error) {
@@ -345,62 +471,87 @@ func (api *API) GetInboxTrusted(oldest_id int) (APIInbox, error) {
 	return result.InboxTimeline, err
 }
 
-func (api *API) GetDMConversation(id DMChatRoomID, max_id DMMessageID) (APIInbox, error) {
-	url, err := url.Parse("https://twitter.com/i/api/1.1/dm/conversation/" + string(id) + ".json")
+func (api *API) GetConversation(room_id DMChatRoomID, max_id DMMessageID, how_many int) (TweetTrove, error) {
+	if !api.IsAuthenticated {
+		return TweetTrove{}, ErrLoginRequired
+	}
+
+	fetch := func(max_id DMMessageID) (APIInbox, error) {
+		url, err := url.Parse("https://twitter.com/i/api/1.1/dm/conversation/" + string(room_id) + ".json")
+		if err != nil {
+			panic(err)
+		}
+		query := url.Query()
+		query.Add("max_id", fmt.Sprint(max_id))
+		query.Add("context", "FETCH_DM_CONVERSATION_HISTORY")
+		query.Add("include_profile_interstitial_type", "1")
+		query.Add("include_blocking", "1")
+		query.Add("include_blocked_by", "1")
+		query.Add("include_followed_by", "1")
+		query.Add("include_want_retweets", "1")
+		query.Add("include_mute_edge", "1")
+		query.Add("include_can_dm", "1")
+		query.Add("include_can_media_tag", "1")
+		query.Add("include_ext_has_nft_avatar", "1")
+		query.Add("include_ext_is_blue_verified", "1")
+		query.Add("include_ext_verified_type", "1")
+		query.Add("include_ext_profile_image_shape", "1")
+		query.Add("skip_status", "1")
+		query.Add("dm_secret_conversations_enabled", "false")
+		query.Add("krs_registration_enabled", "true")
+		query.Add("cards_platform", "Web-12")
+		query.Add("include_cards", "1")
+		query.Add("include_ext_alt_text", "true")
+		query.Add("include_ext_limited_action_results", "true")
+		query.Add("include_quote_count", "true")
+		query.Add("include_reply_count", "1")
+		query.Add("tweet_mode", "extended")
+		query.Add("include_ext_views", "true")
+		query.Add("dm_users", "false")
+		query.Add("include_groups", "true")
+		query.Add("include_inbox_timelines", "true")
+		query.Add("include_ext_media_color", "true")
+		query.Add("supports_reactions", "true")
+		query.Add("include_conversation_info", "true")
+		query.Add("ext", strings.Join([]string{
+			"mediaColor",
+			"altText",
+			"mediaStats",
+			"highlightedLabel",
+			"hasNftAvatar",
+			"voiceInfo",
+			"birdwatchPivot",
+			"enrichments",
+			"superFollowMetadata",
+			"unmentionInfo",
+			"editControl",
+			"vibe",
+		}, ","))
+		url.RawQuery = query.Encode()
+
+		var result APIDMResponse
+		err = api.do_http(url.String(), "", &result)
+		return result.ConversationTimeline, err
+	}
+
+	dm_response, err := fetch(max_id)
 	if err != nil {
 		panic(err)
 	}
-	query := url.Query()
-	query.Add("max_id", fmt.Sprint(max_id))
-	query.Add("context", "FETCH_DM_CONVERSATION_HISTORY")
-	query.Add("include_profile_interstitial_type", "1")
-	query.Add("include_blocking", "1")
-	query.Add("include_blocked_by", "1")
-	query.Add("include_followed_by", "1")
-	query.Add("include_want_retweets", "1")
-	query.Add("include_mute_edge", "1")
-	query.Add("include_can_dm", "1")
-	query.Add("include_can_media_tag", "1")
-	query.Add("include_ext_has_nft_avatar", "1")
-	query.Add("include_ext_is_blue_verified", "1")
-	query.Add("include_ext_verified_type", "1")
-	query.Add("include_ext_profile_image_shape", "1")
-	query.Add("skip_status", "1")
-	query.Add("dm_secret_conversations_enabled", "false")
-	query.Add("krs_registration_enabled", "true")
-	query.Add("cards_platform", "Web-12")
-	query.Add("include_cards", "1")
-	query.Add("include_ext_alt_text", "true")
-	query.Add("include_ext_limited_action_results", "true")
-	query.Add("include_quote_count", "true")
-	query.Add("include_reply_count", "1")
-	query.Add("tweet_mode", "extended")
-	query.Add("include_ext_views", "true")
-	query.Add("dm_users", "false")
-	query.Add("include_groups", "true")
-	query.Add("include_inbox_timelines", "true")
-	query.Add("include_ext_media_color", "true")
-	query.Add("supports_reactions", "true")
-	query.Add("include_conversation_info", "true")
-	query.Add("ext", strings.Join([]string{
-		"mediaColor",
-		"altText",
-		"mediaStats",
-		"highlightedLabel",
-		"hasNftAvatar",
-		"voiceInfo",
-		"birdwatchPivot",
-		"enrichments",
-		"superFollowMetadata",
-		"unmentionInfo",
-		"editControl",
-		"vibe",
-	}, ","))
-	url.RawQuery = query.Encode()
 
-	var result APIDMResponse
-	err = api.do_http(url.String(), "", &result)
-	return result.ConversationTimeline, err
+	trove := dm_response.ToTweetTrove(api.UserID)
+	oldest := trove.GetOldestMessage(room_id)
+	for len(trove.Messages) < how_many && dm_response.Status != "AT_END" {
+		dm_response, err = fetch(oldest)
+		if err != nil {
+			panic(err)
+		}
+		next_trove := dm_response.ToTweetTrove(api.UserID)
+		oldest = next_trove.GetOldestMessage(room_id)
+		trove.MergeWith(next_trove)
+	}
+
+	return trove, nil
 }
 
 // Returns a TweetTrove and the cursor for the next update, or an error
@@ -458,6 +609,9 @@ func (api *API) PollInboxUpdates(cursor string) (TweetTrove, string, error) {
 	}
 	return result.UserEvents.ToTweetTrove(api.UserID), result.UserEvents.Cursor, nil
 }
+
+// Writes
+// ------
 
 func (api *API) SendDMMessage(room_id DMChatRoomID, text string, in_reply_to_id DMMessageID) (TweetTrove, error) {
 	if !api.IsAuthenticated {
