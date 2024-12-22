@@ -384,17 +384,6 @@ type Feed struct {
 	CursorBottom Cursor
 }
 
-func (f Feed) BottomTimestamp() Timestamp {
-	if len(f.Items) == 0 {
-		return TimestampFromUnix(0)
-	}
-	last := f.Items[len(f.Items)-1]
-	if last.RetweetID != 0 {
-		return f.Retweets[last.RetweetID].RetweetedAt
-	}
-	return f.Tweets[last.TweetID].PostedAt
-}
-
 func NewFeed() Feed {
 	return Feed{
 		Items:      []FeedItem{},
