@@ -34,7 +34,7 @@ func (t *BackgroundTask) Do() {
 				t.log.Print("(the following is an object, not an error)")
 				t.log.Print(r)
 			}
-			t.log.Output(2, string(debug.Stack()))
+			panic_if(t.log.Output(2, string(debug.Stack())))
 		}
 	}()
 
