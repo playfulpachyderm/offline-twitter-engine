@@ -238,7 +238,7 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Every 3 seconds, message detail page will send request to scrape, with `?poll` set
-	if r.URL.Query().Has("poll") {
+	if r.URL.Query().Has("poll") && !app.IsScrapingDisabled {
 		trove, new_cursor, err := app.API.PollInboxUpdates(inbox_cursor)
 		if err != nil && !errors.Is(err, scraper.END_OF_FEED) && !errors.Is(err, scraper.ErrRateLimited) {
 			panic(err)
