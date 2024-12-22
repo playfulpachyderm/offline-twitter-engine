@@ -2,6 +2,7 @@ package webserver
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -118,8 +119,21 @@ func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
 		app.error_400_with_message(w, r, fmt.Sprintf("User not in database: %s", form.AccountName))
 		return
 	}
-	app.LastReadNotificationSortIndex = 0    // Clear unread notifications
-	go app.background_notifications_scrape() // Update notifications info in background (avoid latency when switching users)
+	app.LastReadNotificationSortIndex = 0 // Clear unread notifications
+
+	// Update notifications info in background (avoid latency when switching users)
+	go func() {
+		trove, last_unread_notification_sort_index, err := app.API.GetNotifications(1) // Just 1 page
+		if err != nil && !errors.Is(err, scraper.END_OF_FEED) && !errors.Is(err, scraper.ErrRateLimited) {
+			app.ErrorLog.Printf("Error occurred on getting notifications after switching users: %s", err.Error())
+			return
+		}
+		// We have to save the notifications first, otherwise it'll just report 0 since the last-read sort index
+		app.Profile.SaveTweetTrove(trove, false, &app.API)
+		go app.Profile.SaveTweetTrove(trove, true, &app.API)
+		// Set the notifications count
+		app.LastReadNotificationSortIndex = last_unread_notification_sort_index
+	}()
 	data := NotificationBubbles{
 		NumMessageNotifications: len(app.Profile.GetUnreadConversations(app.ActiveUser.ID)),
 	}

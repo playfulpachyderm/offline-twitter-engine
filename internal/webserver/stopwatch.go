@@ -1,213 +1,151 @@
 package webserver
 
 import (
+	"errors"
 	"fmt"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	"log"
+	"os"
+	"runtime/debug"
 	"time"
+
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-var is_following_only = true // Do one initial scrape of the "following_only" feed and then just regular feed after that
+type BackgroundTask struct {
+	Name         string
+	GetTroveFunc func(*scraper.API) scraper.TweetTrove
+	StartDelay   time.Duration
+	Period       time.Duration
 
-func (app *Application) background_scrape() {
+	log *log.Logger
+	app *Application
+}
+
+func (t *BackgroundTask) Do() {
 	// Avoid crashing the thread if a scrape fails
 	defer func() {
 		if r := recover(); r != nil {
 			// TODO
-			fmt.Println("Background Home Timeline thread: panicked!")
+			t.log.Print("panicked!")
 			if err, ok := r.(error); ok {
-				fmt.Println(err.Error())
+				t.log.Print("(the following is an error)")
+				t.log.Print(err.Error())
 			} else {
-				fmt.Println(r)
+				t.log.Print("(the following is an object, not an error)")
+				t.log.Print(r)
 			}
+			t.log.Output(2, string(debug.Stack()))
 		}
 	}()
 
-	fmt.Println("Starting home timeline scrape...")
-
 	// Do nothing if scraping is currently disabled
-	if app.IsScrapingDisabled {
-		fmt.Println("Skipping home timeline scrape!")
+	if t.app.IsScrapingDisabled {
+		t.log.Print("(disabled)")
 		return
+	} else {
+		t.log.Print("starting scrape")
 	}
 
-	fmt.Println("Scraping home timeline...")
-	trove, err := app.API.GetHomeTimeline("", is_following_only)
-	if err != nil {
-		app.ErrorLog.Printf("Background scrape failed: %s", err.Error())
-		return
-	}
-	fmt.Println("Saving scrape results...")
-	app.Profile.SaveTweetTrove(trove, false, &app.API)
-	go app.Profile.SaveTweetTrove(trove, true, &app.API)
-	fmt.Println("Scraping succeeded.")
-	is_following_only = false
+	// Run the task
+	trove := t.GetTroveFunc(&t.app.API)
+	t.log.Print("saving results")
+	t.app.Profile.SaveTweetTrove(trove, false, &t.app.API)
+	go t.app.Profile.SaveTweetTrove(trove, true, &t.app.API)
+	t.log.Print("success")
 }
 
-func (app *Application) background_user_likes_scrape() {
-	// Avoid crashing the thread if a scrape fails
-	defer func() {
-		if r := recover(); r != nil {
-			// TODO
-			fmt.Println("Background Home Timeline thread: panicked!")
-			if err, ok := r.(error); ok {
-				fmt.Println(err.Error())
-			} else {
-				fmt.Println(r)
-			}
+func (t *BackgroundTask) StartBackground() {
+	// Start the task in a goroutine
+	t.log = log.New(os.Stdout, fmt.Sprintf("[background (%s)]: ", t.Name), log.LstdFlags)
+
+	go func() {
+		t.log.Printf("starting, with initial delay %s and regular delay %s", t.StartDelay, t.Period)
+
+		time.Sleep(t.StartDelay)          // Initial delay
+		timer := time.NewTicker(t.Period) // Regular delay
+		defer timer.Stop()
+
+		t.Do()
+		for range timer.C {
+			t.Do()
 		}
 	}()
-
-	fmt.Println("Starting user likes scrape...")
-
-	// Do nothing if scraping is currently disabled
-	if app.IsScrapingDisabled {
-		fmt.Println("Skipping user likes scrape!")
-		return
-	}
-
-	fmt.Println("Scraping user likes...")
-	trove, err := app.API.GetUserLikes(app.ActiveUser.ID, 50) // TODO: parameterizable
-	if err != nil {
-		app.ErrorLog.Printf("Background scrape failed: %s", err.Error())
-		return
-	}
-	fmt.Println("Saving scrape results...")
-	app.Profile.SaveTweetTrove(trove, false, &app.API)
-	go app.Profile.SaveTweetTrove(trove, true, &app.API)
-	fmt.Println("Scraping succeeded.")
 }
+
+var is_following_only = 0           // Do mostly "For you" feed, but start with one round of the "following_only" feed
+var is_following_only_frequency = 5 // Make every 5th scrape a "following_only" one
 
 var inbox_cursor string = ""
 
-func (app *Application) background_dm_polling_scrape() {
-	// Avoid crashing the thread if a scrape fails
-	defer func() {
-		if r := recover(); r != nil {
-			// TODO
-			fmt.Println("Background Home Timeline thread: panicked!")
-			if err, ok := r.(error); ok {
-				fmt.Println(err.Error())
-			} else {
-				fmt.Println(r)
-			}
-		}
-	}()
-
-	fmt.Println("Starting user DMs scrape...")
-
-	// Do nothing if scraping is currently disabled
-	if app.IsScrapingDisabled {
-		fmt.Println("Skipping user DMs scrape!")
-		return
-	}
-
-	fmt.Println("Scraping user DMs...")
-	var trove scraper.TweetTrove
-	var err error
-	if inbox_cursor == "" {
-		trove, inbox_cursor, err = app.API.GetInbox(0)
-	} else {
-		trove, inbox_cursor, err = app.API.PollInboxUpdates(inbox_cursor)
-	}
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Saving DM results...")
-	app.Profile.SaveTweetTrove(trove, false, &app.API)
-	go app.Profile.SaveTweetTrove(trove, true, &app.API)
-	fmt.Println("Scraping DMs succeeded.")
-}
-
-func (app *Application) background_notifications_scrape() {
-	// Avoid crashing the thread if a scrape fails
-	defer func() {
-		if r := recover(); r != nil {
-			// TODO
-			fmt.Println("Background notifications thread: panicked!")
-			if err, ok := r.(error); ok {
-				fmt.Println(err.Error())
-			} else {
-				fmt.Println(r)
-			}
-		}
-	}()
-
-	fmt.Println("Starting notifications scrape...")
-
-	// Do nothing if scraping is currently disabled
-	if app.IsScrapingDisabled {
-		fmt.Println("Skipping notifications scrape!")
-		return
-	}
-
-	fmt.Println("Scraping user notifications...")
-	trove, last_unread_notification_sort_index, err := app.API.GetNotifications(1) // Just 1 page
-	if err != nil {
-		panic(err)
-	}
-	// Jot down the unread notifs info in the application object (to render notification count bubble)
-	app.LastReadNotificationSortIndex = last_unread_notification_sort_index
-	fmt.Println("Saving notification results...")
-	app.Profile.SaveTweetTrove(trove, false, &app.API)
-	go app.Profile.SaveTweetTrove(trove, true, &app.API)
-	fmt.Println("Scraping notification succeeded.")
-}
-
 func (app *Application) start_background() {
-	fmt.Println("Starting background")
+	fmt.Println("Starting background tasks")
 
-	// Scrape the home timeline every 3 minutes
-	go func() {
-		// Initial delay before the first task execution
-		time.Sleep(10 * time.Second)
-		app.background_scrape()
+	timeline_task := BackgroundTask{
+		Name: "home timeline",
+		GetTroveFunc: func(api *scraper.API) scraper.TweetTrove {
+			should_do_following_only := is_following_only%is_following_only_frequency == 0
+			trove, err := api.GetHomeTimeline("", should_do_following_only)
+			if err != nil && !errors.Is(err, scraper.END_OF_FEED) && !errors.Is(err, scraper.ErrRateLimited) {
+				panic(err)
+			}
+			return trove
+		},
+		StartDelay: 10 * time.Second,
+		Period:     3 * time.Minute,
+		app:        app,
+	}
+	timeline_task.StartBackground()
 
-		// Create a timer that triggers the background task every 3 minutes
-		interval := 3 * time.Minute // TODO: parameterizable
-		timer := time.NewTicker(interval)
-		defer timer.Stop()
+	likes_task := BackgroundTask{
+		Name: "user likes",
+		GetTroveFunc: func(api *scraper.API) scraper.TweetTrove {
+			trove, err := api.GetUserLikes(api.UserID, 50) // TODO: parameterizable
+			if err != nil && !errors.Is(err, scraper.END_OF_FEED) && !errors.Is(err, scraper.ErrRateLimited) {
+				panic(err)
+			}
+			return trove
+		},
+		StartDelay: 15 * time.Second,
+		Period:     10 * time.Minute,
+		app:        app,
+	}
+	likes_task.StartBackground()
 
-		for range timer.C {
-			app.background_scrape()
-		}
-	}()
+	dms_task := BackgroundTask{
+		Name: "DM inbox",
+		GetTroveFunc: func(api *scraper.API) scraper.TweetTrove {
+			var trove scraper.TweetTrove
+			var err error
+			if inbox_cursor == "" {
+				trove, inbox_cursor, err = api.GetInbox(0)
+			} else {
+				trove, inbox_cursor, err = api.PollInboxUpdates(inbox_cursor)
+			}
+			if err != nil && !errors.Is(err, scraper.END_OF_FEED) && !errors.Is(err, scraper.ErrRateLimited) {
+				panic(err)
+			}
+			return trove
+		},
+		StartDelay: 5 * time.Second,
+		Period:     10 * time.Second,
+		app:        app,
+	}
+	dms_task.StartBackground()
 
-	// Scrape the logged-in user's likes every 10 minutes
-	go func() {
-		time.Sleep(15 * time.Second)
-		app.background_user_likes_scrape()
-
-		interval := 10 * time.Minute // TODO: parameterizable
-		timer := time.NewTicker(interval)
-		defer timer.Stop()
-
-		for range timer.C {
-			app.background_user_likes_scrape()
-		}
-	}()
-
-	// Scrape inbox DMs every 10 seconds
-	go func() {
-		time.Sleep(5 * time.Second)
-		app.background_dm_polling_scrape()
-
-		interval := 10 * time.Second
-		timer := time.NewTicker(interval)
-		defer timer.Stop()
-		for range timer.C {
-			app.background_dm_polling_scrape()
-		}
-	}()
-
-	// Scrape notifications every 10 seconds
-	go func() {
-		app.background_notifications_scrape()
-
-		interval := 10 * time.Second
-		timer := time.NewTicker(interval)
-		defer timer.Stop()
-		for range timer.C {
-			app.background_notifications_scrape()
-		}
-	}()
+	notifications_task := BackgroundTask{
+		Name: "DM inbox",
+		GetTroveFunc: func(api *scraper.API) scraper.TweetTrove {
+			trove, last_unread_notification_sort_index, err := api.GetNotifications(1) // Just 1 page
+			if err != nil && !errors.Is(err, scraper.END_OF_FEED) && !errors.Is(err, scraper.ErrRateLimited) {
+				panic(err)
+			}
+			// Jot down the unread notifs info in the application object (to render notification count bubble)
+			app.LastReadNotificationSortIndex = last_unread_notification_sort_index
+			return trove
+		},
+		StartDelay: 1 * time.Second,
+		Period:     10 * time.Second,
+		app:        app,
+	}
+	notifications_task.StartBackground()
 }

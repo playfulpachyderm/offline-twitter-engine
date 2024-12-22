@@ -3,6 +3,7 @@ package webserver
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -238,8 +239,13 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 
 	// Every 3 seconds, message detail page will send request to scrape, with `?poll` set
 	if r.URL.Query().Has("poll") {
-		// Not run as a goroutine; this call blocks.  It's not actually "background"
-		app.background_dm_polling_scrape()
+		trove, new_cursor, err := app.API.PollInboxUpdates(inbox_cursor)
+		if err != nil && !errors.Is(err, scraper.END_OF_FEED) && !errors.Is(err, scraper.ErrRateLimited) {
+			panic(err)
+		}
+		inbox_cursor = new_cursor
+		app.Profile.SaveTweetTrove(trove, false, &app.API)
+		go app.Profile.SaveTweetTrove(trove, true, &app.API)
 	}
 
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
