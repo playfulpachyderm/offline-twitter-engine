@@ -218,11 +218,11 @@ test $(sqlite3 twitter.db "select is_content_downloaded from users where handle=
 
 
 # Get a user's feed
-tw fetch_user covfefeanon
-covfefe_id=$(sqlite3 twitter.db "select id from users where handle like 'covfefeanon'")
+tw fetch_user cernovich
+cernovich_id=$(sqlite3 twitter.db "select id from users where handle like 'cernovich'")
 test $(sqlite3 twitter.db "select count(*) from retweets") = "0"
 tweet_count_1=$(sqlite3 twitter.db "select count(*) from tweets")
-tw get_user_tweets covfefeanon
+tw get_user_tweets cernovich
 
 # Check that there are some retweets
 rts_count=$(sqlite3 twitter.db "select count(*) from retweets")
@@ -230,7 +230,7 @@ test $rts_count -gt "0"
 
 # Check that new retweets plus new tweets > 50
 tweet_count_2=$(sqlite3 twitter.db "select count(*) from tweets")
-test $(sqlite3 twitter.db "select count(*) from retweets where retweeted_by != $covfefe_id") = "0"
+test $(sqlite3 twitter.db "select count(*) from retweets where retweeted_by != $cernovich_id") = "0"
 test $(($rts_count + $tweet_count_2 - $tweet_count_1)) -gt "50"
 
 
