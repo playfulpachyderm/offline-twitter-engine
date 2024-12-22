@@ -37,12 +37,10 @@
           </div>
         {{end}}
         {{range .Images}}
+          {{/* DM images can only be loaded with an authenticated session.  So sending the RemoteUrl
+                in an <img> tag is not useful; it will just HTTP 401 */}}
           <img class="dm-message__embedded-image"
-            {{if .IsDownloaded}}
-              src="/content/images/{{.LocalFilename}}"
-            {{else}}
-              src="{{.RemoteURL}}"
-            {{end}}
+            src="/content/images/{{.LocalFilename}}"
             width="{{.Width}}" height="{{.Height}}"
             onclick="image_carousel.querySelector('img').src = this.src; image_carousel.showModal();"
           >
