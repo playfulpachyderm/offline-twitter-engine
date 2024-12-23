@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"path"
 	"regexp"
-	"sort"
 	"strconv"
+	"slices"
 	"strings"
 	"time"
 )
@@ -38,21 +38,16 @@ func ParseAPIMedia(apiMedia APIMedia) Image {
 	}
 }
 
-type SortableVariants []struct {
+type Variant struct {
 	Bitrate int    `json:"bitrate,omitempty"`
 	URL     string `json:"url"`
 }
-
-func (v SortableVariants) Len() int           { return len(v) }
-func (v SortableVariants) Swap(i, j int)      { v[i], v[j] = v[j], v[i] }
-func (v SortableVariants) Less(i, j int) bool { return v[i].Bitrate > v[j].Bitrate }
-
 type APIExtendedMedia struct {
 	ID            int64  `json:"id_str,string"`
 	MediaURLHttps string `json:"media_url_https"`
 	Type          string `json:"type"`
 	VideoInfo     struct {
-		Variants SortableVariants `json:"variants"`
+		Variants []Variant `json:"variants"`
 		Duration int              `json:"duration_millis"`
 	} `json:"video_info"`
 	ExtMediaAvailability struct {
@@ -201,7 +196,7 @@ func parse_num_choices(card_name string) int {
 
 func ParseAPIVideo(apiVideo APIExtendedMedia) Video {
 	variants := apiVideo.VideoInfo.Variants
-	sort.Sort(variants)
+	slices.SortFunc(variants, func(a, b Variant) int { return b.Bitrate - a.Bitrate })
 	video_remote_url := variants[0].URL
 
 	var view_count int
@@ -769,11 +764,7 @@ type APIv1Entry struct {
 	} `json:"content"`
 }
 
-type SortableEntries []APIv1Entry
-
-func (e SortableEntries) Len() int           { return len(e) }
-func (e SortableEntries) Swap(i, j int)      { e[i], e[j] = e[j], e[i] }
-func (e SortableEntries) Less(i, j int) bool { return e[i].SortIndex > e[j].SortIndex }
+func entry_sorting_cmp(a, b APIv1Entry) int { return int(b.SortIndex - a.SortIndex) }
 
 type APIv1Response struct {
 	GlobalObjects struct {
@@ -784,7 +775,7 @@ type APIv1Response struct {
 	Timeline struct {
 		Instructions []struct {
 			AddEntries struct {
-				Entries SortableEntries `json:"entries"`
+				Entries []APIv1Entry `json:"entries"`
 			} `json:"addEntries"`
 			ReplaceEntry struct {
 				Entry APIv1Entry
@@ -849,7 +840,7 @@ func (t *APIv1Response) HandleTombstones() []UserHandle {
 
 	// Handle tombstones in the conversation flow
 	entries := t.Timeline.Instructions[0].AddEntries.Entries
-	sort.Sort(entries)
+	slices.SortFunc(entries, entry_sorting_cmp)
 	for i, entry := range entries {
 		if entry.Content.Item.Content.Tombstone.TombstoneInfo.RichText.Text != "" {
 			// Try to reconstruct the tombstone tweet

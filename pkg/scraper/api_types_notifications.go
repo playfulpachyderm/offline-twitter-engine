@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
-	"sort"
 	"strings"
 	"time"
+	"slices"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -137,7 +137,7 @@ func (t *APIv1Response) ToTweetTroveAsNotifications(current_user_id UserID) (Twe
 
 	// Find the "addEntries" instruction
 	for _, instr := range t.Timeline.Instructions {
-		sort.Sort(instr.AddEntries.Entries)
+		slices.SortFunc(instr.AddEntries.Entries, entry_sorting_cmp)
 		for _, entry := range instr.AddEntries.Entries {
 			id_re := regexp.MustCompile(`notification-([\w-]+)`)
 			matches := id_re.FindStringSubmatch(entry.EntryID)
@@ -276,7 +276,7 @@ func (t *APIv1Response) ToTweetTroveAsNotificationDetail() (TweetTrove, []TweetI
 
 	// Find the "addEntries" instruction
 	for _, instr := range t.Timeline.Instructions {
-		sort.Sort(instr.AddEntries.Entries)
+		slices.SortFunc(instr.AddEntries.Entries, entry_sorting_cmp)
 		for _, entry := range instr.AddEntries.Entries {
 			if entry.Content.Item.Content.Tweet.ID != 0 {
 				ids = append(ids, TweetID(entry.Content.Item.Content.Tweet.ID))
