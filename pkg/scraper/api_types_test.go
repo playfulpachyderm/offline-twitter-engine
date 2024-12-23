@@ -75,18 +75,18 @@ func TestUserProfileToAPIUser(t *testing.T) {
 	assert.Equal(user_resp.Data.User.Result.Legacy.FollowersCount, result.FollowersCount)
 }
 
-func TestGetCursor(t *testing.T) {
+func TestGetCursorBottom(t *testing.T) {
 	assert := assert.New(t)
 	data, err := os.ReadFile("test_responses/midriffs_anarchist_cookbook.json")
 	if err != nil {
 		panic(err)
 	}
-	var tweet_resp TweetResponse
+	var tweet_resp APIv1Response
 	err = json.Unmarshal(data, &tweet_resp)
 	assert.NoError(err)
 
 	assert.Equal("LBmGhsC+ibH1peAmgICjpbS0m98mgICj7a2lmd8mhsC4rbmsmN8mgMCqkbT1p+AmgsC4ucv4o+AmhoCyrf+nlt8mhMC9qfOwlt8mJQISAAA=",
-		tweet_resp.GetCursor())
+		tweet_resp.GetCursorBottom())
 }
 
 func TestIsEndOfFeed(t *testing.T) {
@@ -103,7 +103,7 @@ func TestIsEndOfFeed(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
-		var tweet_resp TweetResponse
+		var tweet_resp APIv1Response
 		err = json.Unmarshal(data, &tweet_resp)
 		assert.NoError(err)
 		assert.Equal(v.is_end_of_feed, tweet_resp.IsEndOfFeed())
@@ -116,7 +116,7 @@ func TestHandleTombstonesHidden(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	var tweet_resp TweetResponse
+	var tweet_resp APIv1Response
 	err = json.Unmarshal(data, &tweet_resp)
 	require.NoError(t, err)
 	assert.Equal(2, len(tweet_resp.GlobalObjects.Tweets), "Before tombstone handling")
@@ -146,7 +146,7 @@ func TestHandleTombstonesDeleted(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	var tweet_resp TweetResponse
+	var tweet_resp APIv1Response
 	err = json.Unmarshal(data, &tweet_resp)
 	require.NoError(t, err)
 	assert.Equal(1, len(tweet_resp.GlobalObjects.Tweets), "Before tombstone handling")
@@ -169,7 +169,7 @@ func TestHandleTombstonesUnavailable(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	var tweet_resp TweetResponse
+	var tweet_resp APIv1Response
 	err = json.Unmarshal(data, &tweet_resp)
 	require.NoError(t, err)
 	assert.Equal(2, len(tweet_resp.GlobalObjects.Tweets), "Before tombstone handling")

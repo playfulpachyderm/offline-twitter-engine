@@ -735,7 +735,7 @@ func (u UserResponse) ConvertToAPIUser() (APIUser, error) {
 	return ret, nil
 }
 
-type Entry struct {
+type APIv1Entry struct {
 	EntryID   string `json:"entryId"`
 	SortIndex int64  `json:"sortIndex,string"`
 	Content   struct {
@@ -769,17 +769,13 @@ type Entry struct {
 	} `json:"content"`
 }
 
-func (e Entry) GetTombstoneText() string {
-	return e.Content.Item.Content.Tombstone.TombstoneInfo.RichText.Text
-}
-
-type SortableEntries []Entry
+type SortableEntries []APIv1Entry
 
 func (e SortableEntries) Len() int           { return len(e) }
 func (e SortableEntries) Swap(i, j int)      { e[i], e[j] = e[j], e[i] }
 func (e SortableEntries) Less(i, j int) bool { return e[i].SortIndex > e[j].SortIndex }
 
-type TweetResponse struct {
+type APIv1Response struct {
 	GlobalObjects struct {
 		Tweets        map[string]APITweet        `json:"tweets"`
 		Users         map[string]APIUser         `json:"users"`
@@ -791,7 +787,7 @@ type TweetResponse struct {
 				Entries SortableEntries `json:"entries"`
 			} `json:"addEntries"`
 			ReplaceEntry struct {
-				Entry Entry
+				Entry APIv1Entry
 			} `json:"replaceEntry"`
 			MarkEntriesUnreadGreaterThanSortIndex struct {
 				SortIndex int64 `json:"sortIndex,string"`
@@ -819,11 +815,9 @@ var tombstone_types = map[string]string{
 	"This Post is from an account that no longer exists. Learn more":                                         "no longer exists",
 }
 
-/**
- * Insert tweets into GlobalObjects for each tombstone.  Returns a list of users that need to
- * be fetched for tombstones.
- */
-func (t *TweetResponse) HandleTombstones() []UserHandle {
+// Insert tweets into GlobalObjects for each tombstone.  Returns a list of users that need to
+// be fetched for tombstones.
+func (t *APIv1Response) HandleTombstones() []UserHandle {
 	ret := []UserHandle{}
 
 	// Handle tombstones in quote-tweets
@@ -857,7 +851,7 @@ func (t *TweetResponse) HandleTombstones() []UserHandle {
 	entries := t.Timeline.Instructions[0].AddEntries.Entries
 	sort.Sort(entries)
 	for i, entry := range entries {
-		if entry.GetTombstoneText() != "" {
+		if entry.Content.Item.Content.Tombstone.TombstoneInfo.RichText.Text != "" {
 			// Try to reconstruct the tombstone tweet
 			var tombstoned_tweet APITweet
 			tombstoned_tweet.ID = int64(i) // Set a default to prevent clobbering other tombstones
@@ -880,9 +874,10 @@ func (t *TweetResponse) HandleTombstones() []UserHandle {
 				tombstoned_tweet.InReplyToStatusID = prev_tweet_id
 			}
 
-			short_text, ok := tombstone_types[entry.GetTombstoneText()]
+			short_text, ok := tombstone_types[entry.Content.Item.Content.Tombstone.TombstoneInfo.RichText.Text]
 			if !ok {
-				panic(fmt.Errorf("Unknown tombstone text %q:\n  %w", entry.GetTombstoneText(), EXTERNAL_API_ERROR))
+				panic(fmt.Errorf("Unknown tombstone text %q:\n  %w",
+					entry.Content.Item.Content.Tombstone.TombstoneInfo.RichText.Text, EXTERNAL_API_ERROR))
 			}
 			tombstoned_tweet.TombstoneText = short_text
 
@@ -894,7 +889,7 @@ func (t *TweetResponse) HandleTombstones() []UserHandle {
 	return ret
 }
 
-func (t *TweetResponse) GetCursor() string {
+func (t *APIv1Response) GetCursorBottom() string {
 	// TODO: is this function used anywhere other than Notifications?
 	for _, instr := range t.Timeline.Instructions {
 		if len(instr.AddEntries.Entries) > 0 {
@@ -914,7 +909,7 @@ func (t *TweetResponse) GetCursor() string {
 	return ""
 }
 
-func (t *TweetResponse) GetCursorTop() string {
+func (t *APIv1Response) GetCursorTop() string {
 	for _, instr := range t.Timeline.Instructions {
 		for _, entry := range instr.AddEntries.Entries {
 			if strings.Contains(entry.EntryID, "cursor-top") {
@@ -925,13 +920,11 @@ func (t *TweetResponse) GetCursorTop() string {
 	return ""
 }
 
-/**
- * Test for one case of end-of-feed.  Cursor increments on each request for some reason, but
- * there's no new content.  This seems to happen when there's a pinned tweet.
- *
- * In this case, we look for an "entries" object that has only cursors in it, and no tweets.
- */
-func (t *TweetResponse) IsEndOfFeed() bool {
+// Test for one case of end-of-feed.  Cursor increments on each request for some reason, but
+// there's no new content.  This seems to happen when there's a pinned tweet.
+//
+// In this case, we look for an "entries" object that has only cursors in it, and no tweets.
+func (t *APIv1Response) IsEndOfFeed() bool {
 	for _, instr := range t.Timeline.Instructions {
 		entries := instr.AddEntries.Entries
 		if len(entries) == 0 {
@@ -949,7 +942,7 @@ func (t *TweetResponse) IsEndOfFeed() bool {
 	return true
 }
 
-func (t *TweetResponse) ToTweetTrove() (TweetTrove, error) {
+func (t *APIv1Response) ToTweetTrove() (TweetTrove, error) {
 	ret := NewTweetTrove()
 
 	for _, single_tweet := range t.GlobalObjects.Tweets {

@@ -18,7 +18,7 @@ func TestParseNotificationsPage(t *testing.T) {
 	data, err := os.ReadFile("test_responses/notifications/notifications_response_first_page.json")
 	require.NoError(err)
 
-	var resp TweetResponse
+	var resp APIv1Response
 	err = json.Unmarshal(data, &resp)
 	require.NoError(err)
 
@@ -164,7 +164,7 @@ func TestParseNotificationsPage(t *testing.T) {
 	assert.Equal(int64(1724566381021), resp.CheckUnreadNotifications())
 
 	// Test cursor-bottom
-	bottom_cursor := resp.GetCursor()
+	bottom_cursor := resp.GetCursorBottom()
 	assert.Equal("DAACDAABCgABFKncQJGVgAQIAAIAAAABCAADSQ3bEQgABIsN6BEACwACAAAAC0FaRkxRSXFNLTJJAAA", bottom_cursor)
 	assert.False(resp.IsEndOfFeed())
 
@@ -178,7 +178,7 @@ func TestParseNotificationsEndOfFeed(t *testing.T) {
 	data, err := os.ReadFile("test_responses/notifications/notifications_end_of_feed.json")
 	require.NoError(err)
 
-	var resp TweetResponse
+	var resp APIv1Response
 	err = json.Unmarshal(data, &resp)
 	require.NoError(err)
 
@@ -191,7 +191,7 @@ func TestParseNotificationDetail(t *testing.T) {
 	data, err := os.ReadFile("test_responses/notifications/notification_detail.json")
 	require.NoError(err)
 
-	var resp TweetResponse
+	var resp APIv1Response
 	err = json.Unmarshal(data, &resp)
 	require.NoError(err)
 

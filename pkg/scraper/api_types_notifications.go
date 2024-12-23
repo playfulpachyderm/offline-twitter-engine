@@ -13,7 +13,7 @@ import (
 )
 
 // TODO: pagination
-func (api *API) GetNotificationsPage(cursor string) (TweetResponse, error) {
+func (api *API) GetNotificationsPage(cursor string) (APIv1Response, error) {
 	url, err := url.Parse("https://api.twitter.com/2/notifications/all.json")
 	if err != nil {
 		panic(err)
@@ -23,7 +23,7 @@ func (api *API) GetNotificationsPage(cursor string) (TweetResponse, error) {
 	add_tweet_query_params(&query)
 	url.RawQuery = query.Encode()
 
-	var result TweetResponse
+	var result APIv1Response
 	err = api.do_http(url.String(), cursor, &result)
 
 	return result, err
@@ -41,7 +41,7 @@ func (api *API) GetNotifications(how_many int) (TweetTrove, int64, error) {
 	}
 
 	for len(trove.Notifications) < how_many {
-		resp, err = api.GetNotificationsPage(resp.GetCursor())
+		resp, err = api.GetNotificationsPage(resp.GetCursorBottom())
 		if errors.Is(err, ErrRateLimited) {
 			log.Warnf("Rate limited!")
 			break
@@ -86,7 +86,7 @@ func (api *API) MarkNotificationsAsRead() error {
 }
 
 // Check a Notifications result for unread notifications.  Returns `0` if there are none.
-func (t TweetResponse) CheckUnreadNotifications() int64 {
+func (t APIv1Response) CheckUnreadNotifications() int64 {
 	for _, instr := range t.Timeline.Instructions {
 		if instr.MarkEntriesUnreadGreaterThanSortIndex.SortIndex != 0 {
 			return instr.MarkEntriesUnreadGreaterThanSortIndex.SortIndex
@@ -129,7 +129,7 @@ func (api *API) GetNotificationDetailForAll(trove TweetTrove, to_scrape []Notifi
 	return trove, nil
 }
 
-func (t *TweetResponse) ToTweetTroveAsNotifications(current_user_id UserID) (TweetTrove, error) {
+func (t *APIv1Response) ToTweetTroveAsNotifications(current_user_id UserID) (TweetTrove, error) {
 	ret, err := t.ToTweetTrove()
 	if err != nil {
 		return TweetTrove{}, err
@@ -251,7 +251,7 @@ func ParseSingleNotification(n APINotification) Notification {
 	return ret
 }
 
-func (api *API) GetNotificationDetail(n Notification) (TweetResponse, error) {
+func (api *API) GetNotificationDetail(n Notification) (APIv1Response, error) {
 	url, err := url.Parse(fmt.Sprintf("https://twitter.com/i/api/2/notifications/view/%s.json", n.ID))
 	if err != nil {
 		panic(err)
@@ -261,13 +261,13 @@ func (api *API) GetNotificationDetail(n Notification) (TweetResponse, error) {
 	add_tweet_query_params(&query)
 	url.RawQuery = query.Encode()
 
-	var result TweetResponse
+	var result APIv1Response
 	err = api.do_http(url.String(), "", &result)
 
 	return result, err
 }
 
-func (t *TweetResponse) ToTweetTroveAsNotificationDetail() (TweetTrove, []TweetID, error) {
+func (t *APIv1Response) ToTweetTroveAsNotificationDetail() (TweetTrove, []TweetID, error) {
 	ids := []TweetID{}
 	ret, err := t.ToTweetTrove()
 	if err != nil {

@@ -217,13 +217,13 @@ func TestTweetWithSpace(t *testing.T) {
 	assert.False(s.IsDetailsFetched)
 }
 
-func TestParseTweetResponse(t *testing.T) {
+func TestParseAPIv1Response(t *testing.T) {
 	assert := assert.New(t)
 	data, err := os.ReadFile("test_responses/michael_malice_feed.json")
 	if err != nil {
 		panic(err)
 	}
-	var tweet_resp TweetResponse
+	var tweet_resp APIv1Response
 	err = json.Unmarshal(data, &tweet_resp)
 	require.NoError(t, err)
 
@@ -235,13 +235,13 @@ func TestParseTweetResponse(t *testing.T) {
 	assert.Len(trove.Users, 9)
 }
 
-func TestParseTweetResponseWithTombstones(t *testing.T) {
+func TestParseAPIv1ResponseWithTombstones(t *testing.T) {
 	assert := assert.New(t)
 	data, err := os.ReadFile("test_responses/tombstones/tombstone_deleted.json")
 	if err != nil {
 		panic(err)
 	}
-	var tweet_resp TweetResponse
+	var tweet_resp APIv1Response
 	err = json.Unmarshal(data, &tweet_resp)
 	require.NoError(t, err)
 

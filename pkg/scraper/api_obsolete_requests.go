@@ -13,7 +13,7 @@ import (
 const API_CONVERSATION_BASE_PATH = "https://twitter.com/i/api/2/timeline/conversation/"
 const API_USER_TIMELINE_BASE_PATH = "https://api.twitter.com/2/timeline/profile/"
 
-func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) {
+func (api API) GetFeedFor(user_id UserID, cursor string) (APIv1Response, error) {
 	url, err := url.Parse(fmt.Sprintf("%s%d.json", API_USER_TIMELINE_BASE_PATH, user_id))
 	if err != nil {
 		panic(err)
@@ -22,7 +22,7 @@ func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) 
 	add_tweet_query_params(&queryParams)
 	url.RawQuery = queryParams.Encode()
 
-	var result TweetResponse
+	var result APIv1Response
 	err = api.do_http(url.String(), cursor, &result)
 
 	return result, err
@@ -33,10 +33,10 @@ func (api API) GetFeedFor(user_id UserID, cursor string) (TweetResponse, error) 
  *
  * args:
  * - user_id: the user's UserID
- * - response: an "out" parameter; the TweetResponse that tweets, RTs and users will be appended to
+ * - response: an "out" parameter; the APIv1Response that tweets, RTs and users will be appended to
  * - min_tweets: the desired minimum amount of tweets to get
  */
-func (api API) GetMoreTweetsFromFeed(user_id UserID, response *TweetResponse, min_tweets int) error {
+func (api API) GetMoreTweetsFromFeed(user_id UserID, response *APIv1Response, min_tweets int) error {
 	last_response := response
 	for last_response.GetCursor() != "" && len(response.GlobalObjects.Tweets) < min_tweets {
 		fresh_response, err := api.GetFeedFor(user_id, last_response.GetCursor())
@@ -121,7 +121,7 @@ func GetTweetFull(id TweetID, how_many int) (trove TweetTrove, err error) {
 		}
 	}
 
-	// This has to be called BEFORE ToTweetTrove, because it modifies the TweetResponse (adds tombstone tweets to its tweets list)
+	// This has to be called BEFORE ToTweetTrove, because it modifies the APIv1Response (adds tombstone tweets to its tweets list)
 	tombstoned_users := tweet_response.HandleTombstones()
 
 	trove, err = tweet_response.ToTweetTrove()
@@ -150,7 +150,7 @@ func GetTweetFull(id TweetID, how_many int) (trove TweetTrove, err error) {
 	return
 }
 
-func (api *API) GetTweet(id TweetID, cursor string) (TweetResponse, error) {
+func (api *API) GetTweet(id TweetID, cursor string) (APIv1Response, error) {
 	url, err := url.Parse(fmt.Sprintf("%s%d.json", API_CONVERSATION_BASE_PATH, id))
 	if err != nil {
 		panic(err)
@@ -162,13 +162,13 @@ func (api *API) GetTweet(id TweetID, cursor string) (TweetResponse, error) {
 	add_tweet_query_params(&queryParams)
 	url.RawQuery = queryParams.Encode()
 
-	var result TweetResponse
+	var result APIv1Response
 	err = api.do_http(url.String(), cursor, &result)
 	return result, err
 }
 
 // Resend the request to get more replies if necessary
-func (api *API) GetMoreReplies(tweet_id TweetID, response *TweetResponse, max_replies int) error {
+func (api *API) GetMoreReplies(tweet_id TweetID, response *APIv1Response, max_replies int) error {
 	last_response := response
 	for last_response.GetCursor() != "" && len(response.GlobalObjects.Tweets) < max_replies {
 		fresh_response, err := api.GetTweet(tweet_id, last_response.GetCursor())
