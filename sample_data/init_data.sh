@@ -4,10 +4,10 @@ set -e
 
 THIS_DIR=$(readlink -f $0 | xargs dirname)
 
-if [[ -e "$THIS_DIR/profile" ]]; then
-	rm -r $THIS_DIR/profile
+if [[ -d "$THIS_DIR/profile" ]] && [ "$(ls -A "$THIS_DIR"/profile)" ]; then
+	rm -r $THIS_DIR/profile/*
 fi
-mkdir $THIS_DIR/profile
+mkdir -p $THIS_DIR/profile
 
 test -e $THIS_DIR/profile/twitter.db && rm $THIS_DIR/profile/twitter.db
 sqlite3 $THIS_DIR/profile/twitter.db < $THIS_DIR/seed_data.sql
