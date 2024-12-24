@@ -183,7 +183,6 @@ func create_stable_retweet() Retweet {
 
 // Create a new user with a random ID and handle
 func create_dummy_user() User {
-	rand.Seed(time.Now().UnixNano())
 	userID := rand.Int()
 
 	return User{
@@ -208,7 +207,6 @@ func create_dummy_user() User {
 
 // Create a new tweet with a random ID and content
 func create_dummy_tweet() Tweet {
-	rand.Seed(time.Now().UnixNano())
 	tweet_id := TweetID(rand.Int())
 
 	img1 := create_image_from_id(rand.Int())
@@ -252,7 +250,6 @@ func create_dummy_tweet() Tweet {
 
 // Create a random tombstone
 func create_dummy_tombstone() Tweet {
-	rand.Seed(time.Now().UnixNano())
 	tweet_id := TweetID(rand.Int())
 
 	return Tweet{
@@ -269,7 +266,6 @@ func create_dummy_tombstone() Tweet {
 
 // Create a new retweet with a random ID for a given TweetID
 func create_dummy_retweet(tweet_id TweetID) Retweet {
-	rand.Seed(time.Now().UnixNano())
 	retweet_id := TweetID(rand.Int())
 
 	return Retweet{
@@ -338,7 +334,6 @@ func create_stable_chat_room() DMChatRoom {
 }
 
 func create_dummy_chat_room() DMChatRoom {
-	rand.Seed(time.Now().UnixNano())
 	id := DMChatRoomID(fmt.Sprintf("Chat Room #%d", rand.Int()))
 
 	return DMChatRoom{
@@ -364,7 +359,6 @@ func create_dummy_chat_room() DMChatRoom {
 }
 
 func create_dummy_chat_message() DMMessage {
-	rand.Seed(time.Now().UnixNano())
 	id := DMMessageID(rand.Int())
 	vid := create_video_from_id(int(id))
 	vid.TweetID = TweetID(0)
@@ -398,7 +392,6 @@ func create_dummy_chat_message() DMMessage {
 }
 
 func create_dummy_notification() Notification {
-	rand.Seed(time.Now().UnixNano())
 	id := NotificationID(fmt.Sprintf("Notification #%d", rand.Int()))
 
 	return Notification{
