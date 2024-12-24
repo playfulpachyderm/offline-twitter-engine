@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"math/rand"
-	"time"
 
 	"github.com/go-test/deep"
 	"github.com/stretchr/testify/require"
