@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"path"
 	"regexp"
-	"strconv"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -48,7 +48,7 @@ type APIExtendedMedia struct {
 	Type          string `json:"type"`
 	VideoInfo     struct {
 		Variants []Variant `json:"variants"`
-		Duration int              `json:"duration_millis"`
+		Duration int       `json:"duration_millis"`
 	} `json:"video_info"`
 	ExtMediaAvailability struct {
 		Status string `json:"status"`
@@ -672,62 +672,6 @@ type APINotification struct {
 			} `json:"fromUsers"`
 		} `json:"aggregateUserActionsV1"`
 	} `json:"template"`
-}
-
-type UserResponse struct {
-	Data struct {
-		User struct {
-			Result struct {
-				MetaTypename       string  `json:"__typename"`
-				ID                 int64   `json:"rest_id,string"`
-				Legacy             APIUser `json:"legacy"`
-				IsBlueVerified     bool    `json:"is_blue_verified"`
-				UnavailableMessage struct {
-					Text string `json:"text"`
-				} `json:"unavailable_message"`
-				Reason string `json:"reason"`
-			} `json:"result"`
-		} `json:"user"`
-	} `json:"data"`
-	Errors []struct {
-		Message string `json:"message"`
-		Name    string `json:"name"`
-		Code    int    `json:"code"`
-	} `json:"errors"`
-}
-
-func (u UserResponse) ConvertToAPIUser() (APIUser, error) {
-	if u.Data.User.Result.MetaTypename == "" {
-		// Completely empty response (user not found)
-		return APIUser{}, ErrDoesntExist
-	}
-
-	ret := u.Data.User.Result.Legacy
-	ret.ID = u.Data.User.Result.ID
-	ret.Verified = u.Data.User.Result.IsBlueVerified
-
-	// Banned users
-	for _, api_error := range u.Errors {
-		if api_error.Message == "Authorization: User has been suspended. (63)" {
-			ret.IsBanned = true
-		} else if api_error.Name == "NotFoundError" {
-			ret.DoesntExist = true
-		} else {
-			panic(fmt.Errorf("Unknown api error %q:\n  %w", api_error.Message, EXTERNAL_API_ERROR))
-		}
-	}
-
-	// Banned users, new version
-	if u.Data.User.Result.Reason == "Suspended" {
-		ret.IsBanned = true
-	}
-
-	// Deleted users
-	if ret.ID == 0 && ret.ScreenName == "" && u.Data.User.Result.Reason != "Suspended" {
-		ret.DoesntExist = true
-	}
-
-	return ret, nil
 }
 
 type APIv1Entry struct {

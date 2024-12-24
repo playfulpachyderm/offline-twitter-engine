@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
-	"slices"
 
 	log "github.com/sirupsen/logrus"
 )
