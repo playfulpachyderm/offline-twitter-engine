@@ -14,6 +14,10 @@ import (
 	"time"
 )
 
+// -------------------------------------------------------------------------
+// Image content
+// -------------------------------------------------------------------------
+
 type APIMedia struct {
 	ID            int64  `json:"id_str,string"`
 	MediaURLHttps string `json:"media_url_https"`
@@ -37,6 +41,10 @@ func ParseAPIMedia(apiMedia APIMedia) Image {
 		IsDownloaded:  false,
 	}
 }
+
+// -------------------------------------------------------------------------
+// Video content
+// -------------------------------------------------------------------------
 
 type Variant struct {
 	Bitrate int    `json:"bitrate,omitempty"`
@@ -65,6 +73,60 @@ type APIExtendedMedia struct {
 	} `json:"ext"`
 	URL string `json:"url"` // For DM videos
 }
+
+func ParseAPIVideo(apiVideo APIExtendedMedia) Video {
+	variants := apiVideo.VideoInfo.Variants
+	slices.SortFunc(variants, func(a, b Variant) int { return b.Bitrate - a.Bitrate })
+	video_remote_url := variants[0].URL
+
+	var view_count int
+
+	r := apiVideo.Ext.MediaStats.R
+
+	switch r.(type) {
+	case string:
+		view_count = 0
+	case map[string]interface{}:
+		OK_entry, ok := r.(map[string]interface{})["ok"]
+		if !ok {
+			panic("No 'ok' value found in the R!")
+		}
+		view_count_str, ok := OK_entry.(map[string]interface{})["viewCount"]
+		view_count = int_or_panic(view_count_str.(string))
+		if !ok {
+			panic("No 'viewCount' value found in the OK!")
+		}
+	}
+
+	video_parsed_url, err := url.Parse(video_remote_url)
+	if err != nil {
+		panic(err)
+	}
+
+	local_filename := get_prefixed_path(path.Base(video_parsed_url.Path))
+
+	return Video{
+		ID:            VideoID(apiVideo.ID),
+		Width:         apiVideo.OriginalInfo.Width,
+		Height:        apiVideo.OriginalInfo.Height,
+		RemoteURL:     video_remote_url,
+		LocalFilename: local_filename,
+
+		ThumbnailRemoteUrl: apiVideo.MediaURLHttps,
+		ThumbnailLocalPath: get_prefixed_path(path.Base(apiVideo.MediaURLHttps)),
+		Duration:           apiVideo.VideoInfo.Duration,
+		ViewCount:          view_count,
+
+		IsDownloaded:    false,
+		IsBlockedByDMCA: false,
+		IsGeoblocked:    apiVideo.ExtMediaAvailability.Reason == "Geoblocked",
+		IsGif:           apiVideo.Type == "animated_gif",
+	}
+}
+
+// -------------------------------------------------------------------------
+// Cards: polls and urls
+// -------------------------------------------------------------------------
 
 type APICard struct {
 	Name          string `json:"name"`
@@ -194,56 +256,6 @@ func parse_num_choices(card_name string) int {
 	return int_or_panic(card_name[4:5])
 }
 
-func ParseAPIVideo(apiVideo APIExtendedMedia) Video {
-	variants := apiVideo.VideoInfo.Variants
-	slices.SortFunc(variants, func(a, b Variant) int { return b.Bitrate - a.Bitrate })
-	video_remote_url := variants[0].URL
-
-	var view_count int
-
-	r := apiVideo.Ext.MediaStats.R
-
-	switch r.(type) {
-	case string:
-		view_count = 0
-	case map[string]interface{}:
-		OK_entry, ok := r.(map[string]interface{})["ok"]
-		if !ok {
-			panic("No 'ok' value found in the R!")
-		}
-		view_count_str, ok := OK_entry.(map[string]interface{})["viewCount"]
-		view_count = int_or_panic(view_count_str.(string))
-		if !ok {
-			panic("No 'viewCount' value found in the OK!")
-		}
-	}
-
-	video_parsed_url, err := url.Parse(video_remote_url)
-	if err != nil {
-		panic(err)
-	}
-
-	local_filename := get_prefixed_path(path.Base(video_parsed_url.Path))
-
-	return Video{
-		ID:            VideoID(apiVideo.ID),
-		Width:         apiVideo.OriginalInfo.Width,
-		Height:        apiVideo.OriginalInfo.Height,
-		RemoteURL:     video_remote_url,
-		LocalFilename: local_filename,
-
-		ThumbnailRemoteUrl: apiVideo.MediaURLHttps,
-		ThumbnailLocalPath: get_prefixed_path(path.Base(apiVideo.MediaURLHttps)),
-		Duration:           apiVideo.VideoInfo.Duration,
-		ViewCount:          view_count,
-
-		IsDownloaded:    false,
-		IsBlockedByDMCA: false,
-		IsGeoblocked:    apiVideo.ExtMediaAvailability.Reason == "Geoblocked",
-		IsGif:           apiVideo.Type == "animated_gif",
-	}
-}
-
 func ParseAPIUrlCard(apiCard APICard) Url {
 	values := apiCard.BindingValues
 	ret := Url{}
@@ -280,6 +292,10 @@ func ParseAPIUrlCard(apiCard APICard) Url {
 	return ret
 }
 
+// Some filesystems get slow if the number of items in a directory is very large.  To handle this,
+// we add a 2 letter directory prefix, based on the first 2 letters of the filename:
+//
+// e.g., `abcdefg.asdf` => `ab/abcdefg.asdf`
 func get_prefixed_path(p string) string {
 	local_prefix_regex := regexp.MustCompile(`^[\w-]{2}`)
 	local_prefix := local_prefix_regex.FindString(p)
@@ -306,6 +322,10 @@ func get_thumbnail_local_path(remote_url string) string {
 		fmt.Sprintf("%s_%s.%s", path.Base(u.Path), query_params["name"][0], query_params["format"][0]),
 	)
 }
+
+// -------------------------------------------------------------------------
+// Individual tweets
+// -------------------------------------------------------------------------
 
 type APITweet struct {
 	ID               int64  `json:"id_str,string"`
@@ -567,6 +587,10 @@ func (t APITweet) String() string {
 	return string(data)
 }
 
+// -------------------------------------------------------------------------
+// User information
+// -------------------------------------------------------------------------
+
 type APIUser struct {
 	CreatedAt   string `json:"created_at"`
 	Description string `json:"description"`
@@ -643,6 +667,10 @@ func ParseSingleUser(apiUser APIUser) (ret User, err error) {
 	return
 }
 
+// -------------------------------------------------------------------------
+// Notifications
+// -------------------------------------------------------------------------
+
 type APINotification struct {
 	ID          string `json:"id"`
 	TimestampMs int64  `json:"timestampMs,string"`
@@ -673,6 +701,10 @@ type APINotification struct {
 		} `json:"aggregateUserActionsV1"`
 	} `json:"template"`
 }
+
+// -------------------------------------------------------------------------
+// Metadata object for ordering, which contains implicit data for tombstones
+// -------------------------------------------------------------------------
 
 type APIv1Entry struct {
 	EntryID   string `json:"entryId"`
@@ -709,6 +741,10 @@ type APIv1Entry struct {
 }
 
 func entry_sorting_cmp(a, b APIv1Entry) int { return int(b.SortIndex - a.SortIndex) }
+
+// -------------------------------------------------------------------------
+// Full APIv1 response
+// -------------------------------------------------------------------------
 
 type APIv1Response struct {
 	GlobalObjects struct {
@@ -901,6 +937,10 @@ func (t *APIv1Response) ToTweetTrove() (TweetTrove, error) {
 	}
 	return ret, nil
 }
+
+// -------------------------------------------------------------------------
+// Utils
+// -------------------------------------------------------------------------
 
 func idstr_to_int(s string) int64 {
 	return int64(int_or_panic(s))
