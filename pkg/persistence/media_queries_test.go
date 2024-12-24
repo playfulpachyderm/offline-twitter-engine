@@ -21,7 +21,6 @@ func TestSaveAndLoadImage(t *testing.T) {
 	tweet := create_stable_tweet()
 
 	// Create a fresh Image to test on
-	rand.Seed(time.Now().UnixNano())
 	img := create_image_from_id(rand.Int())
 	img.TweetID = tweet.ID
 
@@ -83,7 +82,6 @@ func TestSaveAndLoadVideo(t *testing.T) {
 	tweet := create_stable_tweet()
 
 	// Create a fresh Video to test on
-	rand.Seed(time.Now().UnixNano())
 	vid := create_video_from_id(rand.Int())
 	vid.TweetID = tweet.ID
 	vid.IsGif = true
@@ -149,7 +147,6 @@ func TestSaveAndLoadUrl(t *testing.T) {
 	tweet := create_stable_tweet()
 
 	// Create a fresh Url to test on
-	rand.Seed(time.Now().UnixNano())
 	url := create_url_from_id(rand.Int())
 	url.TweetID = tweet.ID
 
