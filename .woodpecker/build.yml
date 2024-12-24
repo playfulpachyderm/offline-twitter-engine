@@ -3,17 +3,17 @@
 # is persistent between build steps.
 
 steps:
-  lint:
-    image: offline-twitter/go
-    commands:
-      - golangci-lint run
-
   test:
     image: offline-twitter/go
     commands:
       - mkdir pkg/persistence/test_profiles
       - sample_data/init_data.sh
       - go test -bench=. -cover ./...
+
+  lint:
+    image: offline-twitter/go
+    commands:
+      - golangci-lint run
 
   integration_test:
     image: offline-twitter/go
