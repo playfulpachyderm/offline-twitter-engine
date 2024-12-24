@@ -1,6 +1,6 @@
 module gitlab.com/offline-twitter/twitter_offline_engine
 
-go 1.18
+go 1.21
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
