@@ -28,9 +28,9 @@ Source: "{#EXE_PATH}"; DestDir: "{app}"; Flags: recursesubdirs
 
 [Icons]
 
-Name: "{group}\{#NAME}"; Filename: "{app}\{#EXE_NAME}"; WorkingDir: "{commondocs}"; Tasks: createstartmenushortcut; Parameters: "webserver --auto-open --default-profile"
+Name: "{group}\{#NAME}"; Filename: "{app}\{#EXE_NAME}"; WorkingDir: "{autodocs}"; Tasks: createstartmenushortcut; Parameters: "--default-profile webserver --auto-open"
 Name: "{group}\Uninstall {#NAME}"; Filename: "{uninstallexe}"; Tasks: createstartmenushortcut
-Name: "{commondesktop}\{#NAME}"; Filename: "{app}\{#EXE_NAME}"; WorkingDir: "{commondocs}"; Tasks: createdesktopshortcut; Parameters: "webserver --auto-open --default-profile"
+Name: "{autodesktop}\{#NAME}"; Filename: "{app}\{#EXE_NAME}"; WorkingDir: "{autodocs}"; Tasks: createdesktopshortcut; Parameters: "--default-profile webserver --auto-open"
 
 ; [Registry]
 ; Root: HKCU; Subkey: "Environment"; ValueType: string; ValueName: "Path"; ValueData: "{olddata};{app}";
