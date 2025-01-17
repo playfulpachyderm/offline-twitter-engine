@@ -43,6 +43,7 @@
             src="/content/images/{{.LocalFilename}}"
             width="{{.Width}}" height="{{.Height}}"
             onclick="image_carousel.querySelector('img').src = this.src; image_carousel.showModal();"
+            onerror="img_load_err(event, this)"
           >
         {{end}}
         {{range .Videos}}
@@ -371,6 +372,19 @@
       emoji_popup.close();
       emoji_popup.innerHTML = ""; // remove the picker
     }
+
+    // Callback function: If a chat image hasn't been downloaded, wait 500ms and try again
+    function img_load_err(err_event, img) {
+      // TODO: if (isHTTP404(e)) {...}
+      console.log(img);
+      console.log(err_event);
+      var retries = parseInt(img.getAttribute("data-retries") ?? 0);
+      if (retries < 5) {
+        img.setAttribute("data-retries", retries + 1);
+        setTimeout(() => {img.src = img.src;}, 500);
+      }
+    }
+
   </script>
 {{end}}
 
