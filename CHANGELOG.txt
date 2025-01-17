@@ -378,3 +378,12 @@ v0.6.20
 - UI improvements:
 	- reaccs: add a little circle around the logged-in user's reaccs, to indicate them better
 	- "refresh chat room" button now puts a spinner on the chat while it's refreshing
+
+v0.6.21
+-------
+
+- UI improvements:
+	- on loading a "misshapen" chat image, it will try to reload it a few times
+- Windows:
+	- Start menu shortcut should work now
+	- "Install for current user only" should now create desktop shortcut properly

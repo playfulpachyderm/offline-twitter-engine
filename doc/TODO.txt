@@ -11,11 +11,14 @@ TODO: video-bitrates (#scraper)
 - add "bitrate" and "available bitrates" fields
 - option to upgrade or downgrade video quality
 
-TODO: videos-view-count (#scraper, #scraper-bug)
+TODO: videos-view-count (#scraper, #bug)
 - video view counts don't parse properly in APIv2
 
-TODO: video-not-downloading (#scraper, #scraper-bug)
+TODO: video-not-downloading (#scraper, #bug)
 - https://twitter.com/JustinPulitzer/status/1496709662602932224
+
+TODO video-source-user (#scraper)
+- extract source user information from API videos (i.e.., someone shares a video from someone else)
 
 TODO: get-user-tweets-user-not-in-database (#scraper)
 - subcommand `get_user_tweets` should fetch the user first instead of just failing
@@ -73,7 +76,7 @@ TODO: search-bottom-cursor
 TODO: newer-version-tombstone (#scraper)
 - Preserve tombstone after re-scraping
 
-TODO: failed-tweets (#scraper, #scraper-bug)
+TODO: failed-tweets (#scraper, #bug)
 - https://twitter.com/_HARVEY__DENT_/status/1755665502385377720
 - "Empty tweet": https://twitter.com/wispem_wantex/status/1581333495393107968
 
@@ -122,22 +125,22 @@ TODO: emoji-rewrite (#webserver)
 TODO: windows-session-list (#release, #windows)
 - Check that sessions load as @Offline_Twatter instead of @test\Offline_Twatter on Windows
 
-TODO: conversation-thread-missing-tweets (#scraper, #scraper-bug)
+TODO: conversation-thread-missing-tweets (#scraper, #bug)
 - In a conversation thread (replies under a tweet), if a user is blocked, the tweet response can be empty
 - These are just completely invisible on Twitter (render as nothing)
 - e.g.: https://x.com/sirbughunter/status/1479540319410696192
 
-TODO: scrape-user-feed-removes-pinned-tweet (#scraper, #scraper-bug)
+TODO: scrape-user-feed-removes-pinned-tweet (#scraper, #bug)
 - Scraping a user feed unsets the user's pinned tweet
 
-TOOD: notifications-duplicate-bug (#scraper, #scraper-bug)
+TOOD: notifications-duplicate-bug (#scraper, #bug)
 - Older notifications often appear to get duplicated, sometimes quite a few times
 - Probably related to the fact that notifications can replace old ones but we just treat them as a new notification instance
 
 TODO: dm-reaccs-popup-list (#dms, #webserver, #reaccs)
 - on-click popup showing who sent which reacc
 
-TODO: detect-banned-users-when-scraping-tweets (#scraper, #scraper-bug)
+TODO: detect-banned-users-when-scraping-tweets (#scraper, #bug)
 - banned users aren't detected when scraping tweets
 
 TODO: sqlite-query-optimizing
@@ -151,3 +154,9 @@ TODO: deprecated-offline-follows
 - Offline Follows doesn't do much userful anymore
 
 TODO: offline-timeline-vs-user-timeline
+
+TODO: tweetcomposer-entry (#scraper, #bug)
+- "Unexpected first part of entry id: "tweetcomposer-": https://twitter.com/wispem_wantex/status/1866661241135226975
+
+TODO: just-sent-dm-images-not-loading (#webserver, #dms, #bug)
+- DM images can only be loaded with an authenticated session.  So sending the `remote_url` in an <img> tag is not useful; it just HTTP 401's
