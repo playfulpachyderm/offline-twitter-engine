@@ -175,6 +175,10 @@ func (t *APIv1Response) ToTweetTroveAsNotifications(current_user_id UserID) (Twe
 					// Native ad for buying X Premium; ignore
 					delete(ret.Notifications, notification.ID)
 					continue
+				} else if strings.Contains(entry.Content.Item.ClientEventInfo.Element, "twitterversary") {
+					// Account creation anniversary; ignore
+					delete(ret.Notifications, notification.ID)
+					continue
 				}
 			}
 
