@@ -1,11 +1,8 @@
 package scraper
 
 import (
-	"errors"
 	"fmt"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type TweetTrove struct {
@@ -87,59 +84,11 @@ func (t1 *TweetTrove) MergeWith(t2 TweetTrove) {
 	}
 }
 
-/**
- * Tries to fetch every User that's been identified in a tombstone in this trove
- */
-func (trove *TweetTrove) FetchTombstoneUsers(api *API) {
-	for _, handle := range trove.TombstoneUsers {
-		// Skip fetching if this user is already in the trove
-		user, already_fetched := trove.FindUserByHandle(handle)
-
-		if already_fetched {
-			// If the user is already fetched and it's an intact user, don't fetch it again
-			if user.JoinDate.Unix() != (Timestamp{}).Unix() && user.JoinDate.Unix() != 0 {
-				log.Debugf("Skipping %q due to intact user", handle)
-				continue
-			}
-
-			// A user needs a valid handle or ID to fetch it by
-			if user.IsIdFake && user.Handle == "<UNKNOWN USER>" {
-				log.Debugf("Skipping %q due to completely unknown user (not fetchable)", handle)
-				continue
-			}
-		}
-
-		log.Debug("Getting tombstone user: " + handle)
-		user, err := api.GetUser(handle)
-		if errors.Is(err, ErrDoesntExist) {
-			user = GetUnknownUserWithHandle(handle)
-			user.IsDeleted = true
-		} else if err != nil {
-			panic(fmt.Errorf("Error getting tombstoned user with handle %q: \n  %w", handle, err))
-		}
-
-		if user.ID == 0 {
-			// Find some random ID to fit it into the trove
-			for i := 1; ; i++ {
-				_, ok := trove.Users[UserID(i)]
-				if !ok {
-					user.ID = UserID(i)
-					break
-				}
-			}
-		}
-
-		trove.Users[user.ID] = user
-	}
-}
-
-/**
- * Checks for tombstoned tweets and fills in their UserIDs based on the collected tombstoned users.
- * To be called after calling "scraper.GetUser" on all the tombstoned users.
- *
- * At this point, those users should have been added to this trove's Users collection, and the
- * Tweets have a field `UserHandle` which can be used to pair them with newly fetched Users.
- */
+// Checks for tombstoned tweets and fills in their UserIDs based on the collected tombstoned users.
+// To be called after calling "scraper.GetUser" on all the tombstoned users.
+//
+// At this point, those users should have been added to this trove's Users collection, and the
+// Tweets have a field `UserHandle` which can be used to pair them with newly fetched Users.
 func (trove *TweetTrove) FillMissingUserIDs() {
 	for i := range trove.Tweets {
 		tweet := trove.Tweets[i]
@@ -161,39 +110,6 @@ func (trove *TweetTrove) FillMissingUserIDs() {
 		tweet.UserID = user.ID
 		trove.Tweets[i] = tweet
 	}
-}
-
-func (trove *TweetTrove) FillSpaceDetails(api *API) error {
-	fmt.Println("Filling space details")
-	for i := range trove.Spaces {
-		fmt.Printf("Getting space: %q\n", trove.Spaces[i].ID)
-		new_trove, err := api.FetchSpaceDetail(trove.Spaces[i].ID)
-		if err != nil {
-			return err
-		}
-		// Replace the old space in the trove with the new, updated one
-		new_space, is_ok := new_trove.Spaces[i]
-		if new_space.ShortUrl == "" {
-			// Copy over the short-url, which doesn't seem to exist on a full Space response
-			new_space.ShortUrl = trove.Spaces[i].ShortUrl
-		}
-		if is_ok {
-			// Necessary to check is_ok because the space response could be empty, in which case
-			// we don't want to overwrite it
-			trove.Spaces[i] = new_space
-		}
-	}
-	return nil
-}
-
-func (trove *TweetTrove) PostProcess(api *API) error {
-	trove.FetchTombstoneUsers(api)
-	trove.FillMissingUserIDs()
-	err := trove.FillSpaceDetails(api)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (t TweetTrove) GetOldestMessage(id DMChatRoomID) DMMessageID {

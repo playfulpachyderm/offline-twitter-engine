@@ -964,7 +964,7 @@ func (api *API) GetPaginatedQuery(pq PaginatedQuery, count int) (TweetTrove, err
 	}
 
 	fmt.Println("------------")
-	err2 = trove.PostProcess(api)
+	err2 = api.PostProcess(&trove)
 	if err2 != nil {
 		return TweetTrove{}, fmt.Errorf("failed to post-process tweet trove: %w", err2)
 	}
