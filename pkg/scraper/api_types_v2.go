@@ -710,6 +710,10 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 		}
 		// Infer "in_reply_to_id" for tombstoned tweets from the order of entries, if applicable
 		if entry.Content.EntryType == "TimelineTimelineItem" {
+			if strings.HasPrefix(entry.EntryID, "tweetcomposer") {
+				// Skip composer
+				continue
+			}
 			entry_type, main_tweet_id := entry.ParseID()
 			if entry_type == "cursor-showmorethreadsprompt" ||
 				entry_type == "cursor-bottom" ||

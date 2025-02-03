@@ -1001,12 +1001,14 @@ func TestNoFailOnComposerEntryInTimelineModule(t *testing.T) {
 func TestNoFailOnComposerEntryInRegularThread(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
-	data, err := os.ReadFile("test_responses/api_v2/composer_entry_item_non_module.json")
+	data, err := os.ReadFile("test_responses/api_v2/composer_entry_full_thread.json")
 	require.NoError(err)
-	var entry_result APIV2Entry
-	err = json.Unmarshal(data, &entry_result)
+	var api_response APIV2Response
+	err = json.Unmarshal(data, &api_response)
 	require.NoError(err)
 
-	trove := entry_result.ToTweetTrove()
-	assert.Len(trove.Tweets, 0)
+	trove, err := api_response.ToTweetTrove()
+	require.NoError(err)
+
+	assert.Len(trove.Tweets, 3)
 }
