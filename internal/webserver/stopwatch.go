@@ -148,4 +148,34 @@ func (app *Application) start_background() {
 		app:        app,
 	}
 	notifications_task.StartBackground()
+
+	bookmarks_task := BackgroundTask{
+		Name: "bookmarks",
+		GetTroveFunc: func(api *scraper.API) scraper.TweetTrove {
+			trove, err := app.API.GetBookmarks(10)
+			if err != nil && !errors.Is(err, scraper.END_OF_FEED) && !errors.Is(err, scraper.ErrRateLimited) {
+				panic(err)
+			}
+			return trove
+		},
+		StartDelay: 5 * time.Second,
+		Period: 10 * time.Minute,
+		app: app,
+	}
+	bookmarks_task.StartBackground()
+
+	own_profile_task := BackgroundTask{
+		Name: "user profile",
+		GetTroveFunc: func(api *scraper.API) scraper.TweetTrove {
+			trove, err := app.API.GetUserFeed(api.UserID, 1)
+			if err != nil && !errors.Is(err, scraper.END_OF_FEED) && !errors.Is(err, scraper.ErrRateLimited) {
+				panic(err)
+			}
+			return trove
+		},
+		StartDelay: 1 * time.Second,
+		Period: 20 * time.Minute,
+		app: app,
+	}
+	own_profile_task.StartBackground()
 }
