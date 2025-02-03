@@ -76,10 +76,6 @@ TODO: search-bottom-cursor
 TODO: newer-version-tombstone (#scraper)
 - Preserve tombstone after re-scraping
 
-TODO: failed-tweets (#scraper, #bug)
-- https://twitter.com/_HARVEY__DENT_/status/1755665502385377720
-- "Empty tweet": https://twitter.com/wispem_wantex/status/1581333495393107968
-
 TODO: new-content-type
 - https://twitter.com/itsbackwereover/status/1757947530506043872
 
@@ -88,7 +84,7 @@ TODO: mark-invalidated-sessions-invalid
 
 TODO: SQL-logger (#webserver)
 
-TODO: const-select-fields (#webserver)
+TODO: const-select-fields (#webserver, #code-quality)
 - There's a few queries that use "select ..." and write out all the fields.  Put the field names in one spot
 
 TODO: compound-query-structs (#webserver)
@@ -154,9 +150,3 @@ TODO: deprecated-offline-follows
 - Offline Follows doesn't do much userful anymore
 
 TODO: offline-timeline-vs-user-timeline
-
-TODO: tweetcomposer-entry (#scraper, #bug)
-- "Unexpected first part of entry id: "tweetcomposer-": https://twitter.com/wispem_wantex/status/1866661241135226975
-
-TODO: just-sent-dm-images-not-loading (#webserver, #dms, #bug)
-- DM images can only be loaded with an authenticated session.  So sending the `remote_url` in an <img> tag is not useful; it just HTTP 401's

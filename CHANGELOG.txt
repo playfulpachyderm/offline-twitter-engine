@@ -387,3 +387,9 @@ v0.6.21
 - Windows:
 	- Start menu shortcut should work now
 	- "Install for current user only" should now create desktop shortcut properly
+
+v0.6.22
+-------
+
+- Add background scraping jobs for Bookmarks and logged-in user's User Feed
+- Manually rescraping a User Feed now re-downloads user's profile and banner images as well
