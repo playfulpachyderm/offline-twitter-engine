@@ -159,8 +159,8 @@ func (app *Application) start_background() {
 			return trove
 		},
 		StartDelay: 5 * time.Second,
-		Period: 10 * time.Minute,
-		app: app,
+		Period:     10 * time.Minute,
+		app:        app,
 	}
 	bookmarks_task.StartBackground()
 
@@ -174,8 +174,8 @@ func (app *Application) start_background() {
 			return trove
 		},
 		StartDelay: 1 * time.Second,
-		Period: 20 * time.Minute,
-		app: app,
+		Period:     20 * time.Minute,
+		app:        app,
 	}
 	own_profile_task.StartBackground()
 }
