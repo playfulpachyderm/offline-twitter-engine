@@ -10,6 +10,7 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"strings"
+	"bytes"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -173,12 +174,7 @@ func (api *API) do_http_POST(remote_url string, body string, result interface{})
 
 	api.add_authentication_headers(req)
 
-	log.Debugf("POST: %s\n", req.URL.String())
-	for header := range req.Header {
-		log.Debugf("    %s: %s\n", header, req.Header.Get(header))
-	}
-	log.Debug("    " + body)
-
+	log.Debug(print_req(req, api.Client.Jar.Cookies(req.URL)))
 	resp, err := api.Client.Do(req)
 	if is_timeout(err) {
 		return fmt.Errorf("POST %q:\n  %w", remote_url, ErrRequestTimeout)
@@ -236,11 +232,7 @@ func (api *API) do_http(remote_url string, cursor string, result interface{}) er
 
 	api.add_authentication_headers(req)
 
-	log.Debugf("GET: %s\n", req.URL.String())
-	for header := range req.Header {
-		log.Debugf("    %s: %s\n", header, req.Header.Get(header))
-	}
-
+	log.Debug(print_req(req, api.Client.Jar.Cookies(req.URL)))
 	resp, err := api.Client.Do(req)
 	if is_timeout(err) {
 		return fmt.Errorf("GET %q:\n  %w", remote_url, ErrRequestTimeout)
@@ -267,6 +259,7 @@ func (api *API) do_http(remote_url string, cursor string, result interface{}) er
 	} else if err != nil {
 		panic(err)
 	}
+	log.Debug(string(body))
 
 	if resp.StatusCode != 200 && resp.StatusCode != 403 {
 		if resp.StatusCode == 401 && is_session_invalidated(body) {
@@ -279,8 +272,6 @@ func (api *API) do_http(remote_url string, cursor string, result interface{}) er
 		}
 		return fmt.Errorf("HTTP Error.  HTTP %s\n%s\nbody: %s", resp.Status, responseHeaders, body)
 	}
-
-	log.Debug(string(body))
 
 	err = json.Unmarshal(body, result)
 	if err != nil {
@@ -368,12 +359,6 @@ func (api *API) DownloadMedia(remote_url string) ([]byte, error) {
 	}
 
 	if resp.StatusCode != 200 {
-		url, err := url.Parse(remote_url)
-		if err != nil {
-			panic(err)
-		}
-		print_curl_cmd(*req, api.Client.Jar.Cookies(url))
-
 		if resp.StatusCode == 401 && is_session_invalidated(body) {
 			return body, ErrSessionInvalidated
 		}
@@ -390,15 +375,27 @@ func (api *API) DownloadMedia(remote_url string) ([]byte, error) {
 	return body, nil
 }
 
-func print_curl_cmd(r http.Request, cookies []*http.Cookie) {
-	fmt.Printf("curl -X %s %q \\\n", r.Method, r.URL.String())
+func print_req(r *http.Request, cookies []*http.Cookie) string {
+	b := strings.Builder{}
+	b.WriteString(fmt.Sprintf("%s %s\n", r.Method, r.URL.String()))
 	for header := range r.Header {
-		fmt.Printf("  -H '%s: %s' \\\n", header, r.Header.Get(header))
+		b.WriteString(fmt.Sprintf("    %s: %s\n", header, r.Header.Get(header)))
 	}
-	fmt.Printf("  -H 'Cookie: ")
-	for _, c := range cookies {
-		fmt.Printf("%s=%s;", c.Name, c.Value)
+	// b.WriteString(fmt.Sprintf("    Cookie: "))
+	// for _, c := range cookies {
+	// 	b.WriteString(fmt.Sprintf("%s=%s;", c.Name, c.Value))
+	// }
+	// b.WriteString("\n")
+
+	if r.Body != nil {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			panic(err)
+		}
+		b.WriteString("    " + string(body))
+
+		// Restore the body
+		r.Body = io.NopCloser(bytes.NewReader(body))
 	}
-	fmt.Printf("' \\\n")
-	fmt.Printf("  --compressed\n")
+	return b.String()
 }
