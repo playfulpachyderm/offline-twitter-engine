@@ -51,6 +51,13 @@ func (api API) MarshalJSON() ([]byte, error) {
 	}
 	return result, nil
 }
+func (api API) MustMarshalJSON() []byte {
+	data, err := json.Marshal(api)
+	if err != nil {
+		panic(err)
+	}
+	return data
+}
 
 func (api *API) UnmarshalJSON(data []byte) error {
 	var in_struct api_outstruct

@@ -76,7 +76,7 @@ func (app *Application) SetActiveUser(handle scraper.UserHandle) error {
 		if err != nil {
 			return fmt.Errorf("set active user to %q: %w", handle, err)
 		}
-		app.API = app.Profile.LoadSession(handle)
+		app.Profile.LoadSession(handle, &app.API)
 		app.ActiveUser = user
 		app.IsScrapingDisabled = false
 	}

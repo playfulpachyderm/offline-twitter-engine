@@ -133,7 +133,7 @@ func main() {
 			// Lop off the ".session" suffix (allows using `--session asdf.session` which lets you tab-autocomplete at command line)
 			*session_name = (*session_name)[:len(*session_name)-8]
 		}
-		api = profile.LoadSession(scraper.UserHandle(*session_name))
+		profile.LoadSession(scraper.UserHandle(*session_name), &api)
 	} else {
 		var err error
 		api, err = scraper.NewGuestSession()
@@ -269,7 +269,7 @@ func login(username string, password string) {
 		api.LoginVerifyPhone(*challenge, phone_number)
 	}
 
-	profile.SaveSession(api)
+	profile.SaveSession(api.UserHandle, api.MustMarshalJSON())
 	happy_exit("Logged in as "+string(api.UserHandle), nil)
 }
 

@@ -11,7 +11,7 @@ import (
 
 	"github.com/go-test/deep"
 
-	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 // Save and load an API session; it should come back the same
@@ -24,7 +24,7 @@ func TestSaveAndLoadAuthenticatedSession(t *testing.T) {
 		panic(err)
 	}
 
-	api := API{
+	api := scraper.API{
 		UserHandle:      "testUser",
 		IsAuthenticated: true,
 		Client: http.Client{
@@ -35,8 +35,9 @@ func TestSaveAndLoadAuthenticatedSession(t *testing.T) {
 	}
 
 	// Save and load the session; it should come back the same
-	profile.SaveSession(api)
-	new_api := profile.LoadSession(api.UserHandle)
+	profile.SaveSession(api.UserHandle, api.MustMarshalJSON())
+	var new_api scraper.API
+	profile.LoadSession(api.UserHandle, &new_api)
 
 	if diff := deep.Equal(api, new_api); diff != nil {
 		t.Error(diff)

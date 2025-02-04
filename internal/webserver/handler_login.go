@@ -67,7 +67,7 @@ func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) after_login(w http.ResponseWriter, r *http.Request, api scraper.API) {
-	app.Profile.SaveSession(api)
+	app.Profile.SaveSession(api.UserHandle, api.MustMarshalJSON())
 
 	// Ensure the user is downloaded
 	user, err := api.GetUser(api.UserHandle)
