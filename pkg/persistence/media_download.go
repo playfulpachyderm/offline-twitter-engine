@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
@@ -13,8 +13,10 @@ type MediaDownloader interface {
 	Curl(url string, outpath string) error
 }
 
+type DownloadFunc func(url string) ([]byte, error)
+
 type DefaultDownloader struct {
-	*API
+	Download DownloadFunc
 }
 
 // Download a file over HTTP and save it.
@@ -23,13 +25,13 @@ type DefaultDownloader struct {
 // - url: the remote file to download
 // - outpath: the path on disk to save it to
 func (d DefaultDownloader) Curl(url string, outpath string) error {
-	data, err := d.API.DownloadMedia(url)
+	data, err := d.Download(url)
 	if err != nil {
 		return fmt.Errorf("downloading %q:\n  %w", url, err)
 	}
 
 	// Ensure the output directory exists
-	dirname := path.Dir(outpath)
+	dirname := filepath.Dir(outpath)
 	if dirname != "." {
 		err = os.MkdirAll(dirname, 0755)
 		if err != nil {
@@ -48,7 +50,7 @@ func (d DefaultDownloader) Curl(url string, outpath string) error {
 // Downloads an Image, and if successful, marks it as downloaded in the DB
 // DUPE: download-image
 func (p Profile) download_tweet_image(img *Image, downloader MediaDownloader) error {
-	outfile := path.Join(p.ProfileDir, "images", img.LocalFilename)
+	outfile := filepath.Join(p.ProfileDir, "images", img.LocalFilename)
 	err := downloader.Curl(img.RemoteURL, outfile)
 	if err != nil {
 		return fmt.Errorf("Error downloading tweet image (TweetID %d):\n  %w", img.TweetID, err)
@@ -61,7 +63,7 @@ func (p Profile) download_tweet_image(img *Image, downloader MediaDownloader) er
 // DUPE: download-video
 func (p Profile) download_tweet_video(v *Video, downloader MediaDownloader) error {
 	// Download the video
-	outfile := path.Join(p.ProfileDir, "videos", v.LocalFilename)
+	outfile := filepath.Join(p.ProfileDir, "videos", v.LocalFilename)
 	err := downloader.Curl(v.RemoteURL, outfile)
 
 	if errors.Is(err, ErrorDMCA) {
@@ -74,7 +76,7 @@ func (p Profile) download_tweet_video(v *Video, downloader MediaDownloader) erro
 	}
 
 	// Download the thumbnail
-	outfile = path.Join(p.ProfileDir, "video_thumbnails", v.ThumbnailLocalPath)
+	outfile = filepath.Join(p.ProfileDir, "video_thumbnails", v.ThumbnailLocalPath)
 	err = downloader.Curl(v.ThumbnailRemoteUrl, outfile)
 	if err != nil {
 		v.IsDownloaded = false
@@ -88,7 +90,7 @@ func (p Profile) download_tweet_video(v *Video, downloader MediaDownloader) erro
 // DUPE: download-link-thumbnail
 func (p Profile) download_link_thumbnail(url *Url, downloader MediaDownloader) error {
 	if url.HasCard && url.HasThumbnail {
-		outfile := path.Join(p.ProfileDir, "link_preview_images", url.ThumbnailLocalPath)
+		outfile := filepath.Join(p.ProfileDir, "link_preview_images", url.ThumbnailLocalPath)
 		err := downloader.Curl(url.ThumbnailRemoteUrl, outfile)
 		if err != nil {
 			return fmt.Errorf("Error downloading link thumbnail (TweetID %d):\n  %w", url.TweetID, err)
@@ -100,8 +102,8 @@ func (p Profile) download_link_thumbnail(url *Url, downloader MediaDownloader) e
 
 // Download a tweet's video and picture content.
 // Wraps the `DownloadTweetContentWithInjector` method with the default (i.e., real) downloader.
-func (p Profile) DownloadTweetContentFor(t *Tweet, api *API) error {
-	return p.DownloadTweetContentWithInjector(t, DefaultDownloader{API: api})
+func (p Profile) DownloadTweetContentFor(t *Tweet, download DownloadFunc) error {
+	return p.DownloadTweetContentWithInjector(t, DefaultDownloader{Download: download})
 }
 
 // Enable injecting a custom MediaDownloader (i.e., for testing)
@@ -141,8 +143,8 @@ func (p Profile) DownloadTweetContentWithInjector(t *Tweet, downloader MediaDown
 }
 
 // Download a user's banner and profile images
-func (p Profile) DownloadUserContentFor(u *User, api *API) error {
-	return p.DownloadUserContentWithInjector(u, DefaultDownloader{API: api})
+func (p Profile) DownloadUserContentFor(u *User, download DownloadFunc) error {
+	return p.DownloadUserContentWithInjector(u, DefaultDownloader{Download: download})
 }
 
 // Enable injecting a custom MediaDownloader (i.e., for testing)
@@ -186,14 +188,14 @@ func (p Profile) DownloadUserContentWithInjector(u *User, downloader MediaDownlo
 // Download a User's tiny profile image, if it hasn't been downloaded yet.
 // If it has been downloaded, do nothing.
 // If this user should have a big profile picture, defer to the regular `DownloadUserContentFor` method.
-func (p Profile) DownloadUserProfileImageTiny(u *User, api *API) error {
+func (p Profile) DownloadUserProfileImageTiny(u *User, download DownloadFunc) error {
 	if p.IsFollowing(*u) {
-		return p.DownloadUserContentFor(u, api)
+		return p.DownloadUserContentFor(u, download)
 	}
 
-	d := DefaultDownloader{API: api}
+	d := DefaultDownloader{Download: download}
 
-	outfile := path.Join(p.ProfileDir, "profile_images", u.GetTinyProfileImageLocalPath())
+	outfile := filepath.Join(p.ProfileDir, "profile_images", u.GetTinyProfileImageLocalPath())
 	if file_exists(outfile) {
 		return nil
 	}

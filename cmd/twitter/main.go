@@ -522,7 +522,7 @@ func download_tweet_content(tweet_identifier string) {
 	if err != nil {
 		panic(fmt.Errorf("Couldn't get tweet (ID %d) from database:\n  %w", tweet_id, err))
 	}
-	err = profile.DownloadTweetContentFor(&tweet, &api)
+	err = profile.DownloadTweetContentFor(&tweet, api.DownloadMedia)
 	if err != nil {
 		panic("Error getting content: " + err.Error())
 	}
@@ -533,7 +533,7 @@ func download_user_content(handle scraper.UserHandle) {
 	if err != nil {
 		panic("Couldn't get the user from database: " + err.Error())
 	}
-	err = profile.DownloadUserContentFor(&user, &api)
+	err = profile.DownloadUserContentFor(&user, api.DownloadMedia)
 	if err != nil {
 		panic("Error getting content: " + err.Error())
 	}

@@ -25,7 +25,7 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		panic_if(app.Profile.SaveUser(&user)) // TODO: handle conflicting users
-		panic_if(app.Profile.DownloadUserContentFor(&user, &app.API))
+		panic_if(app.Profile.DownloadUserContentFor(&user, app.API.DownloadMedia))
 	} else if err != nil {
 		panic(err)
 	}
@@ -50,7 +50,7 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 		user, err = app.API.GetUser(scraper.UserHandle(parts[0]))
 		panic_if(err)
 		panic_if(app.Profile.SaveUser(&user)) // TODO: handle conflicting users
-		panic_if(app.Profile.DownloadUserContentFor(&user, &app.API))
+		panic_if(app.Profile.DownloadUserContentFor(&user, app.API.DownloadMedia))
 
 		if len(parts) == 1 { // The URL is just the user handle
 			// Run scraper

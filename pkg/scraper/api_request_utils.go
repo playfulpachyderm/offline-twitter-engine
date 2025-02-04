@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,7 +11,6 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"strings"
-	"bytes"
 	"time"
 
 	log "github.com/sirupsen/logrus"

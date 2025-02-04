@@ -133,9 +133,9 @@ const (
 type CursorResult struct {
 	Tweet
 	Retweet
-	Chrono            int            `db:"chrono"`
-	LikeSortOrder     int            `db:"likes_sort_order"`
-	BookmarkSortOrder int            `db:"bookmarks_sort_order"`
+	Chrono            int    `db:"chrono"`
+	LikeSortOrder     int    `db:"likes_sort_order"`
+	BookmarkSortOrder int    `db:"bookmarks_sort_order"`
 	ByUserID          UserID `db:"by_user_id"`
 }
 
