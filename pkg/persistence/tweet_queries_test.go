@@ -9,7 +9,7 @@ import (
 	"github.com/go-test/deep"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 // Create a Tweet, save it, reload it, and make sure it comes back the same
@@ -71,7 +71,7 @@ func TestNoWorseningTweet(t *testing.T) {
 	tweet.IsStub = false
 	tweet.IsConversationScraped = true
 	tweet.IsExpandable = true
-	tweet.LastScrapedAt = scraper.TimestampFromUnix(1000)
+	tweet.LastScrapedAt = TimestampFromUnix(1000)
 	tweet.Text = "Yes text"
 	tweet.NumLikes = 10
 	tweet.NumRetweets = 11
@@ -87,7 +87,7 @@ func TestNoWorseningTweet(t *testing.T) {
 	tweet.IsStub = true
 	tweet.IsConversationScraped = false
 	tweet.IsExpandable = false
-	tweet.LastScrapedAt = scraper.TimestampFromUnix(500)
+	tweet.LastScrapedAt = TimestampFromUnix(500)
 	tweet.Text = ""
 	err = profile.SaveTweet(tweet)
 	require.NoError(err)
@@ -231,7 +231,7 @@ func TestModifyTweet(t *testing.T) {
 	tweet.IsStub = true
 	tweet.IsContentDownloaded = false
 	tweet.IsConversationScraped = false
-	tweet.LastScrapedAt = scraper.TimestampFromUnix(1000)
+	tweet.LastScrapedAt = TimestampFromUnix(1000)
 
 	err := profile.SaveTweet(tweet)
 	require.NoError(err)
@@ -243,7 +243,7 @@ func TestModifyTweet(t *testing.T) {
 	tweet.IsStub = false
 	tweet.IsContentDownloaded = true
 	tweet.IsConversationScraped = true
-	tweet.LastScrapedAt = scraper.TimestampFromUnix(2000)
+	tweet.LastScrapedAt = TimestampFromUnix(2000)
 	tweet.TombstoneType = "deleted"
 
 	err = profile.SaveTweet(tweet)
@@ -332,7 +332,7 @@ func TestLoadMissingTweet(t *testing.T) {
 	profile_path := "test_profiles/TestTweetQueries"
 	profile := create_or_load_profile(profile_path)
 
-	_, err := profile.GetTweetById(scraper.TweetID(6234234)) // Random number
+	_, err := profile.GetTweetById(TweetID(6234234)) // Random number
 	require.Error(t, err)
 	assert.ErrorIs(t, err, persistence.ErrNotInDatabase)
 }

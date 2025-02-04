@@ -2,13 +2,15 @@ package persistence
 
 import (
 	"encoding/json"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+
 	"os"
 
 	log "github.com/sirupsen/logrus"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
-func (p Profile) SaveSession(api scraper.API) {
+func (p Profile) SaveSession(api API) {
 	data, err := json.Marshal(api)
 	if err != nil {
 		panic(err)
@@ -21,13 +23,13 @@ func (p Profile) SaveSession(api scraper.API) {
 	}
 }
 
-func (p Profile) LoadSession(userhandle scraper.UserHandle) scraper.API {
+func (p Profile) LoadSession(userhandle UserHandle) API {
 	data, err := os.ReadFile(p.ProfileDir + "/" + string(userhandle+".session"))
 	if err != nil {
 		panic(err)
 	}
 
-	var result scraper.API
+	var result API
 	err = json.Unmarshal(data, &result)
 	if err != nil {
 		panic(err)

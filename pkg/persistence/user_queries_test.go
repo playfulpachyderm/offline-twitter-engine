@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 // Create a user, save it, reload it, and make sure it comes back the same
@@ -53,19 +53,19 @@ func TestModifyUser(t *testing.T) {
 	user := create_dummy_user()
 	user.DisplayName = "Display Name 1"
 	user.Location = "location1"
-	user.Handle = scraper.UserHandle(fmt.Sprintf("handle %d", rand.Int31()))
+	user.Handle = UserHandle(fmt.Sprintf("handle %d", rand.Int31()))
 	user.IsPrivate = false
 	user.IsVerified = false
 	user.FollowersCount = 1000
-	user.JoinDate = scraper.TimestampFromUnix(1000)
+	user.JoinDate = TimestampFromUnix(1000)
 	user.ProfileImageUrl = "asdf"
 	user.IsContentDownloaded = true
 
-	// Save the user so it can be modified
+	// Save the user for the first time; should do insert
 	err := profile.SaveUser(&user)
 	require.NoError(err)
 
-	new_handle := scraper.UserHandle(fmt.Sprintf("handle %d", rand.Int31()))
+	new_handle := UserHandle(fmt.Sprintf("handle %d", rand.Int31()))
 
 	user.DisplayName = "Display Name 2"
 	user.Location = "location2"
@@ -73,11 +73,11 @@ func TestModifyUser(t *testing.T) {
 	user.IsPrivate = true
 	user.IsVerified = true
 	user.FollowersCount = 2000
-	user.JoinDate = scraper.TimestampFromUnix(2000)
+	user.JoinDate = TimestampFromUnix(2000)
 	user.ProfileImageUrl = "asdf2"
 	user.IsContentDownloaded = false // test No Worsening
 
-	// Save the modified user
+	// Save the user for the second time; should do update
 	err = profile.SaveUser(&user)
 	require.NoError(err)
 
@@ -107,9 +107,9 @@ func TestSetUserBannedDeleted(t *testing.T) {
 	user.DisplayName = "Display Name 1"
 	user.Location = "location1"
 	user.Bio = "Some Bio"
-	user.Handle = scraper.UserHandle(fmt.Sprintf("handle %d", rand.Int31()))
+	user.Handle = UserHandle(fmt.Sprintf("handle %d", rand.Int31()))
 	user.FollowersCount = 1000
-	user.JoinDate = scraper.TimestampFromUnix(1000)
+	user.JoinDate = TimestampFromUnix(1000)
 	user.ProfileImageUrl = "asdf"
 	user.IsContentDownloaded = true
 
@@ -118,7 +118,7 @@ func TestSetUserBannedDeleted(t *testing.T) {
 	require.NoError(err)
 
 	// Now the user deactivates
-	err = profile.SaveUser(&scraper.User{ID: user.ID, IsDeleted: true})
+	err = profile.SaveUser(&User{ID: user.ID, IsDeleted: true})
 	require.NoError(err)
 	// Reload the modified user
 	new_user, err := profile.GetUserByID(user.ID)
@@ -141,9 +141,9 @@ func TestSaveAndLoadBannedDeletedUser(t *testing.T) {
 	profile_path := "test_profiles/TestUserQueries"
 	profile := create_or_load_profile(profile_path)
 
-	user := scraper.User{
-		ID:       scraper.UserID(rand.Int31()),
-		Handle:   scraper.UserHandle(fmt.Sprintf("handle-%d", rand.Int31())),
+	user := User{
+		ID:       UserID(rand.Int31()),
+		Handle:   UserHandle(fmt.Sprintf("handle-%d", rand.Int31())),
 		IsBanned: true,
 	}
 
@@ -365,20 +365,20 @@ func TestCreateUnknownUserWithHandle(t *testing.T) {
 
 	next_id := profile.NextFakeUserID()
 
-	handle := scraper.UserHandle(fmt.Sprintf("UnknownUser%d", rand.Int31()))
-	user := scraper.GetUnknownUserWithHandle(handle)
-	assert.Equal(scraper.UserID(0), user.ID)
+	handle := UserHandle(fmt.Sprintf("UnknownUser%d", rand.Int31()))
+	user := GetUnknownUserWithHandle(handle)
+	assert.Equal(UserID(0), user.ID)
 	assert.True(user.IsIdFake)
 
 	err := profile.SaveUser(&user)
 	assert.NoError(err)
-	assert.Equal(scraper.UserID(next_id+1), user.ID)
+	assert.Equal(UserID(next_id+1), user.ID)
 
 	// Ensure the change was persisted
 	user_reloaded, err := profile.GetUserByHandle(user.Handle)
 	require.NoError(t, err)
 	assert.Equal(handle, user_reloaded.Handle) // Verify it's the same user
-	assert.Equal(scraper.UserID(next_id+1), user_reloaded.ID)
+	assert.Equal(UserID(next_id+1), user_reloaded.ID)
 
 	// Why not tack this test on here: make sure NextFakeUserID works as expected
 	assert.Equal(next_id+2, profile.NextFakeUserID())
@@ -393,8 +393,8 @@ func TestCreateUnknownUserWithHandleThatAlreadyExists(t *testing.T) {
 
 	user := create_stable_user()
 
-	unknown_user := scraper.GetUnknownUserWithHandle(user.Handle)
-	assert.Equal(scraper.UserID(0), unknown_user.ID)
+	unknown_user := GetUnknownUserWithHandle(user.Handle)
+	assert.Equal(UserID(0), unknown_user.ID)
 
 	err := profile.SaveUser(&unknown_user)
 	assert.NoError(err)
@@ -417,6 +417,6 @@ func TestSearchUsers(t *testing.T) {
 
 	users := profile.SearchUsers("no")
 	assert.Len(users, 2)
-	assert.Equal(users[0].Handle, scraper.UserHandle("Cernovich"))
-	assert.Equal(users[1].Handle, scraper.UserHandle("CovfefeAnon"))
+	assert.Equal(users[0].Handle, UserHandle("Cernovich"))
+	assert.Equal(users[1].Handle, UserHandle("CovfefeAnon"))
 }

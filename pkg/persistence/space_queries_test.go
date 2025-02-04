@@ -5,10 +5,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 
 	"github.com/go-test/deep"
 	"math/rand"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 // Create a Space, save it, reload it, and make sure it comes back the same
@@ -41,8 +42,8 @@ func TestModifySpace(t *testing.T) {
 
 	// Modify and save
 	space.State = "Some other state"
-	space.UpdatedAt = scraper.TimestampFromUnix(9001)
-	space.EndedAt = scraper.TimestampFromUnix(10001)
+	space.UpdatedAt = TimestampFromUnix(9001)
+	space.EndedAt = TimestampFromUnix(10001)
 	space.ReplayWatchCount = 100
 	space.LiveListenersCount = 50
 	space.IsDetailsFetched = true
@@ -51,8 +52,8 @@ func TestModifySpace(t *testing.T) {
 
 	new_space, err := profile.GetSpaceById(space.ID)
 	require.NoError(err)
-	assert.Equal(scraper.TimestampFromUnix(9001), new_space.UpdatedAt)
-	assert.Equal(scraper.TimestampFromUnix(10001), new_space.EndedAt)
+	assert.Equal(TimestampFromUnix(9001), new_space.UpdatedAt)
+	assert.Equal(TimestampFromUnix(10001), new_space.EndedAt)
 	assert.Equal(100, new_space.ReplayWatchCount)
 	assert.Equal(50, new_space.LiveListenersCount)
 	assert.True(new_space.IsDetailsFetched)
@@ -68,9 +69,9 @@ func TestNoWorseningSpace(t *testing.T) {
 	space.ShortUrl = "Some Short Url"
 	space.State = "Some State"
 	space.Title = "Debating Somebody"
-	space.CreatedAt = scraper.TimestampFromUnix(1000)
-	space.UpdatedAt = scraper.TimestampFromUnix(2000)
-	space.CreatedById = scraper.UserID(-1)
+	space.CreatedAt = TimestampFromUnix(1000)
+	space.UpdatedAt = TimestampFromUnix(2000)
+	space.CreatedById = UserID(-1)
 	space.LiveListenersCount = 100
 	space.IsDetailsFetched = true
 
@@ -82,9 +83,9 @@ func TestNoWorseningSpace(t *testing.T) {
 	space.ShortUrl = ""
 	space.Title = ""
 	space.State = ""
-	space.CreatedAt = scraper.TimestampFromUnix(0)
-	space.UpdatedAt = scraper.TimestampFromUnix(0)
-	space.CreatedById = scraper.UserID(0)
+	space.CreatedAt = TimestampFromUnix(0)
+	space.UpdatedAt = TimestampFromUnix(0)
+	space.CreatedById = UserID(0)
 	space.LiveListenersCount = 0
 	space.IsDetailsFetched = false
 	err = profile.SaveSpace(space)
@@ -97,9 +98,9 @@ func TestNoWorseningSpace(t *testing.T) {
 	assert.Equal(new_space.ShortUrl, "Some Short Url")
 	assert.Equal(new_space.State, "Some State")
 	assert.Equal(new_space.Title, "Debating Somebody")
-	assert.Equal(new_space.CreatedAt, scraper.TimestampFromUnix(1000))
-	assert.Equal(new_space.UpdatedAt, scraper.TimestampFromUnix(2000))
-	assert.Equal(new_space.CreatedById, scraper.UserID(-1))
+	assert.Equal(new_space.CreatedAt, TimestampFromUnix(1000))
+	assert.Equal(new_space.UpdatedAt, TimestampFromUnix(2000))
+	assert.Equal(new_space.CreatedById, UserID(-1))
 	assert.Equal(new_space.LiveListenersCount, 100)
 	assert.True(new_space.IsDetailsFetched)
 }

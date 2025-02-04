@@ -3,11 +3,11 @@ package persistence
 import (
 	"fmt"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 // Save a Retweet.  Do nothing if it already exists, because none of its parameters are modifiable.
-func (p Profile) SaveRetweet(r scraper.Retweet) error {
+func (p Profile) SaveRetweet(r Retweet) error {
 	_, err := p.DB.NamedExec(`
 			insert into retweets (retweet_id, tweet_id, retweeted_by, retweeted_at)
 			values (:retweet_id, :tweet_id, :retweeted_by, :retweeted_at)
@@ -22,8 +22,8 @@ func (p Profile) SaveRetweet(r scraper.Retweet) error {
 }
 
 // Retrieve a Retweet by ID
-func (p Profile) GetRetweetById(id scraper.TweetID) (scraper.Retweet, error) {
-	var r scraper.Retweet
+func (p Profile) GetRetweetById(id TweetID) (Retweet, error) {
+	var r Retweet
 	err := p.DB.Get(&r, `
 		select retweet_id, tweet_id, retweeted_by, retweeted_at
 		  from retweets

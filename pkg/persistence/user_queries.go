@@ -9,11 +9,11 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/mattn/go-sqlite3"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 type ErrConflictingUserHandle struct {
-	ConflictingUserID scraper.UserID
+	ConflictingUserID UserID
 }
 
 func (e ErrConflictingUserHandle) Error() string {
@@ -46,7 +46,7 @@ const USERS_ALL_SQL_FIELDS = `
 //  3. Mark the old user as deactivated, eliminating the conflict
 //  4. Re-save the new user
 //  5. Return an ErrConflictingUserHandle, notifying the caller of the conflict
-func (p Profile) SaveUser(u *scraper.User) error {
+func (p Profile) SaveUser(u *User) error {
 	// First, check if the user needs a fake ID, and generate one if needed
 	if u.IsNeedingFakeID {
 		// User is fake; check if we already have them, in order to proceed
@@ -70,7 +70,7 @@ func (p Profile) SaveUser(u *scraper.User) error {
 	// We know the UNIQUE violation must be on `handle`, because we checked for users with this ID
 	// above (`update` query).
 	handle_conflict := func() error {
-		var old_user scraper.User
+		var old_user User
 		err := p.DB.Get(&old_user,
 			`select id, is_id_fake from users where handle = ? and is_banned = 0 and is_deleted = 0`,
 			u.Handle,
@@ -189,10 +189,10 @@ func (p Profile) SaveUser(u *scraper.User) error {
 //
 // returns:
 // - the User, if it exists
-func (p Profile) GetUserByHandle(handle scraper.UserHandle) (scraper.User, error) {
+func (p Profile) GetUserByHandle(handle UserHandle) (User, error) {
 	db := p.DB
 
-	var ret scraper.User
+	var ret User
 	err := db.Get(&ret, `
 	    select `+USERS_ALL_SQL_FIELDS+`
 	      from users_by_handle
@@ -212,10 +212,10 @@ func (p Profile) GetUserByHandle(handle scraper.UserHandle) (scraper.User, error
 //
 // returns:
 // - the User, if it exists
-func (p Profile) GetUserByID(id scraper.UserID) (scraper.User, error) {
+func (p Profile) GetUserByID(id UserID) (User, error) {
 	db := p.DB
 
-	var ret scraper.User
+	var ret User
 
 	err := db.Get(&ret, `
 	    select `+USERS_ALL_SQL_FIELDS+`
@@ -243,7 +243,7 @@ func (p Profile) GetUserByID(id scraper.UserID) (scraper.User, error) {
 //
 // The `user` object will always have `is_content_downloaded` = false on every scrape.  This is
 // why the No Worsening Principle is needed.
-func (p Profile) CheckUserContentDownloadNeeded(user scraper.User) bool {
+func (p Profile) CheckUserContentDownloadNeeded(user User) bool {
 	row := p.DB.QueryRow(`select is_content_downloaded, profile_image_url, banner_image_url from users where id = ?`, user.ID)
 
 	var is_content_downloaded bool
@@ -271,7 +271,7 @@ func (p Profile) CheckUserContentDownloadNeeded(user scraper.User) bool {
 }
 
 // Follow / unfollow a user.  Update the given User object's IsFollowed field.
-func (p Profile) SetUserFollowed(user *scraper.User, is_followed bool) {
+func (p Profile) SetUserFollowed(user *User, is_followed bool) {
 	result, err := p.DB.Exec("update users set is_followed = ? where id = ?", is_followed, user.ID)
 	if err != nil {
 		panic(fmt.Errorf("Error inserting user with handle %q:\n  %w", user.Handle, err))
@@ -286,12 +286,12 @@ func (p Profile) SetUserFollowed(user *scraper.User, is_followed bool) {
 	user.IsFollowed = is_followed
 }
 
-func (p Profile) NextFakeUserID() scraper.UserID {
+func (p Profile) NextFakeUserID() UserID {
 	_, err := p.DB.Exec("update fake_user_sequence set latest_fake_id = latest_fake_id + 1")
 	if err != nil {
 		panic(err)
 	}
-	var ret scraper.UserID
+	var ret UserID
 	err = p.DB.QueryRow("select latest_fake_id from fake_user_sequence").Scan(&ret)
 	if err != nil {
 		panic(err)
@@ -301,7 +301,7 @@ func (p Profile) NextFakeUserID() scraper.UserID {
 
 // TODO: This is only used in checking whether the media downloader should get the big or small version of
 // a profile image.  That should be rewritten
-func (p Profile) IsFollowing(user scraper.User) bool {
+func (p Profile) IsFollowing(user User) bool {
 	row := p.DB.QueryRow("select is_followed from users where id like ?", user.ID)
 	var ret bool
 	err := row.Scan(&ret)
@@ -315,21 +315,21 @@ func (p Profile) IsFollowing(user scraper.User) bool {
 }
 
 // Utility function to compute the path to save banner image to
-func (p Profile) get_banner_image_output_path(u scraper.User) string {
+func (p Profile) get_banner_image_output_path(u User) string {
 	return path.Join(p.ProfileDir, "profile_images", u.BannerImageLocalPath)
 }
 
 // Utility function to compute the path to save profile image to
-func (p Profile) get_profile_image_output_path(u scraper.User) string {
+func (p Profile) get_profile_image_output_path(u User) string {
 	if u.ProfileImageUrl == "" {
-		return path.Join(p.ProfileDir, "profile_images", path.Base(scraper.DEFAULT_PROFILE_IMAGE_URL))
+		return path.Join(p.ProfileDir, "profile_images", path.Base(DEFAULT_PROFILE_IMAGE_URL))
 	}
 	return path.Join(p.ProfileDir, "profile_images", u.ProfileImageLocalPath)
 }
 
 // Do a text search for users
-func (p Profile) SearchUsers(s string) []scraper.User {
-	var ret []scraper.User
+func (p Profile) SearchUsers(s string) []User {
+	var ret []User
 	q, args, err := sqlx.Named(`
 		select `+USERS_ALL_SQL_FIELDS+`
 	      from users

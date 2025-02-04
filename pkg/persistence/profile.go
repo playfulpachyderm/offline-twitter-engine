@@ -9,7 +9,7 @@ import (
 	sql "github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 //go:embed schema.sql
@@ -125,14 +125,14 @@ func LoadProfile(profile_dir string) (Profile, error) {
 	return ret, err
 }
 
-func (p Profile) ListSessions() []scraper.UserHandle {
+func (p Profile) ListSessions() []UserHandle {
 	result, err := filepath.Glob(filepath.Join(p.ProfileDir, "*.session"))
 	if err != nil {
 		panic(err)
 	}
-	ret := []scraper.UserHandle{}
+	ret := []UserHandle{}
 	for _, filename := range result {
-		ret = append(ret, scraper.UserHandle(filepath.Base(filename[:len(filename)-len(".session")])))
+		ret = append(ret, UserHandle(filepath.Base(filename[:len(filename)-len(".session")])))
 	}
 	return ret
 }

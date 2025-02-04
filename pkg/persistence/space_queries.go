@@ -4,16 +4,17 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 type SpaceParticipant struct {
-	UserID  scraper.UserID  `db:"user_id"`
-	SpaceID scraper.SpaceID `db:"space_id"`
+	UserID  UserID  `db:"user_id"`
+	SpaceID SpaceID `db:"space_id"`
 }
 
 // Save a Space
-func (p Profile) SaveSpace(s scraper.Space) error {
+func (p Profile) SaveSpace(s Space) error {
 	_, err := p.DB.NamedExec(`
 		insert into spaces (id, created_by_id, short_url, state, title, created_at, started_at, ended_at, updated_at,
 		                    is_available_for_replay, replay_watch_count, live_listeners_count, is_details_fetched)
@@ -52,7 +53,7 @@ func (p Profile) SaveSpace(s scraper.Space) error {
 }
 
 // Get a Space by ID
-func (p Profile) GetSpaceById(id scraper.SpaceID) (space scraper.Space, err error) {
+func (p Profile) GetSpaceById(id SpaceID) (space Space, err error) {
 	err = p.DB.Get(&space,
 		`select id, ifnull(created_by_id, 0) created_by_id, short_url, state, title, created_at, started_at, ended_at, updated_at,
 		        is_available_for_replay, replay_watch_count, live_listeners_count, is_details_fetched
@@ -61,7 +62,7 @@ func (p Profile) GetSpaceById(id scraper.SpaceID) (space scraper.Space, err erro
 	if err != nil {
 		return
 	}
-	space.ParticipantIds = []scraper.UserID{}
+	space.ParticipantIds = []UserID{}
 	rows, err := p.DB.Query(`select user_id from space_participants where space_id = ?`, id)
 	if errors.Is(err, sql.ErrNoRows) {
 		err = nil
@@ -70,7 +71,7 @@ func (p Profile) GetSpaceById(id scraper.SpaceID) (space scraper.Space, err erro
 	if err != nil {
 		panic(err)
 	}
-	var participant_id scraper.UserID
+	var participant_id UserID
 	for rows.Next() {
 		err = rows.Scan(&participant_id)
 		if err != nil {

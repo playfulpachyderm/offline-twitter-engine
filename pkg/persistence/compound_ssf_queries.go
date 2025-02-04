@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 type SortOrder int
@@ -91,7 +91,7 @@ func (o SortOrder) NextCursorValue(r CursorResult) int {
 		panic(fmt.Sprintf("Invalid sort order: %d", o))
 	}
 }
-func (o SortOrder) NextDMCursorValue(m scraper.DMMessage) int64 {
+func (o SortOrder) NextDMCursorValue(m DMMessage) int64 {
 	switch o {
 	case SORT_ORDER_NEWEST, SORT_ORDER_OLDEST:
 		return m.SentAt.UnixMilli()
@@ -131,12 +131,12 @@ const (
 )
 
 type CursorResult struct {
-	scraper.Tweet
-	scraper.Retweet
+	Tweet
+	Retweet
 	Chrono            int            `db:"chrono"`
 	LikeSortOrder     int            `db:"likes_sort_order"`
 	BookmarkSortOrder int            `db:"bookmarks_sort_order"`
-	ByUserID          scraper.UserID `db:"by_user_id"`
+	ByUserID          UserID `db:"by_user_id"`
 }
 
 type Cursor struct {
@@ -147,16 +147,16 @@ type Cursor struct {
 
 	// Search params
 	Keywords               []string
-	FromUserHandle         scraper.UserHandle   // Tweeted by this user
-	RetweetedByUserHandle  scraper.UserHandle   // Retweeted by this user
-	ByUserHandle           scraper.UserHandle   // Either tweeted or retweeted by this user
-	ToUserHandles          []scraper.UserHandle // In reply to these users
-	LikedByUserHandle      scraper.UserHandle   // Liked by this user
-	BookmarkedByUserHandle scraper.UserHandle   // Bookmarked by this user
-	ListID                 scraper.ListID       // Either tweeted or retweeted by users from this List
-	FollowedByUserHandle   scraper.UserHandle   // Either tweeted or retweeted by users followed by this user
-	SinceTimestamp         scraper.Timestamp
-	UntilTimestamp         scraper.Timestamp
+	FromUserHandle         UserHandle   // Tweeted by this user
+	RetweetedByUserHandle  UserHandle   // Retweeted by this user
+	ByUserHandle           UserHandle   // Either tweeted or retweeted by this user
+	ToUserHandles          []UserHandle // In reply to these users
+	LikedByUserHandle      UserHandle   // Liked by this user
+	BookmarkedByUserHandle UserHandle   // Bookmarked by this user
+	ListID                 ListID       // Either tweeted or retweeted by users from this List
+	FollowedByUserHandle   UserHandle   // Either tweeted or retweeted by users followed by this user
+	SinceTimestamp         Timestamp
+	UntilTimestamp         Timestamp
 	TombstoneType          string
 	FilterLinks            Filter
 	FilterImages           Filter
@@ -173,9 +173,9 @@ type Cursor struct {
 func NewCursor() Cursor {
 	return Cursor{
 		Keywords:       []string{},
-		ToUserHandles:  []scraper.UserHandle{},
-		SinceTimestamp: scraper.TimestampFromUnix(0),
-		UntilTimestamp: scraper.TimestampFromUnix(0),
+		ToUserHandles:  []UserHandle{},
+		SinceTimestamp: TimestampFromUnix(0),
+		UntilTimestamp: TimestampFromUnix(0),
 		CursorPosition: CURSOR_START,
 		CursorValue:    0,
 		SortOrder:      SORT_ORDER_NEWEST,
@@ -189,9 +189,9 @@ func NewCursor() Cursor {
 func NewTimelineCursor() Cursor {
 	return Cursor{
 		Keywords:       []string{},
-		ToUserHandles:  []scraper.UserHandle{},
-		SinceTimestamp: scraper.TimestampFromUnix(0),
-		UntilTimestamp: scraper.TimestampFromUnix(0),
+		ToUserHandles:  []UserHandle{},
+		SinceTimestamp: TimestampFromUnix(0),
+		UntilTimestamp: TimestampFromUnix(0),
 		CursorPosition: CURSOR_START,
 		CursorValue:    0,
 		SortOrder:      SORT_ORDER_NEWEST,
@@ -202,13 +202,13 @@ func NewTimelineCursor() Cursor {
 }
 
 // Generate a cursor appropriate for showing a List feed
-func NewListCursor(list_id scraper.ListID) Cursor {
+func NewListCursor(list_id ListID) Cursor {
 	return Cursor{
 		Keywords:       []string{},
-		ToUserHandles:  []scraper.UserHandle{},
+		ToUserHandles:  []UserHandle{},
 		ListID:         list_id,
-		SinceTimestamp: scraper.TimestampFromUnix(0),
-		UntilTimestamp: scraper.TimestampFromUnix(0),
+		SinceTimestamp: TimestampFromUnix(0),
+		UntilTimestamp: TimestampFromUnix(0),
 		CursorPosition: CURSOR_START,
 		CursorValue:    0,
 		SortOrder:      SORT_ORDER_NEWEST,
@@ -217,12 +217,12 @@ func NewListCursor(list_id scraper.ListID) Cursor {
 }
 
 // Generate a cursor appropriate for fetching a User Feed
-func NewUserFeedCursor(h scraper.UserHandle) Cursor {
+func NewUserFeedCursor(h UserHandle) Cursor {
 	return Cursor{
 		Keywords:       []string{},
-		ToUserHandles:  []scraper.UserHandle{},
-		SinceTimestamp: scraper.TimestampFromUnix(0),
-		UntilTimestamp: scraper.TimestampFromUnix(0),
+		ToUserHandles:  []UserHandle{},
+		SinceTimestamp: TimestampFromUnix(0),
+		UntilTimestamp: TimestampFromUnix(0),
 		CursorPosition: CURSOR_START,
 		CursorValue:    0,
 		SortOrder:      SORT_ORDER_NEWEST,
@@ -233,12 +233,12 @@ func NewUserFeedCursor(h scraper.UserHandle) Cursor {
 }
 
 // Generate a cursor appropriate for a user's Media tab
-func NewUserFeedMediaCursor(h scraper.UserHandle) Cursor {
+func NewUserFeedMediaCursor(h UserHandle) Cursor {
 	return Cursor{
 		Keywords:       []string{},
-		ToUserHandles:  []scraper.UserHandle{},
-		SinceTimestamp: scraper.TimestampFromUnix(0),
-		UntilTimestamp: scraper.TimestampFromUnix(0),
+		ToUserHandles:  []UserHandle{},
+		SinceTimestamp: TimestampFromUnix(0),
+		UntilTimestamp: TimestampFromUnix(0),
 		CursorPosition: CURSOR_START,
 		CursorValue:    0,
 		SortOrder:      SORT_ORDER_NEWEST,
@@ -250,12 +250,12 @@ func NewUserFeedMediaCursor(h scraper.UserHandle) Cursor {
 }
 
 // Generate a cursor for a User's Likes
-func NewUserFeedLikesCursor(h scraper.UserHandle) Cursor {
+func NewUserFeedLikesCursor(h UserHandle) Cursor {
 	return Cursor{
 		Keywords:       []string{},
-		ToUserHandles:  []scraper.UserHandle{},
-		SinceTimestamp: scraper.TimestampFromUnix(0),
-		UntilTimestamp: scraper.TimestampFromUnix(0),
+		ToUserHandles:  []UserHandle{},
+		SinceTimestamp: TimestampFromUnix(0),
+		UntilTimestamp: TimestampFromUnix(0),
 		CursorPosition: CURSOR_START,
 		CursorValue:    0,
 		SortOrder:      SORT_ORDER_LIKED_AT,
@@ -266,12 +266,12 @@ func NewUserFeedLikesCursor(h scraper.UserHandle) Cursor {
 }
 
 // Generate a cursor for a User's Bookmarks
-func NewUserFeedBookmarksCursor(h scraper.UserHandle) Cursor {
+func NewUserFeedBookmarksCursor(h UserHandle) Cursor {
 	return Cursor{
 		Keywords:       []string{},
-		ToUserHandles:  []scraper.UserHandle{},
-		SinceTimestamp: scraper.TimestampFromUnix(0),
-		UntilTimestamp: scraper.TimestampFromUnix(0),
+		ToUserHandles:  []UserHandle{},
+		SinceTimestamp: TimestampFromUnix(0),
+		UntilTimestamp: TimestampFromUnix(0),
 		CursorPosition: CURSOR_START,
 		CursorValue:    0,
 		SortOrder:      SORT_ORDER_BOOKMARKED_AT,
@@ -343,24 +343,24 @@ func (c *Cursor) apply_token(token string) error {
 	var err error
 	switch parts[0] {
 	case "from":
-		c.FromUserHandle = scraper.UserHandle(parts[1])
+		c.FromUserHandle = UserHandle(parts[1])
 	case "to":
-		c.ToUserHandles = append(c.ToUserHandles, scraper.UserHandle(parts[1]))
+		c.ToUserHandles = append(c.ToUserHandles, UserHandle(parts[1]))
 	case "retweeted_by":
-		c.RetweetedByUserHandle = scraper.UserHandle(parts[1])
+		c.RetweetedByUserHandle = UserHandle(parts[1])
 		c.FilterRetweets = NONE // Clear the "exclude retweets" filter set by default in NewCursor
 	case "liked_by":
-		c.LikedByUserHandle = scraper.UserHandle(parts[1])
+		c.LikedByUserHandle = UserHandle(parts[1])
 	case "bookmarked_by":
-		c.BookmarkedByUserHandle = scraper.UserHandle(parts[1])
+		c.BookmarkedByUserHandle = UserHandle(parts[1])
 	case "followed_by":
-		c.FollowedByUserHandle = scraper.UserHandle(parts[1])
+		c.FollowedByUserHandle = UserHandle(parts[1])
 	case "list":
 		i, err := strconv.Atoi(parts[1])
 		if err != nil {
 			return fmt.Errorf("%w: filter 'list:' must be a number (list ID), got %q", ErrInvalidQuery, parts[1])
 		}
-		c.ListID = scraper.ListID(i)
+		c.ListID = ListID(i)
 	case "since":
 		c.SinceTimestamp.Time, err = time.Parse("2006-01-02", parts[1])
 	case "until":
@@ -413,7 +413,7 @@ func (c *Cursor) apply_token(token string) error {
 	return nil
 }
 
-func (p Profile) NextPage(c Cursor, current_user_id scraper.UserID) (Feed, error) {
+func (p Profile) NextPage(c Cursor, current_user_id UserID) (Feed, error) {
 	where_clauses := []string{}
 	bind_values := []interface{}{}
 

@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 // Some types to spy on a MediaDownloader
@@ -38,7 +38,7 @@ func (d FakeDownloader) Contains(result SpyResult) bool {
 	return false
 }
 
-func test_all_downloaded(tweet scraper.Tweet, yes_or_no bool, t *testing.T) {
+func test_all_downloaded(tweet Tweet, yes_or_no bool, t *testing.T) {
 	error_msg := map[bool]string{
 		true:  "Expected to be downloaded, but it wasn't",
 		false: "Expected not to be downloaded, but it was",
@@ -147,7 +147,7 @@ func TestDownloadDefaultUserContent(t *testing.T) {
 	// Check that the downloader was called with the appropriate stuff
 	assert.Len(*fake_downloader.Spy, 1)
 	assert.True(fake_downloader.Contains(SpyResult{
-		scraper.DEFAULT_PROFILE_IMAGE_URL,
+		DEFAULT_PROFILE_IMAGE_URL,
 		"test_profiles/TestMediaQueries/profile_images/default_profile.png",
 	}))
 }

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"path"
 
+	log "github.com/sirupsen/logrus"
+
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -18,7 +20,7 @@ func (p Profile) SaveTweetTrove(trove TweetTrove, should_download bool, api *API
 		// who were marked as deleted, and then let the callee re-scrape and re-save them.
 		var conflict_err ErrConflictingUserHandle
 		if errors.As(err, &conflict_err) {
-			fmt.Printf(
+			log.Warnf(
 				"Conflicting user handle found (ID %d); old user has been marked deleted.  Rescraping them\n",
 				conflict_err.ConflictingUserID,
 			)

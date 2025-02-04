@@ -6,7 +6,7 @@ import (
 	"os"
 	"path"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 type MediaDownloader interface {
@@ -14,7 +14,7 @@ type MediaDownloader interface {
 }
 
 type DefaultDownloader struct {
-	*scraper.API
+	*API
 }
 
 // Download a file over HTTP and save it.
@@ -47,7 +47,7 @@ func (d DefaultDownloader) Curl(url string, outpath string) error {
 
 // Downloads an Image, and if successful, marks it as downloaded in the DB
 // DUPE: download-image
-func (p Profile) download_tweet_image(img *scraper.Image, downloader MediaDownloader) error {
+func (p Profile) download_tweet_image(img *Image, downloader MediaDownloader) error {
 	outfile := path.Join(p.ProfileDir, "images", img.LocalFilename)
 	err := downloader.Curl(img.RemoteURL, outfile)
 	if err != nil {
@@ -59,12 +59,12 @@ func (p Profile) download_tweet_image(img *scraper.Image, downloader MediaDownlo
 
 // Downloads a Video and its thumbnail, and if successful, marks it as downloaded in the DB
 // DUPE: download-video
-func (p Profile) download_tweet_video(v *scraper.Video, downloader MediaDownloader) error {
+func (p Profile) download_tweet_video(v *Video, downloader MediaDownloader) error {
 	// Download the video
 	outfile := path.Join(p.ProfileDir, "videos", v.LocalFilename)
 	err := downloader.Curl(v.RemoteURL, outfile)
 
-	if errors.Is(err, scraper.ErrorDMCA) {
+	if errors.Is(err, ErrorDMCA) {
 		v.IsDownloaded = false
 		v.IsBlockedByDMCA = true
 	} else if err != nil {
@@ -86,7 +86,7 @@ func (p Profile) download_tweet_video(v *scraper.Video, downloader MediaDownload
 
 // Downloads an URL thumbnail image, and if successful, marks it as downloaded in the DB
 // DUPE: download-link-thumbnail
-func (p Profile) download_link_thumbnail(url *scraper.Url, downloader MediaDownloader) error {
+func (p Profile) download_link_thumbnail(url *Url, downloader MediaDownloader) error {
 	if url.HasCard && url.HasThumbnail {
 		outfile := path.Join(p.ProfileDir, "link_preview_images", url.ThumbnailLocalPath)
 		err := downloader.Curl(url.ThumbnailRemoteUrl, outfile)
@@ -100,12 +100,12 @@ func (p Profile) download_link_thumbnail(url *scraper.Url, downloader MediaDownl
 
 // Download a tweet's video and picture content.
 // Wraps the `DownloadTweetContentWithInjector` method with the default (i.e., real) downloader.
-func (p Profile) DownloadTweetContentFor(t *scraper.Tweet, api *scraper.API) error {
+func (p Profile) DownloadTweetContentFor(t *Tweet, api *API) error {
 	return p.DownloadTweetContentWithInjector(t, DefaultDownloader{API: api})
 }
 
 // Enable injecting a custom MediaDownloader (i.e., for testing)
-func (p Profile) DownloadTweetContentWithInjector(t *scraper.Tweet, downloader MediaDownloader) error {
+func (p Profile) DownloadTweetContentWithInjector(t *Tweet, downloader MediaDownloader) error {
 	// Check if content needs to be downloaded; if not, just return
 	if !p.CheckTweetContentDownloadNeeded(*t) {
 		return nil
@@ -141,12 +141,12 @@ func (p Profile) DownloadTweetContentWithInjector(t *scraper.Tweet, downloader M
 }
 
 // Download a user's banner and profile images
-func (p Profile) DownloadUserContentFor(u *scraper.User, api *scraper.API) error {
+func (p Profile) DownloadUserContentFor(u *User, api *API) error {
 	return p.DownloadUserContentWithInjector(u, DefaultDownloader{API: api})
 }
 
 // Enable injecting a custom MediaDownloader (i.e., for testing)
-func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader MediaDownloader) error {
+func (p Profile) DownloadUserContentWithInjector(u *User, downloader MediaDownloader) error {
 	if !p.CheckUserContentDownloadNeeded(*u) {
 		return nil
 	}
@@ -155,7 +155,7 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
 
 	var target_url string
 	if u.ProfileImageUrl == "" {
-		target_url = scraper.DEFAULT_PROFILE_IMAGE_URL
+		target_url = DEFAULT_PROFILE_IMAGE_URL
 	} else {
 		target_url = u.ProfileImageUrl
 	}
@@ -170,7 +170,7 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
 		outfile = p.get_banner_image_output_path(*u)
 		err = downloader.Curl(u.BannerImageUrl, outfile)
 
-		if errors.Is(err, scraper.ErrMediaDownload404) {
+		if errors.Is(err, ErrMediaDownload404) {
 			// Try adding "600x200".  Not sure why this does this but sometimes it does.
 			err = downloader.Curl(u.BannerImageUrl+"/600x200", outfile)
 		}
@@ -186,7 +186,7 @@ func (p Profile) DownloadUserContentWithInjector(u *scraper.User, downloader Med
 // Download a User's tiny profile image, if it hasn't been downloaded yet.
 // If it has been downloaded, do nothing.
 // If this user should have a big profile picture, defer to the regular `DownloadUserContentFor` method.
-func (p Profile) DownloadUserProfileImageTiny(u *scraper.User, api *scraper.API) error {
+func (p Profile) DownloadUserProfileImageTiny(u *User, api *API) error {
 	if p.IsFollowing(*u) {
 		return p.DownloadUserContentFor(u, api)
 	}

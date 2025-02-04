@@ -2,7 +2,7 @@ package persistence_test
 
 import (
 	"fmt"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+
 	"math/rand"
 	"net/http"
 	"net/http/cookiejar"
@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/go-test/deep"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 // Save and load an API session; it should come back the same
@@ -22,7 +24,7 @@ func TestSaveAndLoadAuthenticatedSession(t *testing.T) {
 		panic(err)
 	}
 
-	api := scraper.API{
+	api := API{
 		UserHandle:      "testUser",
 		IsAuthenticated: true,
 		Client: http.Client{

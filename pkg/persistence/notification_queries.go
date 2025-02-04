@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 

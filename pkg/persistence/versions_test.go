@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 func TestVersionUpgrade(t *testing.T) {
@@ -21,7 +21,7 @@ func TestVersionUpgrade(t *testing.T) {
 	profile := create_or_load_profile(profile_path)
 
 	test_migration := "insert into tweets (id, user_id, text) values (21250554358298342, -1, 'awefjk')"
-	test_tweet_id := scraper.TweetID(21250554358298342)
+	test_tweet_id := TweetID(21250554358298342)
 
 	require.False(profile.IsTweetInDatabase(test_tweet_id), "Test tweet shouldn't be in db yet")
 

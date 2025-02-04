@@ -8,7 +8,7 @@ import (
 	"github.com/go-test/deep"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 // Create an Image, save it, reload it, and make sure it comes back the same
@@ -31,7 +31,7 @@ func TestSaveAndLoadImage(t *testing.T) {
 	imgs, err := profile.GetImagesForTweet(tweet)
 	require.NoError(err)
 
-	var new_img scraper.Image
+	var new_img Image
 	for index := range imgs {
 		if imgs[index].ID == img.ID {
 			new_img = imgs[index]
@@ -52,7 +52,7 @@ func TestModifyImage(t *testing.T) {
 	tweet := create_stable_tweet()
 	img := tweet.Images[0]
 
-	require.Equal(scraper.ImageID(-1), img.ID, "Got the wrong image back")
+	require.Equal(ImageID(-1), img.ID, "Got the wrong image back")
 
 	img.IsDownloaded = true
 
@@ -94,7 +94,7 @@ func TestSaveAndLoadVideo(t *testing.T) {
 	vids, err := profile.GetVideosForTweet(tweet)
 	require.NoError(err)
 
-	var new_vid scraper.Video
+	var new_vid Video
 	for index := range vids {
 		if vids[index].ID == vid.ID {
 			new_vid = vids[index]
@@ -115,7 +115,7 @@ func TestModifyVideo(t *testing.T) {
 
 	tweet := create_stable_tweet()
 	vid := tweet.Videos[0]
-	require.Equal(scraper.VideoID(-1), vid.ID, "Got the wrong video back")
+	require.Equal(VideoID(-1), vid.ID, "Got the wrong video back")
 
 	vid.IsDownloaded = true
 	vid.IsBlockedByDMCA = true
@@ -157,7 +157,7 @@ func TestSaveAndLoadUrl(t *testing.T) {
 	urls, err := profile.GetUrlsForTweet(tweet)
 	require.NoError(err)
 
-	var new_url scraper.Url
+	var new_url Url
 	for index := range urls {
 		if urls[index].Text == url.Text {
 			new_url = urls[index]
@@ -218,7 +218,7 @@ func TestSaveAndLoadPoll(t *testing.T) {
 	polls, err := profile.GetPollsForTweet(tweet)
 	require.NoError(err)
 
-	var new_poll scraper.Poll
+	var new_poll Poll
 	for index := range polls {
 		if polls[index].ID == poll.ID {
 			new_poll = polls[index]
