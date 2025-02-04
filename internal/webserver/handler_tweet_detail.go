@@ -53,8 +53,8 @@ func (app *Application) ensure_tweet(id scraper.TweetID, is_forced bool, is_conv
 
 		// Save the trove unless there was an unrecoverable error
 		if err == nil || errors.Is(err, scraper.END_OF_FEED) || errors.Is(err, scraper.ErrRateLimited) {
-			app.Profile.SaveTweetTrove(trove, false, &app.API)
-			go app.Profile.SaveTweetTrove(trove, true, &app.API) // Download the content in the background
+			app.Profile.SaveTweetTrove(trove, false, app.API.DownloadMedia)
+			go app.Profile.SaveTweetTrove(trove, true, app.API.DownloadMedia) // Download the content in the background
 			_, is_available = trove.Tweets[id]
 		}
 

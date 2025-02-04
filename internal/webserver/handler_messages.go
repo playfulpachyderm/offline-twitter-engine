@@ -80,8 +80,8 @@ func (app *Application) message_send(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	app.Profile.SaveTweetTrove(trove, false, &app.API)
-	go app.Profile.SaveTweetTrove(trove, true, &app.API)
+	app.Profile.SaveTweetTrove(trove, false, app.API.DownloadMedia)
+	go app.Profile.SaveTweetTrove(trove, true, app.API.DownloadMedia)
 }
 
 func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
@@ -153,8 +153,8 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		app.Profile.SaveTweetTrove(trove, false, &app.API)
-		go app.Profile.SaveTweetTrove(trove, true, &app.API) // Download the content in the background
+		app.Profile.SaveTweetTrove(trove, false, app.API.DownloadMedia)
+		go app.Profile.SaveTweetTrove(trove, true, app.API.DownloadMedia) // Download the content in the background
 	}
 
 	// `LatestPollingTimestamp` sort of passes-through the function; if we're not updating it, it
@@ -244,8 +244,8 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 		inbox_cursor = new_cursor
-		app.Profile.SaveTweetTrove(trove, false, &app.API)
-		go app.Profile.SaveTweetTrove(trove, true, &app.API)
+		app.Profile.SaveTweetTrove(trove, false, app.API.DownloadMedia)
+		go app.Profile.SaveTweetTrove(trove, true, app.API.DownloadMedia)
 	}
 
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")

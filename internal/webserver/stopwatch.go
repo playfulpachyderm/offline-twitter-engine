@@ -49,8 +49,8 @@ func (t *BackgroundTask) Do() {
 	// Run the task
 	trove := t.GetTroveFunc(&t.app.API)
 	t.log.Print("saving results")
-	t.app.Profile.SaveTweetTrove(trove, false, &t.app.API)
-	go t.app.Profile.SaveTweetTrove(trove, true, &t.app.API)
+	t.app.Profile.SaveTweetTrove(trove, false, t.app.API.DownloadMedia)
+	go t.app.Profile.SaveTweetTrove(trove, true, t.app.API.DownloadMedia)
 	t.log.Print("success")
 }
 
