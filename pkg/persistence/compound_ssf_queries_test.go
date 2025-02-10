@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -17,13 +17,13 @@ func TestCursorSearchByNewest(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
-	c := persistence.NewCursor()
+	c := NewCursor()
 	c.PageSize = 3
 	c.Keywords = []string{"think"}
-	c.SortOrder = persistence.SORT_ORDER_NEWEST
+	c.SortOrder = SORT_ORDER_NEWEST
 
 	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
@@ -35,7 +35,7 @@ func TestCursorSearchByNewest(t *testing.T) {
 	assert.Equal(feed.Items[2].TweetID, TweetID(1428939163961790466))
 
 	next_cursor := feed.CursorBottom
-	assert.Equal(next_cursor.CursorPosition, persistence.CURSOR_MIDDLE)
+	assert.Equal(next_cursor.CursorPosition, CURSOR_MIDDLE)
 	assert.Equal(next_cursor.SortOrder, c.SortOrder)
 	assert.Equal(next_cursor.Keywords, c.Keywords)
 	assert.Equal(next_cursor.PageSize, c.PageSize)
@@ -50,7 +50,7 @@ func TestCursorSearchByNewest(t *testing.T) {
 	assert.Equal(feed.Items[1].TweetID, TweetID(1343633011364016128))
 
 	next_cursor = feed.CursorBottom
-	assert.Equal(next_cursor.CursorPosition, persistence.CURSOR_END)
+	assert.Equal(next_cursor.CursorPosition, CURSOR_END)
 }
 
 // Search retweets, sorted by oldest
@@ -58,14 +58,14 @@ func TestCursorSearchWithRetweets(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
-	c := persistence.NewCursor()
+	c := NewCursor()
 	c.PageSize = 3
 	c.RetweetedByUserHandle = "cernovich"
-	c.FilterRetweets = persistence.REQUIRE
-	c.SortOrder = persistence.SORT_ORDER_OLDEST
+	c.FilterRetweets = REQUIRE
+	c.SortOrder = SORT_ORDER_OLDEST
 
 	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
@@ -77,7 +77,7 @@ func TestCursorSearchWithRetweets(t *testing.T) {
 	assert.Equal(feed.Items[2].RetweetID, TweetID(1490135787144237058))
 
 	next_cursor := feed.CursorBottom
-	assert.Equal(next_cursor.CursorPosition, persistence.CURSOR_MIDDLE)
+	assert.Equal(next_cursor.CursorPosition, CURSOR_MIDDLE)
 	assert.Equal(next_cursor.SortOrder, c.SortOrder)
 	assert.Equal(next_cursor.Keywords, c.Keywords)
 	assert.Equal(next_cursor.PageSize, c.PageSize)
@@ -88,7 +88,7 @@ func TestCursorSearchWithRetweets(t *testing.T) {
 
 	assert.Len(feed.Items, 0)
 	next_cursor = feed.CursorBottom
-	assert.Equal(next_cursor.CursorPosition, persistence.CURSOR_END)
+	assert.Equal(next_cursor.CursorPosition, CURSOR_END)
 }
 
 // Offline Following Timeline
@@ -96,10 +96,10 @@ func TestTimeline(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
-	c := persistence.NewTimelineCursor()
+	c := NewTimelineCursor()
 	c.PageSize = 6
 
 	feed, err := profile.NextPage(c, UserID(0))
@@ -115,7 +115,7 @@ func TestTimeline(t *testing.T) {
 	assert.Equal(feed.Items[5].TweetID, TweetID(1453461248142495744))
 
 	next_cursor := feed.CursorBottom
-	assert.Equal(next_cursor.CursorPosition, persistence.CURSOR_MIDDLE)
+	assert.Equal(next_cursor.CursorPosition, CURSOR_MIDDLE)
 	assert.Equal(next_cursor.SortOrder, c.SortOrder)
 	assert.Equal(next_cursor.Keywords, c.Keywords)
 	assert.Equal(next_cursor.PageSize, c.PageSize)
@@ -139,9 +139,9 @@ func TestKeywordSearch(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
-	c := persistence.NewCursor()
+	c := NewCursor()
 
 	// Multiple words without quotes
 	c.Keywords = []string{"who", "are"}
@@ -167,9 +167,9 @@ func TestSearchReplyingToUser(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
-	c := persistence.NewCursor()
+	c := NewCursor()
 
 	// Replying to a user
 	c.ToUserHandles = []UserHandle{"spacex"}
@@ -191,10 +191,10 @@ func TestSearchDateFilters(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
-	c := persistence.NewCursor()
-	c.SortOrder = persistence.SORT_ORDER_MOST_LIKES
+	c := NewCursor()
+	c.SortOrder = SORT_ORDER_MOST_LIKES
 
 	// Since timestamp
 	c.SinceTimestamp.Time = time.Date(2021, 10, 1, 0, 0, 0, 0, time.UTC)
@@ -220,13 +220,13 @@ func TestSearchMediaFilters(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	// Links
-	c := persistence.NewCursor()
-	c.SortOrder = persistence.SORT_ORDER_MOST_LIKES
-	c.FilterLinks = persistence.REQUIRE
+	c := NewCursor()
+	c.SortOrder = SORT_ORDER_MOST_LIKES
+	c.FilterLinks = REQUIRE
 	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.Len(feed.Items, 2)
@@ -234,9 +234,9 @@ func TestSearchMediaFilters(t *testing.T) {
 	assert.Equal(feed.Items[1].TweetID, TweetID(1413665734866186243))
 
 	// Images
-	c = persistence.NewCursor()
-	c.SortOrder = persistence.SORT_ORDER_MOST_LIKES
-	c.FilterImages = persistence.REQUIRE
+	c = NewCursor()
+	c.SortOrder = SORT_ORDER_MOST_LIKES
+	c.FilterImages = REQUIRE
 	feed, err = profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.Len(feed.Items, 2)
@@ -244,9 +244,9 @@ func TestSearchMediaFilters(t *testing.T) {
 	assert.Equal(feed.Items[1].TweetID, TweetID(1426669666928414720))
 
 	// Videos
-	c = persistence.NewCursor()
-	c.SortOrder = persistence.SORT_ORDER_MOST_LIKES
-	c.FilterVideos = persistence.REQUIRE
+	c = NewCursor()
+	c.SortOrder = SORT_ORDER_MOST_LIKES
+	c.FilterVideos = REQUIRE
 	feed, err = profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.Len(feed.Items, 2)
@@ -254,9 +254,9 @@ func TestSearchMediaFilters(t *testing.T) {
 	assert.Equal(feed.Items[1].TweetID, TweetID(1453461248142495744))
 
 	// Media (generic)
-	c = persistence.NewCursor()
-	c.SortOrder = persistence.SORT_ORDER_MOST_LIKES
-	c.FilterMedia = persistence.REQUIRE
+	c = NewCursor()
+	c.SortOrder = SORT_ORDER_MOST_LIKES
+	c.FilterMedia = REQUIRE
 	feed, err = profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.Len(feed.Items, 4)
@@ -266,24 +266,24 @@ func TestSearchMediaFilters(t *testing.T) {
 	assert.Equal(feed.Items[3].TweetID, TweetID(1453461248142495744))
 
 	// Polls
-	c = persistence.NewCursor()
-	c.FilterPolls = persistence.REQUIRE
+	c = NewCursor()
+	c.FilterPolls = REQUIRE
 	feed, err = profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.Len(feed.Items, 1)
 	assert.Equal(feed.Items[0].TweetID, TweetID(1465534109573390348))
 
 	// Spaces
-	c = persistence.NewCursor()
-	c.FilterSpaces = persistence.REQUIRE
+	c = NewCursor()
+	c.FilterSpaces = REQUIRE
 	feed, err = profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	assert.Len(feed.Items, 1)
 	assert.Equal(feed.Items[0].TweetID, TweetID(1624833173514293249))
 
 	// Negative filter (images)
-	c = persistence.NewCursor()
-	c.FilterImages = persistence.EXCLUDE
+	c = NewCursor()
+	c.FilterImages = EXCLUDE
 	c.FromUserHandle = UserHandle("covfefeanon")
 	feed, err = profile.NextPage(c, UserID(0))
 	require.NoError(err)

@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-test/deep"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -334,5 +334,5 @@ func TestLoadMissingTweet(t *testing.T) {
 
 	_, err := profile.GetTweetById(TweetID(6234234)) // Random number
 	require.Error(t, err)
-	assert.ErrorIs(t, err, persistence.ErrNotInDatabase)
+	assert.ErrorIs(t, err, ErrNotInDatabase)
 }

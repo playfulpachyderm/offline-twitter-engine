@@ -5,17 +5,17 @@ import (
 	"math/rand"
 	"time"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 // Load a test profile, or create it if it doesn't exist.
-func create_or_load_profile(profile_path string) persistence.Profile {
-	var profile persistence.Profile
+func create_or_load_profile(profile_path string) Profile {
+	var profile Profile
 	var err error
 
 	if !file_exists(profile_path) {
-		profile, err = persistence.NewProfile(profile_path)
+		profile, err = NewProfile(profile_path)
 		if err != nil {
 			panic(err)
 		}
@@ -34,7 +34,7 @@ func create_or_load_profile(profile_path string) persistence.Profile {
 		}
 		err = profile.SaveChatRoom(create_stable_chat_room())
 	} else {
-		profile, err = persistence.LoadProfile(profile_path)
+		profile, err = LoadProfile(profile_path)
 	}
 	if err != nil {
 		panic(err)

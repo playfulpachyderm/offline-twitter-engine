@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -170,7 +170,7 @@ func TestInsertUserWithDuplicateHandle(t *testing.T) {
 	user2 := create_dummy_user()
 	user2.Handle = user1.Handle
 	err = profile.SaveUser(&user2)
-	var conflict_err persistence.ErrConflictingUserHandle
+	var conflict_err ErrConflictingUserHandle
 	require.ErrorAs(err, &conflict_err)
 	require.Equal(conflict_err.ConflictingUserID, user1.ID)
 
@@ -213,7 +213,7 @@ func TestReviveDeletedUserWithDuplicateHandle(t *testing.T) {
 	// Reactivate the 1st user; should return the 2nd user's ID as a conflict
 	user1.IsDeleted = false
 	err = profile.SaveUser(&user1)
-	var conflict_err persistence.ErrConflictingUserHandle
+	var conflict_err ErrConflictingUserHandle
 	require.ErrorAs(err, &conflict_err)
 	require.Equal(conflict_err.ConflictingUserID, user2.ID)
 

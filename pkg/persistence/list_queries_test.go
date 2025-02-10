@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -17,7 +17,7 @@ func TestSaveAndLoadOfflineList(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	// Create an offline list
@@ -38,7 +38,7 @@ func TestRenameOfflineList(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	// Create an offline list
@@ -62,7 +62,7 @@ func TestSaveAndLoadOnlineList(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	// Create an online list
@@ -84,7 +84,7 @@ func TestRenameOnlineList(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	// Create an online list
@@ -108,7 +108,7 @@ func TestRenameOnlineList(t *testing.T) {
 func TestNoOnlineListWithoutID(t *testing.T) {
 	require := require.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	// Creating an online list with no OnlineID should fail
@@ -126,7 +126,7 @@ func TestAddAndRemoveUserToList(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	// Create a list
@@ -161,7 +161,7 @@ func TestGetAllLists(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	// Create a list
@@ -177,7 +177,7 @@ func TestGetAllLists(t *testing.T) {
 func TestDeleteList(t *testing.T) {
 	require := require.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	// Create an offline list

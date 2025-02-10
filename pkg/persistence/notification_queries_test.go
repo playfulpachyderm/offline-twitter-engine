@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -30,7 +30,7 @@ func TestGetUnreadNotificationsCount(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	unread_notifs_count := profile.GetUnreadNotificationsCount(UserID(1488963321701171204), 1724372973735)

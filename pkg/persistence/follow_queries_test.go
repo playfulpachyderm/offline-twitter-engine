@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -14,7 +14,7 @@ func TestSaveAndLoadFollows(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	follower := create_dummy_user()
@@ -47,7 +47,7 @@ func TestIsFollowing(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	assert.True(profile.IsXFollowingY(UserID(1178839081222115328), UserID(1488963321701171204)))

@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -25,8 +25,8 @@ func TestVersionUpgrade(t *testing.T) {
 
 	require.False(profile.IsTweetInDatabase(test_tweet_id), "Test tweet shouldn't be in db yet")
 
-	persistence.MIGRATIONS = append(persistence.MIGRATIONS, test_migration)
-	err := profile.UpgradeFromXToY(persistence.ENGINE_DATABASE_VERSION, persistence.ENGINE_DATABASE_VERSION+1)
+	MIGRATIONS = append(MIGRATIONS, test_migration)
+	err := profile.UpgradeFromXToY(ENGINE_DATABASE_VERSION, ENGINE_DATABASE_VERSION+1)
 	require.NoError(err)
 
 	require.True(profile.IsTweetInDatabase(test_tweet_id), "Migration should have created the tweet, but it didn't")

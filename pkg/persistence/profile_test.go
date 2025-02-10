@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
 // DUPE 1
@@ -35,10 +35,10 @@ func TestNewProfileInvalidPath(t *testing.T) {
 	err := os.Mkdir(gibberish_path, 0755)
 	require.NoError(err)
 
-	_, err = persistence.NewProfile(gibberish_path)
+	_, err = NewProfile(gibberish_path)
 	require.Error(err, "Should have failed to create a profile in an already existing directory!")
 
-	assert.ErrorIs(t, err, persistence.ErrTargetAlreadyExists)
+	assert.ErrorIs(t, err, ErrTargetAlreadyExists)
 }
 
 // Should correctly create a new Profile
@@ -52,7 +52,7 @@ func TestNewProfile(t *testing.T) {
 		require.NoError(err)
 	}
 
-	profile, err := persistence.NewProfile(profile_path)
+	profile, err := NewProfile(profile_path)
 	require.NoError(err)
 
 	assert.Equal(profile_path, profile.ProfileDir)
@@ -82,7 +82,7 @@ func TestNewProfile(t *testing.T) {
 	// Check database version is initialized
 	version, err := profile.GetDatabaseVersion()
 	require.NoError(err)
-	assert.Equal(persistence.ENGINE_DATABASE_VERSION, version)
+	assert.Equal(ENGINE_DATABASE_VERSION, version)
 }
 
 // Should correctly load the Profile
@@ -95,10 +95,10 @@ func TestLoadProfile(t *testing.T) {
 		require.NoError(err)
 	}
 
-	_, err := persistence.NewProfile(profile_path)
+	_, err := NewProfile(profile_path)
 	require.NoError(err)
 
-	profile, err := persistence.LoadProfile(profile_path)
+	profile, err := LoadProfile(profile_path)
 	require.NoError(err)
 
 	assert.Equal(t, profile_path, profile.ProfileDir)

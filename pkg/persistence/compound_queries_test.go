@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -15,10 +15,10 @@ func TestBuildUserFeed(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
-	c := persistence.NewUserFeedCursor(UserHandle("cernovich"))
+	c := NewUserFeedCursor(UserHandle("cernovich"))
 	c.PageSize = 2
 
 	feed, err := profile.NextPage(c, UserID(0))
@@ -56,12 +56,12 @@ func TestBuildUserFeedPage2(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
-	c := persistence.NewUserFeedCursor(UserHandle("cernovich"))
+	c := NewUserFeedCursor(UserHandle("cernovich"))
 	c.PageSize = 2
-	c.CursorPosition = persistence.CURSOR_MIDDLE
+	c.CursorPosition = CURSOR_MIDDLE
 	c.CursorValue = 1644107102000
 	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
@@ -96,12 +96,12 @@ func TestBuildUserFeedEnd(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
-	c := persistence.NewUserFeedCursor(UserHandle("cernovich"))
+	c := NewUserFeedCursor(UserHandle("cernovich"))
 	c.PageSize = 2
-	c.CursorPosition = persistence.CURSOR_MIDDLE
+	c.CursorPosition = CURSOR_MIDDLE
 	c.CursorValue = 1 // Won't be anything
 	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
@@ -111,18 +111,18 @@ func TestBuildUserFeedEnd(t *testing.T) {
 	assert.Len(feed.Users, 0)
 	require.Len(feed.Items, 0)
 
-	assert.Equal(feed.CursorBottom.CursorPosition, persistence.CURSOR_END)
+	assert.Equal(feed.CursorBottom.CursorPosition, CURSOR_END)
 }
 
 func TestUserFeedHasLikesInfo(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	// Fetch @Peter_Nimitz user feed while logged in as @MysteryGrove
-	c := persistence.NewUserFeedCursor(UserHandle("Peter_Nimitz"))
+	c := NewUserFeedCursor(UserHandle("Peter_Nimitz"))
 	feed, err := profile.NextPage(c, UserID(1178839081222115328))
 	require.NoError(err)
 
@@ -136,10 +136,10 @@ func TestUserFeedWithTombstone(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
-	c := persistence.NewUserFeedCursor(UserHandle("Heminator"))
+	c := NewUserFeedCursor(UserHandle("Heminator"))
 	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
 	tombstone_tweet := feed.Tweets[TweetID(31)]
@@ -150,12 +150,12 @@ func TestUserLikesFeed(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	// Fetch @Peter_Nimitz user feed while logged in as @MysteryGrove
-	c := persistence.NewUserFeedLikesCursor(UserHandle("MysteryGrove"))
-	require.Equal(c.SortOrder, persistence.SORT_ORDER_LIKED_AT)
+	c := NewUserFeedLikesCursor(UserHandle("MysteryGrove"))
+	require.Equal(c.SortOrder, SORT_ORDER_LIKED_AT)
 	c.PageSize = 2
 	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
@@ -188,14 +188,14 @@ func TestUserLikesFeed(t *testing.T) {
 		_, is_ok := feed.Tweets[expected_tweet_id]
 		assert.True(is_ok)
 	}
-	assert.Equal(feed.CursorBottom.CursorPosition, persistence.CURSOR_END)
+	assert.Equal(feed.CursorBottom.CursorPosition, CURSOR_END)
 }
 
 func TestTweetDetailWithReplies(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	tweet_detail, err := profile.GetTweetDetail(TweetID(1413646595493568516), UserID(1178839081222115328))
@@ -248,7 +248,7 @@ func TestTweetDetailWithParents(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	tweet_detail, err := profile.GetTweetDetail(TweetID(1413773185296650241), UserID(1178839081222115328))
@@ -286,7 +286,7 @@ func TestTweetDetailWithThread(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	tweet_detail, err := profile.GetTweetDetail(TweetID(1698762403163304110), UserID(0))
@@ -322,7 +322,7 @@ func TestNotificationsFeed(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	profile, err := persistence.LoadProfile("../../sample_data/profile")
+	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
 	feed := profile.GetNotificationsForUser(UserID(1488963321701171204), 0, 6)
@@ -353,7 +353,7 @@ func TestNotificationsFeed(t *testing.T) {
 	assert.Equal(feed.Items[5].NotificationID, NotificationID("FKncQJGVgAQAAAABSQ3bEaTgXL8f40e77r4"))
 	assert.Equal(feed.Items[5].TweetID, TweetID(1826778617705115868))
 
-	assert.Equal(feed.CursorBottom.CursorPosition, persistence.CURSOR_MIDDLE)
+	assert.Equal(feed.CursorBottom.CursorPosition, CURSOR_MIDDLE)
 	assert.Equal(feed.CursorBottom.CursorValue, 1723494244885)
 
 	// Paginated version
@@ -368,7 +368,7 @@ func TestNotificationsFeed(t *testing.T) {
 	assert.Equal(feed.Items[1].NotificationID, NotificationID("FKncQJGVgAQAAAABSQ3bEaTgXL8VBxefepo"))
 	assert.Equal(feed.Items[2].NotificationID, NotificationID("FKncQJGVgAQAAAABSQ3bEaTgXL_S11Ev36g"))
 
-	assert.Equal(feed.CursorBottom.CursorPosition, persistence.CURSOR_MIDDLE)
+	assert.Equal(feed.CursorBottom.CursorPosition, CURSOR_MIDDLE)
 	assert.Equal(feed.CursorBottom.CursorValue, 1724251072880)
 
 	// At end of feed
@@ -377,5 +377,5 @@ func TestNotificationsFeed(t *testing.T) {
 	// cursor = last notification's sort index
 	feed = profile.GetNotificationsForUser(UserID(1488963321701171204), 1723494244885, 3)
 	assert.Len(feed.Items, 0)
-	assert.Equal(feed.CursorBottom.CursorPosition, persistence.CURSOR_END)
+	assert.Equal(feed.CursorBottom.CursorPosition, CURSOR_END)
 }
