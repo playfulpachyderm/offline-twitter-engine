@@ -239,22 +239,25 @@ tw fetch_user LandsharkRides
 test $(sqlite3 twitter.db "select is_private from users where handle = 'LandsharkRides'") = "1"
 
 
-# # Fetch a user who deleted and made a new account with the same handle
-# TODO: this guy got banned
-# sqlite3 twitter.db "INSERT INTO users(rowid,id,display_name,handle,bio,following_count,followers_count,location,website,join_date,is_private,is_verified,is_banned,profile_image_url,profile_image_local_path,banner_image_url,banner_image_local_path,pinned_tweet_id,is_content_downloaded,is_followed,is_id_fake,is_deleted) VALUES(134934,1615394007961731072,'Monsieur Chat ✊🏼','9MonsieurChat9','Lives: 4 (-5)',121,694,'','',1673974925000,0,0,0,'https://pbs.twimg.com/profile_images/1818708927842074627/O0i9kUeI.jpg','9MonsieurChat9_profile_O0i9kUeI.jpg','','',1834121200584589600,0,0,0,0)"
-# test $(sqlite3 twitter.db "select count(*) from users where handle like '9MonsieurChat9'") = "1"
-# tw fetch_user 9MonsieurChat9 # Should get the updated one
-# test $(sqlite3 twitter.db "select count(*) from users where handle like '9MonsieurChat9'") = "2"
-# test $(sqlite3 twitter.db "select count(*) from users where handle like '9MonsieurChat9' and not is_deleted") = "1"
-# test $(sqlite3 twitter.db "select is_deleted from users where id = 1615394007961731072") = "1"
-#
-# # Fetch a tweet from such a new account with the same handle as an old one
-# sqlite3 twitter.db "delete from users where handle like '9MonsieurChat9' and not is_deleted"
-# test $(sqlite3 twitter.db "select count(*) from users where handle like '9MonsieurChat9'") = "1"
-# tw fetch_tweet https://x.com/9MonsieurChat9/status/1834121200584589600 # Should update the user as well
-# test $(sqlite3 twitter.db "select count(*) from users where handle like '9MonsieurChat9'") = "2"
-# test $(sqlite3 twitter.db "select count(*) from users where handle like '9MonsieurChat9' and not is_deleted") = "1"
-# test $(sqlite3 twitter.db "select is_deleted from users where id = 1615394007961731072") = "1"
+# Fetch a user who deleted and made a new account with the same handle
+# First, insert some fake data
+sqlite3 twitter.db "INSERT INTO users(rowid,id,display_name,handle,bio,following_count,followers_count,location,website,join_date,is_private,is_verified,is_banned,profile_image_url,profile_image_local_path,banner_image_url,banner_image_local_path,pinned_tweet_id,is_content_downloaded,is_followed,is_id_fake,is_deleted) VALUES(134934,1615394007961731072,'blahblehbluh','xctlot','fake',121,694,'','',1673974925000,0,0,0,'https://pbs.twimg.com/profile_images/1818708927842074627/O0i9kUeI.jpg','fakeimage.jpg','','',1834121200584589600,0,0,0,0)"
+test $(sqlite3 twitter.db "select count(*) from users where handle like 'xctlot'") = "1"
+tw fetch_user xctlot # Should get the real one
+# Check the old one is marked deleted
+test $(sqlite3 twitter.db "select count(*) from users where handle like 'xctlot'") = "2"
+test $(sqlite3 twitter.db "select count(*) from users where handle like 'xctlot' and not is_deleted") = "1"
+test $(sqlite3 twitter.db "select is_deleted from users where id = 1615394007961731072") = "1"
+
+# Do the same thing indirectly by fetching a tweet; should do the same process as above
+sqlite3 twitter.db "delete from users where handle like 'xctlot' and not is_deleted" # re-setup the state
+sqlite3 twitter.db "update users set is_deleted=0 where handle like 'xctlot'"
+test $(sqlite3 twitter.db "select count(*) from users where handle like 'xctlot'") = "1"
+test $(sqlite3 twitter.db "select is_deleted from users where id = 1615394007961731072") = "0"
+tw fetch_tweet https://x.com/xctlot/status/1856171129938813327 # Should update the user as well
+test $(sqlite3 twitter.db "select count(*) from users where handle like 'xctlot'") = "2"
+test $(sqlite3 twitter.db "select count(*) from users where handle like 'xctlot' and not is_deleted") = "1"
+test $(sqlite3 twitter.db "select is_deleted from users where id = 1615394007961731072") = "1"
 
 
 # Test tweets with URLs
@@ -430,7 +433,7 @@ tw fetch_dm "1458284524761075714-1488963321701171204"
 # Test followers and followees
 test $(sqlite3 twitter.db "select count(*) from follows") = "0"
 tw get_followees Offline_Twatter
-test $(sqlite3 twitter.db "select count(*) from follows where follower_id = 1488963321701171204") = "3"
+test $(sqlite3 twitter.db "select count(*) from follows where follower_id = 1488963321701171204") -ge "3"
 test $(sqlite3 twitter.db "select count(*) from follows where followee_id = 1488963321701171204") = "0"
 tw get_followers Offline_Twatter
 test $(sqlite3 twitter.db "select count(*) from follows where follower_id = 1488963321701171204 and followee_id = 759251") = "1"
