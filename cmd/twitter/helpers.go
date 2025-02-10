@@ -96,3 +96,30 @@ func is_scrape_failure(err error) bool {
 	}
 	return true
 }
+
+// DUPE: full_save_tweet_trove
+func full_save_tweet_trove(trove scraper.TweetTrove) {
+	conflicting_users := profile.SaveTweetTrove(trove, true, api.DownloadMedia)
+	for _, u_id := range conflicting_users {
+		fmt.Printf(terminal_utils.COLOR_YELLOW+
+			"Conflicting user handle found (ID %d); old user has been marked deleted.  Rescraping manually"+
+			terminal_utils.COLOR_RESET+"\n",
+			u_id)
+		// Rescrape
+		updated_user, err := scraper.GetUserByID(u_id)
+		if errors.Is(err, scraper.ErrDoesntExist) {
+			// Mark them as deleted.
+			// Handle and display name won't be updated if the user exists.
+			updated_user = scraper.User{ID: u_id, DisplayName: "<Unknown User>", Handle: "<UNKNOWN USER>", IsDeleted: true}
+		} else if err != nil {
+			panic(fmt.Errorf("error scraping conflicting user (ID %d): %w", u_id, err))
+		}
+		err = profile.SaveUser(&updated_user)
+		if err != nil {
+			panic(fmt.Errorf(
+				"error saving rescraped conflicting user with ID %d and handle %q: %w",
+				updated_user.ID, updated_user.Handle, err,
+			))
+		}
+	}
+}

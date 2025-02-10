@@ -59,16 +59,14 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 				app.ErrorLog.Print(err)
 				// TOOD: show error in UI
 			}
-			app.Profile.SaveTweetTrove(trove, false, app.API.DownloadMedia)
-			go app.Profile.SaveTweetTrove(trove, true, app.API.DownloadMedia)
+			app.full_save_tweet_trove(trove)
 		} else if len(parts) == 2 && parts[1] == "likes" {
 			trove, err := app.API.GetUserLikes(user.ID, 50) // TODO: parameterizable
 			if err != nil {
 				app.ErrorLog.Print(err)
 				// TOOD: show error in UI
 			}
-			app.Profile.SaveTweetTrove(trove, false, app.API.DownloadMedia)
-			go app.Profile.SaveTweetTrove(trove, true, app.API.DownloadMedia)
+			app.full_save_tweet_trove(trove)
 		}
 	}
 
@@ -171,9 +169,8 @@ func (app *Application) UserFollowees(w http.ResponseWriter, r *http.Request, us
 			app.ErrorLog.Print(err)
 			// TOOD: show error in UI
 		}
-		app.Profile.SaveTweetTrove(trove, false, app.API.DownloadMedia)
+		app.full_save_tweet_trove(trove)
 		app.Profile.SaveAsFolloweesList(user.ID, trove)
-		go app.Profile.SaveTweetTrove(trove, true, app.API.DownloadMedia)
 	}
 
 	data, trove := NewFollowsData(app.Profile.GetFollowees(user.ID))
@@ -197,9 +194,8 @@ func (app *Application) UserFollowers(w http.ResponseWriter, r *http.Request, us
 			app.ErrorLog.Print(err)
 			// TOOD: show error in UI
 		}
-		app.Profile.SaveTweetTrove(trove, false, app.API.DownloadMedia)
+		app.full_save_tweet_trove(trove)
 		app.Profile.SaveAsFollowersList(user.ID, trove)
-		go app.Profile.SaveTweetTrove(trove, true, app.API.DownloadMedia)
 	}
 
 	data, trove := NewFollowsData(app.Profile.GetFollowers(user.ID))

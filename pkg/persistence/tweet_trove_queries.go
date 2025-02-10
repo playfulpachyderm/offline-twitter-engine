@@ -5,37 +5,18 @@ import (
 	"fmt"
 	"path"
 
-	log "github.com/sirupsen/logrus"
-
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 // Convenience function that saves all the objects in a TweetTrove.
-// Panics if anything goes wrong.
-func (p Profile) SaveTweetTrove(trove TweetTrove, should_download bool, download func(string) ([]byte, error)) {
+// Returns a list of UserIDs that had conflicting handles with another user.
+func (p Profile) SaveTweetTrove(trove TweetTrove, should_download bool, download func(string) ([]byte, error)) (conflict_u_ids []UserID) {
 	for i, u := range trove.Users {
 		err := p.SaveUser(&u)
-		// Check for handle conflicts and handle them in place
-		// TODO: this is hacky, it doesn't go here.  We should return a list of conflicting users
-		// who were marked as deleted, and then let the callee re-scrape and re-save them.
+		// Check for user-handle conflicts
 		var conflict_err ErrConflictingUserHandle
 		if errors.As(err, &conflict_err) {
-			log.Warnf(
-				"Conflicting user handle found (ID %d); old user has been marked deleted.  Rescraping them\n",
-				conflict_err.ConflictingUserID,
-			)
-			user, err := GetUserByID(conflict_err.ConflictingUserID)
-			if errors.Is(err, ErrDoesntExist) {
-				// Mark them as deleted.
-				// Handle and display name won't be updated if the user exists.
-				user = User{ID: conflict_err.ConflictingUserID, DisplayName: "<Unknown User>", Handle: "<UNKNOWN USER>", IsDeleted: true}
-			} else if err != nil {
-				panic(fmt.Errorf("error scraping conflicting user (ID %d): %w", conflict_err.ConflictingUserID, err))
-			}
-			err = p.SaveUser(&user)
-			if err != nil {
-				panic(fmt.Errorf("error saving rescraped conflicting user with ID %d and handle %q: %w", user.ID, user.Handle, err))
-			}
+			conflict_u_ids = append(conflict_u_ids, conflict_err.ConflictingUserID)
 		} else if err != nil {
 			panic(fmt.Errorf("Error saving user with ID %d and handle %s:\n  %w", u.ID, u.Handle, err))
 		}
@@ -253,4 +234,5 @@ func (p Profile) SaveTweetTrove(trove TweetTrove, should_download bool, download
 			}
 		}
 	}
+	return conflict_u_ids // If there are any
 }

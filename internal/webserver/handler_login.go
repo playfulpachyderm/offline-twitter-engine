@@ -89,8 +89,7 @@ func (app *Application) after_login(w http.ResponseWriter, r *http.Request, api 
 		http.Redirect(w, r, "/", 303)
 	}
 	fmt.Println("Saving initial feed results...")
-	app.Profile.SaveTweetTrove(trove, false, app.API.DownloadMedia)
-	go app.Profile.SaveTweetTrove(trove, true, app.API.DownloadMedia)
+	app.full_save_tweet_trove(trove)
 
 	// Scrape the user's followers
 	trove, err = app.API.GetFollowees(user.ID, 1000)
@@ -98,9 +97,8 @@ func (app *Application) after_login(w http.ResponseWriter, r *http.Request, api 
 		app.ErrorLog.Printf("Failed to scrape followers: %s", err.Error())
 		http.Redirect(w, r, "/", 303)
 	}
-	app.Profile.SaveTweetTrove(trove, false, app.API.DownloadMedia)
+	app.full_save_tweet_trove(trove)
 	app.Profile.SaveAsFolloweesList(user.ID, trove)
-	go app.Profile.SaveTweetTrove(trove, true, app.API.DownloadMedia)
 
 	// Redirect to Timeline
 	http.Redirect(w, r, "/", 303)
@@ -129,8 +127,7 @@ func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		// We have to save the notifications first, otherwise it'll just report 0 since the last-read sort index
-		app.Profile.SaveTweetTrove(trove, false, app.API.DownloadMedia)
-		go app.Profile.SaveTweetTrove(trove, true, app.API.DownloadMedia)
+		app.full_save_tweet_trove(trove)
 		// Set the notifications count
 		app.LastReadNotificationSortIndex = last_unread_notification_sort_index
 	}()

@@ -410,7 +410,7 @@ func fetch_tweet_conversation(tweet_identifier string, how_many int) {
 	if is_scrape_failure(err) {
 		die(err.Error(), false, -1)
 	}
-	profile.SaveTweetTrove(trove, true, api.DownloadMedia)
+	full_save_tweet_trove(trove)
 
 	happy_exit(fmt.Sprintf("Saved %d tweets and %d users", len(trove.Tweets), len(trove.Users)), err)
 }
@@ -431,7 +431,7 @@ func fetch_user_feed(handle string, how_many int) {
 	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error scraping feed: %s\n  %s", handle, err.Error()), false, -2)
 	}
-	profile.SaveTweetTrove(trove, true, api.DownloadMedia)
+	full_save_tweet_trove(trove)
 
 	happy_exit(
 		fmt.Sprintf("Saved %d tweets, %d retweets and %d users", len(trove.Tweets), len(trove.Retweets), len(trove.Users)),
@@ -449,7 +449,7 @@ func get_user_likes(handle string, how_many int) {
 	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error scraping feed: %s\n  %s", handle, err.Error()), false, -2)
 	}
-	profile.SaveTweetTrove(trove, true, api.DownloadMedia)
+	full_save_tweet_trove(trove)
 
 	happy_exit(
 		fmt.Sprintf("Saved %d tweets, %d retweets and %d users", len(trove.Tweets), len(trove.Retweets), len(trove.Users)),
@@ -467,7 +467,7 @@ func get_followees(handle string, how_many int) {
 	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error getting followees: %s\n  %s", handle, err.Error()), false, -2)
 	}
-	profile.SaveTweetTrove(trove, true, api.DownloadMedia)
+	full_save_tweet_trove(trove)
 	profile.SaveAsFolloweesList(user.ID, trove)
 
 	happy_exit(fmt.Sprintf("Saved %d followees", len(trove.Users)), err)
@@ -481,7 +481,7 @@ func get_followers(handle string, how_many int) {
 	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error getting followees: %s\n  %s", handle, err.Error()), false, -2)
 	}
-	profile.SaveTweetTrove(trove, true, api.DownloadMedia)
+	full_save_tweet_trove(trove)
 	profile.SaveAsFollowersList(user.ID, trove)
 
 	happy_exit(fmt.Sprintf("Saved %d followers", len(trove.Users)), err)
@@ -491,7 +491,7 @@ func get_bookmarks(how_many int) {
 	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error scraping bookmarks:\n  %s", err.Error()), false, -2)
 	}
-	profile.SaveTweetTrove(trove, true, api.DownloadMedia)
+	full_save_tweet_trove(trove)
 
 	happy_exit(fmt.Sprintf(
 		"Saved %d tweets, %d retweets, %d users, and %d bookmarks",
@@ -504,7 +504,7 @@ func fetch_timeline(is_following_only bool) {
 	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error fetching timeline:\n  %s", err.Error()), false, -2)
 	}
-	profile.SaveTweetTrove(trove, true, api.DownloadMedia)
+	full_save_tweet_trove(trove)
 
 	happy_exit(
 		fmt.Sprintf("Saved %d tweets, %d retweets and %d users", len(trove.Tweets), len(trove.Retweets), len(trove.Users)),
@@ -544,7 +544,7 @@ func search(query string, how_many int) {
 	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error scraping search results: %s", err.Error()), false, -100)
 	}
-	profile.SaveTweetTrove(trove, true, api.DownloadMedia)
+	full_save_tweet_trove(trove)
 
 	happy_exit(fmt.Sprintf("Saved %d tweets and %d users", len(trove.Tweets), len(trove.Users)), err)
 }
@@ -607,7 +607,7 @@ func fetch_inbox(how_many int) {
 	if err != nil {
 		die(fmt.Sprintf("Failed to fetch inbox:\n  %s", err.Error()), false, 1)
 	}
-	profile.SaveTweetTrove(trove, true, api.DownloadMedia)
+	full_save_tweet_trove(trove)
 	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)), nil)
 }
 
@@ -621,7 +621,7 @@ func fetch_dm(id string, how_many int) {
 	if err != nil {
 		die(fmt.Sprintf("Failed to fetch dm:\n  %s", err.Error()), false, 1)
 	}
-	profile.SaveTweetTrove(trove, true, api.DownloadMedia)
+	full_save_tweet_trove(trove)
 	happy_exit(
 		fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)),
 		err,
@@ -638,7 +638,7 @@ func send_dm(room_id string, text string, in_reply_to_id int) {
 	if err != nil {
 		die(fmt.Sprintf("Failed to send dm:\n  %s", err.Error()), false, 1)
 	}
-	profile.SaveTweetTrove(trove, true, api.DownloadMedia)
+	full_save_tweet_trove(trove)
 	happy_exit(fmt.Sprintf("Saved %d messages from %d chats", len(trove.Messages), len(trove.Rooms)), nil)
 }
 
@@ -670,7 +670,7 @@ func get_notifications(how_many int) {
 		panic(err)
 	}
 
-	profile.SaveTweetTrove(trove, true, api.DownloadMedia)
+	full_save_tweet_trove(trove)
 	happy_exit(fmt.Sprintf("Saved %d notifications, %d tweets and %d users",
 		len(trove.Notifications), len(trove.Tweets), len(trove.Users),
 	), nil)
