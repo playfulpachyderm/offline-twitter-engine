@@ -102,9 +102,9 @@ func TestSearchContentFilters(t *testing.T) {
 
 	c, err := NewCursorFromSearchQuery("filter:links filter:videos filter:images filter:polls filter:spaces")
 	require.NoError(err)
-	assert.Equal(c.FilterLinks, persistence.REQUIRE)
-	assert.Equal(c.FilterVideos, persistence.REQUIRE)
-	assert.Equal(c.FilterImages, persistence.REQUIRE)
-	assert.Equal(c.FilterPolls, persistence.REQUIRE)
-	assert.Equal(c.FilterSpaces, persistence.REQUIRE)
+	assert.Equal(c.FilterLinks, REQUIRE)
+	assert.Equal(c.FilterVideos, REQUIRE)
+	assert.Equal(c.FilterImages, REQUIRE)
+	assert.Equal(c.FilterPolls, REQUIRE)
+	assert.Equal(c.FilterSpaces, REQUIRE)
 }
