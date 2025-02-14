@@ -11,15 +11,15 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 type MessageData struct {
-	persistence.DMChatView
+	DMChatView
 	LatestPollingTimestamp int
 	ScrollBottom           bool
-	UnreadRoomIDs          map[scraper.DMChatRoomID]bool
+	UnreadRoomIDs          map[DMChatRoomID]bool
 }
 
 func (app *Application) messages_index(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +30,7 @@ func (app *Application) messages_index(w http.ResponseWriter, r *http.Request) {
 func (app *Application) message_mark_as_read(w http.ResponseWriter, r *http.Request) {
 	room_id := get_room_id_from_context(r.Context())
 
-	c := persistence.NewConversationCursor(room_id)
+	c := NewConversationCursor(room_id)
 	c.PageSize = 1
 	chat_contents := app.Profile.GetChatRoomMessagesByCursor(c)
 	last_message_id := chat_contents.MessageIDs[len(chat_contents.MessageIDs)-1]
@@ -76,7 +76,7 @@ func (app *Application) message_send(w http.ResponseWriter, r *http.Request) {
 		app.error_401(w, r)
 		return
 	}
-	trove, err := app.API.SendDMMessage(room_id, message_data.Text, scraper.DMMessageID(in_reply_to_id))
+	trove, err := app.API.SendDMMessage(room_id, message_data.Text, DMMessageID(in_reply_to_id))
 	if err != nil {
 		panic(err)
 	}
@@ -107,8 +107,8 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		var data struct {
-			MessageID scraper.DMMessageID `json:"message_id,string"`
-			Reacc     string              `json:"reacc"`
+			MessageID DMMessageID `json:"message_id,string"`
+			Reacc     string      `json:"reacc"`
 		}
 		data_, err := io.ReadAll(r.Body)
 		panic_if(err)
@@ -129,11 +129,11 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 				panic(global_data)
 			}
 		}
-		dm_message.Reactions[app.ActiveUser.ID] = scraper.DMReaction{
+		dm_message.Reactions[app.ActiveUser.ID] = DMReaction{
 			ID:          0, // Hopefully will be OK temporarily
 			DMMessageID: dm_message.ID,
 			SenderID:    app.ActiveUser.ID,
-			SentAt:      scraper.Timestamp{time.Now()},
+			SentAt:      Timestamp{time.Now()},
 			Emoji:       data.Reacc,
 		}
 		global_data.Messages[dm_message.ID] = dm_message
@@ -147,7 +147,7 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.URL.Query().Has("scrape") && !app.IsScrapingDisabled {
-		max_id := scraper.DMMessageID(^uint(0) >> 1)
+		max_id := DMMessageID(^uint(0) >> 1)
 		trove, err := app.API.GetConversation(room_id, max_id, 50) // TODO: parameterizable
 		if err != nil {
 			panic(err)
@@ -168,12 +168,12 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 		chat_view_data.ScrollBottom = true
 	}
 
-	c := persistence.NewConversationCursor(room_id)
-	c.SinceTimestamp = scraper.TimestampFromUnixMilli(int64(chat_view_data.LatestPollingTimestamp))
+	c := NewConversationCursor(room_id)
+	c.SinceTimestamp = TimestampFromUnixMilli(int64(chat_view_data.LatestPollingTimestamp))
 	if cursor_value := r.URL.Query().Get("cursor"); cursor_value != "" {
 		until_time, err := strconv.Atoi(cursor_value)
 		panic_if(err) // TODO: 400 not 500
-		c.UntilTimestamp = scraper.TimestampFromUnixMilli(int64(until_time))
+		c.UntilTimestamp = TimestampFromUnixMilli(int64(until_time))
 	}
 	chat_contents := app.Profile.GetChatRoomMessagesByCursor(c)
 	chat_view_data.DMChatView.MergeWith(chat_contents.TweetTrove)
@@ -210,7 +210,7 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 func (app *Application) get_message_global_data() (MessageData, PageGlobalData) {
 	// Get message list previews
 	chat_view_data := MessageData{DMChatView: app.Profile.GetChatRoomsPreview(app.ActiveUser.ID)}
-	chat_view_data.UnreadRoomIDs = make(map[scraper.DMChatRoomID]bool)
+	chat_view_data.UnreadRoomIDs = make(map[DMChatRoomID]bool)
 	for _, id := range app.Profile.GetUnreadConversations(app.ActiveUser.ID) {
 		chat_view_data.UnreadRoomIDs[id] = true
 	}
@@ -223,7 +223,7 @@ func (app *Application) get_message_global_data() (MessageData, PageGlobalData) 
 
 func (app *Application) messages_refresh_list(w http.ResponseWriter, r *http.Request) {
 	chat_view_data, global_data := app.get_message_global_data()
-	chat_view_data.ActiveRoomID = scraper.DMChatRoomID(r.URL.Query().Get("active-chat"))
+	chat_view_data.ActiveRoomID = DMChatRoomID(r.URL.Query().Get("active-chat"))
 	app.buffered_render_htmx(w, "chat-list", global_data, chat_view_data)
 }
 
@@ -250,7 +250,7 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 		app.messages_refresh_list(w, r)
 		return
 	}
-	room_id := scraper.DMChatRoomID(parts[0])
+	room_id := DMChatRoomID(parts[0])
 
 	// Messages index
 	if room_id == "" {
@@ -267,12 +267,12 @@ func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
 
 const ROOM_ID_KEY = key("room_id") // type `key` is defined in "handler_tweet_detail"
 
-func add_room_id_to_context(ctx context.Context, room_id scraper.DMChatRoomID) context.Context {
+func add_room_id_to_context(ctx context.Context, room_id DMChatRoomID) context.Context {
 	return context.WithValue(ctx, ROOM_ID_KEY, room_id)
 }
 
-func get_room_id_from_context(ctx context.Context) scraper.DMChatRoomID {
-	room_id, is_ok := ctx.Value(ROOM_ID_KEY).(scraper.DMChatRoomID)
+func get_room_id_from_context(ctx context.Context) DMChatRoomID {
+	room_id, is_ok := ctx.Value(ROOM_ID_KEY).(DMChatRoomID)
 	if !is_ok {
 		panic("room_id not found in context")
 	}

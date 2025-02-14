@@ -9,7 +9,6 @@ import (
 	"github.com/go-test/deep"
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
-	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 // Create a Tweet, save it, reload it, and make sure it comes back the same

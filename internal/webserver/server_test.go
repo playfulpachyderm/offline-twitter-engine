@@ -10,8 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
 type CapturingWriter struct {
@@ -23,11 +22,11 @@ func (w *CapturingWriter) Write(p []byte) (int, error) {
 	return len(p), nil
 }
 
-var profile persistence.Profile
+var profile Profile
 
 func init() {
 	var err error
-	profile, err = persistence.LoadProfile("../../sample_data/profile")
+	profile, err = LoadProfile("../../sample_data/profile")
 	if err != nil {
 		panic(err)
 	}
@@ -55,7 +54,7 @@ func do_request_with_active_user(req *http.Request) *http.Response {
 	recorder := httptest.NewRecorder()
 	app := webserver.NewApp(profile)
 	app.IsScrapingDisabled = true
-	app.ActiveUser = scraper.User{ID: 1488963321701171204, Handle: "Offline_Twatter"} // Simulate a login
+	app.ActiveUser = User{ID: 1488963321701171204, Handle: "Offline_Twatter"} // Simulate a login
 	app.WithMiddlewares().ServeHTTP(recorder, req)
 	return recorder.Result()
 }

@@ -12,7 +12,7 @@ import (
 	"golang.org/x/net/html"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
 func TestMessagesIndexPageRequiresActiveUser(t *testing.T) {
@@ -63,7 +63,7 @@ func TestMessagesRoomRequiresCorrectUser(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	app := webserver.NewApp(profile)
 	app.IsScrapingDisabled = true
-	app.ActiveUser = scraper.User{ID: 782982734, Handle: "Not a real user"} // Simulate a login
+	app.ActiveUser = User{ID: 782982734, Handle: "Not a real user"} // Simulate a login
 	app.WithMiddlewares().ServeHTTP(recorder, httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328", nil))
 	resp2 := recorder.Result()
 	require.Equal(404, resp2.StatusCode)

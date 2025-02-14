@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
 // -------------------------------------------------------------------------
@@ -533,8 +535,8 @@ func ParseSingleTweet(t APITweet) (ret Tweet, err error) {
 	ret.IsConversationScraped = false        // Safe due to the "No Worsening" principle
 
 	// Extra data that can help piece together tombstoned tweet info
-	ret.in_reply_to_user_id = UserID(t.InReplyToUserID)
-	ret.in_reply_to_user_handle = UserHandle(t.InReplyToScreenName)
+	ret.InReplyToUserID = UserID(t.InReplyToUserID)
+	ret.InReplyToUserHandle = UserHandle(t.InReplyToScreenName)
 
 	return
 }
@@ -658,8 +660,8 @@ func ParseSingleUser(apiUser APIUser) (ret User, err error) {
 	}
 	ret.BannerImageUrl = apiUser.ProfileBannerURL
 
-	ret.ProfileImageLocalPath = ret.compute_profile_image_local_path()
-	ret.BannerImageLocalPath = ret.compute_banner_image_local_path()
+	ret.ProfileImageLocalPath = compute_profile_image_local_path(ret)
+	ret.BannerImageLocalPath = compute_banner_image_local_path(ret)
 
 	if len(apiUser.PinnedTweetIdsStr) > 0 {
 		ret.PinnedTweetID = TweetID(idstr_to_int(apiUser.PinnedTweetIdsStr[0]))

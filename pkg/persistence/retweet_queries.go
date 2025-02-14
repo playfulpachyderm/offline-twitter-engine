@@ -2,8 +2,6 @@ package persistence
 
 import (
 	"fmt"
-
-	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 // Save a Retweet.  Do nothing if it already exists, because none of its parameters are modifiable.

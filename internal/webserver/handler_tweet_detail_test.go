@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/net/html"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
 func TestTweetDetail(t *testing.T) {
@@ -105,7 +105,7 @@ func TestLongTweet(t *testing.T) {
 	paragraphs := cascadia.QueryAll(root, selector(".tweet .text"))
 	assert.Len(paragraphs, 22)
 
-	twt, err := profile.GetTweetById(scraper.TweetID(1695110851324256692))
+	twt, err := profile.GetTweetById(TweetID(1695110851324256692))
 	require.NoError(err)
 	for i, s := range strings.Split(twt.Text, "\n") {
 		assert.Equal(strings.TrimSpace(s), strings.TrimSpace(paragraphs[i].FirstChild.Data))

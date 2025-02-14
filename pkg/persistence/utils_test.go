@@ -6,7 +6,6 @@ import (
 	"time"
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
-	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 // Load a test profile, or create it if it doesn't exist.

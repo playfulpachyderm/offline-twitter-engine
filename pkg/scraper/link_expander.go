@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"regexp"
 	"time"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
 /**

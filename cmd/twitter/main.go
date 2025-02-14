@@ -15,12 +15,12 @@ import (
 	"time"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 // Global variable referencing the open data profile
-var profile persistence.Profile
+var profile Profile
 
 var version_string string
 
@@ -119,7 +119,7 @@ func main() {
 		}
 		// Path exists and is a directory; safe to continue
 	}
-	profile, err = persistence.LoadProfile(*profile_dir)
+	profile, err = LoadProfile(*profile_dir)
 	if err != nil {
 		if *use_default_profile {
 			create_profile(*profile_dir)
@@ -133,7 +133,7 @@ func main() {
 			// Lop off the ".session" suffix (allows using `--session asdf.session` which lets you tab-autocomplete at command line)
 			*session_name = (*session_name)[:len(*session_name)-8]
 		}
-		profile.LoadSession(scraper.UserHandle(*session_name), &api)
+		profile.LoadSession(UserHandle(*session_name), &api)
 	} else {
 		var err error
 		api, err = scraper.NewGuestSession()
@@ -162,15 +162,15 @@ func main() {
 		}
 		login(target, password)
 	case "fetch_user":
-		fetch_user(scraper.UserHandle(target))
+		fetch_user(UserHandle(target))
 	case "fetch_user_by_id":
 		id, err := strconv.Atoi(target)
 		if err != nil {
 			panic(err)
 		}
-		fetch_user_by_id(scraper.UserID(id))
+		fetch_user_by_id(UserID(id))
 	case "download_user_content":
-		download_user_content(scraper.UserHandle(target))
+		download_user_content(UserHandle(target))
 	case "fetch_tweet_only":
 		fetch_tweet_only(target)
 	case "fetch_tweet":
@@ -280,25 +280,25 @@ func login(username string, password string) {
  * - target_dir: the location of the new data dir.
  */
 func create_profile(target_dir string) {
-	_, err := persistence.NewProfile(target_dir)
+	_, err := NewProfile(target_dir)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func _fetch_user_by_id(id scraper.UserID) error {
+func _fetch_user_by_id(id UserID) error {
 	user, err := scraper.GetUserByID(id)
 	if errors.Is(err, scraper.ErrDoesntExist) {
 		// Mark them as deleted.
 		// Handle and display name won't be updated if the user exists.
-		user = scraper.User{ID: id, DisplayName: "<Unknown User>", Handle: "<UNKNOWN USER>", IsDeleted: true}
+		user = User{ID: id, DisplayName: "<Unknown User>", Handle: "<UNKNOWN USER>", IsDeleted: true}
 	} else if err != nil {
 		return fmt.Errorf("scraping error on user ID %d: %w", id, err)
 	}
 	log.Debugf("%#v\n", user)
 
 	err = profile.SaveUser(&user)
-	var conflict_err persistence.ErrConflictingUserHandle
+	var conflict_err ErrConflictingUserHandle
 	if errors.As(err, &conflict_err) {
 		log.Warnf(
 			"Conflicting user handle found (ID %d); old user has been marked deleted.  Rescraping them",
@@ -319,7 +319,7 @@ func _fetch_user_by_id(id scraper.UserID) error {
 	return nil
 }
 
-func fetch_user(handle scraper.UserHandle) {
+func fetch_user(handle UserHandle) {
 	user, err := api.GetUser(handle)
 	if errors.Is(err, scraper.ErrDoesntExist) {
 		// There's several reasons we could get a ErrDoesntExist:
@@ -335,7 +335,7 @@ func fetch_user(handle scraper.UserHandle) {
 	log.Debugf("%#v\n", user)
 
 	err = profile.SaveUser(&user)
-	var conflict_err persistence.ErrConflictingUserHandle
+	var conflict_err ErrConflictingUserHandle
 	if errors.As(err, &conflict_err) {
 		log.Warnf(
 			"Conflicting user handle found (ID %d); old user has been marked deleted.  Rescraping them",
@@ -352,7 +352,7 @@ func fetch_user(handle scraper.UserHandle) {
 	happy_exit("Saved the user", nil)
 }
 
-func fetch_user_by_id(id scraper.UserID) {
+func fetch_user_by_id(id UserID) {
 	err := _fetch_user_by_id(id)
 	if err != nil {
 		die(err.Error(), false, -1)
@@ -382,7 +382,7 @@ func fetch_tweet_only(tweet_identifier string) {
 	if !ok {
 		panic("Trove didn't contain its own tweet!")
 	}
-	tweet.LastScrapedAt = scraper.Timestamp{time.Now()}
+	tweet.LastScrapedAt = Timestamp{time.Now()}
 	tweet.IsConversationScraped = true
 
 	log.Debug(tweet)
@@ -422,7 +422,7 @@ func fetch_tweet_conversation(tweet_identifier string, how_many int) {
  * - handle: the user handle to get
  */
 func fetch_user_feed(handle string, how_many int) {
-	user, err := profile.GetUserByHandle(scraper.UserHandle(handle))
+	user, err := profile.GetUserByHandle(UserHandle(handle))
 	if is_scrape_failure(err) {
 		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
 	}
@@ -440,7 +440,7 @@ func fetch_user_feed(handle string, how_many int) {
 }
 
 func get_user_likes(handle string, how_many int) {
-	user, err := profile.GetUserByHandle(scraper.UserHandle(handle))
+	user, err := profile.GetUserByHandle(UserHandle(handle))
 	if err != nil {
 		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
 	}
@@ -458,7 +458,7 @@ func get_user_likes(handle string, how_many int) {
 }
 
 func get_followees(handle string, how_many int) {
-	user, err := profile.GetUserByHandle(scraper.UserHandle(handle))
+	user, err := profile.GetUserByHandle(UserHandle(handle))
 	if err != nil {
 		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
 	}
@@ -473,7 +473,7 @@ func get_followees(handle string, how_many int) {
 	happy_exit(fmt.Sprintf("Saved %d followees", len(trove.Users)), err)
 }
 func get_followers(handle string, how_many int) {
-	user, err := profile.GetUserByHandle(scraper.UserHandle(handle))
+	user, err := profile.GetUserByHandle(UserHandle(handle))
 	if err != nil {
 		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
 	}
@@ -528,7 +528,7 @@ func download_tweet_content(tweet_identifier string) {
 	}
 }
 
-func download_user_content(handle scraper.UserHandle) {
+func download_user_content(handle UserHandle) {
 	user, err := profile.GetUserByHandle(handle)
 	if err != nil {
 		panic("Couldn't get the user from database: " + err.Error())
@@ -550,7 +550,7 @@ func search(query string, how_many int) {
 }
 
 func follow_user(handle string, is_followed bool) {
-	user, err := profile.GetUserByHandle(scraper.UserHandle(handle))
+	user, err := profile.GetUserByHandle(UserHandle(handle))
 	if err != nil {
 		panic("Couldn't get the user from database: " + err.Error())
 	}
@@ -612,11 +612,11 @@ func fetch_inbox(how_many int) {
 }
 
 func fetch_dm(id string, how_many int) {
-	room, err := profile.GetChatRoom(scraper.DMChatRoomID(id))
+	room, err := profile.GetChatRoom(DMChatRoomID(id))
 	if is_scrape_failure(err) {
 		panic(err)
 	}
-	max_id := scraper.DMMessageID(^uint(0) >> 1)
+	max_id := DMMessageID(^uint(0) >> 1)
 	trove, err := api.GetConversation(room.ID, max_id, how_many)
 	if err != nil {
 		die(fmt.Sprintf("Failed to fetch dm:\n  %s", err.Error()), false, 1)
@@ -629,12 +629,12 @@ func fetch_dm(id string, how_many int) {
 }
 
 func send_dm(room_id string, text string, in_reply_to_id int) {
-	room, err := profile.GetChatRoom(scraper.DMChatRoomID(room_id))
+	room, err := profile.GetChatRoom(DMChatRoomID(room_id))
 	if err != nil {
 		die(fmt.Sprintf("No such chat room: %d", in_reply_to_id), false, 1)
 	}
 
-	trove, err := api.SendDMMessage(room.ID, text, scraper.DMMessageID(in_reply_to_id))
+	trove, err := api.SendDMMessage(room.ID, text, DMMessageID(in_reply_to_id))
 	if err != nil {
 		die(fmt.Sprintf("Failed to send dm:\n  %s", err.Error()), false, 1)
 	}
@@ -643,15 +643,15 @@ func send_dm(room_id string, text string, in_reply_to_id int) {
 }
 
 func send_dm_reacc(room_id string, in_reply_to_id int, reacc string) {
-	room, err := profile.GetChatRoom(scraper.DMChatRoomID(room_id))
+	room, err := profile.GetChatRoom(DMChatRoomID(room_id))
 	if err != nil {
 		die(fmt.Sprintf("No such chat room: %d", in_reply_to_id), false, 1)
 	}
-	_, err = profile.GetChatMessage(scraper.DMMessageID(in_reply_to_id))
+	_, err = profile.GetChatMessage(DMMessageID(in_reply_to_id))
 	if err != nil {
 		die(fmt.Sprintf("No such message: %d", in_reply_to_id), false, 1)
 	}
-	err = api.SendDMReaction(room.ID, scraper.DMMessageID(in_reply_to_id), reacc)
+	err = api.SendDMReaction(room.ID, DMMessageID(in_reply_to_id), reacc)
 	if err != nil {
 		die(fmt.Sprintf("Failed to react to message:\n  %s", err.Error()), false, 1)
 	}

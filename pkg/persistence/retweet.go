@@ -1,4 +1,4 @@
-package scraper
+package persistence
 
 type Retweet struct {
 	RetweetID     TweetID `db:"retweet_id"`

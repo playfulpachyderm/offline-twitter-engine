@@ -10,13 +10,12 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
-	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
 type ListData struct {
 	List
-	Feed      persistence.Feed
+	Feed      Feed
 	UserIDs   []UserID
 	ActiveTab string
 }
@@ -36,17 +35,17 @@ func NewListData(users []User) (ListData, TweetTrove) {
 func (app *Application) ListDetailFeed(w http.ResponseWriter, r *http.Request) {
 	list := get_list_from_context(r.Context())
 
-	c := persistence.NewListCursor(list.ID)
+	c := NewListCursor(list.ID)
 	err := parse_cursor_value(&c, r)
 	if err != nil {
 		app.error_400_with_message(w, r, "invalid cursor (must be a number)")
 		return
 	}
 	feed, err := app.Profile.NextPage(c, app.ActiveUser.ID)
-	if err != nil && !errors.Is(err, persistence.ErrEndOfFeed) {
+	if err != nil && !errors.Is(err, ErrEndOfFeed) {
 		panic(err)
 	}
-	if is_htmx(r) && c.CursorPosition == persistence.CURSOR_MIDDLE {
+	if is_htmx(r) && c.CursorPosition == CURSOR_MIDDLE {
 		// It's a Show More request
 		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
 	} else {

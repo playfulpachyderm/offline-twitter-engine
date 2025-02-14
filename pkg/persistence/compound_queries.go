@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/jmoiron/sqlx"
-	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 var (

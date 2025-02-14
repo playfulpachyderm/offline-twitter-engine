@@ -3,6 +3,8 @@ package scraper
 import (
 	"fmt"
 	"net/url"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
 type SpaceResponse struct {

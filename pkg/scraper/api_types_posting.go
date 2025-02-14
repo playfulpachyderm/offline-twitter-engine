@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
 var AlreadyLikedThisTweet error = errors.New("already liked this tweet")

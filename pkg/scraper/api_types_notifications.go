@@ -10,6 +10,8 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
 // TODO: pagination

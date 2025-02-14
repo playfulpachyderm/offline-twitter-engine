@@ -2,8 +2,6 @@ package persistence
 
 import (
 	"fmt"
-
-	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 func (p Profile) SaveLike(l Like) error {

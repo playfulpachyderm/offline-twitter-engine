@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
 func (api *API) FillSpaceDetails(trove *TweetTrove) error {

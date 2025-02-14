@@ -11,8 +11,7 @@ import (
 
 	"github.com/Masterminds/sprig/v3"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
 type NotificationBubbles struct {
@@ -22,35 +21,35 @@ type NotificationBubbles struct {
 
 // TODO: this name sucks
 type PageGlobalData struct {
-	scraper.TweetTrove
+	TweetTrove
 	SearchText     string
-	FocusedTweetID scraper.TweetID
+	FocusedTweetID TweetID
 	Toasts         []Toast
 	NotificationBubbles
 }
 
-func (d PageGlobalData) Tweet(id scraper.TweetID) scraper.Tweet {
+func (d PageGlobalData) Tweet(id TweetID) Tweet {
 	return d.Tweets[id]
 }
-func (d PageGlobalData) User(id scraper.UserID) scraper.User {
+func (d PageGlobalData) User(id UserID) User {
 	return d.Users[id]
 }
-func (d PageGlobalData) Retweet(id scraper.TweetID) scraper.Retweet {
+func (d PageGlobalData) Retweet(id TweetID) Retweet {
 	return d.Retweets[id]
 }
-func (d PageGlobalData) Space(id scraper.SpaceID) scraper.Space {
+func (d PageGlobalData) Space(id SpaceID) Space {
 	return d.Spaces[id]
 }
-func (d PageGlobalData) Notification(id scraper.NotificationID) scraper.Notification {
+func (d PageGlobalData) Notification(id NotificationID) Notification {
 	return d.Notifications[id]
 }
-func (d PageGlobalData) Message(id scraper.DMMessageID) scraper.DMMessage {
+func (d PageGlobalData) Message(id DMMessageID) DMMessage {
 	return d.Messages[id]
 }
-func (d PageGlobalData) ChatRoom(id scraper.DMChatRoomID) scraper.DMChatRoom {
+func (d PageGlobalData) ChatRoom(id DMChatRoomID) DMChatRoom {
 	return d.Rooms[id]
 }
-func (d PageGlobalData) GetFocusedTweetID() scraper.TweetID {
+func (d PageGlobalData) GetFocusedTweetID() TweetID {
 	return d.FocusedTweetID
 }
 func (d PageGlobalData) GetSearchText() string {
@@ -143,18 +142,18 @@ func (app *Application) make_funcmap(global_data PageGlobalData) template.FuncMa
 		"focused_tweet_id": global_data.GetFocusedTweetID,
 		"search_text":      global_data.GetSearchText,
 		"global_data":      global_data.GlobalData, // This fucking sucks
-		"active_user": func() scraper.User {
+		"active_user": func() User {
 			return app.ActiveUser
 		},
 
 		// Utility functions
-		"get_tombstone_text": func(t scraper.Tweet) string {
+		"get_tombstone_text": func(t Tweet) string {
 			if t.TombstoneText != "" {
 				return t.TombstoneText
 			}
 			return t.TombstoneType
 		},
-		"cursor_to_query_params": func(c persistence.Cursor) string {
+		"cursor_to_query_params": func(c Cursor) string {
 			result := url.Values{}
 			result.Set("cursor", fmt.Sprint(c.CursorValue))
 			result.Set("sort-order", c.SortOrder.String())

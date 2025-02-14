@@ -8,8 +8,6 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/mattn/go-sqlite3"
-
-	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 type ErrConflictingUserHandle struct {

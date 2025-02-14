@@ -6,8 +6,6 @@ import (
 	"os"
 
 	log "github.com/sirupsen/logrus"
-
-	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 func (p Profile) SaveSession(userhandle UserHandle, data []byte) {

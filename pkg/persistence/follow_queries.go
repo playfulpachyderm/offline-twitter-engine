@@ -1,9 +1,5 @@
 package persistence
 
-import (
-	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
-)
-
 func (p Profile) SaveFollow(follower_id UserID, followee_id UserID) {
 	_, err := p.DB.Exec(`
 		insert into follows (follower_id, followee_id)

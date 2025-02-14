@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
-	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 func TestVersionUpgrade(t *testing.T) {

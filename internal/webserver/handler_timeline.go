@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"strings"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
 type TimelineData struct {
-	persistence.Feed
+	Feed
 	ActiveTab string
 }
 
@@ -19,7 +18,7 @@ type TimelineData struct {
 func (app *Application) OfflineTimeline(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'Timeline' handler (path: %q)", r.URL.Path)
 
-	c := persistence.NewTimelineCursor()
+	c := NewTimelineCursor()
 	err := parse_cursor_value(&c, r)
 	if err != nil {
 		app.error_400_with_message(w, r, "invalid cursor (must be a number)")
@@ -27,11 +26,11 @@ func (app *Application) OfflineTimeline(w http.ResponseWriter, r *http.Request) 
 	}
 
 	feed, err := app.Profile.NextPage(c, app.ActiveUser.ID)
-	if err != nil && !errors.Is(err, persistence.ErrEndOfFeed) {
+	if err != nil && !errors.Is(err, ErrEndOfFeed) {
 		panic(err)
 	}
 
-	if is_htmx(r) && c.CursorPosition == persistence.CURSOR_MIDDLE {
+	if is_htmx(r) && c.CursorPosition == CURSOR_MIDDLE {
 		// It's a Show More request
 		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
 	} else {
@@ -53,14 +52,14 @@ func (app *Application) Timeline(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := persistence.Cursor{
+	c := Cursor{
 		Keywords:       []string{},
-		ToUserHandles:  []scraper.UserHandle{},
-		SinceTimestamp: scraper.TimestampFromUnix(0),
-		UntilTimestamp: scraper.TimestampFromUnix(0),
-		CursorPosition: persistence.CURSOR_START,
+		ToUserHandles:  []UserHandle{},
+		SinceTimestamp: TimestampFromUnix(0),
+		UntilTimestamp: TimestampFromUnix(0),
+		CursorPosition: CURSOR_START,
 		CursorValue:    0,
-		SortOrder:      persistence.SORT_ORDER_NEWEST,
+		SortOrder:      SORT_ORDER_NEWEST,
 		PageSize:       50,
 
 		FollowedByUserHandle: app.ActiveUser.Handle,
@@ -72,11 +71,11 @@ func (app *Application) Timeline(w http.ResponseWriter, r *http.Request) {
 	}
 
 	feed, err := app.Profile.NextPage(c, app.ActiveUser.ID)
-	if err != nil && !errors.Is(err, persistence.ErrEndOfFeed) {
+	if err != nil && !errors.Is(err, ErrEndOfFeed) {
 		panic(err)
 	}
 
-	if is_htmx(r) && c.CursorPosition == persistence.CURSOR_MIDDLE {
+	if is_htmx(r) && c.CursorPosition == CURSOR_MIDDLE {
 		// It's a Show More request
 		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
 	} else {

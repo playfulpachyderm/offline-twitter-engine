@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"strconv"
 
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/terminal_utils"
 )
@@ -55,14 +56,14 @@ func happy_exit(text string, exit_err error) {
  *
  * returns: the id at the end of the tweet: e.g., 1395882872729477131
  */
-func extract_id_from(url string) (scraper.TweetID, error) {
+func extract_id_from(url string) (TweetID, error) {
 	_, id, is_ok := scraper.TryParseTweetUrl(url)
 	if is_ok {
 		return id, nil
 	}
 
 	num, err := strconv.Atoi(url)
-	return scraper.TweetID(num), err
+	return TweetID(num), err
 }
 
 // Get a sensible default path to create a default profile.  Uses `XDG_DATA_HOME` if available
@@ -98,7 +99,7 @@ func is_scrape_failure(err error) bool {
 }
 
 // DUPE: full_save_tweet_trove
-func full_save_tweet_trove(trove scraper.TweetTrove) {
+func full_save_tweet_trove(trove TweetTrove) {
 	conflicting_users := profile.SaveTweetTrove(trove, true, api.DownloadMedia)
 	for _, u_id := range conflicting_users {
 		fmt.Printf(terminal_utils.COLOR_YELLOW+
@@ -110,7 +111,7 @@ func full_save_tweet_trove(trove scraper.TweetTrove) {
 		if errors.Is(err, scraper.ErrDoesntExist) {
 			// Mark them as deleted.
 			// Handle and display name won't be updated if the user exists.
-			updated_user = scraper.User{ID: u_id, DisplayName: "<Unknown User>", Handle: "<UNKNOWN USER>", IsDeleted: true}
+			updated_user = User{ID: u_id, DisplayName: "<Unknown User>", Handle: "<UNKNOWN USER>", IsDeleted: true}
 		} else if err != nil {
 			panic(fmt.Errorf("error scraping conflicting user (ID %d): %w", u_id, err))
 		}

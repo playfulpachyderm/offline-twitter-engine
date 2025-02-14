@@ -1,4 +1,4 @@
-package scraper
+package persistence
 
 import (
 	"database/sql/driver"

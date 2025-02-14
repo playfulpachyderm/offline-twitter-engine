@@ -6,8 +6,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 type SortOrder int

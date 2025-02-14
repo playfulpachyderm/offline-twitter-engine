@@ -8,31 +8,31 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 var ErrNotFound = errors.New("not found")
 
 type TweetDetailData struct {
-	persistence.TweetDetailView
-	MainTweetID scraper.TweetID
+	TweetDetailView
+	MainTweetID TweetID
 }
 
 func NewTweetDetailData() TweetDetailData {
 	return TweetDetailData{
-		TweetDetailView: persistence.NewTweetDetailView(),
+		TweetDetailView: NewTweetDetailView(),
 	}
 }
 
-func (app *Application) ensure_tweet(id scraper.TweetID, is_forced bool, is_conversation_required bool) (scraper.Tweet, error) {
+func (app *Application) ensure_tweet(id TweetID, is_forced bool, is_conversation_required bool) (Tweet, error) {
 	is_available := false
 	is_needing_scrape := is_forced
 
 	// Check if tweet is already in DB
 	tweet, err := app.Profile.GetTweetById(id)
 	if err != nil {
-		if errors.Is(err, persistence.ErrNotInDatabase) {
+		if errors.Is(err, ErrNotInDatabase) {
 			is_needing_scrape = true
 			is_available = false
 		} else {
@@ -58,14 +58,14 @@ func (app *Application) ensure_tweet(id scraper.TweetID, is_forced bool, is_conv
 		}
 
 		if err != nil && !errors.Is(err, scraper.END_OF_FEED) {
-			return scraper.Tweet{}, fmt.Errorf("scraper error: %w", err)
+			return Tweet{}, fmt.Errorf("scraper error: %w", err)
 		}
 	} else if is_needing_scrape {
 		app.InfoLog.Printf("Would have scraped Tweet: %d", id)
 	}
 
 	if !is_available {
-		return scraper.Tweet{}, ErrNotFound
+		return Tweet{}, ErrNotFound
 	}
 	return tweet, nil
 }
@@ -92,7 +92,7 @@ func (app *Application) UnlikeTweet(w http.ResponseWriter, r *http.Request) {
 		// It's a different error
 		panic(err)
 	}
-	err = app.Profile.DeleteLike(scraper.Like{UserID: app.ActiveUser.ID, TweetID: tweet.ID})
+	err = app.Profile.DeleteLike(Like{UserID: app.ActiveUser.ID, TweetID: tweet.ID})
 	panic_if(err)
 	tweet.IsLikedByCurrentUser = false
 
@@ -108,7 +108,7 @@ func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 		app.error_400_with_message(w, r, fmt.Sprintf("Invalid tweet ID: %q", parts[1]))
 		return
 	}
-	tweet_id := scraper.TweetID(val)
+	tweet_id := TweetID(val)
 
 	data := NewTweetDetailData()
 	data.MainTweetID = tweet_id
@@ -169,12 +169,12 @@ type key string
 
 const TWEET_KEY = key("tweet")
 
-func add_tweet_to_context(ctx context.Context, tweet scraper.Tweet) context.Context {
+func add_tweet_to_context(ctx context.Context, tweet Tweet) context.Context {
 	return context.WithValue(ctx, TWEET_KEY, tweet)
 }
 
-func get_tweet_from_context(ctx context.Context) scraper.Tweet {
-	tweet, is_ok := ctx.Value(TWEET_KEY).(scraper.Tweet)
+func get_tweet_from_context(ctx context.Context) Tweet {
+	tweet, is_ok := ctx.Value(TWEET_KEY).(Tweet)
 	if !is_ok {
 		panic("Tweet not found in context")
 	}

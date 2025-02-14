@@ -10,6 +10,8 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
 type CardValue struct {
@@ -777,10 +779,10 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 			panic(fmt.Sprintf("Tombstoned tweet has no ID (should be %d)", tweet.InReplyToID))
 		}
 
-		// Fill out the replied tweet's UserID using this tweet's "in_reply_to_user_id".
+		// Fill out the replied tweet's UserID using this tweet's "InReplyToUserID".
 		// If this tweet doesn't have it (i.e., this tweet is also a tombstone), create a fake user instead, and add it to the tweet trove.
 		if replied_tweet.UserID == 0 || replied_tweet.UserID == GetUnknownUser().ID {
-			replied_tweet.UserID = tweet.in_reply_to_user_id
+			replied_tweet.UserID = tweet.InReplyToUserID
 			if replied_tweet.UserID == 0 || replied_tweet.UserID == GetUnknownUser().ID {
 				fake_user := GetUnknownUser()
 				ret.Users[fake_user.ID] = fake_user
@@ -793,7 +795,7 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 			existing_user = User{ID: replied_tweet.UserID}
 		}
 		if existing_user.Handle == "" {
-			existing_user.Handle = tweet.in_reply_to_user_handle
+			existing_user.Handle = tweet.InReplyToUserHandle
 		}
 		ret.Users[replied_tweet.UserID] = existing_user
 		ret.TombstoneUsers = append(ret.TombstoneUsers, existing_user.Handle)

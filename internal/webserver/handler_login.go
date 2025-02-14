@@ -7,12 +7,13 @@ import (
 	"io"
 	"net/http"
 
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 type LoginData struct {
 	LoginForm
-	ExistingSessions []scraper.UserHandle
+	ExistingSessions []UserHandle
 }
 
 type LoginForm struct {
@@ -112,7 +113,7 @@ func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
 	formdata, err := io.ReadAll(r.Body)
 	panic_if(err)
 	panic_if(json.Unmarshal(formdata, &form)) // TODO: HTTP 400 not 500
-	err = app.SetActiveUser(scraper.UserHandle(form.AccountName))
+	err = app.SetActiveUser(UserHandle(form.AccountName))
 	if err != nil {
 		app.error_400_with_message(w, r, fmt.Sprintf("User not in database: %s", form.AccountName))
 		return

@@ -1,4 +1,4 @@
-package scraper
+package persistence
 
 type ListID int64
 type OnlineListID int64

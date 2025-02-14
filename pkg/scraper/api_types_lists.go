@@ -2,6 +2,8 @@ package scraper
 
 import (
 	"net/url"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
 func (api *API) GetFolloweesPage(user_id UserID, cursor string) (APIV2Response, error) {

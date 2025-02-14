@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"path"
-
-	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 // Convenience function that saves all the objects in a TweetTrove.

@@ -1,4 +1,4 @@
-package scraper
+package persistence
 
 import (
 	"fmt"
@@ -78,32 +78,6 @@ func GetUnknownUserWithHandle(handle UserHandle) User {
 		IsNeedingFakeID: true,
 		IsIdFake:        true,
 	}
-}
-
-/**
- * Make a filename for the profile image, that hopefully won't clobber other ones
- */
-func (u User) compute_profile_image_local_path() string {
-	return string(u.Handle) + "_profile_" + path.Base(u.ProfileImageUrl)
-}
-
-/**
- * Make a filename for the banner image, that hopefully won't clobber other ones.
- * Add a file extension if necessary (seems to be necessary).
- * If there is no banner image, just return nothing.
- */
-func (u User) compute_banner_image_local_path() string {
-	if u.BannerImageUrl == "" {
-		return ""
-	}
-	base_name := path.Base(u.BannerImageUrl)
-
-	// Check if it has an extension (e.g., ".png" or ".jpeg")
-	if !regexp.MustCompile(`\.\w{2,4}$`).MatchString(base_name) {
-		// If it doesn't have an extension, add one
-		base_name += ".jpg"
-	}
-	return string(u.Handle) + "_banner_" + base_name
 }
 
 /**

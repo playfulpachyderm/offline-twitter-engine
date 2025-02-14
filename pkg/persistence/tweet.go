@@ -1,4 +1,4 @@
-package scraper
+package persistence
 
 import (
 	"database/sql/driver"
@@ -46,9 +46,9 @@ type Tweet struct {
 	User   *User  `db:"user"`
 
 	// For processing tombstones
-	UserHandle              UserHandle
-	in_reply_to_user_handle UserHandle
-	in_reply_to_user_id     UserID
+	UserHandle          UserHandle
+	InReplyToUserHandle UserHandle
+	InReplyToUserID     UserID
 
 	Images        []Image
 	Videos        []Video

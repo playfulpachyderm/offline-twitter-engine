@@ -8,24 +8,24 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 type SearchPageData struct {
-	persistence.Feed
+	Feed
 	SearchText       string
-	SortOrder        persistence.SortOrder
+	SortOrder        SortOrder
 	SortOrderOptions []string
 	IsUsersSearch    bool
-	UserIDs          []scraper.UserID
+	UserIDs          []UserID
 	// TODO: fill out the search text in the search bar as well (needs modifying the base template)
 }
 
 func NewSearchPageData() SearchPageData {
-	ret := SearchPageData{SortOrderOptions: []string{}, Feed: persistence.NewFeed()}
+	ret := SearchPageData{SortOrderOptions: []string{}, Feed: NewFeed()}
 	for i := 0; i < 4; i++ { // Don't include "Liked At" option which is #4
-		ret.SortOrderOptions = append(ret.SortOrderOptions, persistence.SortOrder(i).String())
+		ret.SortOrderOptions = append(ret.SortOrderOptions, SortOrder(i).String())
 	}
 	return ret
 }
@@ -34,7 +34,7 @@ func (app *Application) SearchUsers(w http.ResponseWriter, r *http.Request) {
 	ret := NewSearchPageData()
 	ret.IsUsersSearch = true
 	ret.SearchText = strings.Trim(r.URL.Path, "/")
-	ret.UserIDs = []scraper.UserID{}
+	ret.UserIDs = []UserID{}
 	for _, u := range app.Profile.SearchUsers(ret.SearchText) {
 		ret.TweetTrove.Users[u.ID] = u
 		ret.UserIDs = append(ret.UserIDs, u.ID)
@@ -110,7 +110,7 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 		app.full_save_tweet_trove(trove)
 	}
 
-	c, err := persistence.NewCursorFromSearchQuery(search_text)
+	c, err := NewCursorFromSearchQuery(search_text)
 	if err != nil {
 		app.error_400_with_message(w, r, err.Error())
 		return
@@ -121,13 +121,13 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var is_ok bool
-	c.SortOrder, is_ok = persistence.SortOrderFromString(r.URL.Query().Get("sort-order"))
+	c.SortOrder, is_ok = SortOrderFromString(r.URL.Query().Get("sort-order"))
 	if !is_ok && r.URL.Query().Get("sort-order") != "" {
 		app.error_400_with_message(w, r, "Invalid sort order")
 	}
 
 	feed, err := app.Profile.NextPage(c, app.ActiveUser.ID)
-	if err != nil && !errors.Is(err, persistence.ErrEndOfFeed) {
+	if err != nil && !errors.Is(err, ErrEndOfFeed) {
 		panic(err)
 	}
 
@@ -136,7 +136,7 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 	data.SearchText = search_text
 	data.SortOrder = c.SortOrder
 
-	if is_htmx(r) && c.CursorPosition == persistence.CURSOR_MIDDLE {
+	if is_htmx(r) && c.CursorPosition == CURSOR_MIDDLE {
 		// It's a Show More request
 		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: data.Feed.TweetTrove, SearchText: search_text}, data)
 	} else {

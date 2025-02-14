@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -29,7 +29,7 @@ func (app *Application) Bookmarks(w http.ResponseWriter, r *http.Request) {
 		app.full_save_tweet_trove(trove)
 	}
 
-	c := persistence.NewUserFeedBookmarksCursor(app.ActiveUser.Handle)
+	c := NewUserFeedBookmarksCursor(app.ActiveUser.Handle)
 	err := parse_cursor_value(&c, r)
 	if err != nil {
 		app.error_400_with_message(w, r, "invalid cursor (must be a number)")
@@ -37,11 +37,11 @@ func (app *Application) Bookmarks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	feed, err := app.Profile.NextPage(c, app.ActiveUser.ID)
-	if err != nil && !errors.Is(err, persistence.ErrEndOfFeed) {
+	if err != nil && !errors.Is(err, ErrEndOfFeed) {
 		panic(err)
 	}
 
-	if is_htmx(r) && c.CursorPosition == persistence.CURSOR_MIDDLE {
+	if is_htmx(r) && c.CursorPosition == CURSOR_MIDDLE {
 		// It's a Show More request
 		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
 	} else {

@@ -8,12 +8,13 @@ import (
 	"runtime/debug"
 	"time"
 
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 type BackgroundTask struct {
 	Name         string
-	GetTroveFunc func(*scraper.API) scraper.TweetTrove
+	GetTroveFunc func(*scraper.API) TweetTrove
 	StartDelay   time.Duration
 	Period       time.Duration
 
@@ -81,7 +82,7 @@ func (app *Application) start_background() {
 
 	timeline_task := BackgroundTask{
 		Name: "home timeline",
-		GetTroveFunc: func(api *scraper.API) scraper.TweetTrove {
+		GetTroveFunc: func(api *scraper.API) TweetTrove {
 			should_do_following_only := is_following_only%is_following_only_frequency == 0
 			trove, err := api.GetHomeTimeline("", should_do_following_only)
 			if err != nil && !errors.Is(err, scraper.END_OF_FEED) && !errors.Is(err, scraper.ErrRateLimited) {
@@ -97,7 +98,7 @@ func (app *Application) start_background() {
 
 	likes_task := BackgroundTask{
 		Name: "user likes",
-		GetTroveFunc: func(api *scraper.API) scraper.TweetTrove {
+		GetTroveFunc: func(api *scraper.API) TweetTrove {
 			trove, err := api.GetUserLikes(api.UserID, 50) // TODO: parameterizable
 			if err != nil && !errors.Is(err, scraper.END_OF_FEED) && !errors.Is(err, scraper.ErrRateLimited) {
 				panic(err)
@@ -112,8 +113,8 @@ func (app *Application) start_background() {
 
 	dms_task := BackgroundTask{
 		Name: "DM inbox",
-		GetTroveFunc: func(api *scraper.API) scraper.TweetTrove {
-			var trove scraper.TweetTrove
+		GetTroveFunc: func(api *scraper.API) TweetTrove {
+			var trove TweetTrove
 			var err error
 			if inbox_cursor == "" {
 				trove, inbox_cursor, err = api.GetInbox(0)
@@ -133,7 +134,7 @@ func (app *Application) start_background() {
 
 	notifications_task := BackgroundTask{
 		Name: "DM inbox",
-		GetTroveFunc: func(api *scraper.API) scraper.TweetTrove {
+		GetTroveFunc: func(api *scraper.API) TweetTrove {
 			trove, last_unread_notification_sort_index, err := api.GetNotifications(1) // Just 1 page
 			if err != nil && !errors.Is(err, scraper.END_OF_FEED) && !errors.Is(err, scraper.ErrRateLimited) {
 				panic(err)
@@ -150,7 +151,7 @@ func (app *Application) start_background() {
 
 	bookmarks_task := BackgroundTask{
 		Name: "bookmarks",
-		GetTroveFunc: func(api *scraper.API) scraper.TweetTrove {
+		GetTroveFunc: func(api *scraper.API) TweetTrove {
 			trove, err := app.API.GetBookmarks(10)
 			if err != nil && !errors.Is(err, scraper.END_OF_FEED) && !errors.Is(err, scraper.ErrRateLimited) {
 				panic(err)
@@ -165,7 +166,7 @@ func (app *Application) start_background() {
 
 	own_profile_task := BackgroundTask{
 		Name: "user profile",
-		GetTroveFunc: func(api *scraper.API) scraper.TweetTrove {
+		GetTroveFunc: func(api *scraper.API) TweetTrove {
 			trove, err := app.API.GetUserFeed(api.UserID, 1)
 			if err != nil && !errors.Is(err, scraper.END_OF_FEED) && !errors.Is(err, scraper.ErrRateLimited) {
 				panic(err)

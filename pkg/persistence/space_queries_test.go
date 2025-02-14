@@ -9,7 +9,7 @@ import (
 	"github.com/go-test/deep"
 	"math/rand"
 
-	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
 // Create a Space, save it, reload it, and make sure it comes back the same

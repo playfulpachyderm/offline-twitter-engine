@@ -8,8 +8,6 @@ import (
 
 	sql "github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
-
-	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 //go:embed schema.sql

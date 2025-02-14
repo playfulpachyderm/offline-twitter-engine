@@ -1,4 +1,4 @@
-package scraper
+package persistence
 
 type DMChatRoomID string
 

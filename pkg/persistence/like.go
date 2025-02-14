@@ -1,4 +1,4 @@
-package scraper
+package persistence
 
 type LikeSortID int64
 

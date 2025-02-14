@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
@@ -28,14 +28,14 @@ type Application struct {
 
 	Middlewares []Middleware
 
-	Profile                       persistence.Profile
-	ActiveUser                    scraper.User
+	Profile                       Profile
+	ActiveUser                    User
 	IsScrapingDisabled            bool
 	API                           scraper.API
 	LastReadNotificationSortIndex int64
 }
 
-func NewApp(profile persistence.Profile) Application {
+func NewApp(profile Profile) Application {
 	ret := Application{
 		accessLog: log.New(os.Stdout, "ACCESS\t", log.Ldate|log.Ltime),
 		traceLog:  log.New(os.Stdout, "TRACE\t", log.Ldate|log.Ltime),
@@ -67,7 +67,7 @@ func (app *Application) WithMiddlewares() http.Handler {
 	return ret
 }
 
-func (app *Application) SetActiveUser(handle scraper.UserHandle) error {
+func (app *Application) SetActiveUser(handle UserHandle) error {
 	if handle == "no account" {
 		app.ActiveUser = get_default_user()
 		app.IsScrapingDisabled = true // API requests will fail b/c not logged in
@@ -83,12 +83,12 @@ func (app *Application) SetActiveUser(handle scraper.UserHandle) error {
 	return nil
 }
 
-func get_default_user() scraper.User {
-	return scraper.User{
+func get_default_user() User {
+	return User{
 		ID:                    0,
 		Handle:                "[nobody]",
 		DisplayName:           "[Not logged in]",
-		ProfileImageLocalPath: path.Base(scraper.DEFAULT_PROFILE_IMAGE_URL),
+		ProfileImageLocalPath: path.Base(DEFAULT_PROFILE_IMAGE_URL),
 		IsContentDownloaded:   true,
 	}
 }
@@ -189,7 +189,7 @@ func openWebPage(url string) {
 	}
 }
 
-func parse_cursor_value(c *persistence.Cursor, r *http.Request) error {
+func parse_cursor_value(c *Cursor, r *http.Request) error {
 	cursor_param := r.URL.Query().Get("cursor")
 	if cursor_param != "" {
 		var err error
@@ -197,7 +197,7 @@ func parse_cursor_value(c *persistence.Cursor, r *http.Request) error {
 		if err != nil {
 			return fmt.Errorf("attempted to parse cursor value %q as int: %w", c.CursorValue, err)
 		}
-		c.CursorPosition = persistence.CURSOR_MIDDLE
+		c.CursorPosition = CURSOR_MIDDLE
 	}
 	return nil
 }
