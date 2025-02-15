@@ -55,6 +55,12 @@ func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
 						"If you're logging in from a new device, try doing it on the official Twitter site first, then try again here.")
 			}
 			app.after_login(w, r, api)
+		} else {
+			s := ""
+			for i := range form.FormErrors {
+				s += i + " " + form.FormErrors[i] + "\n"
+			}
+			panic(s)
 		}
 		return
 	}
