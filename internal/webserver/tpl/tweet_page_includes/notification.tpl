@@ -1,7 +1,7 @@
 {{define "notification"}}
   {{$notification := (notification .NotificationID)}}
 
-  <div class="notification">
+  <div class="notification" data-notification-id="{{$notification.ID}}">
     <div class="notification__header">
       {{if (not (eq $notification.ActionUserID 0))}}
         <div class="notification__users">
@@ -26,15 +26,30 @@
 
       <div class="notification__text">
         {{if (eq $notification.Type 1)}} {{/* LIKE */}}
-          <b>{{(user $notification.ActionUserID).DisplayName}} liked your tweet</b>
+          {{ $num_liked_items := (add (len $notification.RetweetIDs) (len $notification.TweetIDs))}}
+          {{if (gt (len $notification.UserIDs) 1)}}
+            <b>{{(user $notification.ActionUserID).DisplayName}} and {{(len (slice $notification.UserIDs 1))}} others liked your tweet</b>
+          {{else if (gt $num_liked_items 1)}}
+            <b>{{(user $notification.ActionUserID).DisplayName}} liked {{ $num_liked_items }} of your tweets</b>
+          {{else}}
+            <b>{{(user $notification.ActionUserID).DisplayName}} liked your tweet</b>
+          {{end}}
         {{else if (eq $notification.Type 2)}} {{/* RETWEET */}}
-          <b>{{(user $notification.ActionUserID).DisplayName}} retweeted you</b>
+          {{if (gt (len $notification.UserIDs) 1)}}
+            <b>{{(user $notification.ActionUserID).DisplayName}} and {{(len (slice $notification.UserIDs 1))}} others retweeted you</b>
+          {{else}}
+            <b>{{(user $notification.ActionUserID).DisplayName}} retweeted you</b>
+          {{end}}
         {{else if (eq $notification.Type 3)}} {{/* QUOTE_TWEET */}}
           <b>{{(user $notification.ActionUserID).DisplayName}} quote-tweeted you</b>
         {{else if (eq $notification.Type 4)}} {{/* REPLY */}}
           <b>{{(user $notification.ActionUserID).DisplayName}} replied to you</b>
         {{else if (eq $notification.Type 5)}} {{/* FOLLOW */}}
-          <b>{{(user $notification.ActionUserID).DisplayName}} followed you!</b>
+          {{if (gt (len $notification.UserIDs) 1)}}
+            <b>{{(user $notification.ActionUserID).DisplayName}} and {{(len (slice $notification.UserIDs 1))}} others followed you</b>
+          {{else}}
+            <b>{{(user $notification.ActionUserID).DisplayName}} followed you!</b>
+          {{end}}
         {{else if (eq $notification.Type 6)}} {{/* MENTION */}}
           <b>{{(user $notification.ActionUserID).DisplayName}} mentioned you</b>
         {{else if (eq $notification.Type 7)}} {{/* USER_IS_LIVE */}}
