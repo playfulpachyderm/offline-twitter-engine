@@ -1,8 +1,0 @@
-Notifications mark as read
-
-- it uses cursors.  so, to mark notifications as read:
-	- scrape notifications
-	- extract top cursor
-	- use that as the cursor value to mark as read
-
-DAABDAABCgABFDzeDIfVUAIIAAIAAAABCAADiJONcggABOxI6DUACwACAAAAC0FaSHRBaThqLUN3CAADyS991gAA

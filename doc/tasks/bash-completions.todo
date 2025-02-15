@@ -1,3 +1,9 @@
 Bash completions
 
 https://opensource.com/article/18/3/creating-bash-completion-script
+
+
+Enable with:
+```
+complete -C 'go run ./twitter autocomplete "$@"' twitter
+```
