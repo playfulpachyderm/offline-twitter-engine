@@ -196,7 +196,8 @@ INSERT INTO tweets VALUES
     (1411566,1698848086880133147,1458284524761075714,'I have basically no experience with one and literally no experience with the other, and additionally I''ve never even used Haskell.  So unfortunately I''m not really in a position to say.',1693871921000,1,0,1,0,1698802806096846909,0,'sol_plunder,ilyakooo0','sol_plunder,ilyakooo0','',NULL,NULL, 0,1,0,0,0),
     (1169437,1665509126737129472,1458284524761075714,replace('Btw, to the extent this has happened, it''s partly thanks to the Golden One (@TheGloriousLion) who invented #fizeekfriday and the "post physique" rejoinder.  Everyone should follow him if they don''t already.\n\nSince I forgot last week, and since it''s topical, here''s a leg poast','\n',char(10)),1685923294000,7,0,0,0,1665505986184900611,0,'TheGloriousLion','','fizeekfriday',NULL,NULL,0,1,0,0,0),
     (2857438,1826778617705115868,1488963321701171204,'Conversations are trees, not sequences.  They branch.  They don''t flow in a perfectly linear way.',1724372937000,4,1,0,0,0,0,'','','',NULL,NULL,0,1,0,0,0),
-    (2857439,1826778617705115869,1178839081222115328,'Real tweet that is definitely real',1724372938000,4,1,0,0,1826778617705115868,0,'Offline_Twatter','Offline_Twatter','',NULL,NULL,0,1,0,0,0);
+    (2857439,1826778617705115869,1178839081222115328,'Real tweet that is definitely real',1724372938000,4,1,0,0,1826778617705115868,0,'Offline_Twatter','Offline_Twatter','',NULL,NULL,0,1,0,0,0),
+    (98105,1507883724615999488,1488963321701171204,'Apparently I am not allowed to call myself "Twitter"',1648342469000,5,1,0,1,0,0,'','','',NULL,NULL,0,1,1,1739654377321,0);
 
 CREATE TABLE retweets(rowid integer primary key,
     retweet_id integer not null unique,
@@ -576,12 +577,19 @@ create table notification_tweets (rowid integer primary key,
     tweet_id not null references tweets(id),
     unique(notification_id, tweet_id)
 );
+insert into notification_tweets values
+    (1, 'FKncQJGVgAQAAAABSQ3bEaTgXL8f40e77r4', 1826778617705115868),
+    (2, 'FKncQJGVgAQAAAABSQ3bEaTgXL8VBxefepo', 1826778617705115868),
+    (3, 'FDzeDIfVUAIAAvsBiJONcqYgiLgXOolO9t0', 1826778617705115869),
+    (4, 'FDzeDIfVUAIAAAABiJONcqaBFAzeN-n-Luw', 1507883724615999488);
 
 create table notification_retweets (rowid integer primary key,
     notification_id not null references notifications(id),
     retweet_id not null references retweets(retweet_id),
     unique(notification_id, retweet_id)
 );
+insert into notification_retweets values
+    (1, 'FDzeDIfVUAIAAAABiJONcqaBFAzeN-n-Luw', 1490135787124232223);
 
 create table notification_users (rowid integer primary key,
     notification_id not null references notifications(id),

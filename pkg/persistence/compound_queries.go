@@ -107,6 +107,7 @@ func (p Profile) fill_content(trove *TweetTrove, current_user_id UserID) {
 			user_ids = append(user_ids, p)
 		}
 	}
+	// User detail is needed to render the notification properly (profile image, username)
 	for _, n := range trove.Notifications {
 		// Primary user
 		if n.ActionUserID != UserID(0) {
@@ -408,8 +409,7 @@ func (p Profile) GetNotificationsForUser(u_id UserID, cursor int64, count int64)
 		panic(err)
 	}
 
-	// Get the user_ids list for each notification.  Unlike tweet+retweet_ids, users are needed to render
-	// the notification properly.
+	// Get the user_ids, tweet_ids, and retweet_ids list for each notification
 	for i := range notifications {
 		err = p.DB.Select(&notifications[i].UserIDs,
 			`select user_id from notification_users where notification_id = ?`,
@@ -419,8 +419,27 @@ func (p Profile) GetNotificationsForUser(u_id UserID, cursor int64, count int64)
 			panic(err)
 		}
 	}
+	for i := range notifications {
+		err = p.DB.Select(&notifications[i].TweetIDs,
+			`select tweet_id from notification_tweets where notification_id = ?`,
+			notifications[i].ID,
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
+	for i := range notifications {
+		err = p.DB.Select(&notifications[i].RetweetIDs,
+			`select retweet_id from notification_retweets where notification_id = ?`,
+			notifications[i].ID,
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
 
-	// Collect tweet and retweet IDs
+	// Collect tweet and retweet IDs.
+	// Users are fetched in `fill_content`
 	retweet_ids := []TweetID{}
 	tweet_ids := []TweetID{}
 	for _, n := range notifications {

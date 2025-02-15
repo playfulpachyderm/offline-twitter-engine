@@ -99,19 +99,20 @@ func TestTimeline(t *testing.T) {
 	require.NoError(err)
 
 	c := NewTimelineCursor()
-	c.PageSize = 6
+	c.PageSize = 7
 
 	feed, err := profile.NextPage(c, UserID(0))
 	require.NoError(err)
 
-	assert.Len(feed.Items, 6)
+	assert.Len(feed.Items, 7)
 	assert.Len(feed.Retweets, 4)
 	assert.Equal(feed.Items[0].TweetID, TweetID(1826778617705115868))
-	assert.Equal(feed.Items[1].RetweetID, TweetID(1490135787144237058))
-	assert.Equal(feed.Items[2].RetweetID, TweetID(1490135787124232223))
-	assert.Equal(feed.Items[3].RetweetID, TweetID(1490119308692766723))
-	assert.Equal(feed.Items[4].RetweetID, TweetID(1490100255987171332))
-	assert.Equal(feed.Items[5].TweetID, TweetID(1453461248142495744))
+	assert.Equal(feed.Items[1].TweetID, TweetID(1507883724615999488))
+	assert.Equal(feed.Items[2].RetweetID, TweetID(1490135787144237058))
+	assert.Equal(feed.Items[3].RetweetID, TweetID(1490135787124232223))
+	assert.Equal(feed.Items[4].RetweetID, TweetID(1490119308692766723))
+	assert.Equal(feed.Items[5].RetweetID, TweetID(1490100255987171332))
+	assert.Equal(feed.Items[6].TweetID, TweetID(1453461248142495744))
 
 	next_cursor := feed.CursorBottom
 	assert.Equal(next_cursor.CursorPosition, CURSOR_MIDDLE)

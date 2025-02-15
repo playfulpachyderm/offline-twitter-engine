@@ -352,10 +352,16 @@ func TestNotificationsFeed(t *testing.T) {
 	assert.Equal(feed.Items[5].NotificationID, NotificationID("FKncQJGVgAQAAAABSQ3bEaTgXL8f40e77r4"))
 	assert.Equal(feed.Items[5].TweetID, TweetID(1826778617705115868))
 
-	// Tweet should be "liked"
+	// This tweet should be "liked"
 	liked_tweet, is_ok := feed.TweetTrove.Tweets[1826778617705115869]
 	require.True(is_ok)
 	assert.True(liked_tweet.IsLikedByCurrentUser)
+
+	notif1, is_ok := feed.TweetTrove.Notifications["FDzeDIfVUAIAAAABiJONcqaBFAzeN-n-Luw"]
+	require.Len(notif1.TweetIDs, 1)
+	assert.Equal(notif1.TweetIDs[0], TweetID(1507883724615999488))
+	require.Len(notif1.RetweetIDs, 1)
+	assert.Equal(notif1.RetweetIDs[0], TweetID(1490135787124232223))
 
 	assert.Equal(feed.CursorBottom.CursorPosition, CURSOR_MIDDLE)
 	assert.Equal(feed.CursorBottom.CursorValue, 1723494244885)
