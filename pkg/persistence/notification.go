@@ -7,6 +7,7 @@ type NotificationType int
 const (
 	// ActionUserID is who "liked" it, Action[Re]TweetID is most recent [re]tweet they "liked".
 	// Can have either many Users "liking" one [re]tweet, or many 1 User "liking" many [re]tweets.
+	// The "liked" items can be a mix of Tweets and Retweets.
 	NOTIFICATION_TYPE_LIKE NotificationType = iota + 1
 
 	// ActionUserID is who retweeted it, Action[Re]TweetID is your [re]tweet they retweeted.

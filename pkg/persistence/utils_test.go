@@ -204,7 +204,7 @@ func create_dummy_user() User {
 	}
 }
 
-// Create a new tweet with a random ID and content
+// Create a new tweet from the stable User, with a random ID and content
 func create_dummy_tweet() Tweet {
 	tweet_id := TweetID(rand.Int())
 
@@ -228,7 +228,7 @@ func create_dummy_tweet() Tweet {
 
 	return Tweet{
 		ID:             tweet_id,
-		UserID:         -1,
+		UserID:         create_stable_user().ID,
 		Text:           "text",
 		PostedAt:       Timestamp{time.Now().Truncate(1e9)}, // Round to nearest second
 		NumLikes:       1,

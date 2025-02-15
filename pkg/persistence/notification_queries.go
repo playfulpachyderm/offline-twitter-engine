@@ -33,6 +33,7 @@ func (p Profile) SaveNotification(n Notification) {
 		            sort_index = max(sort_index, :sort_index),
 		            action_user_id = nullif(:action_user_id, 0),
 		            action_tweet_id = nullif(:action_tweet_id, 0),
+		            action_retweet_id = nullif(:action_retweet_id, 0),
 		            has_detail = has_detail or :has_detail,
 		            last_scraped_at = max(last_scraped_at, :last_scraped_at)
 	`, n)
@@ -88,6 +89,8 @@ func (p Profile) GetNotification(id NotificationID) Notification {
 	if err != nil {
 		panic(err)
 	}
+	ret.RetweetIDs = []TweetID{} // If the query returns no rows, these will otherwise be uninitialized (nil)!
+	ret.TweetIDs = []TweetID{}
 	err = p.DB.Select(&ret.TweetIDs, `select tweet_id from notification_tweets where notification_id = ?`, id)
 	if err != nil {
 		panic(err)

@@ -358,6 +358,7 @@ func TestNotificationsFeed(t *testing.T) {
 	assert.True(liked_tweet.IsLikedByCurrentUser)
 
 	notif1, is_ok := feed.TweetTrove.Notifications["FDzeDIfVUAIAAAABiJONcqaBFAzeN-n-Luw"]
+	require.True(is_ok)
 	require.Len(notif1.TweetIDs, 1)
 	assert.Equal(notif1.TweetIDs[0], TweetID(1507883724615999488))
 	require.Len(notif1.RetweetIDs, 1)
