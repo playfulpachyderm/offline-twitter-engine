@@ -25,6 +25,8 @@ const TWEETS_ALL_SQL_FIELDS = `
 // - spaces
 // - users
 // - images, videos, urls, polls
+//
+// `current_user_id` is used to fetch likes on quoted tweets
 func (p Profile) fill_content(trove *TweetTrove, current_user_id UserID) {
 	if len(trove.Tweets) == 0 {
 		// Empty trove, nothing to fetch
@@ -453,15 +455,15 @@ func (p Profile) GetNotificationsForUser(u_id UserID, cursor int64, count int64)
 			tweet_ids = append(tweet_ids, r.TweetID)
 		}
 	}
-
 	// Get tweets, if there are any
 	var tweets []Tweet
 	if len(tweet_ids) != 0 {
-		sql_str, vals, err := sqlx.In(`select `+TWEETS_ALL_SQL_FIELDS+`
+		sql_str, vals, err := sqlx.In(`
+		  select `+TWEETS_ALL_SQL_FIELDS+`
 			from tweets
 			left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
-			left join likes on tweets.id = likes.tweet_id and likes.user_id = -1
-          where id in (?)`, tweet_ids)
+			left join likes on tweets.id = likes.tweet_id and likes.user_id = ?
+           where id in (?)`, u_id, tweet_ids)
 		if err != nil {
 			panic(err)
 		}
@@ -496,8 +498,7 @@ func (p Profile) GetNotificationsForUser(u_id UserID, cursor int64, count int64)
 		ret.Items = append(ret.Items, feed_item)
 	}
 
-	// TODO: proper user id
-	p.fill_content(&ret.TweetTrove, UserID(0))
+	p.fill_content(&ret.TweetTrove, u_id)
 
 	// Set the bottom cursor value
 	ret.CursorBottom = Cursor{}
