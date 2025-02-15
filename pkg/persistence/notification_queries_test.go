@@ -70,7 +70,7 @@ func TestLikesNotificationWithBothTweetsAndRetweets(t *testing.T) {
 
 	// Now the user "likes" another Tweet
 	new_tweet := create_dummy_tweet()
-	profile.SaveTweet(new_tweet)
+	require.NoError(t, profile.SaveTweet(new_tweet))
 	n.ActionTweetID = new_tweet.ID
 	n.ActionRetweetID = TweetID(0)
 	n.TweetIDs = append(n.TweetIDs, new_tweet.ID)
