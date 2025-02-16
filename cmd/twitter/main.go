@@ -14,9 +14,9 @@ import (
 	"syscall"
 	"time"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/webserver"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/webserver"
 )
 
 // Global variable referencing the open data profile

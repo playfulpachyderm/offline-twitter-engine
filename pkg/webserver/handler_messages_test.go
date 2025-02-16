@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/net/html"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/webserver"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/webserver"
 )
 
 func TestMessagesIndexPageRequiresActiveUser(t *testing.T) {
