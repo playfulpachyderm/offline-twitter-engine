@@ -14,7 +14,7 @@ import (
 	"syscall"
 	"time"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/webserver"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
