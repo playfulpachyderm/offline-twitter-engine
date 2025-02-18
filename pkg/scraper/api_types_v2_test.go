@@ -1013,3 +1013,36 @@ func TestNoFailOnComposerEntryInRegularThread(t *testing.T) {
 
 	assert.Len(trove.Tweets, 3)
 }
+
+// Test a thread with a banned user
+func TestParseTweetThreadWithBannedUser(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+	data, err := os.ReadFile("test_responses/api_v2/tweet_from_banned_user.json")
+	require.NoError(err)
+	var api_response APIV2Response
+	err = json.Unmarshal(data, &api_response)
+	require.NoError(err)
+
+	trove, err := api_response.ToTweetTrove()
+	require.NoError(err)
+
+	assert.Len(trove.Tweets, 6)
+	banned_tweet1, is_ok := trove.Tweets[1709579269247234284]
+	assert.True(is_ok)
+	assert.True(banned_tweet1.IsStub)
+	assert.Equal(banned_tweet1.UserID, UserID(1595500307374829568))
+	assert.Equal(banned_tweet1.TombstoneType, "suspended")
+
+	banned_tweet2, is_ok := trove.Tweets[1709580398026805736]
+	assert.True(is_ok)
+	assert.True(banned_tweet2.IsStub)
+	assert.Equal(banned_tweet2.UserID, UserID(1595500307374829568))
+	assert.Equal(banned_tweet2.TombstoneType, "suspended")
+
+	// assert.Len(trove.Users, 3)
+	banned_user, is_ok := trove.Users[1595500307374829568]
+	assert.True(is_ok)
+	assert.Equal(banned_user.Handle, UserHandle("spandrell3"))
+	assert.True(banned_user.IsBanned)
+}

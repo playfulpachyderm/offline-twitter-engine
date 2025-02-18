@@ -557,6 +557,8 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 				panic(err)
 			}
 
+			// We don't have any user info yet.  We may be able to reconstruct some later with reply-joining
+			// But for now, it's just "Unknown User"
 			fake_user := GetUnknownUser()
 			ret.Users[fake_user.ID] = fake_user
 			parsed_tombstone_tweet.UserID = fake_user.ID
@@ -784,8 +786,10 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 		if replied_tweet.UserID == 0 || replied_tweet.UserID == GetUnknownUser().ID {
 			replied_tweet.UserID = tweet.InReplyToUserID
 			if replied_tweet.UserID == 0 || replied_tweet.UserID == GetUnknownUser().ID {
+				// We know absolutely nothing about them; can't determine a UserID or handle
+				// Create a dummy user just so the Tweet will have a non-0 user ID.
 				fake_user := GetUnknownUser()
-				ret.Users[fake_user.ID] = fake_user
+				ret.Users[fake_user.ID] = fake_user // Make sure the dummy user appears in the Trove
 				replied_tweet.UserID = fake_user.ID
 			}
 		} // replied_tweet.UserID should now be a real UserID
@@ -796,6 +800,11 @@ func (api_response APIV2Response) ToTweetTrove() (TweetTrove, error) {
 		}
 		if existing_user.Handle == "" {
 			existing_user.Handle = tweet.InReplyToUserHandle
+		}
+		// If the replied tweet is a "user was suspended" tombstone, it can be inferred that the
+		// user must be suspended
+		if replied_tweet.TombstoneType == "suspended" {
+			existing_user.IsBanned = true
 		}
 		ret.Users[replied_tweet.UserID] = existing_user
 		ret.TombstoneUsers = append(ret.TombstoneUsers, existing_user.Handle)
