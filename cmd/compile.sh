@@ -4,7 +4,7 @@ set -x
 set -e
 
 # General build flags
-FLAGS="-s -w -X gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.use_embedded=true"
+FLAGS="-s -w -X gitlab.com/offline-twitter/twitter_offline_engine/pkg/webserver.use_embedded=true"
 
 # Check for the `--static` flag and consume it
 USE_STATIC=false
