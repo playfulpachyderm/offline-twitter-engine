@@ -1040,7 +1040,6 @@ func TestParseTweetThreadWithBannedUser(t *testing.T) {
 	assert.Equal(banned_tweet2.UserID, UserID(1595500307374829568))
 	assert.Equal(banned_tweet2.TombstoneType, "suspended")
 
-	// assert.Len(trove.Users, 3)
 	banned_user, is_ok := trove.Users[1595500307374829568]
 	assert.True(is_ok)
 	assert.Equal(banned_user.Handle, UserHandle("spandrell3"))

@@ -349,6 +349,11 @@ test $(sqlite3 twitter.db "select is_stub, user_id = 0x4000000000000000 from twe
 tw fetch_user nancytracker
 test "$(sqlite3 twitter.db "select is_banned from users where handle='nancytracker'")" = "1"
 
+# Fetch a thread with a banned user in it; test no-clobbering of the existing user data
+sqlite3 twitter.db "insert into users (id, handle, display_name, profile_image_url, banner_image_local_path, followers_count) values (1595500307374829568, 'spandrell3', 'Spandrell', 'Profile URL', 'Banner Local', 10)"
+tw fetch_tweet https://twitter.com/spandrell3/status/1709580398026805736
+test "$(sqlite3 twitter.db "select display_name, profile_image_url, banner_image_local_path, followers_count, is_banned from users where handle='spandrell3'")" = "Spandrell|Profile URL|Banner Local|10|1"
+
 
 # Fetch a user with "600x200" banner image
 tw fetch_user AlexKoppelman  # This is probably kind of a flimsy test
