@@ -400,3 +400,9 @@ v0.7.0
 - PKG: Type definitions are now in `pkg/persistence` instead of `pkg/scraper`
 - BUGFIX: fix notifications page not having user's "likes" filled out on tweets
 - Compound notifications now tell you how many tweets were "liked", how many users followed you, etc
+
+v0.7.1
+------
+
+- BUGFIX: fix banned users getting their user info (followers count, profile image, display name) getting erased
+- PKG: webserver is now a public package

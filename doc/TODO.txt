@@ -136,9 +136,6 @@ TOOD: notifications-duplicate-bug (#scraper, #bug)
 TODO: dm-reaccs-popup-list (#dms, #webserver, #reaccs)
 - on-click popup showing who sent which reacc
 
-TODO: detect-banned-users-when-scraping-tweets (#scraper, #bug)
-- banned users aren't detected when scraping tweets
-
 TODO: sqlite-query-optimizing
 - https://sqlite.org/cli.html#index_recommendations_sqlite_expert_
 - https://sqlite.org/eqp.html
