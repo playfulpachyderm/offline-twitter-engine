@@ -20,8 +20,11 @@ func (app *Application) full_save_tweet_trove(trove TweetTrove) {
 		updated_user, err := scraper.GetUserByID(u_id)
 		if errors.Is(err, scraper.ErrDoesntExist) {
 			// Mark them as deleted.
-			// Handle and display name won't be updated if the user exists.
+			// Handle and display name won't be clobbered if the user exists.
 			updated_user = User{ID: u_id, DisplayName: "<Unknown User>", Handle: "<UNKNOWN USER>", IsDeleted: true}
+		} else if errors.Is(err, scraper.ErrUserIsBanned) {
+			// Mark them as banned (also won't clobber handle and display name)
+			updated_user = User{ID: u_id, DisplayName: "<Unknown User>", Handle: "<UNKNOWN USER>", IsBanned: true}
 		} else if err != nil {
 			panic(fmt.Errorf("error scraping conflicting user (ID %d): %w", u_id, err))
 		}
