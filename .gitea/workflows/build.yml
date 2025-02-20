@@ -1,0 +1,94 @@
+name: Build
+
+on: [push]
+
+jobs:
+  # build-docker:
+  #   container:
+  #     image: docker-bootstrap
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: offline-twitter/go2
+  #       run: |
+  #         cd build
+  #         docker build -f go.dockerfile -t offline-twitter/go2 .
+
+  test:
+    # needs: build-docker
+    container: offline-twitter/go
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Package tests
+        run: |
+          mkdir pkg/persistence/test_profiles
+          sample_data/init_data.sh
+          go test -bench=. -cover ./...
+
+      - name: Lint
+        run: golangci-lint run
+
+      - name: Webserver test
+        run: |
+          cd cmd
+          ./compile.sh
+          ./tw --profile ../sample_data/profile webserver --addr localhost:1000 &
+          sleep 1
+          curl localhost:1000/cernovich > webserver_test_output.html
+          jobs -p | xargs -I{} kill -- -{}
+
+      - name: Integration tests
+        env:
+          # This could be anything, it's just a temp file
+          SESSION_FILE_PATH: /tmp/Offline_Twatter.session
+        if: |
+          contains(join(github.event.head_commit.modified, ','), 'cmd/') ||
+          contains(join(github.event.head_commit.added, ','), 'cmd/') ||
+          contains(join(github.event.head_commit.removed, ','), 'cmd/')
+          contains(join(github.event.head_commit.modified, ','), 'pkg/scraper/') ||
+          contains(join(github.event.head_commit.added, ','), 'pkg/scraper/') ||
+          contains(join(github.event.head_commit.removed, ','), 'pkg/scraper/') ||
+          startsWith(github.ref, 'refs/tags/v')
+        # Write the session file contents to a temp location so it can be used in the tests
+        run: |
+          cd cmd
+          mkdir -p $(dirname $SESSION_FILE_PATH)
+          echo "${{ secrets.OFFLINE_TWATTER_SESSION_FILE }}" > $SESSION_FILE_PATH
+          ./tests.sh
+
+  build-apt:
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/v')
+    container: offline-twitter/go
+
+    steps:
+      - name: Version bump test
+        run: |
+          export version=$(echo "${{ github.ref }}" | cut -d '/' -f 3 | grep -Poh "(?<=^v)\d+\.\d+\.\d+")
+          curl https://apt.playfulpachyderm.com/KEY.gpg | sudo apt-key add -
+          echo "deb https://apt.playfulpachyderm.com/ ./" | sudo tee /etc/apt/sources.list.d/offline_twitter.list
+          sudo apt update
+          sudo apt install -y offline-twitter
+          which twitter
+          twitter create_profile outdated_profile
+          cd outdated_profile
+          # TODO: The CI server appears to have been IP-banned.  Replacing login with session-file secret for now
+          echo "${{ secrets.OFFLINE_TWATTER_SESSION_FILE }}" > Offline_Twatter.session  # Write the session file
+          twitter --session Offline_Twatter fetch_user pcmonk
+          twitter --session Offline_Twatter get_user_tweets pcmonk
+          (cd ../cmd && ./compile.sh $version)
+          which ../cmd/tw
+          ../cmd/tw --session Offline_Twatter fetch_user pcmonk
+
+      - name: Build and upload dpkg
+        run: |
+          cd build
+          # TODO
+
+      - name: Build and upload Windows installer
+        run: |
+          cd build
+          # TODO
