@@ -45,6 +45,7 @@ else
 fi
 # Ensure session file is valid
 test -f Offline_Twatter.session
+cat Offline_Twatter.session
 test "$(jq .UserHandle Offline_Twatter.session)" = "\"Offline_Twatter\""
 test "$(jq .IsAuthenticated Offline_Twatter.session)" = "true"
 jq .CSRFToken Offline_Twatter.session | grep -P '"\w+"'
