@@ -1,6 +1,6 @@
 from ubuntu:jammy
 
-run apt update && apt install -y sudo curl wget build-essential sqlite3 jq git musl-dev musl-tools nodejs
+run apt update && apt install -y sudo curl wget build-essential sqlite3 jq git musl-dev musl-tools
 
 # Install go and golangci-lint
 run wget https://go.dev/dl/go1.21.4.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.21.4.linux-amd64.tar.gz
@@ -12,3 +12,6 @@ run git clone https://gitlab.com/offline-twitter/twitter_offline_engine.git && c
 
 # For SSH upload
 copy known_hosts /root/.ssh/known_hosts
+
+# Install NodeJS v20
+run curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs
