@@ -1,6 +1,6 @@
 from ubuntu:jammy
 
-run apt update && apt install -y sudo curl wget build-essential sqlite3 jq git musl-dev musl-tools
+run apt update && apt install -y sudo curl wget build-essential sqlite3 jq git musl-dev musl-tools nodejs
 
 # Install go and golangci-lint
 run wget https://go.dev/dl/go1.21.4.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.21.4.linux-amd64.tar.gz

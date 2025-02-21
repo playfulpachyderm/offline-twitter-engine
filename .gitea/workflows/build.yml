@@ -3,21 +3,22 @@ name: Build
 on: [push]
 
 jobs:
-  # build-docker:
-  #   container:
-  #     image: docker-bootstrap
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+  build-docker:
+    container:
+      image: docker-bootstrap
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  #     - name: offline-twitter/go2
-  #       run: |
-  #         cd build
-  #         docker build -f go.dockerfile -t offline-twitter/go2 .
+      - name: offline-twitter/go2
+        run: |
+          # cd build
+          cd .woodpecker/docker
+          docker build -f go.dockerfile -t offline-twitter/go2 .
 
   test:
     # needs: build-docker
-    container: offline-twitter/go
+    container: offline-twitter/go2
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -62,7 +63,7 @@ jobs:
   build-apt:
     needs: test
     if: startsWith(github.ref, 'refs/tags/v')
-    container: offline-twitter/go
+    container: offline-twitter/go2
 
     steps:
       - name: Version bump test
