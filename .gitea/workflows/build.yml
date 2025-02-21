@@ -57,7 +57,7 @@ jobs:
         run: |
           cd cmd
           mkdir -p $(dirname $SESSION_FILE_PATH)
-          echo "${{ secrets.OFFLINE_TWATTER_SESSION_FILE }}" > $SESSION_FILE_PATH
+          echo '${{ secrets.OFFLINE_TWATTER_SESSION_FILE }}' > $SESSION_FILE_PATH
           ./tests.sh
 
   build-apt:
