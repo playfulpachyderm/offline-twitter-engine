@@ -4,20 +4,39 @@ on: [push]
 
 jobs:
   build-docker:
+    # TODO: deprecated-woodpecker
+    # - Remove "2" from images
+    # - change the `if` clause to not use `.woodpecker` etc
+    if: |
+      contains(join(github.event.head_commit.modified, ','), '.woodpecker') ||
+      contains(join(github.event.head_commit.added, ','), '.woodpecker') ||
+      contains(join(github.event.head_commit.removed, ','), '.woodpecker') ||
     container:
-      image: docker-bootstrap
+      image: docker-bootstrap # `docker:latest` with NodeJS manually installed on it
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: offline-twitter/go2
         run: |
-          # cd build
           cd .woodpecker/docker
           docker build -f go.dockerfile -t offline-twitter/go2 .
 
+      - name: offline-twitter/go-mingw2
+        run: |
+          cd .woodpecker/docker
+          docker build -f go-mingw.dockerfile -t offline-twitter/go-mingw2 .
+
+      - name: offline-twitter/innosetup2
+        run: |
+          cd .woodpecker/docker
+          docker build -f innosetup.dockerfile -t offline-twitter/innosetup2 .
+
   test:
-    # needs: build-docker
+    # Ensure that it only runs after docker builds are done, if applicable
+    needs: build-docker
+    if: always() # Otherwise, this job will be skipped when build-docker is skipped
+
     container: offline-twitter/go2
     steps:
       - name: Checkout
