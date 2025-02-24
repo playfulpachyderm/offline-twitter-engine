@@ -10,7 +10,7 @@ jobs:
     if: |
       contains(join(github.event.head_commit.modified, ','), '.woodpecker') ||
       contains(join(github.event.head_commit.added, ','), '.woodpecker') ||
-      contains(join(github.event.head_commit.removed, ','), '.woodpecker') ||
+      contains(join(github.event.head_commit.removed, ','), '.woodpecker')
     container:
       image: docker-bootstrap # `docker:latest` with NodeJS manually installed on it
     steps:
