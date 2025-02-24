@@ -45,7 +45,13 @@ jobs:
         env:
           # This could be anything, it's just a temp file
           SESSION_FILE_PATH: /tmp/Offline_Twatter.session
-        if: contains(join(github.event.head_commit.modified, ','), 'cmd/') || contains(join(github.event.head_commit.added, ','), 'cmd/') || contains(join(github.event.head_commit.removed, ','), 'cmd/') contains(join(github.event.head_commit.modified, ','), 'pkg/scraper/') || contains(join(github.event.head_commit.added, ','), 'pkg/scraper/') || contains(join(github.event.head_commit.removed, ','), 'pkg/scraper/') || startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v')
+          # contains(join(github.event.head_commit.modified, ','), 'cmd/') ||
+          # contains(join(github.event.head_commit.added, ','), 'cmd/') ||
+          # contains(join(github.event.head_commit.removed, ','), 'cmd/')
+          # contains(join(github.event.head_commit.modified, ','), 'pkg/scraper/') ||
+          # contains(join(github.event.head_commit.added, ','), 'pkg/scraper/') ||
+          # contains(join(github.event.head_commit.removed, ','), 'pkg/scraper/') ||
         # Write the session file contents to a temp location so it can be used in the tests
         run: |
           cd cmd
