@@ -45,8 +45,7 @@ jobs:
         env:
           # This could be anything, it's just a temp file
           SESSION_FILE_PATH: /tmp/Offline_Twatter.session
-        if: startsWith(github.ref, 'refs/tags/v') || contains(join(github.event.head_commit.modified, ','), 'cmd/')
-          # contains(join(github.event.head_commit.added, ','), 'cmd/') ||
+        if: startsWith(github.ref, 'refs/tags/v') || contains(join(github.event.head_commit.modified, ','), 'cmd/') || contains(join(github.event.head_commit.added, ','), 'cmd/')
           # contains(join(github.event.head_commit.removed, ','), 'cmd/')
           # contains(join(github.event.head_commit.modified, ','), 'pkg/scraper/') ||
           # contains(join(github.event.head_commit.added, ','), 'pkg/scraper/') ||
