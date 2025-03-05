@@ -30,6 +30,7 @@ steps:
       - offline_twatter_session_file
     environment:
       - SESSION_FILE_PATH=/tmp/Offline_Twatter.session  # Temp location, to be imported by the integration test
+      - GOPATH="/go-cache-volume"
     when:  # At least one
       - path:
         - pkg/scraper/**
@@ -42,8 +43,6 @@ steps:
       - ./tests.sh
     volumes:
       - woodpecker-gocache:/go-cache-volume
-    environment:
-      - GOPATH="/go-cache-volume"
 
   webserver_test:
     image: offline-twitter/go
