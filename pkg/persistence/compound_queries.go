@@ -58,7 +58,7 @@ func (p Profile) fill_content(trove *TweetTrove, current_user_id UserID) {
 		if err != nil {
 			panic(err)
 		}
-		err = p.DB.Select(&quoted_tweets, q + sql_str, append(bind_values, vals...)...)
+		err = p.DB.Select(&quoted_tweets, q+sql_str, append(bind_values, vals...)...)
 		if err != nil {
 			panic(err)
 		}
@@ -478,7 +478,7 @@ func (p Profile) GetNotificationsForUser(u_id UserID, cursor int64, count int64)
 		if err != nil {
 			panic(err)
 		}
-		err = p.DB.Select(&tweets, q + sql_str, append(bind_values, vals...)...)
+		err = p.DB.Select(&tweets, q+sql_str, append(bind_values, vals...)...)
 		if err != nil {
 			panic(err)
 		}
