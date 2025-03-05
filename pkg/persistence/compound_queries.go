@@ -27,7 +27,7 @@ func tweet_select_query(u_id UserID) (query string, bind_values []interface{}) {
 	      from tweets
      left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
 	 left join likes on tweets.id = likes.tweet_id and likes.user_id = ?
-	`, []interface{}{u_id, u_id}
+	`, []interface{}{u_id}
 }
 
 // Given a TweetTrove, fetch its:
