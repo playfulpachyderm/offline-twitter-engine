@@ -13,6 +13,7 @@ steps:
       - woodpecker-gocache:/go-cache-volume
     environment:
       - GOPATH=/go-cache-volume
+      - GOCACHE=/go-cache-volume/build-cache
 
   lint:
     image: offline-twitter/go
@@ -22,6 +23,7 @@ steps:
       - woodpecker-gocache:/go-cache-volume
     environment:
       - GOPATH=/go-cache-volume
+      - GOCACHE=/go-cache-volume/build-cache
 
   integration_test:
     image: offline-twitter/go
@@ -31,6 +33,7 @@ steps:
     environment:
       - SESSION_FILE_PATH=/tmp/Offline_Twatter.session  # Temp location, to be imported by the integration test
       - GOPATH=/go-cache-volume
+      - GOCACHE=/go-cache-volume/build-cache
     when:  # At least one
       - path:
         - pkg/scraper/**
@@ -57,6 +60,7 @@ steps:
       - woodpecker-gocache:/go-cache-volume
     environment:
       - GOPATH=/go-cache-volume
+      - GOCACHE=/go-cache-volume/build-cache
 
   version_bump_test:
     image: offline-twitter/go
@@ -87,6 +91,7 @@ steps:
       - woodpecker-gocache:/go-cache-volume
     environment:
       - GOPATH=/go-cache-volume
+      - GOCACHE=/go-cache-volume/build-cache
 
   dpkg_build_and_upload:
     when:
