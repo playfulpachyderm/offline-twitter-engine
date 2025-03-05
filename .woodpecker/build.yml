@@ -9,11 +9,19 @@ steps:
       - mkdir pkg/persistence/test_profiles
       - sample_data/init_data.sh
       - go test -bench=. -cover ./...
+    volumes:
+      - woodpecker-gocache:/go-cache-volume
+    environment:
+      - GOPATH="/go-cache-volume"
 
   lint:
     image: offline-twitter/go
     commands:
       - golangci-lint run
+    volumes:
+      - woodpecker-gocache:/go-cache-volume
+    environment:
+      - GOPATH="/go-cache-volume"
 
   integration_test:
     image: offline-twitter/go
@@ -32,6 +40,10 @@ steps:
       - mkdir -p $(dirname $SESSION_FILE_PATH)                     # Make the temp directory...
       - echo "$OFFLINE_TWATTER_SESSION_FILE" > $SESSION_FILE_PATH  # ...and write the session file to temp location
       - ./tests.sh
+    volumes:
+      - woodpecker-gocache:/go-cache-volume
+    environment:
+      - GOPATH="/go-cache-volume"
 
   webserver_test:
     image: offline-twitter/go
@@ -42,6 +54,10 @@ steps:
       - sleep 1
       - curl localhost:1000/cernovich > webserver_test_output.html
       - jobs -p | xargs -I{} kill -- -{}
+    volumes:
+      - woodpecker-gocache:/go-cache-volume
+    environment:
+      - GOPATH="/go-cache-volume"
 
   version_bump_test:
     image: offline-twitter/go
@@ -68,6 +84,10 @@ steps:
       - (cd ../cmd && ./compile.sh $version)
       - which ../cmd/tw
       - ../cmd/tw --session Offline_Twatter fetch_user pcmonk
+    volumes:
+      - woodpecker-gocache:/go-cache-volume
+    environment:
+      - GOPATH="/go-cache-volume"
 
   dpkg_build_and_upload:
     when:
