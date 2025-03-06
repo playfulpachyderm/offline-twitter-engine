@@ -113,7 +113,7 @@ func TestBuildUserFeedEnd(t *testing.T) {
 	assert.Equal(feed.CursorBottom.CursorPosition, CURSOR_END)
 }
 
-func TestUserFeedHasLikesInfo(t *testing.T) {
+func TestUserFeedHasLikesAndRetweetsInfo(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
@@ -128,6 +128,10 @@ func TestUserFeedHasLikesInfo(t *testing.T) {
 	// Should have "liked" 1 tweet
 	for _, t := range feed.Tweets {
 		assert.Equal(t.IsLikedByCurrentUser, t.ID == TweetID(1413646595493568516))
+	}
+	// Should have retweeted 1 tweet
+	for _, t := range feed.Tweets {
+		assert.Equal(t.IsRetweetedByCurrentUser, t.ID == TweetID(1413664406995566593))
 	}
 }
 
@@ -288,7 +292,7 @@ func TestTweetDetailWithThread(t *testing.T) {
 	profile, err := LoadProfile("../../sample_data/profile")
 	require.NoError(err)
 
-	tweet_detail, err := profile.GetTweetDetail(TweetID(1698762403163304110), UserID(0))
+	tweet_detail, err := profile.GetTweetDetail(TweetID(1698762403163304110), UserID(1488963321701171204))
 	require.NoError(err)
 
 	assert.Len(tweet_detail.Retweets, 0)
@@ -303,8 +307,11 @@ func TestTweetDetailWithThread(t *testing.T) {
 	assert.Equal(expected_thread, tweet_detail.ThreadIDs)
 
 	for _, id := range expected_thread {
-		_, is_ok := tweet_detail.Tweets[id]
+		t, is_ok := tweet_detail.Tweets[id]
 		assert.True(is_ok)
+
+		// Test interactions
+		assert.Equal(t.ID == 1698762413393236329, t.IsRetweetedByCurrentUser)
 	}
 
 	assert.Len(tweet_detail.Users, 2)
