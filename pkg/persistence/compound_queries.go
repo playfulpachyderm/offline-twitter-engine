@@ -296,9 +296,14 @@ func (p Profile) GetTweetDetail(id TweetID, current_user_id UserID) (TweetDetail
 		panic(err)
 	}
 	for _, tweet := range replies_to_self {
-		ret.Tweets[tweet.ID] = tweet
+		// Add it to the main thread, if it's in reply to the previous main thread tweet
 		if tweet.ID != ret.MainTweetID {
-			ret.ThreadIDs = append(ret.ThreadIDs, tweet.ID)
+			// If the user replies to himself a second time, that's not part of the main thread.  Those
+			// will be re-fetched again by the reply query.
+			if len(ret.ThreadIDs) == 0 || tweet.InReplyToID == ret.ThreadIDs[len(ret.ThreadIDs)-1] {
+				ret.Tweets[tweet.ID] = tweet
+				ret.ThreadIDs = append(ret.ThreadIDs, tweet.ID)
+			}
 		}
 	}
 
