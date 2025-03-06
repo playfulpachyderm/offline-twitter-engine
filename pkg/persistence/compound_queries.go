@@ -23,7 +23,8 @@ const TWEETS_ALL_SQL_FIELDS = `
 
 func tweet_select_query(u_id UserID) (query string, bind_values []interface{}) {
 	return `
-	    select ` + TWEETS_ALL_SQL_FIELDS + `, exists (select 1 from retweets where tweet_id = tweets.id and retweeted_by = ?) is_retweeted_by_current_user
+	    select ` + TWEETS_ALL_SQL_FIELDS + `,
+	           exists (select 1 from retweets where tweet_id = tweets.id and retweeted_by = ?) is_retweeted_by_current_user
 	      from tweets
      left join tombstone_types on tweets.tombstone_type = tombstone_types.rowid
 	 left join likes on tweets.id = likes.tweet_id and likes.user_id = ?

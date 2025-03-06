@@ -573,7 +573,9 @@ func (p Profile) NextPage(c Cursor, current_user_id UserID) (Feed, error) {
 	//   2. Two copies of the base query, one for "tweets" and one for "retweets", joined with "union"
 	//   3. Actual "limit" clause
 	q := `select * from (
-	select ` + TWEETS_ALL_SQL_FIELDS + `, exists (select 1 from retweets where tweet_id = tweets.id and retweeted_by = ?) is_retweeted_by_current_user` + likes_sort_order_field + bookmarks_sort_order_field + `,
+	select ` + TWEETS_ALL_SQL_FIELDS + `,
+	       exists (select 1 from retweets where tweet_id = tweets.id and retweeted_by = ?) is_retweeted_by_current_user` +
+		likes_sort_order_field + bookmarks_sort_order_field + `,
            0 tweet_id, 0 retweet_id, 0 retweeted_by, 0 retweeted_at,
            posted_at chrono, tweets.user_id by_user_id
       from tweets
@@ -587,7 +589,9 @@ func (p Profile) NextPage(c Cursor, current_user_id UserID) (Feed, error) {
      union
 
     select * from (
-    select ` + TWEETS_ALL_SQL_FIELDS + `, exists (select 1 from retweets where tweet_id = tweets.id and retweeted_by = ?) is_retweeted_by_current_user` + likes_sort_order_field + bookmarks_sort_order_field + `,
+    select ` + TWEETS_ALL_SQL_FIELDS + `,
+           exists (select 1 from retweets where tweet_id = tweets.id and retweeted_by = ?) is_retweeted_by_current_user` +
+		likes_sort_order_field + bookmarks_sort_order_field + `,
            retweets.tweet_id, retweet_id, retweeted_by, retweeted_at,
            retweeted_at chrono, retweeted_by by_user_id
       from retweets
