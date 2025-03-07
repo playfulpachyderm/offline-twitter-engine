@@ -828,8 +828,14 @@ main {
 
 	.interactions__like-icon {
 		cursor: pointer;
-		&.liked, &:hover {
+		&.interactions__like-icon--liked, &:hover {
 			filter: invert(20%) sepia(97%) saturate(4383%) hue-rotate(321deg) brightness(101%) contrast(95%);
+		}
+	}
+	.interactions__retweet-icon {
+		cursor: pointer;
+		&.interactions__retweet-icon--retweeted, &:hover {
+			filter: brightness(0) saturate(100%) invert(68%) sepia(85%) saturate(4888%) hue-rotate(120deg) brightness(94%) contrast(103%);
 		}
 	}
 

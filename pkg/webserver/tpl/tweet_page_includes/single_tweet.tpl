@@ -148,10 +148,7 @@
           <img class="svg-icon" src="/static/icons/reply.svg" width="24" height="24" />
           <span>{{$main_tweet.NumReplies}}</span>
         </div>
-        <div class="interactions__stat">
-          <img class="svg-icon" src="/static/icons/retweet.svg" width="24" height="24" />
-          <span>{{$main_tweet.NumRetweets}}</span>
-        </div>
+        {{template "retweets-count" $main_tweet}}
         {{template "likes-count" $main_tweet}}
         <div class="interactions__dummy"></div>
         <div class="row" hx-trigger="click consume">
