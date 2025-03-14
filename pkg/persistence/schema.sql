@@ -30,6 +30,7 @@ create table users (rowid integer primary key,
 );
 create unique index index_active_users_handle_unique on users (handle) where is_banned = 0 and is_deleted = 0;
 
+-- A view over `users` in which `handle`s are unique, by excluding inactive users with duplicate handles
 create view users_by_handle as
     with active_users as (
         select * from users where is_banned = 0 and is_deleted = 0
@@ -296,7 +297,6 @@ create table bookmarks(rowid integer primary key,
 );
 create index if not exists index_bookmarks_user_id on bookmarks (user_id);
 create index if not exists index_bookmarks_tweet_id on bookmarks (tweet_id);
-
 
 -- Direct Messages (DMs)
 -- ---------------------

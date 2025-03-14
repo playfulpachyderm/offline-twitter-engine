@@ -1011,9 +1011,9 @@ func (api *API) GetUserFeedPage(user_id UserID, cursor string) (APIV2Response, e
 			ResponsiveWebGraphqlTimelineNavigationEnabled:                  true,
 			ResponsiveWebGraphqlSkipUserProfileImageExtensionsEnabled:      true,
 			ResponsiveWebEditTweetApiEnabled:                               true,
-			LongformNotetweetsConsumptionEnabled:                           true,
 			FreedomOfSpeechNotReachFetchEnabled:                            false,
 			TweetWithVisibilityResultsPreferGqlLimitedActionsPolicyEnabled: true,
+			LongformNotetweetsConsumptionEnabled:                           true,
 			LongformNotetweetsRichTextReadEnabled:                          true,
 			LongformNotetweetsInlineMediaEnabled:                           false,
 			ResponsiveWebMediaDownloadVideoEnabled:                         true,
@@ -1236,6 +1236,10 @@ func (api *API) GetBookmarksPage(cursor string) (APIV2Response, error) {
 			TweetWithVisibilityResultsPreferGqlLimitedActionsPolicyEnabled: false,
 			ResponsiveWebTextConversationsEnabled:                          false,
 			VerifiedPhoneLabelEnabled:                                      false,
+
+			LongformNotetweetsConsumptionEnabled:  true,
+			LongformNotetweetsRichTextReadEnabled: true,
+			LongformNotetweetsInlineMediaEnabled:  false,
 
 			CommunitiesWebEnableTweetCommunityResultsFetch: true,
 			RWebTipjarConsumptionEnabled:                   true,

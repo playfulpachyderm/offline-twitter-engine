@@ -664,8 +664,7 @@ func get_notifications(how_many int) {
 	if err != nil && !errors.Is(err, scraper.END_OF_FEED) {
 		panic(err)
 	}
-	to_scrape := profile.CheckNotificationScrapesNeeded(trove)
-	trove, err = api.GetNotificationDetailForAll(trove, to_scrape)
+	trove, err = api.GetNotificationDetailForAll(trove, profile.CheckNotificationScrapesNeeded(trove))
 	if err != nil {
 		panic(err)
 	}
