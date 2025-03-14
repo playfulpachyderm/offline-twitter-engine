@@ -1,0 +1,128 @@
+Dec 09 11:31:30 razer-kubuntu twitter[70533]: Downloading: https://pbs.twimg.com/profile_images/1614788009387335680/8rs2BbEI_normal.jpg
+Dec 09 11:31:30 razer-kubuntu twitter[70533]: panic: Error downloading user content for user with ID 1524464019775569922 and handle gen_z_reprezent:
+Dec 09 11:31:30 razer-kubuntu twitter[70533]:   downloading "https://pbs.twimg.com/profile_images/1614788009387335680/8rs2BbEI_normal.jpg":
+Dec 09 11:31:30 razer-kubuntu twitter[70533]:   Error executing HTTP request:
+Dec 09 11:31:30 razer-kubuntu twitter[70533]:   Get "https://pbs.twimg.com/profile_images/1614788009387335680/8rs2BbEI_normal.jpg": dial tcp: lookup pbs.twimg.com on 127.0.0.53:53: server misbehaving
+Dec 09 11:31:30 razer-kubuntu twitter[70533]: goroutine 599 [running]:
+Dec 09 11:31:30 razer-kubuntu twitter[70533]: gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence.Profile.SaveTweetTrove({{0xbd2958?, 0x1?}, 0xc0000d15f0?}, {0xc0006344e0, 0xc000634510, 0xc000634540, 0xc000634570, 0xc0006345a0, 0xc0006345d0, 0xc000634600, ...}, ...)
+Dec 09 11:31:30 razer-kubuntu twitter[70533]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence/tweet_trove_queries.go:70 +0x2825
+Dec 09 11:31:30 razer-kubuntu twitter[70533]: created by gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).UserFeed
+Dec 09 11:31:30 razer-kubuntu twitter[70533]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/handler_user_feed.go:57 +0xbac
+Dec 09 11:31:30 razer-kubuntu systemd[1]: twitter.service: Main process exited, code=exited, status=2/INVALIDARGUMENT
+Dec 09 11:31:30 razer-kubuntu systemd[1]: twitter.service: Failed with result 'exit-code'.
+Dec 09 11:31:30 razer-kubuntu systemd[1]: twitter.service: Consumed 8.882s CPU time.
+Dec 09 11:31:30 razer-kubuntu systemd[1]: twitter.service: Scheduled restart job, restart counter is at 2.
+Dec 09 11:31:30 razer-kubuntu systemd[1]: Stopped Offline Twitter.
+
+
+
+
+
+
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gen_z_reprezent 1524464019775569922
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: ERROR        2024/12/09 11:31:02 middlewares.go:37: write tcp 127.0.0.1:1995->127.0.0.1:58962: i/o timeout
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: goroutine 5038 [running]:
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: runtime/debug.Stack()
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /usr/local/go/src/runtime/debug/stack.go:24 +0x65
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).error_500(0xc0004a81c0, {0xbd9e30, 0xc000b9a2a0}, 0x1?, {0xbd6aa0, 0xc0003edc20})
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/response_helpers.go:43 +0x6e
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).recoverPanic.func1.1()
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/middlewares.go:37 +0x178
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: panic({0x9e67e0, 0xc00052b9a0})
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /usr/local/go/src/runtime/panic.go:884 +0x213
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.panic_if(...)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/response_helpers.go:11
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.renderer.BufferedRender({0xc000428060, {0xc000e20000, 0x15, 0x28}, {0xa48478, 0x4}, {0xa1af60, 0xc0001cdc00}}, {0xbd7100, 0xc000b9a2a0})
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/renderer_helpers.go:94 +0x413
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).buffered_render_page(0xc0004a8000, {0xbd9e30?, 0xc000b9a2a0}, {0xa51ee7, 0x11}, {{0xc0005f8d50, 0xc0005f8d80, 0xc0005f8db0, 0xc0005f8de0, 0xc0005f8ed0, 
+...}, ...}, ...)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/renderer_helpers.go:116 +0x410
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).UserFeed(0xc0004a8000, {0xbd9e30, 0xc000b9a2a0}, 0xc000030100)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/handler_user_feed.go:132 +0x16e6
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).ServeHTTP(0xc0004a8000, {0xbd9e30, 0xc000b9a2a0}, 0xc000030100)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/server.go:145 +0x8b5
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.secureHeaders.func1({0xbd9e30, 0xc000b9a2a0}, 0x48c937?)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/middlewares.go:18 +0x24c
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: net/http.HandlerFunc.ServeHTTP(0xc00051a280?, {0xbd9e30?, 0xc000b9a2a0?}, 0xefc6c0?)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /usr/local/go/src/net/http/server.go:2122 +0x2f
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).logRequest.func1({0xbd9e30, 0xc000b9a2a0}, 0xc000030100)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/middlewares.go:25 +0x95
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: net/http.HandlerFunc.ServeHTTP(0x503d89?, {0xbd9e30?, 0xc000b9a2a0?}, 0x6c60cc853b?)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /usr/local/go/src/net/http/server.go:2122 +0x2f
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).recoverPanic.func1({0xbd9e30?, 0xc000b9a2a0?}, 0x9e38a0?)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/middlewares.go:40 +0x92
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: net/http.HandlerFunc.ServeHTTP(0xc00012400f?, {0xbd9e30?, 0xc000b9a2a0?}, 0x465e0e?)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /usr/local/go/src/net/http/server.go:2122 +0x2f
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: net/http.serverHandler.ServeHTTP({0xc00058ac30?}, {0xbd9e30, 0xc000b9a2a0}, 0xc000030100)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /usr/local/go/src/net/http/server.go:2936 +0x316
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: net/http.(*conn).serve(0xc0002337a0, {0xbda268, 0xc0004903f0})
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /usr/local/go/src/net/http/server.go:1995 +0x612
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: created by net/http.(*Server).Serve
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /usr/local/go/src/net/http/server.go:3089 +0x5ed
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: TRACE        2024/12/09 11:31:02 'UserFeed' handler (path: "/91lebaron")
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: ERROR        2024/12/09 11:31:02 server.go:3215: http: panic serving 127.0.0.1:58962: write tcp 127.0.0.1:1995->127.0.0.1:58962: i/o timeout
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: goroutine 5038 [running]:
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: net/http.(*conn).serve.func1()
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /usr/local/go/src/net/http/server.go:1854 +0xbf
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: panic({0x9e67e0, 0xc00052b9a0})
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /usr/local/go/src/runtime/panic.go:890 +0x263
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.panic_if(...)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/response_helpers.go:11
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.renderer.BufferedRender({0xc0004dff20, {0xc000af5b80, 0x14, 0x14}, {0xa49393, 0x5}, {0xa0c740, 0xc000715f00}}, {0xbd7100, 0xc000b9a2a0})
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/renderer_helpers.go:94 +0x413
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).buffered_render_htmx(0x4ef35c?, {0xbd9e30?, 0xc000b9a2a0}, {0xa49393, 0x5}, {{0x0, 0x0, 0x0, 0x0, 0x0, ...}, ...}, ...)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/renderer_helpers.go:129 +0x2ae
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).toast(0xc000943ca0?, {0xbd9e30, 0xc000b9a2a0}, 0xc000943be8?, {{0xa4e72f, 0xc}, {0xc0019b3340, 0x36}, {0xa48e48, 0x5}, ...})
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/response_helpers.go:57 +0x2e6
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).error_500(0xc0004a81c0, {0xbd9e30, 0xc000b9a2a0}, 0x1?, {0xbd6aa0, 0xc0003edc20})
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/response_helpers.go:48 +0x208
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).recoverPanic.func1.1()
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/middlewares.go:37 +0x178
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: panic({0x9e67e0, 0xc00052b9a0})
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /usr/local/go/src/runtime/panic.go:884 +0x213
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.panic_if(...)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/response_helpers.go:11
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.renderer.BufferedRender({0xc000428060, {0xc000e20000, 0x15, 0x28}, {0xa48478, 0x4}, {0xa1af60, 0xc0001cdc00}}, {0xbd7100, 0xc000b9a2a0})
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/renderer_helpers.go:94 +0x413
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).buffered_render_page(0xc0004a8000, {0xbd9e30?, 0xc000b9a2a0}, {0xa51ee7, 0x11}, {{0xc0005f8d50, 0xc0005f8d80, 0xc0005f8db0, 0xc0005f8de0, 0xc0005f8ed0, 
+...}, ...}, ...)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/renderer_helpers.go:116 +0x410
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).UserFeed(0xc0004a8000, {0xbd9e30, 0xc000b9a2a0}, 0xc000030100)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/handler_user_feed.go:132 +0x16e6
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).ServeHTTP(0xc0004a8000, {0xbd9e30, 0xc000b9a2a0}, 0xc000030100)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/server.go:145 +0x8b5
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.secureHeaders.func1({0xbd9e30, 0xc000b9a2a0}, 0x48c937?)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/middlewares.go:18 +0x24c
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: net/http.HandlerFunc.ServeHTTP(0xc00051a280?, {0xbd9e30?, 0xc000b9a2a0?}, 0xefc6c0?)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /usr/local/go/src/net/http/server.go:2122 +0x2f
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).logRequest.func1({0xbd9e30, 0xc000b9a2a0}, 0xc000030100)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/middlewares.go:25 +0x95
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: net/http.HandlerFunc.ServeHTTP(0x503d89?, {0xbd9e30?, 0xc000b9a2a0?}, 0x6c60cc853b?)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /usr/local/go/src/net/http/server.go:2122 +0x2f
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).recoverPanic.func1({0xbd9e30?, 0xc000b9a2a0?}, 0x9e38a0?)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/middlewares.go:40 +0x92
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: net/http.HandlerFunc.ServeHTTP(0xc00012400f?, {0xbd9e30?, 0xc000b9a2a0?}, 0x465e0e?)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /usr/local/go/src/net/http/server.go:2122 +0x2f
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: net/http.serverHandler.ServeHTTP({0xc00058ac30?}, {0xbd9e30, 0xc000b9a2a0}, 0xc000030100)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /usr/local/go/src/net/http/server.go:2936 +0x316
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: net/http.(*conn).serve(0xc0002337a0, {0xbda268, 0xc0004903f0})
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /usr/local/go/src/net/http/server.go:1995 +0x612
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: created by net/http.(*Server).Serve
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /usr/local/go/src/net/http/server.go:3089 +0x5ed
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: Downloading: https://pbs.twimg.com/profile_images/1614788009387335680/8rs2BbEI_normal.jpg
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: panic: Error downloading user content for user with ID 1524464019775569922 and handle gen_z_reprezent:
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:   downloading "https://pbs.twimg.com/profile_images/1614788009387335680/8rs2BbEI_normal.jpg":
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:   Error executing HTTP request:
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:   Get "https://pbs.twimg.com/profile_images/1614788009387335680/8rs2BbEI_normal.jpg": read tcp [2603:8081:6500:1dee:ff8b:357a:77c:e0eb]:51944->[2606:4700:4400::6812:257f]:443: read: connection reset by peer
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: goroutine 5872 [running]:
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence.Profile.SaveTweetTrove({{0xbd2958?, 0x1?}, 0xc0000d15f0?}, {0xc000ac05a0, 0xc000ac05d0, 0xc000ac0600, 0xc000ac0630, 0xc000ac0660, 0xc000ac0690, 0xc000ac06c0, ...}, ...)
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence/tweet_trove_queries.go:70 +0x2825
+Dec 09 11:31:02 razer-kubuntu twitter[70118]: created by gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver.(*Application).UserFeed
+Dec 09 11:31:02 razer-kubuntu twitter[70118]:         /woodpecker/src/gitlab.com/offline-twitter/twitter_offline_engine/internal/webserver/handler_user_feed.go:57 +0xbac
+Dec 09 11:31:02 razer-kubuntu systemd[1]: twitter.service: Main process exited, code=exited, status=2/INVALIDARGUMENT
+Dec 09 11:31:02 razer-kubuntu systemd[1]: twitter.service: Failed with result 'exit-code'.
+Dec 09 11:31:02 razer-kubuntu systemd[1]: twitter.service: Consumed 38.170s CPU time.
+Dec 09 11:31:02 razer-kubuntu systemd[1]: twitter.service: Scheduled restart job, restart counter is at 1.
+Dec 09 11:31:02 razer-kubuntu systemd[1]: Stopped Offline Twitter.
+Dec 09 11:31:02 razer-kubuntu systemd[1]: twitter.service: Consumed 38.170s CPU time.
+Dec 09 11:31:02 razer-kubuntu systemd[1]: Started Offline Twitter.

@@ -1,0 +1,22 @@
+Download APK file
+
+Website: https://www.apkmirror.com/apk/x-corp/twitter/twitter-10-2-0-release-0-release/x-previously-twitter-10-2-0-release-0-2-android-apk-download/
+Direct link: https://www.apkmirror.com/apk/x-corp/twitter/twitter-10-2-0-release-0-release/x-previously-twitter-10-2-0-release-0-2-android-apk-download/download/?key=4bacedabfa56c40b56bf129ef987ba3c3a747c2b&forcebaseapk=true
+Make sure this download is correct.  One time I downloaded it and it was corrupted, and apk-mitm failed to unzip it
+
+Disable CA Certificate pinning using apk-mitm: https://github.com/shroudedcode/apk-mitm
+
+Install android studio
+Make a Android Virtual Device (AVD); I used version 33 with a Pixel 7
+Install the patched APK on the AVD (I put it on blog.wispem-wantex.xyz/twitter.apk and downloaded it in the AVD with Google Chrome)
+
+Install mitmproxy
+Follow instructions to install mitmproxy certificate as a system CA cert: https://docs.mitmproxy.org/stable/howto-install-system-trusted-ca-android/#instructions-when-using-magisk
+Use the settings button (in the floating sidebar) on AVD to set up proxy settings to use host machine's IP and port 8080
+
+Start `mitmweb` (mitmproxy web UI) without args (not transparent mode)
+Restart AVD using `emulator -writable-system ...`, otherwise it will load a clean system without the CA cert installed
+
+Start twitter on the AVD and it should proxy to mitmweb!
+
+- Requests are in `pkg/scraper/test_responses/mobile_requests`

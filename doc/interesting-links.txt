@@ -1,0 +1,6 @@
+https://css-tricks.com/auto-growing-inputs-textareas/
+https://chromewebstore.google.com/detail/control-panel-for-twitter/kpmjjdhbcfebfjgdnpjagcndoelnidfj?pli=1
+
+
+Go mod dependency tree printer: https://github.com/arp242/gomodgraph
+Inspect binary size contributions by dependency: `go tool nm -size <binary>`

@@ -1,0 +1,12 @@
+Gitea: So far I have:
+
+- started Gitea in Docker
+	- `/gitea/docker-commpose.yml` on SSDnode
+	- There's also the old `docker-compose-using-woodpecker.yml`, which used woodpecker as the job runner
+- Done the installation through the web interface
+- add a runner config to the docker-compose file. Get a registration token from the running gitea instance, add it in the docker-compose file to the runner service, then restart docker compose; it should be registered.  Will say "registered successfully" in the docker logs, and will show up in the list of runners in Gitea settings.
+- generate a runner config file using `act_runner generate-config` and mount it as a volume in docker-compose
+- configure the cache in the runner config file according to setup instructions:
+	- https://docs.gitea.com/usage/actions/act-runner#configuring-cache-when-starting-a-runner-using-docker-image
+	- doing this lets the runner container use itself as the cache
+	- This might be helpful too: https://about.gitea.com/resources/tutorials/enable-gitea-actions-cache-to-accelerate-cicd
