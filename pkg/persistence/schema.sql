@@ -341,6 +341,7 @@ create table chat_messages (rowid integer primary key,
     foreign key(chat_room_id) references chat_rooms(id)
     foreign key(sender_id) references users(id)
 );
+create index index_latest_message_in_chat_room on chat_messages(chat_room_id, sent_at desc);
 
 create table chat_message_reactions (rowid integer primary key,
     id integer unique not null check(typeof(id) = 'integer'),
@@ -466,4 +467,4 @@ create table notification_users (rowid integer primary key,
 create table database_version(rowid integer primary key,
     version_number integer not null unique
 );
-insert into database_version(version_number) values (32);
+insert into database_version(version_number) values (33);

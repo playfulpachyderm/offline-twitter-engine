@@ -420,6 +420,7 @@ var MIGRATIONS = []string{
 		pragma foreign_keys = ON;
 		vacuum;
 		`,
+	`create index index_latest_message_in_chat_room on chat_messages(chat_room_id, sent_at desc)`,
 }
 var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
 
