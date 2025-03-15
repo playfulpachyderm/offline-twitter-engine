@@ -149,6 +149,3 @@ TODO: deprecated-offline-follows
 TODO: offline-timeline-vs-user-timeline
 
 TODO: go-stdlib-path-vs-filepath (#code-quality)
-
-TODO: show-retweet-icon-in-ui (#webserver)
-- The UI should show whether the active user has retweeted the tweet, same as with "likes"

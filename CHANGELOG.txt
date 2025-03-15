@@ -406,3 +406,11 @@ v0.7.1
 
 - BUGFIX: fix banned users getting their user info (followers count, profile image, display name) getting erased
 - PKG: webserver is now a public package
+
+v0.7.2
+------
+
+- BUGFIX: fix tweets that aren't part of a thread showing up in the thread sometimes
+- Make loading chat message views way faster (added a database index)
+- UI improvements:
+	- retweet icon is now green if the current user has retweeted it (like with "likes")
