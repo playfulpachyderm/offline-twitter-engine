@@ -609,8 +609,6 @@ func (p Profile) NextPage(c Cursor, current_user_id UserID) (Feed, error) {
 	bind_values = append(bind_values, bind_values...)
 	bind_values = append(bind_values, c.PageSize)
 
-	// fmt.Printf("Query: %s\n", q)
-	// fmt.Printf("Bind values: %#v\n", bind_values)
 	// Run the query
 	var results []CursorResult
 	err := p.DB.Select(&results, q, bind_values...)

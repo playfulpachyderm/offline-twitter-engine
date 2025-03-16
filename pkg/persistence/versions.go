@@ -421,6 +421,8 @@ var MIGRATIONS = []string{
 		vacuum;
 		`,
 	`create index index_latest_message_in_chat_room on chat_messages(chat_room_id, sent_at desc)`,
+	`drop index index_retweets_retweeted_at;
+		create index if not exists index_retweets_retweeted_by_and_at on retweets (retweeted_by, retweeted_at desc);`,
 }
 var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
 

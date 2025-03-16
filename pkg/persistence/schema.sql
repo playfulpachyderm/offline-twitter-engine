@@ -234,7 +234,7 @@ create table retweets(rowid integer primary key,
     foreign key(tweet_id) references tweets(id)
     foreign key(retweeted_by) references users(id)
 );
-create index if not exists index_retweets_retweeted_at on retweets (retweeted_at);
+create index if not exists index_retweets_retweeted_by_and_at on retweets (retweeted_by, retweeted_at desc);
 
 
 -- Spaces
@@ -297,6 +297,7 @@ create table bookmarks(rowid integer primary key,
 );
 create index if not exists index_bookmarks_user_id on bookmarks (user_id);
 create index if not exists index_bookmarks_tweet_id on bookmarks (tweet_id);
+
 
 -- Direct Messages (DMs)
 -- ---------------------
@@ -467,4 +468,4 @@ create table notification_users (rowid integer primary key,
 create table database_version(rowid integer primary key,
     version_number integer not null unique
 );
-insert into database_version(version_number) values (33);
+insert into database_version(version_number) values (34);
