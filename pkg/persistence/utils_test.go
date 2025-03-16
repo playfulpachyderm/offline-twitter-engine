@@ -255,6 +255,7 @@ func create_dummy_tombstone() Tweet {
 		ID:            tweet_id,
 		UserID:        -1,
 		TombstoneType: "deleted",
+		TombstoneText: "This Tweet was deleted by the Tweet author",
 		IsStub:        true,
 		Mentions:      CommaSeparatedList{},
 		ReplyMentions: CommaSeparatedList{},
