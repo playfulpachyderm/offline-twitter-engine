@@ -248,20 +248,15 @@ func (p Profile) GetTweetDetail(id TweetID, current_user_id UserID) (TweetDetail
 	q, bind_values := tweet_select_query(current_user_id)
 
 	// Main tweet and parents
-	stmt, err := p.DB.Preparex(`
+	var thread []Tweet
+	err := p.DB.Select(&thread, `
 		   with recursive all_replies(id) as (values(?) union all
 		        select tweets.in_reply_to_id from tweets, all_replies
 		         where tweets.id = all_replies.id and tweets.in_reply_to_id != 0
-		        )` + q + `
+		        )`+q+`
 		    inner join all_replies on tweets.id = all_replies.id
 	      order by id asc
-	`)
-	if err != nil {
-		panic(err)
-	}
-	defer stmt.Close()
-	var thread []Tweet
-	err = stmt.Select(&thread, append([]interface{}{id}, bind_values...)...)
+	`, append([]interface{}{id}, bind_values...)...)
 	if err != nil {
 		panic(err)
 	}
@@ -276,23 +271,18 @@ func (p Profile) GetTweetDetail(id TweetID, current_user_id UserID) (TweetDetail
 	}
 
 	// The thread (all subsequent tweets by that user)
-	stmt, err = p.DB.Preparex(`
+	var replies_to_self []Tweet
+	err = p.DB.Select(&replies_to_self, `
 			with recursive thread_replies(id) as (
 				values(?)
 					union all
 				select tweets.id from tweets
 				                 join thread_replies on tweets.in_reply_to_id = thread_replies.id
 				                where tweets.user_id = ?
-			)` + q + `
+			)`+q+`
             inner join thread_replies on tweets.id = thread_replies.id
 	          order by id asc
-	`)
-	if err != nil {
-		panic(err)
-	}
-	defer stmt.Close()
-	var replies_to_self []Tweet
-	err = stmt.Select(&replies_to_self, append([]interface{}{id, ret.Tweets[ret.MainTweetID].UserID}, bind_values...)...)
+	`, append([]interface{}{id, ret.Tweets[ret.MainTweetID].UserID}, bind_values...)...)
 	if err != nil {
 		panic(err)
 	}
@@ -310,21 +300,16 @@ func (p Profile) GetTweetDetail(id TweetID, current_user_id UserID) (TweetDetail
 
 	// Replies (1st level)
 	var replies []Tweet
-	stmt, err = p.DB.Preparex(
-		q + `
-	      where in_reply_to_id = ?
-	        and id != ? -- skip the main Thread if there is one
-	      order by num_likes desc
-	      limit 50`)
-	if err != nil {
-		panic(err)
-	}
-	defer stmt.Close()
 	thread_top_id := TweetID(0)
 	if len(ret.ThreadIDs) > 0 {
 		thread_top_id = ret.ThreadIDs[0]
 	}
-	err = stmt.Select(&replies, append(bind_values, id, thread_top_id)...)
+	err = p.DB.Select(&replies, q+`
+	      where in_reply_to_id = ?
+	        and id != ? -- skip the main Thread if there is one
+	      order by num_likes desc
+	      limit 50
+	`, append(bind_values, id, thread_top_id)...)
 	if err != nil {
 		panic(err)
 	}
