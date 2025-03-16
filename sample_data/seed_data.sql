@@ -77,6 +77,8 @@ insert into lists(rowid, name) values (1, "Offline Follows");
 insert into list_users(list_id, user_id) select 1, id from users where is_followed = 1;
 insert into lists(rowid, name) values (2, "Bronze Age");
 insert into list_users(list_id, user_id) select 2, id from users where display_name like "%bronze age%";
+insert into lists(rowid, name) values (3, "Covfefe");
+insert into list_users(list_id, user_id) values (3, 887434912529338375);
 
 
 create table tombstone_types (rowid integer primary key,

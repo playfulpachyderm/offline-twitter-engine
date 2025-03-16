@@ -113,3 +113,17 @@ func (p Profile) GetAllLists() []List {
 	}
 	return lists
 }
+
+func (p Profile) GetListsForUser(u_id UserID) []List {
+	var ret []List
+	err := p.DB.Select(&ret, `
+		select lists.rowid, is_online, online_list_id, name
+		  from lists
+		  join list_users on lists.rowid = list_users.list_id and user_id = ?
+	`, u_id)
+	if err != nil {
+		panic(err)
+	}
+	println(ret)
+	return ret
+}

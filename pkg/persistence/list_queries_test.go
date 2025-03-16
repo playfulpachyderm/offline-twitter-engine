@@ -192,3 +192,13 @@ func TestDeleteList(t *testing.T) {
 	_, err = profile.GetListById(l.ID)
 	require.Error(err)
 }
+
+func TestGetListsForUser(t *testing.T) {
+	require := require.New(t)
+
+	profile, err := LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+
+	lists := profile.GetListsForUser(UserID(887434912529338375))
+	require.Len(lists, 2)
+}
