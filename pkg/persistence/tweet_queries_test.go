@@ -32,6 +32,27 @@ func TestSaveAndLoadTweet(t *testing.T) {
 	}
 }
 
+// With an active user, fetching a tweet by ID should have that user's interactions (like /
+// retweet) with the tweet
+func TestGetTweetByIDAsUser(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+
+	user_id := UserID(1178839081222115328)
+	tweet1, err := profile.GetTweetByIdAsUser(TweetID(1413664406995566593), user_id) // retweeted
+	require.NoError(err)
+	assert.True(tweet1.IsRetweetedByCurrentUser)
+	assert.False(tweet1.IsLikedByCurrentUser)
+
+	tweet2, err := profile.GetTweetByIdAsUser(TweetID(1343633011364016128), user_id) // liked
+	require.NoError(err)
+	assert.False(tweet2.IsRetweetedByCurrentUser)
+	assert.True(tweet2.IsLikedByCurrentUser)
+}
+
 // Same as above, but with a tombstone
 func TestSaveAndLoadTombstone(t *testing.T) {
 	profile_path := "test_profiles/TestTweetQueries"
