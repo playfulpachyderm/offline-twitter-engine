@@ -15,6 +15,8 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 
 	user, err := app.Profile.GetUserByHandle(UserHandle(parts[0]))
+	user.Lists = app.Profile.GetListsForUser(user.ID)
+
 	if errors.Is(err, ErrNotInDatabase) {
 		if !app.IsScrapingDisabled {
 			user, err = app.API.GetUser(UserHandle(parts[0]))

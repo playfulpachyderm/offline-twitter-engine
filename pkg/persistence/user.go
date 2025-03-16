@@ -34,10 +34,12 @@ type User struct {
 	PinnedTweetID TweetID `db:"pinned_tweet_id"`
 	PinnedTweet   *Tweet
 
-	IsFollowed          bool `db:"is_followed"`
 	IsContentDownloaded bool `db:"is_content_downloaded"`
 	IsNeedingFakeID     bool
 	IsIdFake            bool `db:"is_id_fake"`
+
+	IsFollowed bool `db:"is_followed"`
+	Lists      []List
 }
 
 func GetUnknownUser() User {

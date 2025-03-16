@@ -32,7 +32,7 @@
         </div>
       {{end}}
       <div class="user-header__join-date labelled-icon">
-        <img class="svg-icon" src="/static/icons/calendar.svg" width="24" height="24" />
+        <img class="svg-icon" src="/static/icons/calendar.svg" title="Join date" width="24" height="24" />
         <label>{{.JoinDate.Time.Format "Jan 2, 2006"}}</label>
       </div>
 
@@ -56,6 +56,15 @@
             <img class="svg-icon" src="/static/icons/refresh.svg" width="24" height="24" />
           </a>
         </div>
+      </div>
+
+      <div class="row">
+        <img class="svg-icon" src="/static/icons/lists.svg" title="Lists this user is on" width="24" height="24" />
+        <ul class="user-header__lists">
+          {{range .Lists}}
+            <li><a href="/lists/{{.ID}}">{{.Name}}</a></li>
+          {{end}}
+        </ul>
       </div>
     </div>
 

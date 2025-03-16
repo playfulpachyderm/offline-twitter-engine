@@ -165,7 +165,7 @@ func (app *Application) Run(address string, should_auto_open bool) {
 
 	if should_auto_open {
 		page := "/login"
-		if app.ActiveUser != get_default_user() {
+		if app.ActiveUser.ID != get_default_user().ID {
 			page = "" // Load the timeline
 		}
 		go openWebPage("http://" + address + page)
