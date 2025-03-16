@@ -9,6 +9,7 @@ import (
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
+// Follow a bunch of users, then check that they are saved properly
 func TestSaveAndLoadFollows(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
@@ -51,4 +52,27 @@ func TestIsFollowing(t *testing.T) {
 
 	assert.True(profile.IsXFollowingY(UserID(1178839081222115328), UserID(1488963321701171204)))
 	assert.False(profile.IsXFollowingY(UserID(1488963321701171204), UserID(1178839081222115328)))
+}
+
+func TestFollowUnfollow(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile_path := "test_profiles/TestUserQueries"
+	profile := create_or_load_profile(profile_path)
+
+	u1 := create_stable_user()
+	u2 := create_dummy_user()
+	require.NoError(profile.SaveUser(&u2))
+
+	// Should not be following to begin
+	assert.False(profile.IsXFollowingY(u1.ID, u2.ID))
+
+	// Follow them
+	profile.SaveFollow(u1.ID, u2.ID)
+	assert.True(profile.IsXFollowingY(u1.ID, u2.ID))
+
+	// Unfollow-- should be gone
+	profile.DeleteFollow(u1.ID, u2.ID)
+	assert.False(profile.IsXFollowingY(u1.ID, u2.ID))
 }

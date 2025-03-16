@@ -10,6 +10,12 @@ func (p Profile) SaveFollow(follower_id UserID, followee_id UserID) {
 		panic(err)
 	}
 }
+func (p Profile) DeleteFollow(follower_id UserID, followee_id UserID) {
+	_, err := p.DB.Exec(`delete from follows where follower_id = ? and followee_id = ?`, follower_id, followee_id)
+	if err != nil {
+		panic(err)
+	}
+}
 
 func (p Profile) SaveAsFollowersList(followee_id UserID, trove TweetTrove) {
 	for follower_id := range trove.Users {
