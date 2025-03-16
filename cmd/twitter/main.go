@@ -187,6 +187,8 @@ func main() {
 		get_followers(target, *how_many)
 	case "get_followees":
 		get_followees(target, *how_many)
+	case "get_followers_you_know":
+		get_followers_you_know(target, *how_many)
 	case "get_bookmarks":
 		get_bookmarks(*how_many)
 	case "fetch_timeline":
@@ -485,6 +487,25 @@ func get_followers(handle string, how_many int) {
 	profile.SaveAsFollowersList(user.ID, trove)
 
 	happy_exit(fmt.Sprintf("Saved %d followers", len(trove.Users)), err)
+}
+func get_followers_you_know(handle string, how_many int) {
+	user, err := profile.GetUserByHandle(UserHandle(handle))
+	if err != nil {
+		die(fmt.Sprintf("Error getting user: %s\n  %s", handle, err.Error()), false, -1)
+	}
+	trove, err := api.GetFollowersYouKnow(user.ID, how_many)
+	if is_scrape_failure(err) {
+		die(fmt.Sprintf("Error getting followees: %s\n  %s", handle, err.Error()), false, -2)
+	}
+	full_save_tweet_trove(trove)
+
+	// You follow everyone in this list
+	profile.SaveAsFollowersList(user.ID, trove)
+
+	// ...and they follow the specified user
+	profile.SaveAsFolloweesList(api.UserID, trove)
+
+	happy_exit(fmt.Sprintf("Saved %d followers-you-know", len(trove.Users)), err)
 }
 func get_bookmarks(how_many int) {
 	trove, err := api.GetBookmarks(how_many)

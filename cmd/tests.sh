@@ -441,6 +441,8 @@ test $(sqlite3 twitter.db "select count(*) from follows where follower_id = 1488
 test $(sqlite3 twitter.db "select count(*) from follows where followee_id = 1488963321701171204") = "0"
 tw get_followers Offline_Twatter
 test $(sqlite3 twitter.db "select count(*) from follows where follower_id = 1488963321701171204 and followee_id = 759251") = "1"
+tw fetch_user Austen && tw get_followers_you_know Austen
+test $(sqlite3 twitter.db "select count(*) from follows where followee_id = 221838349") = "2"
 
 # TODO: Maybe this file should be broken up into multiple test scripts
 

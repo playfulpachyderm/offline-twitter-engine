@@ -73,6 +73,11 @@ type GraphqlFeatures struct {
 	SubscriptionsVerificationInfoIsIdentityVerifiedEnabled         bool `json:"subscriptions_verification_info_is_identity_verified_enabled"` //nolint:lll // I didn't choose this field name
 	C9sTweetAnatomyModeratorBadgeEnabled                           bool `json:"c9s_tweet_anatomy_moderator_badge_enabled"`
 	RwebVideoTimestampsEnabled                                     bool `json:"rweb_video_timestamps_enabled"`
+	PremiumContentApiReadEnabled                                   bool `json:"premium_content_api_read_enabled"`
+	ResponsiveWebGrokAnalysisButtonFromBackend                     bool `json:"responsive_web_grok_analysis_button_from_backend"`
+	ProfileLabelImprovementsPcfLabelInPostEnabled                  bool `json:"profile_label_improvements_pcf_label_in_post_enabled"`
+	ResponsiveWebJetfuelFrame                                      bool `json:"responsive_web_jetfuel_frame"`
+	RwebVideoScreenEnabled                                         bool `json:"rweb_video_screen_enabled"`
 
 	// Spaces
 	Spaces2022H2Clipping          bool `json:"spaces_2022_h2_clipping,omitempty"`
@@ -80,11 +85,17 @@ type GraphqlFeatures struct {
 
 	// Bookmarks
 	CommunitiesWebEnableTweetCommunityResultsFetch bool `json:"communities_web_enable_tweet_community_results_fetch,omitempty"`
-	RWebTipjarConsumptionEnabled                   bool `json:"rweb_tipjar_consumption_enabled,omitempty"`
-	ArticlesPreviewEnabled                         bool `json:"articles_preview_enabled,omitempty"`
+	RWebTipjarConsumptionEnabled                   bool `json:"rweb_tipjar_consumption_enabled"`
+	ArticlesPreviewEnabled                         bool `json:"articles_preview_enabled"`
 	GraphqlTimelineV2BookmarkTimeline              bool `json:"graphql_timeline_v2_bookmark_timeline,omitempty"`
 	CreatorSubscriptionsQuoteTweetPreviewEnabled   bool `json:"creator_subscriptions_quote_tweet_preview_enabled"`
 	SubscriptionsFeatureCanGiftPremium             bool `json:"subscriptions_feature_can_gift_premium,omitempty"`
+
+	// Grok stuff
+	ResponsiveWebGrokShareAttachmentEnabled          bool `json:"responsive_web_grok_share_attachment_enabled"`
+	ResponsiveWebGrokImageAnnotationEnabled          bool `json:"responsive_web_grok_image_annotation_enabled"`
+	ResponsiveWebGrokAnalyzeButtonFetchTrendsEnabled bool `json:"responsive_web_grok_analyze_button_fetch_trends_enabled"`
+	ResponsiveWebGrokAnalyzePostFollowupsEnabled     bool `json:"responsive_web_grok_analyze_post_followups_enabled"`
 }
 
 type GraphqlURL struct {
