@@ -76,3 +76,33 @@ func TestFollowUnfollow(t *testing.T) {
 	profile.DeleteFollow(u1.ID, u2.ID)
 	assert.False(profile.IsXFollowingY(u1.ID, u2.ID))
 }
+
+func TestGetFollowersYouKnow(t *testing.T) {
+	assert := assert.New(t)
+	require := require.New(t)
+
+	profile_path := "test_profiles/TestUserQueries"
+	profile := create_or_load_profile(profile_path)
+
+	u1 := create_stable_user()
+	u2 := create_dummy_user()
+	require.NoError(profile.SaveUser(&u2))
+
+	// Create some intermediates
+	intermediates := []User{}
+	for i := 0; i < 5; i++ {
+		u := create_dummy_user()
+		require.NoError(profile.SaveUser(&u))
+		intermediates = append(intermediates, u)
+
+		// Create the follows
+		profile.SaveFollow(u1.ID, u.ID)
+		profile.SaveFollow(u.ID, u2.ID)
+	}
+
+	followers_you_know := profile.GetFollowersYouKnow(u1.ID, u2.ID)
+	assert.Equal(len(followers_you_know), len(intermediates))
+	for _, u := range intermediates {
+		assert.Contains(followers_you_know, u)
+	}
+}
