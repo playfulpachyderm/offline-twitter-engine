@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
 func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
@@ -58,8 +58,8 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 			panic(err) // Let 500 handler catch it
 		}
 		app.full_save_tweet_trove(trove)
-		app.Profile.SaveAsFolloweesList(app.ActiveUser.ID, trove)  // You follow everyone in this list...
-		app.Profile.SaveAsFollowersList(user.ID, trove)            // ...and they follow the target user
+		app.Profile.SaveAsFolloweesList(app.ActiveUser.ID, trove) // You follow everyone in this list...
+		app.Profile.SaveAsFollowersList(user.ID, trove)           // ...and they follow the target user
 
 		panic_if(app.Profile.SaveUser(&user)) // TODO: handle conflicting users
 		panic_if(app.Profile.DownloadUserContentFor(&user, app.API.DownloadMedia))
