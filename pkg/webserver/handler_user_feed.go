@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
@@ -50,6 +51,16 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 		// Update the user themself
 		user, err = app.API.GetUser(UserHandle(parts[0]))
 		panic_if(err)
+
+		// Get followers-you-know, while we're at it
+		trove, err := app.API.GetFollowersYouKnow(user.ID, 200) // TODO: parameterizable
+		if err != nil && !errors.Is(err, scraper.END_OF_FEED) {
+			panic(err) // Let 500 handler catch it
+		}
+		app.full_save_tweet_trove(trove)
+		app.Profile.SaveAsFolloweesList(app.ActiveUser.ID, trove)  // You follow everyone in this list...
+		app.Profile.SaveAsFollowersList(user.ID, trove)            // ...and they follow the target user
+
 		panic_if(app.Profile.SaveUser(&user)) // TODO: handle conflicting users
 		panic_if(app.Profile.DownloadUserContentFor(&user, app.API.DownloadMedia))
 
@@ -166,9 +177,8 @@ func (app *Application) UserFollowees(w http.ResponseWriter, r *http.Request, us
 
 		// Run scraper
 		trove, err := app.API.GetFollowees(user.ID, 200) // TODO: parameterizable
-		if err != nil {
-			app.ErrorLog.Print(err)
-			// TOOD: show error in UI
+		if err != nil && !errors.Is(err, scraper.END_OF_FEED) {
+			panic(err) // Let 500 handler catch it
 		}
 		app.full_save_tweet_trove(trove)
 		app.Profile.SaveAsFolloweesList(user.ID, trove)
@@ -191,9 +201,8 @@ func (app *Application) UserFollowers(w http.ResponseWriter, r *http.Request, us
 
 		// Run scraper
 		trove, err := app.API.GetFollowers(user.ID, 200) // TODO: parameterizable
-		if err != nil {
-			app.ErrorLog.Print(err)
-			// TOOD: show error in UI
+		if err != nil && !errors.Is(err, scraper.END_OF_FEED) {
+			panic(err) // Let 500 handler catch it
 		}
 		app.full_save_tweet_trove(trove)
 		app.Profile.SaveAsFollowersList(user.ID, trove)
