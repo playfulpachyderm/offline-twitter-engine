@@ -38,8 +38,9 @@ type User struct {
 	IsNeedingFakeID     bool
 	IsIdFake            bool `db:"is_id_fake"`
 
-	IsFollowed bool `db:"is_followed"`
-	Lists      []List
+	IsFollowed       bool `db:"is_followed"`
+	Lists            []List
+	FollowersYouKnow []User
 }
 
 func GetUnknownUser() User {

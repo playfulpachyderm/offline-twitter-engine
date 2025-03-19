@@ -12,7 +12,7 @@
     {{end}}
 
     <div class="user-header__info-container">
-      <div class="row">
+      <div class="row user-header__profile-image-container">
         {{template "author-info-no-link" .}}
         {{template "following-button" .}}
       </div>
@@ -58,14 +58,23 @@
         </div>
       </div>
 
-      <div class="row">
-        <img class="svg-icon" src="/static/icons/lists.svg" title="Lists this user is on" width="24" height="24" />
-        <ul class="user-header__lists">
-          {{range .Lists}}
-            <li><a href="/lists/{{.ID}}">{{.Name}}</a></li>
-          {{end}}
-        </ul>
-      </div>
+      {{if .FollowersYouKnow}}
+        <div class="row followers-you-know">
+          {{template "N-profile-images" (dict "Users" .FollowersYouKnow "MaxDisplayUsers" 6)}}
+          <span class="followers-you-know__label">...followed by {{(len .FollowersYouKnow)}} you follow</span>
+        </div>
+      {{end}}
+
+      {{if .Lists}}
+        <div class="row user-header__lists-container">
+          <img class="svg-icon" src="/static/icons/lists.svg" title="Lists this user is on" width="24" height="24" />
+          <ul class="user-header__lists">
+            {{range .Lists}}
+              <li><a href="/lists/{{.ID}}">{{.Name}}</a></li>
+            {{end}}
+          </ul>
+        </div>
+      {{end}}
     </div>
 
     <div class="htmx-spinner">

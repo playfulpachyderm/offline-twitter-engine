@@ -16,7 +16,6 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 
 	user, err := app.Profile.GetUserByHandle(UserHandle(parts[0]))
-	user.Lists = app.Profile.GetListsForUser(user.ID)
 
 	if errors.Is(err, ErrNotInDatabase) {
 		if !app.IsScrapingDisabled {
@@ -81,6 +80,10 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 			app.full_save_tweet_trove(trove)
 		}
 	}
+
+	user.IsFollowed = app.Profile.IsXFollowingY(app.ActiveUser.ID, user.ID)
+	user.Lists = app.Profile.GetListsForUser(user.ID)
+	user.FollowersYouKnow = app.Profile.GetFollowersYouKnow(app.ActiveUser.ID, user.ID)
 
 	var c Cursor
 	if len(parts) > 1 && parts[1] == "likes" {
