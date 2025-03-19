@@ -1254,7 +1254,7 @@ main {
 		/* Make profile images in the list preview stack up on each other */
 		margin-right: -1em;
 	}
-	margin-right: 1.5em; /* undo the negative margin of the last `.profile-image` and space out a bit
+	margin-right: 1.5em; /* undo the negative margin of the last `.profile-image` and space out a bit */
 }
 
 
