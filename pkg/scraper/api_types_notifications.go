@@ -181,6 +181,11 @@ func (t *APIv1Response) ToTweetTroveAsNotifications(current_user_id UserID) (Twe
 					// Account creation anniversary; ignore
 					delete(ret.Notifications, notification.ID)
 					continue
+				} else {
+					// If no notification type is identifiable, log it and ignore
+					log.Warnf("Unknown notification type: %q (ID: %s)", entry.Content.Item.ClientEventInfo.Element, notification.ID)
+					delete(ret.Notifications, notification.ID)
+					continue
 				}
 			}
 
