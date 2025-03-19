@@ -21,17 +21,10 @@
         <div class="list-preview__info-container" hx-get="/lists/{{.ID}}" hx-trigger="click" hx-target="body" hx-push-url="true">
           <span class="list-name">{{.Name}}</span>
           <span class="list-preview__num-users">({{(len .Users)}})</span>
-          <div class="list-preview__first-N-profile-images" hx-trigger="click consume">
-            {{range $i, $user := .Users}}
-              {{/* Only render the first 10-ish users */}}
-              {{if (lt $i $max_display_users)}}
-                {{template "circle-profile-img" $user}}
-              {{end}}
-            {{end}}
-            {{if (gt (len .Users) $max_display_users)}}
-              <span class="ellipsis">...</span>
-            {{end}}
-          </div>
+          {{template "N-profile-images" (dict "Users" .Users "MaxDisplayUsers" $max_display_users)}}
+          {{if (gt (len .Users) $max_display_users)}}
+            <span class="ellipsis">...</span>
+          {{end}}
         </div>
         <a class="button button--danger"
           hx-delete="/lists/{{.ID}}" hx-target="body"

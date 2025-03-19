@@ -76,3 +76,15 @@
     </div>
   </div>
 {{end}}
+
+
+{{define "N-profile-images"}}
+  <div class="N-profile-images" hx-trigger="click consume">
+    {{range $i, $user := .Users}}
+      {{/* Only render the first N users */}}
+      {{if (lt $i $.MaxDisplayUsers)}}
+        {{template "circle-profile-img" $user}}
+      {{end}}
+    {{end}}
+  </div>
+{{end}}

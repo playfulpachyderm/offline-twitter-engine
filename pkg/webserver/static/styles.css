@@ -1218,23 +1218,23 @@ main {
 		cursor: pointer;
 	}
 	.list-preview__num-users {
-		margin-left: 1em;
+		margin: 0 1em;
 		color: var(--color-twitter-text-gray);
 	}
-	.list-preview__first-N-profile-images {
-		display: flex;
-		align-items: flex-end;
-		margin-left: 1.5em;
+}
 
-		.profile-image {
-			/* Make profile images in the list preview stack up on each other */
-			margin-right: -1.2em;
-		}
-		.ellipsis {
-			/* Counteract the above; the ellipsis should be spaced normally */
-			margin-left: 1.5em;
-		}
+/**
+ * The list of overlapping profile images for a list of users
+ */
+.N-profile-images {
+	display: flex;
+	align-items: flex-end;
+
+	.profile-image {
+		/* Make profile images in the list preview stack up on each other */
+		margin-right: -1em;
 	}
+	margin-right: 1.5em; /* undo the negative margin of the last `.profile-image` and space out a bit
 }
 
 
@@ -1250,6 +1250,7 @@ main {
 	padding: 1em;
 	text-align: center;
 }
+
 
 /******************************************************
  * DMs / Messages
