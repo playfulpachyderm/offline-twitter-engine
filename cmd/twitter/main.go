@@ -500,10 +500,10 @@ func get_followers_you_know(handle string, how_many int) {
 	full_save_tweet_trove(trove)
 
 	// You follow everyone in this list
-	profile.SaveAsFollowersList(user.ID, trove)
+	profile.SaveAsFolloweesList(api.UserID, trove)
 
 	// ...and they follow the specified user
-	profile.SaveAsFolloweesList(api.UserID, trove)
+	profile.SaveAsFollowersList(user.ID, trove)
 
 	happy_exit(fmt.Sprintf("Saved %d followers-you-know", len(trove.Users)), err)
 }

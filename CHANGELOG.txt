@@ -414,3 +414,9 @@ v0.7.2
 - Make loading chat message views way faster (added a database index)
 - UI improvements:
 	- retweet icon is now green if the current user has retweeted it (like with "likes")
+
+v0.7.3
+------
+
+- Add "Followers You Know" to user profile
+- Show Lists that a user is on, on their profile
