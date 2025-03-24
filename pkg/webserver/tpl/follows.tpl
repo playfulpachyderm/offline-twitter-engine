@@ -8,6 +8,9 @@
     <a class="tabs__tab {{if (eq .Title "Followers")}}tabs__tab--active{{end}}" href="/{{$user.Handle}}/followers">
       <span class="tabs__tab-label">Followers</span>
     </a>
+    <a class="tabs__tab {{if (eq .Title "Followers you know")}}tabs__tab--active{{end}}" href="/{{$user.Handle}}/followers_you_know">
+      <span class="tabs__tab-label">Followers you know</span>
+    </a>
     <a class="tabs__tab {{if (eq .Title "Followees")}}tabs__tab--active{{end}}" href="/{{$user.Handle}}/followees">
       <span class="tabs__tab-label">Followees</span>
     </a>

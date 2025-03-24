@@ -38,6 +38,10 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 		app.UserFollowees(w, r, user)
 		return
 	}
+	if len(parts) > 1 && parts[1] == "followers_you_know" {
+		app.UserFollowersYouKnow(w, r, user)
+		return
+	}
 
 	if r.URL.Query().Has("scrape") {
 		if app.IsScrapingDisabled {
@@ -215,6 +219,31 @@ func (app *Application) UserFollowers(w http.ResponseWriter, r *http.Request, us
 	data, trove := NewFollowsData(app.Profile.GetFollowers(user.ID))
 	trove.Users[user.ID] = user
 	data.Title = "Followers"
+	data.HeaderUserID = user.ID
+	app.buffered_render_page(w, "tpl/follows.tpl", PageGlobalData{TweetTrove: trove}, data)
+}
+
+func (app *Application) UserFollowersYouKnow(w http.ResponseWriter, r *http.Request, user User) {
+	if r.URL.Query().Has("scrape") {
+		if app.IsScrapingDisabled {
+			app.InfoLog.Printf("Would have scraped: %s", r.URL.Path)
+			app.error_401(w, r)
+			return
+		}
+
+		trove, err := app.API.GetFollowersYouKnow(user.ID, 200) // TODO: parameterizable
+		if err != nil && !errors.Is(err, scraper.END_OF_FEED) {
+			panic(err) // Let 500 handler catch it
+		}
+		app.full_save_tweet_trove(trove)
+		app.Profile.SaveAsFolloweesList(app.ActiveUser.ID, trove) // You follow everyone in this list...
+		app.Profile.SaveAsFollowersList(user.ID, trove)           // ...and they follow the target user
+	}
+	user.FollowersYouKnow = app.Profile.GetFollowersYouKnow(app.ActiveUser.ID, user.ID)
+
+	data, trove := NewFollowsData(app.Profile.GetFollowersYouKnow(app.ActiveUser.ID, user.ID))
+	trove.Users[user.ID] = user
+	data.Title = "Followers you know"
 	data.HeaderUserID = user.ID
 	app.buffered_render_page(w, "tpl/follows.tpl", PageGlobalData{TweetTrove: trove}, data)
 }

@@ -61,7 +61,9 @@
       {{if .FollowersYouKnow}}
         <div class="row followers-you-know">
           {{template "N-profile-images" (dict "Users" .FollowersYouKnow "MaxDisplayUsers" 6)}}
-          <span class="followers-you-know__label">...followed by {{(len .FollowersYouKnow)}} you follow</span>
+          <a hx-boost="true" href="/{{.Handle}}/followers_you_know">
+            <span class="followers-you-know__label">...followed by {{(len .FollowersYouKnow)}} you follow</span>
+          </a>
         </div>
       {{end}}
 
