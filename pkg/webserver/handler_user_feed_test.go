@@ -127,8 +127,8 @@ func TestUserFollowersAndFollowees(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	test_cases := []struct{
-		Path string
+	test_cases := []struct {
+		Path             string
 		NumExpectedUsers int
 	}{
 		{"/Offline_Twatter/followers", 2},
