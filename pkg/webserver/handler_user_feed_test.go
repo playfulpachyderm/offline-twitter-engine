@@ -123,26 +123,36 @@ func TestUserFeedLikesTab(t *testing.T) {
 // Followers and followees
 // -----------------------
 
-func TestUserFollowers(t *testing.T) {
+func TestUserFollowersAndFollowees(t *testing.T) {
 	assert := assert.New(t)
 	require := require.New(t)
 
-	resp := do_request(httptest.NewRequest("GET", "/Offline_Twatter/followers", nil))
-	require.Equal(resp.StatusCode, 200)
+	test_cases := []struct{
+		Path string
+		NumExpectedUsers int
+	}{
+		{"/Offline_Twatter/followers", 2},
+		{"/Offline_Twatter/followees", 1},
 
-	root, err := html.Parse(resp.Body)
-	require.NoError(err)
-	assert.Len(cascadia.QueryAll(root, selector(".users-list > .user")), 2)
-}
+		{"/wispem_wantex/followers", 1},
+		{"/wispem_wantex/followers_you_know", 1},
+		{"/wispem_wantex/followees", 2},
+		{"/wispem_wantex/followees_you_know", 1},
 
-func TestUserFollowees(t *testing.T) {
-	assert := assert.New(t)
-	require := require.New(t)
+		{"/cernovich/followers", 1},
+		{"/cernovich/followers_you_know", 0},
+	}
 
-	resp := do_request(httptest.NewRequest("GET", "/Offline_Twatter/followees", nil))
-	require.Equal(resp.StatusCode, 200)
+	for _, test_case := range test_cases {
+		resp := do_request_with_active_user(httptest.NewRequest("GET", test_case.Path, nil))
+		require.Equal(resp.StatusCode, 200)
 
-	root, err := html.Parse(resp.Body)
-	require.NoError(err)
-	assert.Len(cascadia.QueryAll(root, selector(".users-list > .user")), 1)
+		root, err := html.Parse(resp.Body)
+		require.NoError(err)
+		assert.Len(
+			cascadia.QueryAll(root, selector(".users-list > .user")),
+			test_case.NumExpectedUsers,
+			"Path: %q", test_case.Path,
+		)
+	}
 }

@@ -531,9 +531,12 @@ create table follows(rowid integer primary key,
 create index if not exists index_follows_followee_id on follows (followee_id);
 create index if not exists index_follows_follower_id on follows (follower_id);
 insert into follows values
-    (1, 1178839081222115328, 1488963321701171204),
-    (2, 1032468021485293568, 1488963321701171204),
-    (3, 1488963321701171204, 1240784920831762433);
+    (1, 1178839081222115328, 1488963321701171204), -- Mystery Grover follows Offline Twatter
+    (2, 1032468021485293568, 1488963321701171204), -- Nemets follows Offline Twatter
+    (3, 1488963321701171204, 1240784920831762433), -- Offline Twatter follows lukas
+    (4, 1458284524761075714, 1240784920831762433), -- wispem-wantex follows lukas
+    (5, 1458284524761075714, 358545917),           -- wispem-wantex follows cernovich
+    (6, 1240784920831762433, 1458284524761075714); -- lukas follows wispem-wantex
 
 
 create table notification_types (rowid integer primary key,
