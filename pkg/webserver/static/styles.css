@@ -515,9 +515,6 @@ main {
 .users-list {
 	display: flex;
 	flex-direction: column;
-	border-color: var(--color-twitter-off-white-dark);
-	border-top-style: double;
-	border-width: 4px;
 
 	.author-info .profile-image__image {
 		width: 4em;

@@ -2,7 +2,6 @@ package webserver
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -186,10 +185,11 @@ func (app *Application) UserFollowees(w http.ResponseWriter, r *http.Request, us
 		app.full_save_tweet_trove(trove)
 		app.Profile.SaveAsFolloweesList(user.ID, trove)
 	}
+	user.FollowersYouKnow = app.Profile.GetFollowersYouKnow(app.ActiveUser.ID, user.ID)
 
 	data, trove := NewFollowsData(app.Profile.GetFollowees(user.ID))
 	trove.Users[user.ID] = user // Not loaded otherwise; needed to profile image in the login button on the sidebar
-	data.Title = fmt.Sprintf("Followed by @%s", user.Handle)
+	data.Title = "Followees"
 	data.HeaderUserID = user.ID
 	app.buffered_render_page(w, "tpl/follows.tpl", PageGlobalData{TweetTrove: trove}, data)
 }
@@ -210,10 +210,11 @@ func (app *Application) UserFollowers(w http.ResponseWriter, r *http.Request, us
 		app.full_save_tweet_trove(trove)
 		app.Profile.SaveAsFollowersList(user.ID, trove)
 	}
+	user.FollowersYouKnow = app.Profile.GetFollowersYouKnow(app.ActiveUser.ID, user.ID)
 
 	data, trove := NewFollowsData(app.Profile.GetFollowers(user.ID))
 	trove.Users[user.ID] = user
-	data.Title = fmt.Sprintf("@%s's followers", user.Handle)
+	data.Title = "Followers"
 	data.HeaderUserID = user.ID
 	app.buffered_render_page(w, "tpl/follows.tpl", PageGlobalData{TweetTrove: trove}, data)
 }

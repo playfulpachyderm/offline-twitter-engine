@@ -37,11 +37,11 @@
       </div>
 
       <div class="followers-followees row">
-        <a href="/{{.Handle}}/followers" class="followers-followees__followers">
+        <a hx-boost="true" href="/{{.Handle}}/followers" class="followers-followees__followers">
           <span class="followers-followees__count">{{.FollowersCount}}</span>
           <label>followers</label>
         </a>
-        <a href="/{{.Handle}}/followees" class="followers-followees__followees">
+        <a hx-boost="true" href="/{{.Handle}}/followees" class="followers-followees__followees">
           <label>is following</label>
           <span class="followers-followees__count">{{.FollowingCount}}</span>
         </a>
