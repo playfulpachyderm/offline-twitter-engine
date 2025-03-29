@@ -420,3 +420,11 @@ v0.7.3
 
 - Add "Followers You Know" to user profile
 - Show Lists that a user is on, on their profile
+
+v0.7.4
+------
+
+- Add tabs-based views for showing a user's followers, using the same "tabs" component from a feed header:
+	- "Followers you know"
+	- "Followees you know"
+	- "Mutual followers"
