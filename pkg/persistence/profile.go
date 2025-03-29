@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	sql "github.com/jmoiron/sqlx"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -18,7 +18,7 @@ var default_profile_image []byte
 
 type Profile struct {
 	ProfileDir string
-	DB         *sql.DB
+	DB         *sqlx.DB
 }
 
 var ErrTargetAlreadyExists = fmt.Errorf("Target already exists")
@@ -53,7 +53,7 @@ func NewProfile(target_dir string) (Profile, error) {
 
 	// Create `twitter.db`
 	fmt.Printf("Creating............. %s\n", sqlite_file)
-	db := sql.MustOpen("sqlite3", sqlite_file+"?_foreign_keys=on")
+	db := sqlx.MustOpen("sqlite3", sqlite_file+"?_foreign_keys=on")
 	db.MustExec(sql_init)
 
 	// Create `profile_images`
@@ -113,7 +113,7 @@ func LoadProfile(profile_dir string) (Profile, error) {
 		return Profile{}, fmt.Errorf("Invalid profile, could not find file: %s", sqlite_file)
 	}
 
-	db := sql.MustOpen("sqlite3", fmt.Sprintf("%s?_foreign_keys=on&_journal_mode=WAL", sqlite_file))
+	db := sqlx.MustOpen("sqlite3", fmt.Sprintf("%s?_foreign_keys=on&_journal_mode=WAL", sqlite_file))
 
 	ret := Profile{
 		ProfileDir: profile_dir,
