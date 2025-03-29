@@ -290,3 +290,19 @@ func TestSearchMediaFilters(t *testing.T) {
 	assert.Len(feed.Items, 1)
 	assert.Equal(feed.Items[0].TweetID, TweetID(1428951883058753537))
 }
+
+func TestSearchQuoteTweets(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	profile, err := LoadProfile("../../sample_data/profile")
+	require.NoError(err)
+	c := NewCursor()
+
+	// Replying to a user
+	c.QuotedTweetID = TweetID(1413646595493568516)
+	feed, err := profile.NextPage(c, UserID(0))
+	require.NoError(err)
+	assert.Len(feed.Items, 1)
+	assert.Equal(feed.Items[0].TweetID, TweetID(1413664406995566593))
+}

@@ -54,7 +54,7 @@ func TestTokenizeSearchStringFromUser(t *testing.T) {
 	assert.Equal(c.ToUserHandles, []UserHandle{"somebody"})
 }
 
-func TestComplexSearchString(t *testing.T) {
+func TestTokenizeTokenizeComplexSearchString(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
@@ -66,7 +66,7 @@ func TestComplexSearchString(t *testing.T) {
 	assert.Equal(c.FromUserHandle, UserHandle("kashi"))
 }
 
-func TestSearchStringBadQuotes(t *testing.T) {
+func TestTokenizeSearchStringBadQuotes(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
@@ -76,7 +76,7 @@ func TestSearchStringBadQuotes(t *testing.T) {
 	assert.ErrorIs(err, ErrInvalidQuery)
 }
 
-func TestSearchWithDates(t *testing.T) {
+func TestTokenizeSearchWithDates(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
@@ -86,7 +86,7 @@ func TestSearchWithDates(t *testing.T) {
 	assert.Equal(c.UntilTimestamp.Time, time.Date(2020, 5, 1, 0, 0, 0, 0, time.UTC))
 }
 
-func TestSearchWithInvalidDates(t *testing.T) {
+func TestTokenizeSearchWithInvalidDates(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
@@ -95,7 +95,7 @@ func TestSearchWithInvalidDates(t *testing.T) {
 	assert.ErrorIs(err, ErrInvalidQuery)
 }
 
-func TestSearchContentFilters(t *testing.T) {
+func TestTokenizeSearchContentFilters(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
@@ -106,4 +106,16 @@ func TestSearchContentFilters(t *testing.T) {
 	assert.Equal(c.FilterImages, REQUIRE)
 	assert.Equal(c.FilterPolls, REQUIRE)
 	assert.Equal(c.FilterSpaces, REQUIRE)
+}
+
+func TestTokenizeSearchQuoteTweets(t *testing.T) {
+	require := require.New(t)
+	assert := assert.New(t)
+
+	c, err := NewCursorFromSearchQuery("quoted_tweet_id:12345")
+	require.NoError(err)
+	assert.Equal(c.QuotedTweetID, TweetID(12345))
+
+	c, err = NewCursorFromSearchQuery("quoted_tweet_id:1234d5")
+	require.Error(err)
 }

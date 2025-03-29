@@ -165,6 +165,7 @@ type Cursor struct {
 	FilterReplies          Filter
 	FilterRetweets         Filter
 	FilterOfflineFollowed  Filter
+	QuotedTweetID          TweetID
 }
 
 // Generate a cursor with some reasonable defaults
@@ -353,6 +354,12 @@ func (c *Cursor) apply_token(token string) error {
 		c.BookmarkedByUserHandle = UserHandle(parts[1])
 	case "followed_by":
 		c.FollowedByUserHandle = UserHandle(parts[1])
+	case "quoted_tweet_id":
+		t_id, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return fmt.Errorf("%w: filter 'quoted_tweet_id:' must be a number, got %q", ErrInvalidQuery, parts[1])
+		}
+		c.QuotedTweetID = TweetID(t_id)
 	case "list":
 		i, err := strconv.Atoi(parts[1])
 		if err != nil {
@@ -446,6 +453,10 @@ func (p Profile) NextPage(c Cursor, current_user_id UserID) (Feed, error) {
 		where_clauses = append(where_clauses,
 			"by_user_id in (select followee_id from follows where follower_id = (select id from users_by_handle where handle like ?))")
 		bind_values = append(bind_values, c.FollowedByUserHandle)
+	}
+	if c.QuotedTweetID != 0 {
+		where_clauses = append(where_clauses, "quoted_tweet_id = ?")
+		bind_values = append(bind_values, c.QuotedTweetID)
 	}
 
 	// Since and until timestamps
