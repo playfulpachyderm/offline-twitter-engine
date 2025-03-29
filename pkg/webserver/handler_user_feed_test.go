@@ -1,6 +1,7 @@
 package webserver_test
 
 import (
+	"fmt"
 	"testing"
 
 	"net/http/httptest"
@@ -9,6 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/net/html"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
 func TestUserFeed(t *testing.T) {
@@ -130,17 +133,22 @@ func TestUserFollowersAndFollowees(t *testing.T) {
 	test_cases := []struct {
 		Path             string
 		NumExpectedUsers int
+		ExpectedUsers    []UserID
 	}{
-		{"/Offline_Twatter/followers", 2},
-		{"/Offline_Twatter/followees", 1},
+		{"/Offline_Twatter/followers", 2, []UserID{1178839081222115328, 1032468021485293568}},
+		{"/Offline_Twatter/followees", 1, []UserID{1240784920831762433}},
+		{"/Offline_Twatter/mutual_followers", 0, []UserID{}},
 
-		{"/wispem_wantex/followers", 1},
-		{"/wispem_wantex/followers_you_know", 1},
-		{"/wispem_wantex/followees", 2},
-		{"/wispem_wantex/followees_you_know", 1},
+		{"/wispem_wantex/followers", 1, []UserID{1240784920831762433}},
+		{"/wispem_wantex/followers_you_know", 1, []UserID{1240784920831762433}},
+		{"/wispem_wantex/followees", 2, []UserID{1240784920831762433, 358545917}},
+		{"/wispem_wantex/followees_you_know", 1, []UserID{1240784920831762433}},
+		{"/wispem_wantex/mutual_followers", 1, []UserID{1240784920831762433}},
 
-		{"/cernovich/followers", 1},
-		{"/cernovich/followers_you_know", 0},
+		{"/cernovich/followers", 1, []UserID{1458284524761075714}},
+		{"/cernovich/followers_you_know", 0, []UserID{}},
+
+		{"/schizo_freq/mutual_followers", 1, []UserID{1458284524761075714}},
 	}
 
 	for _, test_case := range test_cases {
@@ -154,5 +162,12 @@ func TestUserFollowersAndFollowees(t *testing.T) {
 			test_case.NumExpectedUsers,
 			"Path: %q", test_case.Path,
 		)
+		for _, u_id := range test_case.ExpectedUsers {
+			assert.Len(
+				cascadia.QueryAll(root, selector(fmt.Sprintf(".users-list > .user[data-id='%d']", u_id))),
+				1,
+				"path: %q; id: %d", test_case.Path, u_id,
+			)
+		}
 	}
 }

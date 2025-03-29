@@ -46,6 +46,10 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 		app.UserFolloweesYouKnow(w, r, user)
 		return
 	}
+	if len(parts) > 1 && parts[1] == "mutual_followers" {
+		app.UserMutualFollowers(w, r, user)
+		return
+	}
 
 	if r.URL.Query().Has("scrape") {
 		if app.IsScrapingDisabled {
@@ -261,6 +265,19 @@ func (app *Application) UserFolloweesYouKnow(w http.ResponseWriter, r *http.Requ
 	data, trove := NewFollowsData(app.Profile.GetFolloweesYouKnow(app.ActiveUser.ID, user.ID))
 	trove.Users[user.ID] = user
 	data.Title = "Followees you know"
+	data.HeaderUserID = user.ID
+	app.buffered_render_page(w, "tpl/follows.tpl", PageGlobalData{TweetTrove: trove}, data)
+}
+
+func (app *Application) UserMutualFollowers(w http.ResponseWriter, r *http.Request, user User) {
+	if r.URL.Query().Has("scrape") {
+		app.error_400_with_message(w, r, "This page can't be scraped (it's Offline Twitter only)")
+	}
+	user.FollowersYouKnow = app.Profile.GetFollowersYouKnow(app.ActiveUser.ID, user.ID)
+
+	data, trove := NewFollowsData(app.Profile.GetMutualFollowers(user.ID))
+	trove.Users[user.ID] = user
+	data.Title = "Mutual followers"
 	data.HeaderUserID = user.ID
 	app.buffered_render_page(w, "tpl/follows.tpl", PageGlobalData{TweetTrove: trove}, data)
 }

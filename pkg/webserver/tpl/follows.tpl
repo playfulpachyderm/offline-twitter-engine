@@ -17,6 +17,9 @@
     <a class="tabs__tab {{if (eq .Title "Followees you know")}}tabs__tab--active{{end}}" href="/{{$user.Handle}}/followees_you_know">
       <span class="tabs__tab-label">Followees you know</span>
     </a>
+    <a class="tabs__tab {{if (eq .Title "Mutual followers")}}tabs__tab--active{{end}}" href="/{{$user.Handle}}/mutual_followers">
+      <span class="tabs__tab-label">Mutuals</span>
+    </a>
   </div>
   {{template "list" (dict "UserIDs" .UserIDs)}}
 {{end}}

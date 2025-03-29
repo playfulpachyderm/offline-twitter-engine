@@ -2,7 +2,7 @@
   <div class="users-list">
     {{range .UserIDs}}
       {{$user := (user .)}}
-      <div class="user">
+      <div class="user" data-id="{{$user.ID}}">
         <div class="row row--spread">
           {{template "author-info" $user}}
           {{if $.button_text}}

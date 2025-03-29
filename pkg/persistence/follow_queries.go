@@ -92,3 +92,17 @@ func (p Profile) GetFolloweesYouKnow(your_id UserID, their_id UserID) []User {
 	}
 	return ret
 }
+
+func (p Profile) GetMutualFollowers(your_id UserID) []User {
+	var ret []User
+	err := p.DB.Select(&ret, `
+	    select `+USERS_ALL_SQL_FIELDS+`
+	      from users
+	     where id in (select followee_id from follows where follower_id = ?) -- you follow them
+	       and id in (select follower_id from follows where followee_id = ?) -- they follow you
+	`, your_id, your_id)
+	if err != nil {
+		panic(err)
+	}
+	return ret
+}
