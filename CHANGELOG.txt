@@ -428,3 +428,14 @@ v0.7.4
 	- "Followers you know"
 	- "Followees you know"
 	- "Mutual followers"
+
+v0.7.5
+------
+
+- Add ability to search by quoted_tweet_id
+- Add online requests to follow/unfollow users
+- BUGFIX: fix verification and blue checks
+- UI improvements:
+	- "Follow" button on user profile now actually follows/unfollows them
+	- "Follow" button updated to match style of the rest of the app
+	- Now also shows label if they follow you / mutuals

@@ -256,6 +256,9 @@ func ParseSingleNotification(n APINotification) Notification {
 	// If the action has a "target", store it temporarily in ActionTweetID
 	target_objs := n.Template.AggregateUserActionsV1.TargetObjects
 	if len(target_objs) > 0 {
+		// It's inconvenient to check here whether the target is a Tweet or a Retweet.  So we store
+		// it as a Tweet (ActionTweetID) for now; in `ToTweetTroveAsNotifications`, we later check
+		// if the item with this ID is a Tweet or Retweet, and modify the Notification as appropriate.
 		ret.ActionTweetID = TweetID(target_objs[0].Tweet.ID)
 	}
 

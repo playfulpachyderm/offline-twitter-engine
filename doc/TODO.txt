@@ -29,15 +29,13 @@ TODO: twitter-spaces-add-is-details-available-flag (#scraper, #spaces)
 
 TODO: scrape-media-tab (#scraper)
 
-TODO: scrape-quote-tweets (#scraper)
-
 TODO post-tweets
 - post tweets
   - reply to a tweet
   - quote-tweet a tweet
 - retweet a tweet
 
-TODO spaces-fetch-participants-info (#scraper)
+TODO spaces-fetch-participants-info (#scraper, #spaces)
 - some user information is available in a Spaces result.  Right now we just render them as null users (handle = "", id = 0) if they're not fetched already
 - distinguish whether someone was an admin in the space or not
 
@@ -144,8 +142,7 @@ TODO: htmx-scrollBehavior (#webserver, #ux)
 - Investigate `htmx.config.scrollBehavior = "smooth"`: https://htmx.org/migration-guide-htmx-1/
 
 TODO: deprecated-offline-follows
-- Offline Follows doesn't do much userful anymore
-
-TODO: offline-timeline-vs-user-timeline
+- remove `is_followed` column from `users` table
+- remove "Offline Follows" home timeline feed
 
 TODO: go-stdlib-path-vs-filepath (#code-quality)
