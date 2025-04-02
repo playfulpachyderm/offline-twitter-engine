@@ -3,8 +3,8 @@ package scraper
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"net/url"
+	"strings"
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
