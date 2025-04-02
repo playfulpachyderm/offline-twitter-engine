@@ -17,7 +17,11 @@
         <div class="following-info">
           {{template "following-button" .}}
           {{if .IsFollowingYou}}
-            <span class="follows-you-label">Follows you</span>
+            {{if .IsFollowed}}
+              <span class="follows-you-label follows-you-label--mutuals">Mutuals</span>
+            {{else}}
+              <span class="follows-you-label">Follows you</span>
+            {{end}}
           {{end}}
         </div>
       </div>

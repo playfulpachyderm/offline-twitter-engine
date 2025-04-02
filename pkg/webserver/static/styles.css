@@ -21,6 +21,8 @@
 
 	--color-space-purple:              hsl(246, 96%, 80%);
 	--color-space-purple-outline:      hsl(246, 97%, 65%);
+
+	--color-offline-twitter-green:     hsl(121, 54%, 49%);
 }
 
 
@@ -1172,6 +1174,10 @@ main {
 		padding: 0 0.3em;
 		line-height: 1.3em;
 		font-size: 0.9em;
+
+		&.follows-you-label--mutuals {
+			background-color: var(--color-offline-twitter-green);
+		}
 	}
 }
 .following-button {
