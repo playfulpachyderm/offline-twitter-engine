@@ -92,7 +92,7 @@ func (api API) UnlikeTweet(id TweetID) error {
 
 // Follow the given user
 // INFO: manual testing only
-func (api API) FollowUser(u_id UserID) error {
+func (api *API) FollowUser(u_id UserID) error {
 	url, err := url.Parse("https://twitter.com/i/api/1.1/friendships/create.json")
 	if err != nil {
 		panic(err)
@@ -109,7 +109,7 @@ func (api API) FollowUser(u_id UserID) error {
 
 // Unfollow the given user
 // INFO: manual testing only
-func (api API) UnfollowUser(u_id UserID) error {
+func (api *API) UnfollowUser(u_id UserID) error {
 	url, err := url.Parse("https://twitter.com/i/api/1.1/friendships/destroy.json")
 	if err != nil {
 		panic(err)
