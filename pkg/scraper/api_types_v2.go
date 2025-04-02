@@ -127,22 +127,37 @@ func (card APIV2Card) ParseAsSpace() Space {
 	return ret
 }
 
-type APIV2UserResult struct {
-	UserResults struct {
-		Result struct {
-			ID     int64   `json:"rest_id,string"`
-			Legacy APIUser `json:"legacy"`
-		} `json:"result"`
-	} `json:"user_results"`
+type _UserResults struct {
+	Result struct {
+		MetaTypename       string  `json:"__typename"`
+		ID                 int64   `json:"rest_id,string"`
+		Legacy             APIUser `json:"legacy"`
+		IsBlueVerified     bool    `json:"is_blue_verified"`
+		UnavailableMessage struct {
+			Text string `json:"text"`
+		} `json:"unavailable_message"`
+		Reason string `json:"reason"`
+	} `json:"result"`
 }
 
-func (u APIV2UserResult) ToUser() User {
-	user, err := ParseSingleUser(u.UserResults.Result.Legacy)
+func (ur _UserResults) to_user() User {
+	// `IsBlueVerified` supercedes `Verified`
+	ur.Result.Legacy.Verified = ur.Result.IsBlueVerified
+
+	user, err := ParseSingleUser(ur.Result.Legacy)
 	if err != nil {
 		panic(err)
 	}
-	user.ID = UserID(u.UserResults.Result.ID)
+	user.ID = UserID(ur.Result.ID)
 	return user
+}
+
+type APIV2UserResult struct {
+	UserResults _UserResults `json:"user_results"`
+}
+
+func (u APIV2UserResult) ToUser() User {
+	return u.UserResults.to_user()
 }
 
 type Int64Slice []int64

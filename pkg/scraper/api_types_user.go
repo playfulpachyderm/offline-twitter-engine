@@ -12,18 +12,7 @@ import (
 
 type UserResponse struct {
 	Data struct {
-		User struct {
-			Result struct {
-				MetaTypename       string  `json:"__typename"`
-				ID                 int64   `json:"rest_id,string"`
-				Legacy             APIUser `json:"legacy"`
-				IsBlueVerified     bool    `json:"is_blue_verified"`
-				UnavailableMessage struct {
-					Text string `json:"text"`
-				} `json:"unavailable_message"`
-				Reason string `json:"reason"`
-			} `json:"result"`
-		} `json:"user"`
+		User _UserResults `json:"user"`
 	} `json:"data"`
 	Errors []struct {
 		Message string `json:"message"`

@@ -9,6 +9,9 @@
             <img class="svg-icon" src="/static/icons/lock.svg" width="24" height="24">
           </div>
         {{end}}
+        {{if .IsVerified}}
+          <img class="svg-icon author-info__bluecheck" src="/static/icons/verified2.svg" width="24" height="24">
+        {{end}}
       </div>
       <div class="author-info__handle">@{{.Handle}}</div>
     </span>

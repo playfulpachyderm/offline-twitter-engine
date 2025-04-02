@@ -14,26 +14,21 @@ type SpaceResponse struct {
 				RestId                      string `json:"rest_id"`
 				State                       string
 				Title                       string
-				MediaKey                    string `json:"media_key"`
-				CreatedAt                   int64  `json:"created_at"`
-				StartedAt                   int64  `json:"started_at"`
-				EndedAt                     int64  `json:"ended_at,string"`
-				UpdatedAt                   int64  `json:"updated_at"`
-				DisallowJoin                bool   `json:"disallow_join"`
-				NarrowCastSpaceType         int64  `json:"narrow_cast_space_type"`
-				IsEmployeeOnly              bool   `json:"is_employee_only"`
-				IsLocked                    bool   `json:"is_locked"`
-				IsSpaceAvailableForReplay   bool   `json:"is_space_available_for_replay"`
-				IsSpaceAvailableForClipping bool   `json:"is_space_available_for_clipping"`
-				ConversationControls        int64  `json:"conversation_controls"`
-				TotalReplayWatched          int    `json:"total_replay_watched"`
-				TotalLiveListeners          int    `json:"total_live_listeners"`
-				CreatorResults              struct {
-					Result struct {
-						ID     int64   `json:"rest_id,string"`
-						Legacy APIUser `json:"legacy"`
-					} `json:"result"`
-				} `json:"creator_results"`
+				MediaKey                    string       `json:"media_key"`
+				CreatedAt                   int64        `json:"created_at"`
+				StartedAt                   int64        `json:"started_at"`
+				EndedAt                     int64        `json:"ended_at,string"`
+				UpdatedAt                   int64        `json:"updated_at"`
+				DisallowJoin                bool         `json:"disallow_join"`
+				NarrowCastSpaceType         int64        `json:"narrow_cast_space_type"`
+				IsEmployeeOnly              bool         `json:"is_employee_only"`
+				IsLocked                    bool         `json:"is_locked"`
+				IsSpaceAvailableForReplay   bool         `json:"is_space_available_for_replay"`
+				IsSpaceAvailableForClipping bool         `json:"is_space_available_for_clipping"`
+				ConversationControls        int64        `json:"conversation_controls"`
+				TotalReplayWatched          int          `json:"total_replay_watched"`
+				TotalLiveListeners          int          `json:"total_live_listeners"`
+				CreatorResults              _UserResults `json:"creator_results"`
 			}
 			Participants struct {
 				Total  int
@@ -85,10 +80,7 @@ func (r SpaceResponse) ToTweetTrove() TweetTrove {
 
 	ret.Spaces[space.ID] = space
 
-	creator, err := ParseSingleUser(data.Metadata.CreatorResults.Result.Legacy)
-	if err != nil {
-		panic(err)
-	}
+	creator := data.Metadata.CreatorResults.to_user()
 	creator.ID = space.CreatedById
 	ret.Users[creator.ID] = creator
 

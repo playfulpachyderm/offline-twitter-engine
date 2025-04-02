@@ -507,6 +507,11 @@ main {
 	.author-info__handle {
 		color: var(--color-twitter-text-gray);
 	}
+	.author-info__bluecheck {
+		filter: brightness(0) saturate(100%) invert(50%) sepia(20%) saturate(6050%) hue-rotate(179deg) brightness(92%) contrast(88%);
+		font-size: 0.8em;
+		margin-left: 0.3em;
+	}
 }
 
 /**
