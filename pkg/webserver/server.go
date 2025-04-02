@@ -2,7 +2,6 @@ package webserver
 
 import (
 	"crypto/tls"
-	// "encoding/json"
 	"fmt"
 	"log"
 	"net/http"

@@ -7,8 +7,6 @@ import (
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
-// TODO: deprecated-offline-follows
-
 func (app *Application) UserFollow(w http.ResponseWriter, r *http.Request) {
 	app.traceLog.Printf("'UserFollow' handler (path: %q)", r.URL.Path)
 
@@ -28,7 +26,9 @@ func (app *Application) UserFollow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.Profile.SetUserFollowed(&user, true)
+	panic_if(app.API.FollowUser(user.ID))
+	app.Profile.SaveFollow(app.ActiveUser.ID, user.ID)
+	user.IsFollowed = true
 
 	app.buffered_render_htmx(w, "following-button", PageGlobalData{}, user)
 }
@@ -52,6 +52,9 @@ func (app *Application) UserUnfollow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.Profile.SetUserFollowed(&user, false)
+	panic_if(app.API.UnfollowUser(user.ID))
+	app.Profile.DeleteFollow(app.ActiveUser.ID, user.ID)
+	user.IsFollowed = false
+
 	app.buffered_render_htmx(w, "following-button", PageGlobalData{}, user)
 }
