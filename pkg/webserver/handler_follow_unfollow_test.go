@@ -1,9 +1,9 @@
 package webserver_test
 
 import (
+	"net/http/httptest"
 	"testing"
 
-	"net/http/httptest"
 	"github.com/stretchr/testify/require"
 )
 

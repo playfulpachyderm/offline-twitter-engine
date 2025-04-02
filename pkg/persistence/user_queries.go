@@ -268,22 +268,6 @@ func (p Profile) CheckUserContentDownloadNeeded(user User) bool {
 	return !file_exists(profile_path)
 }
 
-// Follow / unfollow a user.  Update the given User object's IsFollowed field.
-func (p Profile) SetUserFollowed(user *User, is_followed bool) {
-	result, err := p.DB.Exec("update users set is_followed = ? where id = ?", is_followed, user.ID)
-	if err != nil {
-		panic(fmt.Errorf("Error inserting user with handle %q:\n  %w", user.Handle, err))
-	}
-	count, err := result.RowsAffected()
-	if err != nil {
-		panic(fmt.Errorf("Unknown error retrieving row count:\n  %w", err))
-	}
-	if count != 1 {
-		panic(fmt.Errorf("User with handle %q not found", user.Handle))
-	}
-	user.IsFollowed = is_followed
-}
-
 func (p Profile) NextFakeUserID() UserID {
 	_, err := p.DB.Exec("update fake_user_sequence set latest_fake_id = latest_fake_id + 1")
 	if err != nil {
