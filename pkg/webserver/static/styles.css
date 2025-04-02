@@ -379,6 +379,9 @@ main {
 		left: 50%;
 		transform: translate(-50%,-50%);
 
+		/* avoid overflowing the container element */
+		max-height: 80%;
+
 		/* https://codepen.io/sosuke/pen/Pjoqqp */
 		filter: invert(54%) sepia(17%) saturate(4210%) hue-rotate(176deg) brightness(89%) contrast(98%);
 	}

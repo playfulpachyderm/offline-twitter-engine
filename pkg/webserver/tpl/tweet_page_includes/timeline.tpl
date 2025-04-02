@@ -19,8 +19,7 @@
       >Show more</a>
     {{end}}
 
-    {{/* Set the font-size to override the default style (3em) to prevent it overflowing the box */}}
-    <div class="htmx-spinner" style="font-size: 2em">
+    <div class="htmx-spinner">
       <div class="htmx-spinner__background"></div>
       <img class="svg-icon htmx-spinner__icon" src="/static/icons/spinner.svg" />
     </div>
