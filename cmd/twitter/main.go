@@ -203,7 +203,7 @@ func main() {
 		download_tweet_content(target)
 	case "search":
 		search(target, *how_many)
-	case "follow": // TODO: update these to use Lists
+	case "follow":
 		follow_user(target, true)
 	case "unfollow":
 		follow_user(target, false)
@@ -575,11 +575,19 @@ func follow_user(handle string, is_followed bool) {
 	if err != nil {
 		panic("Couldn't get the user from database: " + err.Error())
 	}
-	profile.SetUserFollowed(&user, is_followed)
-
 	if is_followed {
+		err := api.FollowUser(user.ID)
+		if err != nil {
+			die(fmt.Sprintf("Failed to follow user:\n  %s", err.Error()), false, 1)
+		}
+		profile.SaveFollow(api.UserID, user.ID)
 		happy_exit("Followed user: "+handle, nil)
 	} else {
+		err := api.UnfollowUser(user.ID)
+		if err != nil {
+			die(fmt.Sprintf("Failed to unfollow user:\n  %s", err.Error()), false, 1)
+		}
+		profile.DeleteFollow(api.UserID, user.ID)
 		happy_exit("Unfollowed user: "+handle, nil)
 	}
 }

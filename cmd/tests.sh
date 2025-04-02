@@ -360,23 +360,6 @@ tw fetch_user AlexKoppelman  # This is probably kind of a flimsy test
 test $(sqlite3 twitter.db "select is_content_downloaded from users where handle='AlexKoppelman'") = "1"
 
 
-# Test following / unfollowing a user
-test "$(sqlite3 twitter.db "select count(*) from users where is_followed = 1")" = "0"
-tw follow michaelmalice
-test "$(sqlite3 twitter.db "select handle from users where is_followed = 1")" = "michaelmalice"
-
-# tw follow cernovich
-# test $(tw list_followed | wc -l) = 2
-# test "$(tw list_followed | grep -iq cernovich && echo YES)" = "YES"
-# test "$(tw list_followed | grep -iq michaelmalice && echo YES)" = "YES"
-# test "$(tw list_followed | grep -iq blahblahgibberish && echo YES)" = ""
-
-# tw unfollow michaelmalice
-# test "$(sqlite3 twitter.db "select count(*) from users where is_followed = 1")" = "1"
-# tw unfollow cernovich
-# test "$(sqlite3 twitter.db "select count(*) from users where is_followed = 1")" = "0"
-
-
 # When not logged in, age-restricted tweet should fail to fetch
 tw fetch_user PandasAndVidya
 tw fetch_tweet_only https://twitter.com/PandasAndVidya/status/1562714727968428032 || true  # This one is expected to fail

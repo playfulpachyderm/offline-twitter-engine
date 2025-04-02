@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"net/url"
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
@@ -87,4 +88,38 @@ func (api API) UnlikeTweet(id TweetID) error {
 		panic(fmt.Sprintf("Dunno why but it failed with value %q", result.Data.UnfavoriteTweet))
 	}
 	return nil
+}
+
+// Follow the given user
+// INFO: manual testing only
+func (api API) FollowUser(u_id UserID) error {
+	url, err := url.Parse("https://twitter.com/i/api/1.1/friendships/create.json")
+	if err != nil {
+		panic(err)
+	}
+
+	query := url.Query()
+	add_tweet_query_params(&query)
+	query.Add("user_id", fmt.Sprint(u_id))
+	url.RawQuery = query.Encode()
+
+	var result APIUser
+	return api.do_http_POST(url.String(), "", &result)
+}
+
+// Unfollow the given user
+// INFO: manual testing only
+func (api API) UnfollowUser(u_id UserID) error {
+	url, err := url.Parse("https://twitter.com/i/api/1.1/friendships/destroy.json")
+	if err != nil {
+		panic(err)
+	}
+
+	query := url.Query()
+	add_tweet_query_params(&query)
+	query.Add("user_id", fmt.Sprint(u_id))
+	url.RawQuery = query.Encode()
+
+	var result APIUser
+	return api.do_http_POST(url.String(), "", &result)
 }
