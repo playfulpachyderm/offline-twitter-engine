@@ -142,17 +142,20 @@ h3 {
 
 .button {
 	display: flex; /* Prevent <a class="button"><img></a> from having extra space at the bottom, looking weird*/
-	padding: 0.5em;
-	margin: 0.2em;
+	padding: 0.5em 0.7em;
+	margin: 0.1em;
 	border-radius: 100em; /* any large amount, just don't use % because then it makes an ellipse */
+	border: 2px solid transparent; /* ensure size remains consistent whether hovered/active or not */
 	cursor: pointer;
 
 	&:hover {
 		background-color: var(--color-twitter-blue-light);
+		border-color: var(--color-twitter-blue);
 	}
 	&:active {
 		transform: translate(0.1em, 0.1em);
 		background-color: var(--color-twitter-blue);
+		border-color: var(--color-twitter-blue);
 	}
 
 	&.button--danger {
@@ -346,6 +349,9 @@ main {
 	left: 0;
 	right: 0;
 	z-index: 2;  /* On top of the search bar, which is z-index of 1 */
+	/* avoid spilling over the corners if parent element has a border-radius */
+	border-radius: inherit;
+	overflow: hidden;
 
 	font-size: 3em;
 
@@ -990,7 +996,7 @@ main {
 	}
 	.nav-sidebar__notifications-count {
 		position: absolute;
-		left: 0.3em;
+		left: 0.7em;
 		top: 0.3em;
 		background-color: var(--color-twitter-blue);
 		min-width: 1em;
@@ -1150,6 +1156,13 @@ main {
 		width: 1em;
 		height: auto;
 	}
+}
+
+/**
+ * Following button
+ */
+.following-button {
+	border-color: var(--color-twitter-blue-light);
 }
 
 /******************************************************

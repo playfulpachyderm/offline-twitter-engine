@@ -1,17 +1,19 @@
 {{define "following-button"}}
+  {{ $action := "follow" }}
   {{if .IsFollowed}}
-    <button class="following-button"
-      hx-post="/unfollow/{{.Handle}}"
-      hx-swap="outerHTML"
-    >
-      Unfollow
-    </button>
-  {{else}}
-    <button class="following-button"
-      hx-post="/follow/{{.Handle}}"
-      hx-swap="outerHTML"
-    >
-      Follow
-    </button>
+    {{ $action = "unfollow" }}
   {{end}}
+
+  <div class="button following-button"
+    hx-post="/{{$action}}/{{.Handle}}"
+    hx-swap="outerHTML"
+    style="text-transform: capitalize; position: relative"
+  >
+    <div class="htmx-spinner">
+      <div class="htmx-spinner__background"></div>
+      <img class="svg-icon htmx-spinner__icon" src="/static/icons/spinner.svg" />
+    </div>
+
+    {{$action}}
+  </div>
 {{end}}
