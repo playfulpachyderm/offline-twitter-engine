@@ -39,6 +39,7 @@ type User struct {
 	IsIdFake            bool `db:"is_id_fake"`
 
 	IsFollowed       bool `db:"is_followed"`
+	IsFollowingYou   bool
 	Lists            []List
 	FollowersYouKnow []User
 }

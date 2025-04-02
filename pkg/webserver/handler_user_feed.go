@@ -92,7 +92,9 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Add more stuff to the user (this has to be done after scraping or else it will get clobbered)
 	user.IsFollowed = app.Profile.IsXFollowingY(app.ActiveUser.ID, user.ID)
+	user.IsFollowingYou = app.Profile.IsXFollowingY(user.ID, app.ActiveUser.ID)
 	user.Lists = app.Profile.GetListsForUser(user.ID)
 	user.FollowersYouKnow = app.Profile.GetFollowersYouKnow(app.ActiveUser.ID, user.ID)
 

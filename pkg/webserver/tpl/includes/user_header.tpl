@@ -14,7 +14,12 @@
     <div class="user-header__info-container">
       <div class="row user-header__profile-image-container">
         {{template "author-info-no-link" .}}
-        {{template "following-button" .}}
+        <div class="following-info">
+          {{template "following-button" .}}
+          {{if .IsFollowingYou}}
+            <span class="follows-you-label">Follows you</span>
+          {{end}}
+        </div>
       </div>
       <div class="user-header__bio">
         {{template "text-with-entities" .Bio}}

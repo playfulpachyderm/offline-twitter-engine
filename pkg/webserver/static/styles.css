@@ -1159,8 +1159,21 @@ main {
 }
 
 /**
- * Following button
+ * Following info
  */
+.following-info {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.3em;
+
+	.follows-you-label {
+		background-color: var(--color-outline-gray);
+		padding: 0 0.3em;
+		line-height: 1.3em;
+		font-size: 0.9em;
+	}
+}
 .following-button {
 	border-color: var(--color-twitter-blue-light);
 }
