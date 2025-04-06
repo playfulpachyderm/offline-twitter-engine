@@ -82,7 +82,7 @@ func fragment(w io.Writer, r io.Reader) (err error) {
 	}
 	nodes, err := html.ParseFragment(r, context)
 	if err != nil {
-		return err
+		return fmt.Errorf("error parsing HTML: %w", err)
 	}
 	for _, node := range nodes {
 		if err = printNode(w, node, false, 0); err != nil {
@@ -244,5 +244,8 @@ func printChildren(w io.Writer, n *html.Node, pre bool, level int) (err error) {
 
 func printIndent(w io.Writer, level int) (err error) {
 	_, err = fmt.Fprint(w, strings.Repeat(" ", level))
-	return err
+	if err != nil {
+		panic(err)
+	}
+	return nil
 }
