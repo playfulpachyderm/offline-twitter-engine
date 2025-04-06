@@ -6,6 +6,7 @@ require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/andybalholm/cascadia v1.3.2
 	github.com/go-test/deep v1.0.7
+	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.1.1
 	github.com/jarcoal/httpmock v1.1.0
 	github.com/jmoiron/sqlx v1.3.4
