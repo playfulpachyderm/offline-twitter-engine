@@ -42,8 +42,14 @@ func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file st
 	}
 	panic_if(err)
 
+	main_component := templ.FromGoHTML(tpl.Lookup("main"), tpl_data)
+	b := bytes.Buffer{}
+	tpl.Lookup("title").Execute(&b, tpl_data)
+	b.WriteString(" | Offline Twitter")
+	global_data.Title = b.String()
+
 	buf := new(bytes.Buffer)
-	Base(tpl, global_data, tpl_data).Render(context.Background(), buf)
+	Base(tpl, global_data, main_component).Render(context.Background(), buf)
 
 	// Check against old version
 	rec := httptest.NewRecorder()
@@ -59,19 +65,12 @@ func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file st
 	panic_if(err)
 }
 
-func title(go_tpl *template.Template, data interface{}) string {
-	b := bytes.Buffer{}
-	go_tpl.Lookup("title").Execute(&b, data)
-	b.WriteString(" | Offline Twitter")
-	return b.String()
-}
-
-templ Base(go_tpl *template.Template, global_data PageGlobalData, data interface{}) {
+templ Base(go_tpl *template.Template, global_data PageGlobalData, main_component templ.Component) {
 	<!doctype html>
 	<html lang='en'>
 		<head>
 			<meta charset='utf-8'>
-			<title>{ title(go_tpl, data) }</title>
+			<title>{ global_data.Title }</title>
 			<link rel='stylesheet' href='/static/styles.css'>
 			<link rel='shortcut icon' href='/static/twitter.ico' type='image/x-icon'>
 			<link rel='stylesheet' href='/static/vendor/fonts.css'>
@@ -125,7 +124,7 @@ templ Base(go_tpl *template.Template, global_data PageGlobalData, data interface
 			</header>
 			@NavSidebar(go_tpl, global_data)
 			<main>
-				@templ.FromGoHTML(go_tpl.Lookup("main"), data)
+				@main_component
 			</main>
 			<dialog
 				id="image_carousel"
@@ -138,8 +137,8 @@ templ Base(go_tpl *template.Template, global_data PageGlobalData, data interface
 				</div>
 			</dialog>
 			<div class="toasts" id="toasts">
-				for toast := range global_data.Toasts {
-					@templ.FromGoHTML(go_tpl.Lookup("toast"), toast)
+				for _, toast := range global_data.Toasts {
+					@ToastTpl(toast)
 				}
 			</div>
 		</body>

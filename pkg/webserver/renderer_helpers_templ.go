@@ -50,8 +50,14 @@ func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file st
 	}
 	panic_if(err)
 
+	main_component := templ.FromGoHTML(tpl.Lookup("main"), tpl_data)
+	b := bytes.Buffer{}
+	tpl.Lookup("title").Execute(&b, tpl_data)
+	b.WriteString(" | Offline Twitter")
+	global_data.Title = b.String()
+
 	buf := new(bytes.Buffer)
-	Base(tpl, global_data, tpl_data).Render(context.Background(), buf)
+	Base(tpl, global_data, main_component).Render(context.Background(), buf)
 
 	// Check against old version
 	rec := httptest.NewRecorder()
@@ -67,25 +73,7 @@ func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file st
 	panic_if(err)
 }
 
-// func component_or_template(go_tpl *template.Template, name string) templ.Component {
-// 	components := map[string]templ.Component{
-
-// 	}
-// 	component, is_ok := components[name]
-// 	if is_ok {
-// 		return component
-// 	}
-// 	return templ.FromGoHTML
-// }
-
-func title(go_tpl *template.Template, data interface{}) string {
-	b := bytes.Buffer{}
-	go_tpl.Lookup("title").Execute(&b, data)
-	b.WriteString(" | Offline Twitter")
-	return b.String()
-}
-
-func Base(go_tpl *template.Template, global_data PageGlobalData, data interface{}) templ.Component {
+func Base(go_tpl *template.Template, global_data PageGlobalData, main_component templ.Component) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -111,15 +99,15 @@ func Base(go_tpl *template.Template, global_data PageGlobalData, data interface{
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title(go_tpl, data))
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(global_data.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/webserver/renderer_helpers.templ`, Line: 74, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/webserver/renderer_helpers.templ`, Line: 73, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><link rel=\"stylesheet\" href=\"/static/styles.css\"><link rel=\"shortcut icon\" href=\"/static/twitter.ico\" type=\"image/x-icon\"><link rel=\"stylesheet\" href=\"/static/vendor/fonts.css\"><link rel=\"manifest\" href=\"/static/pwa/manifest.json\"><script src=\"/static/vendor/htmx.min.js\" integrity=\"sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV\" crossorigin=\"anonymous\"></script><script src=\"/static/vendor/htmx-extension-json-enc.js\"></script><script>\n\t\t\t\tif ('serviceWorker' in navigator) {\n\t\t\t\t\tnavigator.serviceWorker.register('/static/pwa/service-worker.js')\n\t\t\t\t\t\t.then(function(registration) {\n\t\t\t\t\t\t\tconsole.log('Service Worker registered with scope:', registration.scope);\n\t\t\t\t\t\t}).catch(function(error) {\n\t\t\t\t\t\t\tconsole.log('Service Worker registration failed:', error);\n\t\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t</script><script>\n\t\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\t\t/**\n\t\t\t\t\t * Consider HTTP 4xx and 500 errors to contain valid HTMX, and swap them as usual\n\t\t\t\t\t */\n\t\t\t\t\tdocument.body.addEventListener('htmx:beforeSwap', function(e) {\n\t\t\t\t\t\tif (e.detail.xhr.status === 500) {\n\t\t\t\t\t\t\te.detail.shouldSwap = true;\n\t\t\t\t\t\t\te.detail.isError = true;\n\t\t\t\t\t\t} else if (e.detail.xhr.status >= 400 && e.detail.xhr.status < 500) {\n\t\t\t\t\t\t\te.detail.shouldSwap = true;\n\t\t\t\t\t\t\te.detail.isError = false;\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t</script></head><body><header class=\"row search-bar\"><a onclick=\"window.history.back()\" class=\"button search-bar__back-button\"><img class=\"svg-icon\" src=\"/static/icons/back.svg\" width=\"24\" height=\"24\"></a><form class=\"search-bar__form\" hx-get=\"/search\" hx-push-url=\"true\" hx-target=\"body\" hx-swap=\"innerHTML show:window:top\"><input id=\"searchBar\" class=\"search-bar__input\" name=\"q\" placeholder=\"Search\" type=\"text\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><link rel=\"stylesheet\" href=\"/static/styles.css\"><link rel=\"shortcut icon\" href=\"/static/twitter.ico\" type=\"image/x-icon\"><link rel=\"stylesheet\" href=\"/static/vendor/fonts.css\"><link rel=\"manifest\" href=\"/static/pwa/manifest.json\"><script src=\"/static/vendor/htmx.min.js\" integrity=\"sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV\" crossorigin=\"anonymous\"></script><script src=\"/static/vendor/htmx-extension-json-enc.js\"></script><script>\n\t\t\t\tif ('serviceWorker' in navigator) {\n\t\t\t\t\tnavigator.serviceWorker.register('/static/pwa/service-worker.js')\n\t\t\t\t\t\t.then(function(registration) {\n\t\t\t\t\t\t\tconsole.log('Service Worker registered with scope:', registration.scope);\n\t\t\t\t\t\t}).catch(function(error) {\n\t\t\t\t\t\t\tconsole.log('Service Worker registration failed:', error);\n\t\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t</script><script>\n\t\t\t\t// Set default scrolling (\"instant\", \"smooth\" or \"auto\")\n\t\t\t\thtmx.config.scrollBehavior = \"instant\";\n\n\t\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\t\t/**\n\t\t\t\t\t * Consider HTTP 4xx and 500 errors to contain valid HTMX, and swap them as usual\n\t\t\t\t\t */\n\t\t\t\t\tdocument.body.addEventListener('htmx:beforeSwap', function(e) {\n\t\t\t\t\t\tif (e.detail.xhr.status === 500) {\n\t\t\t\t\t\t\te.detail.shouldSwap = true;\n\t\t\t\t\t\t\te.detail.isError = true;\n\t\t\t\t\t\t} else if (e.detail.xhr.status >= 400 && e.detail.xhr.status < 500) {\n\t\t\t\t\t\t\te.detail.shouldSwap = true;\n\t\t\t\t\t\t\te.detail.isError = false;\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t</script></head><body><header class=\"row search-bar\"><a onclick=\"window.history.back()\" class=\"button search-bar__back-button\"><img class=\"svg-icon\" src=\"/static/icons/back.svg\" width=\"24\" height=\"24\"></a><form class=\"search-bar__form\" hx-get=\"/search\" hx-push-url=\"true\" hx-target=\"body\" hx-swap=\"innerHTML show:window:top\"><input id=\"searchBar\" class=\"search-bar__input\" name=\"q\" placeholder=\"Search\" type=\"text\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -131,7 +119,7 @@ func Base(go_tpl *template.Template, global_data PageGlobalData, data interface{
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(global_data.GetSearchText())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/webserver/renderer_helpers.templ`, Line: 120, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/webserver/renderer_helpers.templ`, Line: 122, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -154,7 +142,7 @@ func Base(go_tpl *template.Template, global_data PageGlobalData, data interface{
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.FromGoHTML(go_tpl.Lookup("main"), data).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = main_component.Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -162,8 +150,8 @@ func Base(go_tpl *template.Template, global_data PageGlobalData, data interface{
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for toast := range global_data.Toasts {
-			templ_7745c5c3_Err = templ.FromGoHTML(go_tpl.Lookup("toast"), toast).Render(ctx, templ_7745c5c3_Buffer)
+		for _, toast := range global_data.Toasts {
+			templ_7745c5c3_Err = ToastTpl(toast).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

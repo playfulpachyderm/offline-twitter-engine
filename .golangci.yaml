@@ -92,7 +92,7 @@ linters:
       checks:
         - all
         - -QF1003
-        - -QF1008 # XXX: Temporary
+        - -QF1008 # TODO: remove this one
         - -ST1001
         - -ST1003
         - -ST1013
