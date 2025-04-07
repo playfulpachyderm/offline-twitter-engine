@@ -9,8 +9,8 @@ import (
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
-var AlreadyLikedThisTweet error = errors.New("already liked this tweet")
-var HaventLikedThisTweet error = errors.New("Haven't liked this tweet")
+var ErrAlreadyLikedThisTweet error = errors.New("already liked this tweet")
+var ErrHaventLikedThisTweet error = errors.New("Haven't liked this tweet")
 
 func (api API) LikeTweet(id TweetID) (Like, error) {
 	if !api.IsAuthenticated {
@@ -42,7 +42,7 @@ func (api API) LikeTweet(id TweetID) (Like, error) {
 				UserID:  api.UserID,
 				TweetID: id,
 				SortID:  -1,
-			}, AlreadyLikedThisTweet
+			}, ErrAlreadyLikedThisTweet
 		}
 	}
 	if result.Data.FavoriteTweet != "Done" {
@@ -81,7 +81,7 @@ func (api API) UnlikeTweet(id TweetID) error {
 	}
 	if len(result.Errors) > 0 {
 		if strings.Contains(result.Errors[0].Message, "not found in actor's") {
-			return HaventLikedThisTweet
+			return ErrHaventLikedThisTweet
 		}
 	}
 	if result.Data.UnfavoriteTweet != "Done" {

@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var ERR_NO_TWEET = errors.New("Empty tweet")
+var ErrNoTweet = errors.New("Empty tweet")
 
 type TweetID int64
 

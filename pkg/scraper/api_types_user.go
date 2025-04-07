@@ -39,7 +39,7 @@ func (u UserResponse) ConvertToAPIUser() (APIUser, error) {
 			// TODO: not sure what kind of request returns this
 			ret.DoesntExist = true
 		} else {
-			panic(fmt.Errorf("Unknown api error %q:\n  %w", api_error.Message, EXTERNAL_API_ERROR))
+			panic(fmt.Errorf("Unknown api error %q:\n  %w", api_error.Message, ErrExternalApiError))
 		}
 	}
 

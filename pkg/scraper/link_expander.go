@@ -27,12 +27,12 @@ func ExpandShortUrl(short_url string) string {
 		panic(err) // TODO: handle timeouts
 	}
 	if resp.StatusCode != 301 {
-		panic(fmt.Errorf("Unknown status code returned when expanding short url %q: %s\n  %w", short_url, resp.Status, EXTERNAL_API_ERROR))
+		panic(fmt.Errorf("Unknown status code returned when expanding short url %q: %s\n  %w", short_url, resp.Status, ErrExternalApiError))
 	}
 
 	long_url := resp.Header.Get("Location")
 	if long_url == "" {
-		panic(fmt.Errorf("Header didn't have a Location field for short url %q:\n  %w", short_url, EXTERNAL_API_ERROR))
+		panic(fmt.Errorf("Header didn't have a Location field for short url %q:\n  %w", short_url, ErrExternalApiError))
 	}
 	return long_url
 }

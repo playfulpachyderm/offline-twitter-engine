@@ -74,7 +74,7 @@ func (app *Application) LikeTweet(w http.ResponseWriter, r *http.Request) {
 	tweet := get_tweet_from_context(r.Context())
 	like, err := app.API.LikeTweet(tweet.ID)
 	// "Already Liked This Tweet" is no big deal-- we can just update the UI as if it succeeded
-	if err != nil && !errors.Is(err, scraper.AlreadyLikedThisTweet) {
+	if err != nil && !errors.Is(err, scraper.ErrAlreadyLikedThisTweet) {
 		// It's a different error
 		panic(err)
 	}
@@ -88,7 +88,7 @@ func (app *Application) UnlikeTweet(w http.ResponseWriter, r *http.Request) {
 	tweet := get_tweet_from_context(r.Context())
 	err := app.API.UnlikeTweet(tweet.ID)
 	// As above, "Haven't Liked This Tweet" is no big deal-- we can just update the UI as if the request succeeded
-	if err != nil && !errors.Is(err, scraper.HaventLikedThisTweet) {
+	if err != nil && !errors.Is(err, scraper.ErrHaventLikedThisTweet) {
 		// It's a different error
 		panic(err)
 	}

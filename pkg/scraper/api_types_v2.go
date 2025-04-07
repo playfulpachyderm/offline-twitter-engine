@@ -240,7 +240,7 @@ func (api_result APIV2Result) ToTweetTrove() (TweetTrove, error) {
 
 	// Process the tweet itself
 	main_tweet_trove, err := api_result.Result.Legacy.ToTweetTrove()
-	if errors.Is(err, ERR_NO_TWEET) {
+	if errors.Is(err, ErrNoTweet) {
 		// If the tweet is edited, the entry is just a list of the more recent versions
 		edit_tweet_ids := api_result.Result.EditControl.EditTweetIDs
 		if api_result.Result.ID != 0 && len(edit_tweet_ids) > 1 && edit_tweet_ids[len(edit_tweet_ids)-1] != api_result.Result.ID {
@@ -271,7 +271,7 @@ func (api_result APIV2Result) ToTweetTrove() (TweetTrove, error) {
 		quoted_trove, err := quoted_api_result.ToTweetTrove()
 
 		// Handle `"quoted_status_result": {}` results
-		if errors.Is(err, ERR_NO_TWEET) {
+		if errors.Is(err, ErrNoTweet) {
 			// Replace it with a tombstone
 			err = ErrorIsTombstone
 			if quoted_api_result.Result.Tombstone == nil {
@@ -288,7 +288,7 @@ func (api_result APIV2Result) ToTweetTrove() (TweetTrove, error) {
 			var is_ok bool
 			tombstoned_tweet.TombstoneText, is_ok = tombstone_types[quoted_api_result.Result.Tombstone.Text.Text]
 			if !is_ok {
-				panic(fmt.Errorf("Unknown tombstone text %q:\n  %w", quoted_api_result.Result.Tombstone.Text.Text, EXTERNAL_API_ERROR))
+				panic(fmt.Errorf("Unknown tombstone text %q:\n  %w", quoted_api_result.Result.Tombstone.Text.Text, ErrExternalApiError))
 			}
 
 			// Capture the tombstone ID
@@ -325,7 +325,7 @@ func (api_result APIV2Result) ToTweetTrove() (TweetTrove, error) {
 		// and the retweeted TweetResults; it should only be parsed for the real Tweet, not the Retweet
 		main_tweet, is_ok := ret.Tweets[TweetID(api_result.Result.ID)]
 		if !is_ok {
-			panic(fmt.Errorf("Tweet trove didn't contain its own tweet with ID %d:\n  %w", api_result.Result.ID, EXTERNAL_API_ERROR))
+			panic(fmt.Errorf("Tweet trove didn't contain its own tweet with ID %d:\n  %w", api_result.Result.ID, ErrExternalApiError))
 		}
 		if api_result.Result.Card.Legacy.Name == "summary_large_image" || api_result.Result.Card.Legacy.Name == "player" {
 			url := api_result.Result.Card.ParseAsUrl()
@@ -341,7 +341,7 @@ func (api_result APIV2Result) ToTweetTrove() (TweetTrove, error) {
 				main_tweet.Urls[i] = url
 			}
 			if !found {
-				panic(fmt.Errorf("Couldn't find the url in tweet ID %d:\n  %w", api_result.Result.Legacy.ID, EXTERNAL_API_ERROR))
+				panic(fmt.Errorf("Couldn't find the url in tweet ID %d:\n  %w", api_result.Result.Legacy.ID, ErrExternalApiError))
 			}
 		} else if strings.Index(api_result.Result.Card.Legacy.Name, "poll") == 0 {
 			// Process polls
@@ -516,7 +516,7 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 				if errors.Is(err, ErrorIsTombstone) {
 					// TODO: do something with tombstones in replies to a Tweet Detail
 					// For now, just ignore tombstones in the replies
-				} else if errors.Is(err, ERR_NO_TWEET) {
+				} else if errors.Is(err, ErrNoTweet) {
 					// TODO: handle this; some information can be recovered, we're just throwing it out
 				} else if err != nil {
 					panic(err)
@@ -558,7 +558,7 @@ func (e APIV2Entry) ToTweetTrove() TweetTrove {
 				panic(fmt.Errorf(
 					"Unknown tombstone text %q:\n  %w",
 					e.Content.ItemContent.TweetResults.Result.Tombstone.Text.Text,
-					EXTERNAL_API_ERROR,
+					ErrExternalApiError,
 				))
 			}
 
@@ -1110,7 +1110,7 @@ func (api *API) GetTweetDetail(tweet_id TweetID, cursor string) (APIV2Response, 
 		if response.Errors[0].Message == "_Missing: No status found with that ID." {
 			return response, ErrDoesntExist
 		}
-		return response, fmt.Errorf("%w: %s", EXTERNAL_API_ERROR, response.Errors[0].Message)
+		return response, fmt.Errorf("%w: %s", ErrExternalApiError, response.Errors[0].Message)
 	}
 
 	return response, err

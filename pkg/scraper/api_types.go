@@ -89,15 +89,27 @@ func ParseAPIVideo(apiVideo APIExtendedMedia) Video {
 	case string:
 		view_count = 0
 	case map[string]interface{}:
-		OK_entry, ok := r.(map[string]interface{})["ok"]
-		if !ok {
+		r_map, is_ok := r.(map[string]interface{})
+		if !is_ok {
+			panic("'r' wasn't a map")
+		}
+		OK_entry, is_ok := r_map["ok"]
+		if !is_ok {
 			panic("No 'ok' value found in the R!")
 		}
-		view_count_str, ok := OK_entry.(map[string]interface{})["viewCount"]
-		view_count = int_or_panic(view_count_str.(string))
-		if !ok {
+		ok_entry_map, is_ok := OK_entry.(map[string]interface{})
+		if !is_ok {
+			panic("ok_entry wasn't a map")
+		}
+		_view_count, is_ok := ok_entry_map["viewCount"]
+		if !is_ok {
 			panic("No 'viewCount' value found in the OK!")
 		}
+		view_count_str, is_ok := _view_count.(string)
+		if !is_ok {
+			panic("'view_count wasn't a string")
+		}
+		view_count = int_or_panic(view_count_str)
 	}
 
 	video_parsed_url, err := url.Parse(video_remote_url)
@@ -422,7 +434,7 @@ func ParseSingleTweet(t APITweet) (ret Tweet, err error) {
 		ret.PostedAt, err = TimestampFromString(t.CreatedAt)
 		if err != nil {
 			if ret.ID == 0 {
-				return Tweet{}, fmt.Errorf("unable to parse tweet: %w", ERR_NO_TWEET)
+				return Tweet{}, fmt.Errorf("unable to parse tweet: %w", ErrNoTweet)
 			}
 			return Tweet{}, fmt.Errorf("Error parsing time on tweet ID %d:\n  %w", ret.ID, err)
 		}
@@ -482,7 +494,7 @@ func ParseSingleTweet(t APITweet) (ret Tweet, err error) {
 	for _, mention := range strings.Split(t.Entities.ReplyMentions, " ") {
 		if mention != "" {
 			if mention[0] != '@' {
-				panic(fmt.Errorf("Unknown ReplyMention value %q:\n  %w", t.Entities.ReplyMentions, EXTERNAL_API_ERROR))
+				panic(fmt.Errorf("Unknown ReplyMention value %q:\n  %w", t.Entities.ReplyMentions, ErrExternalApiError))
 			}
 			ret.ReplyMentions = append(ret.ReplyMentions, mention[1:])
 		}
@@ -530,7 +542,7 @@ func ParseSingleTweet(t APITweet) (ret Tweet, err error) {
 
 	// Process tombstones and other metadata
 	ret.TombstoneType = t.TombstoneText
-	ret.IsStub = !(ret.TombstoneType == "")
+	ret.IsStub = (ret.TombstoneType != "")
 	ret.LastScrapedAt = TimestampFromUnix(0) // Caller will change this for the tweet that was actually scraped
 	ret.IsConversationScraped = false        // Safe due to the "No Worsening" principle
 
@@ -850,7 +862,7 @@ func (t *APIv1Response) HandleTombstones() []UserHandle {
 			short_text, ok := tombstone_types[entry.Content.Item.Content.Tombstone.TombstoneInfo.RichText.Text]
 			if !ok {
 				panic(fmt.Errorf("Unknown tombstone text %q:\n  %w",
-					entry.Content.Item.Content.Tombstone.TombstoneInfo.RichText.Text, EXTERNAL_API_ERROR))
+					entry.Content.Item.Content.Tombstone.TombstoneInfo.RichText.Text, ErrExternalApiError))
 			}
 			tombstoned_tweet.TombstoneText = short_text
 
