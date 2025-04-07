@@ -1,6 +1,6 @@
 # Use Alpine because it comes with musl by default; point of this build is to staticallly compile libc
 # Pinning version 1.21.4 because 1.22 crashes when compiling go-sqlite3 on something in `sqlite3-binding.c`.
-from golang:1.21.4-alpine
+from golang:1.23.8-alpine
 
 run apk add --no-cache git sqlite-libs sqlite-dev build-base mingw-w64-gcc curl vim grep
 
