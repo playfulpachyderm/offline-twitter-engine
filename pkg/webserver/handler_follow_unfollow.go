@@ -8,7 +8,7 @@ import (
 )
 
 func (app *Application) UserFollow(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'UserFollow' handler (path: %q)", r.URL.Path)
+	app.TraceLog.Printf("'UserFollow' handler (path: %q)", r.URL.Path)
 
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", 405)
@@ -34,7 +34,7 @@ func (app *Application) UserFollow(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) UserUnfollow(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'UserUnfollow' handler (path: %q)", r.URL.Path)
+	app.TraceLog.Printf("'UserUnfollow' handler (path: %q)", r.URL.Path)
 
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", 405)

@@ -36,7 +36,7 @@ func (f *LoginForm) Validate() {
 }
 
 func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'Login' handler (path: %q)", r.URL.Path)
+	app.TraceLog.Printf("'Login' handler (path: %q)", r.URL.Path)
 	var form LoginForm
 	if r.Method == "POST" {
 		data, err := io.ReadAll(r.Body)
@@ -112,7 +112,7 @@ func (app *Application) after_login(w http.ResponseWriter, r *http.Request, api 
 }
 
 func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'change-session' handler (path: %q)", r.URL.Path)
+	app.TraceLog.Printf("'change-session' handler (path: %q)", r.URL.Path)
 	form := struct {
 		AccountName string `json:"account"`
 	}{}

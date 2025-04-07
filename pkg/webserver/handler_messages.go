@@ -228,7 +228,7 @@ func (app *Application) messages_refresh_list(w http.ResponseWriter, r *http.Req
 }
 
 func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'Messages' handler (path: %q)", r.URL.Path)
+	app.TraceLog.Printf("'Messages' handler (path: %q)", r.URL.Path)
 
 	if app.ActiveUser.ID == 0 {
 		app.error_401(w, r)

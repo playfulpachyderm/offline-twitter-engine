@@ -12,7 +12,6 @@ import (
 	"golang.org/x/net/html"
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
-	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/webserver"
 )
 
 func TestMessagesIndexPageRequiresActiveUser(t *testing.T) {
@@ -61,9 +60,7 @@ func TestMessagesRoomRequiresCorrectUser(t *testing.T) {
 	// Wrong user (not in the chat)
 	// Copied from `do_request_with_active_user`
 	recorder := httptest.NewRecorder()
-	app := webserver.NewApp(profile)
-	app.IsScrapingDisabled = true
-	app.ActiveUser = User{ID: 782982734, Handle: "Not a real user"} // Simulate a login
+	app := make_testing_app(&User{ID: 782982734, Handle: "Not a real user"}) // Simulate a login
 	app.WithMiddlewares().ServeHTTP(recorder, httptest.NewRequest("GET", "/messages/1488963321701171204-1178839081222115328", nil))
 	resp2 := recorder.Result()
 	require.Equal(404, resp2.StatusCode)

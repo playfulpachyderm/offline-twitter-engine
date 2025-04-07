@@ -5,7 +5,7 @@ import (
 )
 
 func (app *Application) NavSidebarPollUpdates(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'NavSidebarPollUpdates' handler (path: %q)", r.URL.Path)
+	app.TraceLog.Printf("'NavSidebarPollUpdates' handler (path: %q)", r.URL.Path)
 
 	// Must be an HTMX request, otherwise HTTP 400
 	if !is_htmx(r) {

@@ -10,7 +10,7 @@ import (
 )
 
 func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'UserFeed' handler (path: %q)", r.URL.Path)
+	app.TraceLog.Printf("'UserFeed' handler (path: %q)", r.URL.Path)
 
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 

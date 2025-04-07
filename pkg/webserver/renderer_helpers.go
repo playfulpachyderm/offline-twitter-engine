@@ -53,7 +53,6 @@ func (d PageGlobalData) GetFocusedTweetID() TweetID {
 	return d.FocusedTweetID
 }
 func (d PageGlobalData) GetSearchText() string {
-	fmt.Println(d.SearchText)
 	return d.SearchText
 }
 func (d PageGlobalData) GlobalData() PageGlobalData {

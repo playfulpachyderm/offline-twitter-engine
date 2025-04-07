@@ -100,7 +100,7 @@ func (app *Application) UnlikeTweet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'TweetDetail' handler (path: %q)", r.URL.Path)
+	app.TraceLog.Printf("'TweetDetail' handler (path: %q)", r.URL.Path)
 
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	val, err := strconv.Atoi(parts[1])

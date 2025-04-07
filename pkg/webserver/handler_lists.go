@@ -75,7 +75,7 @@ func (app *Application) ListDelete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) ListDetail(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'ListDetail' handler (path: %q)", r.URL.Path)
+	app.TraceLog.Printf("'ListDetail' handler (path: %q)", r.URL.Path)
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 
 	if len(parts) == 1 && parts[0] == "" {
@@ -132,7 +132,7 @@ func (app *Application) ListRemoveUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) Lists(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'Lists' handler (path: %q)", r.URL.Path)
+	app.TraceLog.Printf("'Lists' handler (path: %q)", r.URL.Path)
 
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 

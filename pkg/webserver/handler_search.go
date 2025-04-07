@@ -43,7 +43,7 @@ func (app *Application) SearchUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'Search' handler (path: %q)", r.URL.Path)
+	app.TraceLog.Printf("'Search' handler (path: %q)", r.URL.Path)
 
 	search_text := strings.Trim(r.URL.Path, "/")
 	if search_text == "" {

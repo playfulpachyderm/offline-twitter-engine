@@ -16,7 +16,7 @@ type TimelineData struct {
 // TODO: deprecated-offline-follows
 
 func (app *Application) OfflineTimeline(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'Timeline' handler (path: %q)", r.URL.Path)
+	app.TraceLog.Printf("'Timeline' handler (path: %q)", r.URL.Path)
 
 	c := NewTimelineCursor()
 	err := parse_cursor_value(&c, r)
@@ -44,7 +44,7 @@ func (app *Application) OfflineTimeline(w http.ResponseWriter, r *http.Request) 
 }
 
 func (app *Application) Timeline(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'Timeline' handler (path: %q)", r.URL.Path)
+	app.TraceLog.Printf("'Timeline' handler (path: %q)", r.URL.Path)
 
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	if len(parts) > 1 && parts[1] == "offline" {

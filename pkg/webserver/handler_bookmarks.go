@@ -9,7 +9,7 @@ import (
 )
 
 func (app *Application) Bookmarks(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'Bookmarks' handler (path: %q)", r.URL.Path)
+	app.TraceLog.Printf("'Bookmarks' handler (path: %q)", r.URL.Path)
 
 	// Run a scrape if needed
 	if r.URL.Query().Has("scrape") {

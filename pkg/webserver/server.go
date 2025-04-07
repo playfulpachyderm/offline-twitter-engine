@@ -20,8 +20,8 @@ import (
 type Middleware func(http.Handler) http.Handler
 
 type Application struct {
-	accessLog *log.Logger
-	traceLog  *log.Logger
+	AccessLog *log.Logger
+	TraceLog  *log.Logger
 	InfoLog   *log.Logger
 	ErrorLog  *log.Logger
 
@@ -36,8 +36,8 @@ type Application struct {
 
 func NewApp(profile Profile) Application {
 	ret := Application{
-		accessLog: log.New(os.Stdout, "ACCESS\t", log.Ldate|log.Ltime),
-		traceLog:  log.New(os.Stdout, "TRACE\t", log.Ldate|log.Ltime),
+		AccessLog: log.New(os.Stdout, "ACCESS\t", log.Ldate|log.Ltime),
+		TraceLog:  log.New(os.Stdout, "TRACE\t", log.Ldate|log.Ltime),
 		InfoLog:   log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime),
 		ErrorLog:  log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile),
 

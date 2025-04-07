@@ -25,7 +25,7 @@ func (app *Application) logRequest(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 		duration := time.Since(t)
 
-		app.accessLog.Printf("%s - %s %s %s\t%s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI(), duration)
+		app.AccessLog.Printf("%s - %s %s %s\t%s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI(), duration)
 	})
 }
 

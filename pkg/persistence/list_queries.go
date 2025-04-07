@@ -124,6 +124,5 @@ func (p Profile) GetListsForUser(u_id UserID) []List {
 	if err != nil {
 		panic(err)
 	}
-	println(ret)
 	return ret
 }

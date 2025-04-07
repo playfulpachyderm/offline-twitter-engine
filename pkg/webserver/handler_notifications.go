@@ -7,7 +7,7 @@ import (
 )
 
 func (app *Application) Notifications(w http.ResponseWriter, r *http.Request) {
-	app.traceLog.Printf("'Notifications' handler (path: %q)", r.URL.Path)
+	app.TraceLog.Printf("'Notifications' handler (path: %q)", r.URL.Path)
 
 	if app.ActiveUser.ID == 0 {
 		app.error_401(w, r)
