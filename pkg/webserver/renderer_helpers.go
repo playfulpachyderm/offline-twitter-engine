@@ -21,6 +21,7 @@ type NotificationBubbles struct {
 
 // TODO: this name sucks
 type PageGlobalData struct {
+	ActiveUser User
 	TweetTrove
 	SearchText     string
 	FocusedTweetID TweetID

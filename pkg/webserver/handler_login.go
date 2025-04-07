@@ -70,7 +70,7 @@ func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
 		LoginForm:        form,
 		ExistingSessions: app.Profile.ListSessions(),
 	}
-	app.buffered_render_page(w, "tpl/login.tpl", PageGlobalData{}, &data)
+	app.buffered_render_page2(w, "tpl/login.tpl", PageGlobalData{}, &data)
 }
 
 func (app *Application) after_login(w http.ResponseWriter, r *http.Request, api scraper.API) {

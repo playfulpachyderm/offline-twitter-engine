@@ -49,7 +49,7 @@ func (app *Application) ListDetailFeed(w http.ResponseWriter, r *http.Request) {
 		// It's a Show More request
 		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
 	} else {
-		app.buffered_render_page(
+		app.buffered_render_page2(
 			w,
 			"tpl/list.tpl",
 			PageGlobalData{TweetTrove: feed.TweetTrove},
@@ -65,7 +65,7 @@ func (app *Application) ListDetailUsers(w http.ResponseWriter, r *http.Request) 
 	data, trove := NewListData(users)
 	data.List = list
 	data.ActiveTab = "users"
-	app.buffered_render_page(w, "tpl/list.tpl", PageGlobalData{TweetTrove: trove}, data)
+	app.buffered_render_page2(w, "tpl/list.tpl", PageGlobalData{TweetTrove: trove}, data)
 }
 
 func (app *Application) ListDelete(w http.ResponseWriter, r *http.Request) {
@@ -176,7 +176,7 @@ func (app *Application) Lists(w http.ResponseWriter, r *http.Request) {
 			trove.Users[u.ID] = u
 		}
 	}
-	app.buffered_render_page(
+	app.buffered_render_page2(
 		w,
 		"tpl/list_of_lists.tpl",
 		PageGlobalData{TweetTrove: trove},

@@ -157,7 +157,7 @@ func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 
 	data.TweetDetailView = twt_detail
 
-	app.buffered_render_page(
+	app.buffered_render_page2(
 		w,
 		"tpl/tweet_detail.tpl",
 		PageGlobalData{TweetTrove: twt_detail.TweetTrove, FocusedTweetID: data.MainTweetID, Toasts: toasts},

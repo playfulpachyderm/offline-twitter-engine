@@ -39,7 +39,7 @@ func (app *Application) SearchUsers(w http.ResponseWriter, r *http.Request) {
 		ret.TweetTrove.Users[u.ID] = u
 		ret.UserIDs = append(ret.UserIDs, u.ID)
 	}
-	app.buffered_render_page(w, "tpl/search.tpl", PageGlobalData{TweetTrove: ret.Feed.TweetTrove, SearchText: ret.SearchText}, ret)
+	app.buffered_render_page2(w, "tpl/search.tpl", PageGlobalData{TweetTrove: ret.Feed.TweetTrove, SearchText: ret.SearchText}, ret)
 }
 
 func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
@@ -140,6 +140,6 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 		// It's a Show More request
 		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: data.Feed.TweetTrove, SearchText: search_text}, data)
 	} else {
-		app.buffered_render_page(w, "tpl/search.tpl", PageGlobalData{TweetTrove: data.Feed.TweetTrove, SearchText: search_text}, data)
+		app.buffered_render_page2(w, "tpl/search.tpl", PageGlobalData{TweetTrove: data.Feed.TweetTrove, SearchText: search_text}, data)
 	}
 }

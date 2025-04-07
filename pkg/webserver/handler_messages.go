@@ -24,7 +24,7 @@ type MessageData struct {
 
 func (app *Application) messages_index(w http.ResponseWriter, r *http.Request) {
 	chat_view_data, global_data := app.get_message_global_data()
-	app.buffered_render_page(w, "tpl/messages.tpl", global_data, chat_view_data)
+	app.buffered_render_page2(w, "tpl/messages.tpl", global_data, chat_view_data)
 }
 
 func (app *Application) message_mark_as_read(w http.ResponseWriter, r *http.Request) {
@@ -204,7 +204,7 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	app.buffered_render_page(w, "tpl/messages.tpl", global_data, chat_view_data)
+	app.buffered_render_page2(w, "tpl/messages.tpl", global_data, chat_view_data)
 }
 
 func (app *Application) get_message_global_data() (MessageData, PageGlobalData) {

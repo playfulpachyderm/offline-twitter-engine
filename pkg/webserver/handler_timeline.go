@@ -34,7 +34,7 @@ func (app *Application) OfflineTimeline(w http.ResponseWriter, r *http.Request) 
 		// It's a Show More request
 		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
 	} else {
-		app.buffered_render_page(
+		app.buffered_render_page2(
 			w,
 			"tpl/offline_timeline.tpl",
 			PageGlobalData{TweetTrove: feed.TweetTrove},
@@ -79,7 +79,7 @@ func (app *Application) Timeline(w http.ResponseWriter, r *http.Request) {
 		// It's a Show More request
 		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
 	} else {
-		app.buffered_render_page(
+		app.buffered_render_page2(
 			w,
 			"tpl/offline_timeline.tpl",
 			PageGlobalData{TweetTrove: feed.TweetTrove},
