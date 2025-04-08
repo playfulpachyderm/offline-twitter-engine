@@ -1,5 +1,3 @@
-{{define "title"}}{{.Title}}{{end}}
-
 {{define "main"}}
   {{ $user := (user .HeaderUserID)}}
   {{template "user-header" $user}}

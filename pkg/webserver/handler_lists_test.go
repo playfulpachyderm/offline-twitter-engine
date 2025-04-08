@@ -14,6 +14,7 @@ import (
 )
 
 func TestListsIndex(t *testing.T) {
+	assert := assert.New(t)
 	require := require.New(t)
 	resp := do_request(httptest.NewRequest("GET", "/lists", nil))
 	require.Equal(resp.StatusCode, 200)
@@ -21,7 +22,10 @@ func TestListsIndex(t *testing.T) {
 	require.NoError(err)
 
 	// Check that there's at least 2 Lists
-	assert.True(t, len(cascadia.QueryAll(root, selector(".list-preview"))) >= 2)
+	assert.True(len(cascadia.QueryAll(root, selector(".list-preview"))) >= 2)
+
+	// Check page title
+	assert.Equal(cascadia.Query(root, selector("title")).FirstChild.Data, "Lists | Offline Twitter")
 }
 
 // Show the users who are on a List
@@ -34,6 +38,9 @@ func TestListDetailUsers(t *testing.T) {
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".users-list .author-info")), 5)
+
+	// Check page title
+	assert.Equal(cascadia.Query(root, selector("title")).FirstChild.Data, "Offline Follows | Offline Twitter")
 }
 
 // Show the timeline geenrated for a List
@@ -55,6 +62,9 @@ func TestListFeed(t *testing.T) {
 	root2, err := html.Parse(resp1.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root2, selector(":not(.tweet__quoted-tweet) > .tweet")), 2)
+
+	// Check page title
+	assert.Equal(cascadia.Query(root, selector("title")).FirstChild.Data, "Bronze Age | Offline Twitter")
 }
 
 func TestListFeedInvalidCursor(t *testing.T) {

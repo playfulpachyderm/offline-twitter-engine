@@ -1,5 +1,3 @@
-{{define "title"}}@{{(user .UserID).Handle}}{{end}}
-
 {{define "main"}}
   {{$user := (user .UserID)}}
   <div class="user-feed-header">

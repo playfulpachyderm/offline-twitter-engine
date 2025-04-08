@@ -1,5 +1,3 @@
-{{define "title"}}Notifications{{end}}
-
 {{define "main"}}
   <div class="notifications-header">
     <div class="row row--spread">

@@ -1,5 +1,3 @@
-{{define "title"}}Search{{end}}
-
 {{define "main"}}
   <div class="search-header">
     <div class="row row--spread">

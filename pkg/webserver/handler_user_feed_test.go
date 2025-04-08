@@ -23,8 +23,7 @@ func TestUserFeed(t *testing.T) {
 
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	title_node := cascadia.Query(root, selector("title"))
-	assert.Equal(title_node.FirstChild.Data, "@Cernovich | Offline Twitter")
+	assert.Equal(cascadia.Query(root, selector("title")).FirstChild.Data, "@Cernovich | Offline Twitter")
 
 	assert.Len(cascadia.QueryAll(root, selector(".timeline > .tweet")), 8)
 	assert.Len(cascadia.QueryAll(root, selector(".timeline > .pinned-tweet")), 1)

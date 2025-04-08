@@ -51,10 +51,6 @@ func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file st
 	panic_if(err)
 
 	main_component := templ.FromGoHTML(tpl.Lookup("main"), tpl_data)
-	b := bytes.Buffer{}
-	tpl.Lookup("title").Execute(&b, tpl_data)
-	b.WriteString(" | Offline Twitter")
-	global_data.Title = b.String()
 
 	buf := new(bytes.Buffer)
 	Base(tpl, global_data, main_component).Render(context.Background(), buf)
@@ -101,13 +97,13 @@ func Base(go_tpl *template.Template, global_data PageGlobalData, main_component 
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(global_data.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/webserver/renderer_helpers.templ`, Line: 73, Col: 29}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/webserver/renderer_helpers.templ`, Line: 79, Col: 29}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</title><link rel=\"stylesheet\" href=\"/static/styles.css\"><link rel=\"shortcut icon\" href=\"/static/twitter.ico\" type=\"image/x-icon\"><link rel=\"stylesheet\" href=\"/static/vendor/fonts.css\"><link rel=\"manifest\" href=\"/static/pwa/manifest.json\"><script src=\"/static/vendor/htmx.min.js\" integrity=\"sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV\" crossorigin=\"anonymous\"></script><script src=\"/static/vendor/htmx-extension-json-enc.js\"></script><script>\n\t\t\t\tif ('serviceWorker' in navigator) {\n\t\t\t\t\tnavigator.serviceWorker.register('/static/pwa/service-worker.js')\n\t\t\t\t\t\t.then(function(registration) {\n\t\t\t\t\t\t\tconsole.log('Service Worker registered with scope:', registration.scope);\n\t\t\t\t\t\t}).catch(function(error) {\n\t\t\t\t\t\t\tconsole.log('Service Worker registration failed:', error);\n\t\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t</script><script>\n\t\t\t\t// Set default scrolling (\"instant\", \"smooth\" or \"auto\")\n\t\t\t\t// htmx.config.scrollBehavior = \"instant\";\n\n\t\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\t\t/**\n\t\t\t\t\t * Consider HTTP 4xx and 500 errors to contain valid HTMX, and swap them as usual\n\t\t\t\t\t */\n\t\t\t\t\tdocument.body.addEventListener('htmx:beforeSwap', function(e) {\n\t\t\t\t\t\tif (e.detail.xhr.status === 500) {\n\t\t\t\t\t\t\te.detail.shouldSwap = true;\n\t\t\t\t\t\t\te.detail.isError = true;\n\t\t\t\t\t\t} else if (e.detail.xhr.status >= 400 && e.detail.xhr.status < 500) {\n\t\t\t\t\t\t\te.detail.shouldSwap = true;\n\t\t\t\t\t\t\te.detail.isError = false;\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t</script></head><body><header class=\"row search-bar\"><a onclick=\"window.history.back()\" class=\"button search-bar__back-button\"><img class=\"svg-icon\" src=\"/static/icons/back.svg\" width=\"24\" height=\"24\"></a><form class=\"search-bar__form\" hx-get=\"/search\" hx-push-url=\"true\" hx-target=\"body\" hx-swap=\"innerHTML show:window:top\"><input id=\"searchBar\" class=\"search-bar__input\" name=\"q\" placeholder=\"Search\" type=\"text\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" | Offline Twitter</title><link rel=\"stylesheet\" href=\"/static/styles.css\"><link rel=\"shortcut icon\" href=\"/static/twitter.ico\" type=\"image/x-icon\"><link rel=\"stylesheet\" href=\"/static/vendor/fonts.css\"><link rel=\"manifest\" href=\"/static/pwa/manifest.json\"><script src=\"/static/vendor/htmx.min.js\" integrity=\"sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV\" crossorigin=\"anonymous\"></script><script src=\"/static/vendor/htmx-extension-json-enc.js\"></script><script>\n\t\t\t\tif ('serviceWorker' in navigator) {\n\t\t\t\t\tnavigator.serviceWorker.register('/static/pwa/service-worker.js')\n\t\t\t\t\t\t.then(function(registration) {\n\t\t\t\t\t\t\tconsole.log('Service Worker registered with scope:', registration.scope);\n\t\t\t\t\t\t}).catch(function(error) {\n\t\t\t\t\t\t\tconsole.log('Service Worker registration failed:', error);\n\t\t\t\t\t\t});\n\t\t\t\t}\n\t\t\t</script><script>\n\t\t\t\t// Set default scrolling (\"instant\", \"smooth\" or \"auto\")\n\t\t\t\thtmx.config.scrollBehavior = \"instant\";\n\n\t\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\t\t/**\n\t\t\t\t\t * Consider HTTP 4xx and 500 errors to contain valid HTMX, and swap them as usual\n\t\t\t\t\t */\n\t\t\t\t\tdocument.body.addEventListener('htmx:beforeSwap', function(e) {\n\t\t\t\t\t\tif (e.detail.xhr.status === 500) {\n\t\t\t\t\t\t\te.detail.shouldSwap = true;\n\t\t\t\t\t\t\te.detail.isError = true;\n\t\t\t\t\t\t} else if (e.detail.xhr.status >= 400 && e.detail.xhr.status < 500) {\n\t\t\t\t\t\t\te.detail.shouldSwap = true;\n\t\t\t\t\t\t\te.detail.isError = false;\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t</script></head><body><header class=\"row search-bar\"><a onclick=\"window.history.back()\" class=\"button search-bar__back-button\"><img class=\"svg-icon\" src=\"/static/icons/back.svg\" width=\"24\" height=\"24\"></a><form class=\"search-bar__form\" hx-get=\"/search\" hx-push-url=\"true\" hx-target=\"body\" hx-swap=\"innerHTML show:window:top\"><input id=\"searchBar\" class=\"search-bar__input\" name=\"q\" placeholder=\"Search\" type=\"text\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -119,7 +115,7 @@ func Base(go_tpl *template.Template, global_data PageGlobalData, main_component 
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(global_data.GetSearchText())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/webserver/renderer_helpers.templ`, Line: 122, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/webserver/renderer_helpers.templ`, Line: 128, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {

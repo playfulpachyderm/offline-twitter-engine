@@ -30,6 +30,8 @@ func TestNotifications(t *testing.T) {
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".notification")), 6)
+	// Check page title
+	assert.Equal(cascadia.Query(root, selector("title")).FirstChild.Data, "Notifications | Offline Twitter")
 
 	// Show more
 	req = httptest.NewRequest("GET", "/notifications?cursor=1726604756351", nil)

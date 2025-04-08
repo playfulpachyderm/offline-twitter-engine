@@ -1,5 +1,3 @@
-{{define "title"}}Bookmarks{{end}}
-
 {{define "main"}}
   <div class="bookmarks-feed-header">
     <div class="row row--spread">

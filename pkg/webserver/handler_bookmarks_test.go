@@ -21,6 +21,7 @@ func TestBookmarksTab(t *testing.T) {
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
 	tweets := cascadia.QueryAll(root, selector(".timeline > .tweet"))
+	assert.Equal(cascadia.Query(root, selector("title")).FirstChild.Data, "Bookmarks | Offline Twitter")
 	assert.Len(tweets, 2)
 
 	// With pagination

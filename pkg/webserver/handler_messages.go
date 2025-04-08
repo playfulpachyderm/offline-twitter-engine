@@ -216,7 +216,7 @@ func (app *Application) get_message_global_data() (MessageData, PageGlobalData) 
 	}
 
 	// Initialize the Global Data from the chat list data (last message previews, etc)
-	global_data := PageGlobalData{TweetTrove: chat_view_data.DMChatView.TweetTrove}
+	global_data := PageGlobalData{Title: "Messages", TweetTrove: chat_view_data.DMChatView.TweetTrove}
 
 	return chat_view_data, global_data
 }

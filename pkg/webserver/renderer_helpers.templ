@@ -43,10 +43,6 @@ func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file st
 	panic_if(err)
 
 	main_component := templ.FromGoHTML(tpl.Lookup("main"), tpl_data)
-	b := bytes.Buffer{}
-	tpl.Lookup("title").Execute(&b, tpl_data)
-	b.WriteString(" | Offline Twitter")
-	global_data.Title = b.String()
 
 	buf := new(bytes.Buffer)
 	Base(tpl, global_data, main_component).Render(context.Background(), buf)
@@ -70,7 +66,7 @@ templ Base(go_tpl *template.Template, global_data PageGlobalData, main_component
 	<html lang='en'>
 		<head>
 			<meta charset='utf-8'>
-			<title>{ global_data.Title }</title>
+			<title>{ global_data.Title } | Offline Twitter</title>
 			<link rel='stylesheet' href='/static/styles.css'>
 			<link rel='shortcut icon' href='/static/twitter.ico' type='image/x-icon'>
 			<link rel='stylesheet' href='/static/vendor/fonts.css'>

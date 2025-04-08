@@ -37,7 +37,7 @@ func (app *Application) OfflineTimeline(w http.ResponseWriter, r *http.Request) 
 		app.buffered_render_page2(
 			w,
 			"tpl/offline_timeline.tpl",
-			PageGlobalData{TweetTrove: feed.TweetTrove},
+			PageGlobalData{Title: "Timeline", TweetTrove: feed.TweetTrove},
 			TimelineData{Feed: feed, ActiveTab: "Offline"},
 		)
 	}
@@ -82,7 +82,7 @@ func (app *Application) Timeline(w http.ResponseWriter, r *http.Request) {
 		app.buffered_render_page2(
 			w,
 			"tpl/offline_timeline.tpl",
-			PageGlobalData{TweetTrove: feed.TweetTrove},
+			PageGlobalData{Title: "Timeline", TweetTrove: feed.TweetTrove},
 			TimelineData{Feed: feed, ActiveTab: "User feed"},
 		)
 	}

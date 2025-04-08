@@ -1,6 +1,3 @@
-{{define "title"}}Tweet{{end}}
-
-
 {{define "main"}}
   <div class="tweet-detail">
     {{range .ParentIDs}}

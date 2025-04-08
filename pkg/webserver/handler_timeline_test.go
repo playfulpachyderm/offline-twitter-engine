@@ -22,8 +22,7 @@ func TestTimeline(t *testing.T) {
 
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	title_node := cascadia.Query(root, selector("title"))
-	assert.Equal(title_node.FirstChild.Data, "Timeline | Offline Twitter")
+	assert.Equal(cascadia.Query(root, selector("title")).FirstChild.Data, "Timeline | Offline Twitter")
 
 	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
 	assert.Len(tweet_nodes, 21)
@@ -62,8 +61,7 @@ func TestUserFeedTimeline(t *testing.T) {
 
 	root, err := html.Parse(resp.Body)
 	require.NoError(err)
-	title_node := cascadia.Query(root, selector("title"))
-	assert.Equal(title_node.FirstChild.Data, "Timeline | Offline Twitter")
+	assert.Equal(cascadia.Query(root, selector("title")).FirstChild.Data, "Timeline | Offline Twitter")
 
 	tweet_nodes := cascadia.QueryAll(root, selector(".timeline > .tweet"))
 	assert.Len(tweet_nodes, 1)

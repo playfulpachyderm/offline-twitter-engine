@@ -47,6 +47,8 @@ func TestMessagesIndexPage(t *testing.T) {
 	require.NoError(err)
 	assert.Len(cascadia.QueryAll(root, selector(".chat-list .chat-list-entry")), 2)
 	assert.Len(cascadia.QueryAll(root, selector(".chat-view .dm-message")), 0) // No messages until you click on one
+	// Check page title
+	assert.Equal(cascadia.Query(root, selector("title")).FirstChild.Data, "Messages | Offline Twitter")
 }
 
 // Users should only be able to open chats they're a member of
@@ -91,6 +93,8 @@ func TestMessagesRoom(t *testing.T) {
 		cascadia.Query(poller, selector("input[name='latest_timestamp']")).Attr,
 		html.Attribute{Key: "value", Val: "1686025129144"},
 	)
+	// Check page title
+	assert.Equal(cascadia.Query(root, selector("title")).FirstChild.Data, "Messages | Offline Twitter")
 }
 
 // Loading the page since a given message

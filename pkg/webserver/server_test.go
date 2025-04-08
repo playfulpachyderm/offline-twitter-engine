@@ -48,7 +48,6 @@ func make_testing_app(active_user *User) webserver.Application {
 	app.AccessLog.SetOutput(io.Discard)
 	app.TraceLog.SetOutput(io.Discard)
 	app.InfoLog.SetOutput(io.Discard)
-	app.ErrorLog.SetOutput(io.Discard)
 	if active_user != nil {
 		app.ActiveUser = *active_user
 	}

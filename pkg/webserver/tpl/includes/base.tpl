@@ -3,7 +3,7 @@
   <html lang='en'>
     <head>
       <meta charset='utf-8'>
-      <title>{{template "title" .}} | Offline Twitter</title>
+      <title>{{ (global_data).Title }} | Offline Twitter</title>
       <link rel='stylesheet' href='/static/styles.css'>
       <link rel='shortcut icon' href='/static/twitter.ico' type='image/x-icon'>
       <link rel='stylesheet' href='/static/vendor/fonts.css'>

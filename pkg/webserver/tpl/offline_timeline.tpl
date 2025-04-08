@@ -1,5 +1,3 @@
-{{define "title"}}Timeline{{end}}
-
 {{define "main"}}
   <div class="timeline-header">
     <div class="tabs row">

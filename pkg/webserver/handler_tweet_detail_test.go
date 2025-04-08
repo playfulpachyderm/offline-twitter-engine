@@ -25,6 +25,8 @@ func TestTweetDetail(t *testing.T) {
 	require.NoError(err)
 	tweet_nodes := cascadia.QueryAll(root, selector(".tweet"))
 	assert.Len(tweet_nodes, 4)
+	// Check page title
+	assert.Equal(cascadia.Query(root, selector("title")).FirstChild.Data, "Tweet | Offline Twitter")
 }
 
 func TestTweetDetailMissing(t *testing.T) {

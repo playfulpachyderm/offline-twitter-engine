@@ -1,5 +1,3 @@
-{{define "title"}}{{.List.Name}}{{end}}
-
 {{define "main"}}
   <div class="list-feed-header">
     <h1>{{.List.Name}}</h1>

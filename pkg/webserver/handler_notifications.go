@@ -37,7 +37,7 @@ func (app *Application) Notifications(w http.ResponseWriter, r *http.Request) {
 		// It's a Show More request
 		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
 	} else {
-		app.buffered_render_page(w, "tpl/notifications.tpl", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
+		app.buffered_render_page2(w, "tpl/notifications.tpl", PageGlobalData{Title: "Notifications", TweetTrove: feed.TweetTrove}, feed)
 	}
 }
 

@@ -48,7 +48,7 @@ func (app *Application) Bookmarks(w http.ResponseWriter, r *http.Request) {
 		app.buffered_render_page2(
 			w,
 			"tpl/bookmarks.tpl",
-			PageGlobalData{TweetTrove: feed.TweetTrove},
+			PageGlobalData{Title: "Bookmarks", TweetTrove: feed.TweetTrove},
 			TimelineData{Feed: feed},
 		)
 	}

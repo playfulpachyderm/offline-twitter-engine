@@ -1,5 +1,3 @@
-{{define "title"}}Login{{end}}
-
 {{define "main"}}
 <div class="login-page">
   <h1>Login</h1>

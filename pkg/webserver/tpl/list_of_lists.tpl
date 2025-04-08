@@ -1,5 +1,3 @@
-{{define "title"}}Lists{{end}}
-
 {{define "main"}}
   <h1>Lists</h1>
 
