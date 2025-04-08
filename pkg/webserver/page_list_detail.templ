@@ -1,0 +1,32 @@
+package webserver
+
+import (
+	"fmt"
+
+	"html/template"
+)
+
+templ ListDetailPage(go_tpl *template.Template, global_data PageGlobalData, data ListData) {
+	<div class="list-feed-header">
+		<h1>{ data.List.Name }</h1>
+
+		<div class="tabs row">
+			@tab("Feed", data.ActiveTab == "feed", fmt.Sprintf("/lists/%d", data.List.ID))
+			@tab("Users", data.ActiveTab == "users", fmt.Sprintf("/lists/%d/users", data.List.ID))
+		</div>
+	</div>
+
+	if data.ActiveTab == "feed" {
+		<div class="timeline list-feed-timeline">
+			@TimelineComponent(go_tpl, data.Feed)
+		</div>
+	} else {
+		<div class="add-users-container">
+			<form action={ templ.URL(fmt.Sprintf("/lists/%d/add_user", data.List.ID)) }>
+				<input type="text" name="user_handle" placeholder="@some_user_handle" style="width: 15em" />
+				<input type="submit" value="Add user" />
+			</form>
+		</div>
+		@UsersListComponent(global_data, data.UserIDs, "Remove", fmt.Sprintf("/lists/%d/remove_user", data.List.ID))
+	}
+}

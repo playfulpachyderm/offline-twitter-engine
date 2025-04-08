@@ -1,0 +1,13 @@
+package webserver
+
+templ tab(name string, is_active bool, href string) {
+	{{ classname := "tabs__tab " }}
+	{{ if is_active {
+		classname = "tabs__tab tabs__tab--active"
+	} }}
+	<a class={ classname }
+		href={ templ.URL(href) }
+	>
+		<span class="tabs__tab-label">{ name }</span>
+	</a>
+}

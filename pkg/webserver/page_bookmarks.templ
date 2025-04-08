@@ -29,6 +29,6 @@ templ BookmarksPage(go_tpl *template.Template, data TimelineData) {
 		</div>
 	</div>
 	<div class="timeline">
-		@templ.FromGoHTML(go_tpl.Lookup("timeline"), data.Feed)
+		@TimelineComponent(go_tpl, data.Feed)
 	</div>
 }

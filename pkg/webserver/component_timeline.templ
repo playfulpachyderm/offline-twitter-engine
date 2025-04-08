@@ -1,0 +1,44 @@
+package webserver
+
+import (
+	"fmt"
+	"html/template"
+	"net/url"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+)
+
+func cursor_to_query_params(c Cursor) string {
+	result := url.Values{}
+	result.Set("cursor", fmt.Sprint(c.CursorValue))
+	result.Set("sort-order", c.SortOrder.String())
+	return result.Encode()
+}
+
+templ TimelineComponent(go_tpl *template.Template, feed Feed) {
+	for _, item := range feed.Items {
+		if item.NotificationID != "" {
+			@templ.FromGoHTML(go_tpl.Lookup("notification"), item)
+		} else {
+			@templ.FromGoHTML(go_tpl.Lookup("tweet"), item)
+		}
+	}
+
+	<div class="show-more" style="position: relative">
+		if feed.CursorBottom.CursorPosition.IsEnd() {
+			<label class="show-more__eof-label">End of feed</label>
+		} else {
+			<a class="show-more__button button"
+				hx-get={ fmt.Sprintf("?%s", cursor_to_query_params(feed.CursorBottom)) }
+				hx-target=".show-more"
+				hx-swap="outerHTML"
+				hx-indicator="closest .show-more"
+			>Show more</a>
+		}
+
+		<div class="htmx-spinner">
+			<div class="htmx-spinner__background"></div>
+			<img class="svg-icon htmx-spinner__icon" src="/static/icons/spinner.svg" />
+		</div>
+	</div>
+}

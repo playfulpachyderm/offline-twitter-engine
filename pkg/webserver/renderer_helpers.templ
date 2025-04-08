@@ -56,6 +56,12 @@ func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file st
 			panic(tpl_data)
 		}
 		main_component = FollowsPage(tpl, global_data, follows_data)
+	case "tpl/list.tpl":
+		list_data, is_ok := tpl_data.(ListData)
+		if !is_ok {
+			panic(tpl_data)
+		}
+		main_component = ListDetailPage(tpl, global_data, list_data)
 	default:
 		main_component = templ.FromGoHTML(tpl.Lookup("main"), tpl_data)
 	}

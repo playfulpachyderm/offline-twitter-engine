@@ -1,9 +1,9 @@
 package webserver_test
 
 import (
+	"io"
 	"strings"
 	"testing"
-	"io"
 
 	"net/http/httptest"
 
