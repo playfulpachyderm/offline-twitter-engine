@@ -3,6 +3,11 @@
 # is persistent between build steps.
 
 steps:
+  templ_generate:
+    image: offline-twitter/go
+    commands:
+      - templ generate
+
   test:
     image: offline-twitter/go
     commands:

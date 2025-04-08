@@ -6,3 +6,6 @@ run apk add --no-cache git sqlite-libs sqlite-dev build-base mingw-w64-gcc curl 
 
 # Install golangci-lint
 run curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/go/bin v2.0.2
+
+# Install templ
+run GOBIN=/usr/local/go/bin go install github.com/a-h/templ/cmd/templ@v0.3.857

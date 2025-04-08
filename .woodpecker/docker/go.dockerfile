@@ -7,6 +7,9 @@ run wget https://go.dev/dl/go1.23.8.linux-amd64.tar.gz && tar -C /usr/local -xzf
 env PATH="$PATH:/usr/local/go/bin"
 run curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/go/bin v2.0.2
 
+# Install templ
+run GOBIN=/usr/local/go/bin go install github.com/a-h/templ/cmd/templ@v0.3.857
+
 # For SSH upload
 copy known_hosts /root/.ssh/known_hosts
 
