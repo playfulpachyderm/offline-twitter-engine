@@ -2,7 +2,6 @@ package persistence
 
 import (
 	"encoding/json"
-
 	"os"
 
 	log "github.com/sirupsen/logrus"

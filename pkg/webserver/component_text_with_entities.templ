@@ -1,0 +1,36 @@
+package webserver
+
+import (
+	"fmt"
+	"strings"
+)
+
+templ TextWithEntitiesComponent(text string) {
+	for _, line := range strings.Split(text, "\n") {
+		<p class="text" hx-trigger="click consume">
+			// WTF: magic-templ-empty-string
+			{}
+
+			for _, e := range get_entities(line) {
+				switch e.EntityType {
+				case 1:
+					// Mention
+					<a class="entity" href={ templ.URL(fmt.Sprintf("/%s", e.Contents)) }>
+						{ fmt.Sprintf("@%s", e.Contents) }
+					</a>
+				case 2:
+					// Hashtag
+					<a class="entity" href={ templ.URL(fmt.Sprintf("/search/%%23%s", e.Contents)) }>
+						{ fmt.Sprintf("#%s", e.Contents) }
+					</a>
+				default:
+					// Just text
+					// TODO: Fix extra spaces being inserted between entities and text
+					// - e.g., `(@asdf)` renders as `( @asdf )`
+					// - https://css-tricks.com/fighting-the-space-between-inline-block-elements/
+					{ e.Contents }
+				}
+			}
+		</p>
+	}
+}

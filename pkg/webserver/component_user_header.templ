@@ -1,0 +1,137 @@
+package webserver
+
+import (
+	"fmt"
+	"html/template"
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+)
+
+templ FollowingButtonComponent(user User) {
+	{{
+		action := "follow"
+		if user.IsFollowed {
+			action = "unfollow"
+		}
+	}}
+
+	<div class="button following-button"
+		hx-post={ fmt.Sprintf("/%s/%s", action, user.Handle) }
+		hx-swap="outerHTML"
+		style="text-transform: capitalize; position: relative"
+	>
+		<div class="htmx-spinner">
+			<div class="htmx-spinner__background"></div>
+			<img class="svg-icon htmx-spinner__icon" src="/static/icons/spinner.svg" />
+		</div>
+		{ action }
+	</div>
+}
+
+templ UserHeaderComponent(go_tpl *template.Template, global_data PageGlobalData, user User) {
+	<div class="user-header">
+		if user.BannerImageLocalPath != "" {
+			<img class="user-header__profile-banner-image"
+				onclick="image_carousel.querySelector('img').src = this.src; image_carousel.showModal();"
+				if user.IsContentDownloaded {
+					src={ fmt.Sprintf("/content/profile_images/%s", user.BannerImageLocalPath) }
+				} else {
+					src={ user.BannerImageUrl }
+				}
+			>
+		}
+
+		<div class="user-header__info-container">
+			<div class="row user-header__profile-image-container">
+				@AuthorInfoPfpComponentWithLink(user, false) // Profile image isn't a link
+				<div class="following-info">
+					@FollowingButtonComponent(user)
+					if user.IsFollowingYou {
+						if user.IsFollowed {
+							<span class="follows-you-label follows-you-label--mutuals">Mutuals</span>
+						} else {
+							<span class="follows-you-label">Follows you</span>
+						}
+					}
+				</div>
+			</div>
+			<div class="user-header__bio">
+				@TextWithEntitiesComponent(user.Bio)
+			</div>
+			if user.Location != "" {
+				<div class="user-header__location labelled-icon">
+					<img class="svg-icon" src="/static/icons/location.svg" width="24" height="24" />
+					<label>{ user.Location }</label>
+				</div>
+			}
+			if user.Website != "" {
+				<div class="user-header__website labelled-icon">
+					<img class="svg-icon" src="/static/icons/website.svg" width="24" height="24" />
+					<label><a target="_blank" href={ templ.URL(user.Website) }>{ user.Website }</a></label>
+				</div>
+			}
+			<div class="user-header__join-date labelled-icon">
+				<img class="svg-icon" src="/static/icons/calendar.svg" title="Join date" width="24" height="24" />
+				<label>{ user.JoinDate.Time.Format("Jan 2, 2006") }</label>
+			</div>
+
+			<div class="followers-followees row">
+				<a hx-boost="true" href={ templ.URL(fmt.Sprintf("/%s/followers", user.Handle)) } class="followers-followees__followers">
+					<span class="followers-followees__count">{ fmt.Sprint(user.FollowersCount) }</span>
+					<label>followers</label>
+				</a>
+				<a hx-boost="true" href={ templ.URL(fmt.Sprintf("/%s/followees", user.Handle)) } class="followers-followees__followees">
+					<label>is following</label>
+					<span class="followers-followees__count">{ fmt.Sprint(user.FollowingCount) }</span>
+				</a>
+
+				<div class="spacer"></div>
+
+				<div class="row">
+					<a class="button" target="_blank" href={ templ.URL(fmt.Sprintf("https://twitter.com/%s", user.Handle)) } title="Open on twitter.com">
+						<img class="svg-icon" src="/static/icons/external-link.svg" width="24" height="24" />
+					</a>
+					<a class="button" hx-get="?scrape" hx-target="body" hx-indicator=".user-header" title="Refresh">
+						<img class="svg-icon" src="/static/icons/refresh.svg" width="24" height="24" />
+					</a>
+				</div>
+			</div>
+
+			if len(user.FollowersYouKnow) != 0 {
+				<div class="row followers-you-know">
+					@ProfileImageListComponent(user.FollowersYouKnow[:min(len(user.FollowersYouKnow), 6)])
+					<a hx-boost="true" href={ templ.URL(fmt.Sprintf("/%s/followers_you_know", user.Handle)) }>
+						<span class="followers-you-know__label">
+							{ fmt.Sprintf("...followed by %d you follow", len(user.FollowersYouKnow)) }
+						</span>
+					</a>
+				</div>
+			}
+
+			if len(user.Lists) != 0 {
+				<div class="row user-header__lists-container">
+					<img class="svg-icon" src="/static/icons/lists.svg" title="Lists this user is on" width="24" height="24" />
+					<ul class="user-header__lists">
+						for _, list := range user.Lists {
+							<li><a href={ templ.URL(fmt.Sprintf("/lists/%d", list.ID)) }>{ list.Name }</a></li>
+						}
+					</ul>
+				</div>
+			}
+		</div>
+
+		<div class="htmx-spinner">
+			<div class="htmx-spinner__fullscreen-forcer">
+				<div class="htmx-spinner__background"></div>
+				<img class="svg-icon htmx-spinner__icon" src="/static/icons/spinner.svg" />
+			</div>
+		</div>
+	</div>
+}
+
+templ ProfileImageListComponent(users []User) {
+	<div class="N-profile-images" hx-trigger="click consume">
+		for _, u := range users {
+			@CircleProfileImgComponent(u)
+		}
+	</div>
+}

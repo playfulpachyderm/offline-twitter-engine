@@ -3,6 +3,7 @@ package webserver_test
 import (
 	"strings"
 	"testing"
+	"io"
 
 	"net/http/httptest"
 
@@ -32,7 +33,12 @@ func TestTweetDetail(t *testing.T) {
 func TestTweetDetailMissing(t *testing.T) {
 	require := require.New(t)
 
-	resp := do_request(httptest.NewRequest("GET", "/tweet/100089", nil))
+	// Suppress error logging in console
+	recorder := httptest.NewRecorder()
+	app := make_testing_app(nil)
+	app.ErrorLog.SetOutput(io.Discard)
+	app.WithMiddlewares().ServeHTTP(recorder, httptest.NewRequest("GET", "/tweet/100089", nil))
+	resp := recorder.Result()
 	require.Equal(resp.StatusCode, 404)
 }
 

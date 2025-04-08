@@ -1,2 +1,3 @@
 coverage.out
 sample_data/profile
+*_templ.go

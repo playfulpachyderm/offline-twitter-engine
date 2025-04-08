@@ -42,7 +42,23 @@ func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file st
 	}
 	panic_if(err)
 
-	main_component := templ.FromGoHTML(tpl.Lookup("main"), tpl_data)
+	var main_component templ.Component
+	switch tpl_file {
+	case "tpl/bookmarks.tpl":
+		timeline_data, is_ok := tpl_data.(TimelineData)
+		if !is_ok {
+			panic(tpl_data)
+		}
+		main_component = BookmarksPage(tpl, timeline_data)
+	case "tpl/follows.tpl":
+		follows_data, is_ok := tpl_data.(FollowsData)
+		if !is_ok {
+			panic(tpl_data)
+		}
+		main_component = FollowsPage(tpl, global_data, follows_data)
+	default:
+		main_component = templ.FromGoHTML(tpl.Lookup("main"), tpl_data)
+	}
 
 	buf := new(bytes.Buffer)
 	Base(tpl, global_data, main_component).Render(context.Background(), buf)
@@ -53,7 +69,6 @@ func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file st
 	diff, err := diffs.DiffStrings(rec.Body.String(), buf.String())
 	panic_if(err)
 	if diff != "" {
-		println(diff)
 		panic(diff)
 	}
 

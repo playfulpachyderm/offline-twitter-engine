@@ -1,0 +1,33 @@
+package webserver
+
+import (
+	"fmt"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+)
+
+templ UsersListComponent(global_data PageGlobalData, u_ids []UserID, button_text string, button_url string) {
+	<div class="users-list">
+		// WTF: magic-templ-empty-string
+		{}
+
+		for _, u_id := range u_ids {
+			{{ user := global_data.Users[u_id] }}
+			<div class="user" data-id={ fmt.Sprint(user.ID) }>
+				<div class="row row--spread">
+					@AuthorInfoComponent(user)
+					if button_text != "" {
+						<a
+							href={ templ.URL(fmt.Sprintf("%s?user_handle=%s", button_url, user.Handle)) }
+							class="button button--danger"
+							onclick={ templ.JSUnsafeFuncCall(fmt.Sprintf("return confirm('%s this user?  Are you sure?')", button_text)) }
+						>
+							{ button_text }
+						</a>
+					}
+				</div>
+				<p class="bio">{ user.Bio }</p>
+			</div>
+		}
+	</div>
+}

@@ -14,7 +14,6 @@
                - e.g., `(@asdf)` renders as `( @asdf )`
                - https://css-tricks.com/fighting-the-space-between-inline-block-elements/
           -->
-
           {{.Contents}}
         {{end}}
       {{end}}
