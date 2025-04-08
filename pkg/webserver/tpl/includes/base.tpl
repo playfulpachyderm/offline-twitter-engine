@@ -23,6 +23,9 @@
       </script>
 
       <script>
+        // Set default scrolling ("instant", "smooth" or "auto")
+        htmx.config.scrollBehavior = "instant";
+
         document.addEventListener('DOMContentLoaded', function() {
           /**
            * Consider HTTP 4xx and 500 errors to contain valid HTMX, and swap them as usual
