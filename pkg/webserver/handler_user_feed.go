@@ -2,6 +2,7 @@ package webserver
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -161,7 +162,12 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 		// It's a Show More request
 		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, data)
 	} else {
-		app.buffered_render_page2(w, "tpl/user_feed.tpl", PageGlobalData{Title: fmt.Sprintf("@%s", user.Handle), TweetTrove: feed.TweetTrove}, data)
+		app.buffered_render_page2(
+			w,
+			"tpl/user_feed.tpl",
+			PageGlobalData{Title: fmt.Sprintf("@%s", user.Handle), TweetTrove: feed.TweetTrove},
+			data,
+		)
 	}
 }
 
