@@ -9,7 +9,9 @@ import (
 	"io"
 
 	"github.com/andybalholm/cascadia"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/net/html"
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/webserver"
@@ -82,4 +84,18 @@ func TestHomepage(t *testing.T) {
 	resp := do_request(httptest.NewRequest("GET", "/", nil))
 	require.Equal(resp.StatusCode, 303)
 	require.Equal(resp.Header.Get("Location"), "/timeline")
+}
+
+// Login page
+// ----------
+
+func TestLoginPage(t *testing.T) {
+	require := require.New(t)
+
+	resp := do_request(httptest.NewRequest("GET", "/login", nil))
+	require.Equal(resp.StatusCode, 200)
+	root, err := html.Parse(resp.Body)
+	require.NoError(err)
+	assert.Equal(t, cascadia.Query(root, selector("title")).FirstChild.Data, "Login | Offline Twitter")
+	assert.Greater(t, len(cascadia.QueryAll(root, selector("select[name=\"account\"] option"))), 0)
 }

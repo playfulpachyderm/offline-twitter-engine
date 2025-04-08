@@ -2,11 +2,14 @@ package webserver
 
 import (
 	"bytes"
+	"fmt"
 	"context"
 	"html/template"
 	"net/http"
 	"net/http/httptest"
 	"github.com/Masterminds/sprig/v3"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 
 	diffs "gitlab.com/offline-twitter/twitter_offline_engine/pkg/webserver/tmp_templ_diff"
 )
@@ -62,6 +65,24 @@ func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file st
 			panic(tpl_data)
 		}
 		main_component = ListDetailPage(tpl, global_data, list_data)
+	case "tpl/list_of_lists.tpl":
+		list_data, is_ok := tpl_data.([]List)
+		if !is_ok {
+			panic(tpl_data)
+		}
+		main_component = ListIndexPage(list_data)
+	case "tpl/login.tpl":
+		login_data, is_ok := tpl_data.(*LoginData)
+		if !is_ok {
+			panic(fmt.Sprintf("%#v", tpl_data))
+		}
+		main_component = LoginPage(*login_data)
+	case "tpl/notifications.tpl":
+		feed_data, is_ok := tpl_data.(Feed)
+		if !is_ok {
+			panic(fmt.Sprintf("%#v", tpl_data))
+		}
+		main_component = NotificationsPage(tpl, feed_data)
 	default:
 		main_component = templ.FromGoHTML(tpl.Lookup("main"), tpl_data)
 	}

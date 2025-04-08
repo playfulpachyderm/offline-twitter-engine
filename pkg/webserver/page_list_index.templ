@@ -1,0 +1,46 @@
+package webserver
+
+import (
+	"fmt"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+)
+
+templ ListIndexPage(lists []List) {
+	<h1>Lists</h1>
+
+	<button onclick="document.querySelector('#newListDialog').showModal()">New list</button>
+	<dialog id="newListDialog">
+		<h3>Create new list</h3>
+		<form hx-post="/lists" hx-ext="json-enc" hx-target="body" hx-push-url="true">
+			<label for="name">Name</label>
+			<input name="name" />
+			<input type="submit" value="Create" />
+		</form>
+		<button onclick="newListDialog.close()">Cancel</button>
+	</dialog>
+
+	<div class="list-of-lists">
+		for _, l := range lists {
+			<div class="list-preview row row--spread">
+				<div class="list-preview__info-container"
+					hx-get={ fmt.Sprintf("/lists/%d", l.ID) }
+					hx-trigger="click" hx-target="body" hx-push-url="true"
+				>
+					<span class="list-name">{ l.Name }</span>
+					<span class="list-preview__num-users">{ fmt.Sprintf("(%d)", len(l.Users)) }</span>
+					if len(l.Users) > 10 {
+						@ProfileImageListComponent(l.Users[:10])
+						<span class="ellipsis">...</span>
+					} else {
+						@ProfileImageListComponent(l.Users)
+					}
+				</div>
+				<a class="button button--danger"
+					hx-delete={ fmt.Sprintf("/lists/%d", l.ID) } hx-target="body"
+					onclick="return confirm('Delete this list?  Are you sure?')"
+				>Delete</a>
+			</div>
+		}
+	</div>
+}
