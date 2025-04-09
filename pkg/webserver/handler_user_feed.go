@@ -10,6 +10,13 @@ import (
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
 )
 
+type UserFeedData struct {
+	Feed
+	UserID
+	PinnedTweet Tweet
+	FeedType    string
+}
+
 func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	app.TraceLog.Printf("'UserFeed' handler (path: %q)", r.URL.Path)
 
@@ -123,12 +130,7 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	}
 	feed.Users[user.ID] = user
 
-	data := struct {
-		Feed
-		UserID
-		PinnedTweet Tweet
-		FeedType    string
-	}{Feed: feed, UserID: user.ID}
+	data := UserFeedData{Feed: feed, UserID: user.ID}
 
 	if len(parts) == 2 {
 		data.FeedType = parts[1]

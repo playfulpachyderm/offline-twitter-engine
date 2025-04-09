@@ -1,0 +1,55 @@
+package webserver
+
+import (
+	"html/template"
+)
+
+templ TweetDetailPage(go_tpl *template.Template, global_data PageGlobalData, data TweetDetailData) {
+	<div class="tweet-detail">
+		for _, parent_id := range data.ParentIDs {
+			<div class="thread-parent-tweet">
+				@templ.FromGoHTML(go_tpl.Lookup("tweet"), map[string]interface{}{
+					"TweetID": parent_id,
+					"RetweetID": 0,
+					"QuoteNestingLevel": 0,
+				})
+			</div>
+		}
+
+		<div id="focused-tweet" class="focused-tweet">
+			@templ.FromGoHTML(go_tpl.Lookup("tweet"), map[string]interface{}{
+				"TweetID": data.MainTweetID,
+				"RetweetID": 0,
+				"QuoteNestingLevel": 0,
+			})
+		</div>
+
+		if len(data.ThreadIDs) != 0 {
+			<div class="reply-chain">
+				for _, thread_id := range data.ThreadIDs {
+					<div class="reply-tweet">
+						@templ.FromGoHTML(go_tpl.Lookup("tweet"), map[string]interface{}{
+							"TweetID": thread_id,
+							"RetweetID": 0,
+							"QuoteNestingLevel": 0,
+						})
+					</div>
+				}
+			</div>
+		}
+
+		for _, chain := range data.ReplyChains {
+			<div class="reply-chain">
+				for _, t_id := range chain {
+					<div class="reply-tweet">
+						@templ.FromGoHTML(go_tpl.Lookup("tweet"), map[string]interface{}{
+							"TweetID": t_id,
+							"RetweetID": 0,
+							"QuoteNestingLevel": 0,
+						})
+					</div>
+				}
+			</div>
+		}
+	</div>
+}

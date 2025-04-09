@@ -83,8 +83,39 @@ func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file st
 			panic(fmt.Sprintf("%#v", tpl_data))
 		}
 		main_component = NotificationsPage(tpl, feed_data)
+	case "tpl/offline_timeline.tpl":
+		timeline_data, is_ok := tpl_data.(TimelineData)
+		if !is_ok {
+			panic(fmt.Sprintf("%#v", tpl_data))
+		}
+		main_component = TimelinePage(tpl, timeline_data)
+	case "tpl/search.tpl":
+		search_data, is_ok := tpl_data.(SearchPageData)
+		if !is_ok {
+			panic(fmt.Sprintf("%#v", tpl_data))
+		}
+		main_component = SearchPage(tpl, global_data, search_data)
+	case "tpl/user_feed.tpl":
+		user_feed_data, is_ok := tpl_data.(UserFeedData)
+		if !is_ok {
+			panic(fmt.Sprintf("%#v", tpl_data))
+		}
+		main_component = UserFeedPage(tpl, global_data, user_feed_data)
+	case "tpl/tweet_detail.tpl":
+		tweet_detail_data, is_ok := tpl_data.(TweetDetailData)
+		if !is_ok {
+			panic(fmt.Sprintf("%#v", tpl_data))
+		}
+		main_component = TweetDetailPage(tpl, global_data, tweet_detail_data)
+	case "tpl/messages.tpl":
+		messages_data, is_ok := tpl_data.(MessageData)
+		if !is_ok {
+			panic(fmt.Sprintf("%#v", tpl_data))
+		}
+		main_component = MessagesPage(tpl, global_data, messages_data)
 	default:
-		main_component = templ.FromGoHTML(tpl.Lookup("main"), tpl_data)
+		panic(tpl_file)
+		// main_component = templ.FromGoHTML(tpl.Lookup("main"), tpl_data)
 	}
 
 	buf := new(bytes.Buffer)

@@ -1,0 +1,18 @@
+package webserver
+
+import (
+	"html/template"
+)
+
+templ TimelinePage(go_tpl *template.Template, data TimelineData) {
+	<div class="timeline-header">
+		<div class="tabs row">
+			@tab("User feed", data.ActiveTab == "User feed", "/timeline")
+			@tab("Offline timeline", data.ActiveTab == "Offline", "/timeline/offline")
+		</div>
+	</div>
+
+	<div class="timeline">
+		@TimelineComponent(go_tpl, data.Feed)
+	</div>
+}
