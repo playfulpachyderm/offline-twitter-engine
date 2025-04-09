@@ -54,7 +54,7 @@ templ SearchPage(go_tpl *template.Template, global_data PageGlobalData, data Sea
 			</select>
 		</div>
 		<div class="timeline">
-			@TimelineComponent(go_tpl, data.Feed)
+			@TimelineComponent(go_tpl, global_data, data.Feed)
 		</div>
 	}
 }

@@ -4,7 +4,7 @@ import (
 	"html/template"
 )
 
-templ BookmarksPage(go_tpl *template.Template, data TimelineData) {
+templ BookmarksPage(go_tpl *template.Template, global_data PageGlobalData, data TimelineData) {
 	<div class="bookmarks-feed-header">
 		<div class="row row--spread">
 			// Extra div to take up a slot in the `row`
@@ -29,6 +29,6 @@ templ BookmarksPage(go_tpl *template.Template, data TimelineData) {
 		</div>
 	</div>
 	<div class="timeline">
-		@TimelineComponent(go_tpl, data.Feed)
+		@TimelineComponent(go_tpl, global_data, data.Feed)
 	</div>
 }

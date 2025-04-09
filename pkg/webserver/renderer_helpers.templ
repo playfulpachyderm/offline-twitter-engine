@@ -52,7 +52,7 @@ func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file st
 		if !is_ok {
 			panic(tpl_data)
 		}
-		main_component = BookmarksPage(tpl, timeline_data)
+		main_component = BookmarksPage(tpl, global_data, timeline_data)
 	case "tpl/follows.tpl":
 		follows_data, is_ok := tpl_data.(FollowsData)
 		if !is_ok {
@@ -82,13 +82,13 @@ func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file st
 		if !is_ok {
 			panic(fmt.Sprintf("%#v", tpl_data))
 		}
-		main_component = NotificationsPage(tpl, feed_data)
+		main_component = NotificationsPage(tpl, global_data, feed_data)
 	case "tpl/offline_timeline.tpl":
 		timeline_data, is_ok := tpl_data.(TimelineData)
 		if !is_ok {
 			panic(fmt.Sprintf("%#v", tpl_data))
 		}
-		main_component = TimelinePage(tpl, timeline_data)
+		main_component = TimelinePage(tpl, global_data, timeline_data)
 	case "tpl/search.tpl":
 		search_data, is_ok := tpl_data.(SearchPageData)
 		if !is_ok {

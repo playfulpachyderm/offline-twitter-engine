@@ -4,7 +4,7 @@ import (
 	"html/template"
 )
 
-templ TimelinePage(go_tpl *template.Template, data TimelineData) {
+templ TimelinePage(go_tpl *template.Template, global_data PageGlobalData, data TimelineData) {
 	<div class="timeline-header">
 		<div class="tabs row">
 			@tab("User feed", data.ActiveTab == "User feed", "/timeline")
@@ -13,6 +13,6 @@ templ TimelinePage(go_tpl *template.Template, data TimelineData) {
 	</div>
 
 	<div class="timeline">
-		@TimelineComponent(go_tpl, data.Feed)
+		@TimelineComponent(go_tpl, global_data, data.Feed)
 	</div>
 }

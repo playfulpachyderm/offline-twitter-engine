@@ -6,7 +6,7 @@ import (
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
-templ NotificationsPage(go_tpl *template.Template, feed Feed) {
+templ NotificationsPage(go_tpl *template.Template, global_data PageGlobalData, feed Feed) {
 	<div class="notifications-header">
 		<div class="row row--spread">
 			//Extra div to take up a slot in the `row`
@@ -36,7 +36,7 @@ templ NotificationsPage(go_tpl *template.Template, feed Feed) {
 			</div>
 		</div>
 		<div class="timeline">
-			@TimelineComponent(go_tpl, feed)
+			@TimelineComponent(go_tpl, global_data, feed)
 		</div>
 	</div>
 }

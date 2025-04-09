@@ -1,0 +1,207 @@
+package webserver
+
+import (
+	"fmt"
+	"html/template"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+)
+
+templ TweetComponent(go_tpl *template.Template, global_data PageGlobalData, t_id TweetID, r_id TweetID, quote_nesting_level int) {
+	{{ main_tweet := global_data.Tweets[t_id] }}
+	{{ author := global_data.Users[main_tweet.UserID] }}
+
+	<div class="tweet"
+		if main_tweet.ID != global_data.FocusedTweetID {
+			hx-get={ fmt.Sprintf("/tweet/%d", main_tweet.ID) }
+			hx-trigger="click"
+			hx-target="body"
+			hx-swap="outerHTML show:#focused-tweet:top"
+			hx-push-url="true"
+		}
+	>
+		if r_id != 0 {
+			{{ retweet := global_data.Retweets[r_id] }}
+			{{ retweet_user := global_data.Users[retweet.RetweetedByID] }}
+			<div class="retweet-info" hx-trigger="click consume">
+				<img class="svg-icon" src="/static/icons/retweet.svg" width="24" height="24" />
+				<span class="retweet-info__retweeted-by-label">Retweeted by</span>
+				<a
+					class="retweet-info__retweeted-by-user"
+					hx-get={ fmt.Sprintf("/%s", retweet_user.Handle) }
+					hx-target="body"
+					hx-swap="outerHTML"
+					hx-push-url="true"
+				>
+					{ retweet_user.DisplayName }
+				</a>
+			</div>
+		}
+		<div class="tweet__header-container">
+			<div class="author-info-container" hx-trigger="click consume">
+				@templ.FromGoHTML(go_tpl.Lookup("author-info"), author)
+			</div>
+			if len(main_tweet.ReplyMentions) != 0 {
+				<div class="reply-mentions" hx-trigger="click consume">
+					<span class="reply-mentions__dm-message__replying-to-label">Replying&nbsp;to</span>
+					<ul class="reply-mentions__list inline-dotted-list">
+						for _, reply_mention := range main_tweet.ReplyMentions {
+							<li><a class="entity" href={ templ.URL(fmt.Sprintf("/%s", reply_mention)) }>
+								{ fmt.Sprintf("@%s", reply_mention) }
+							</a></li>
+						}
+					</ul>
+				</div>
+			}
+			<div class="posted-at">
+				<p class="posted-at__text">
+					{ main_tweet.PostedAt.Time.Format("Jan 2, 2006") }
+					<br/>
+					{ main_tweet.PostedAt.Time.Format("3:04 pm") }
+				</p>
+			</div>
+		</div>
+		<div class="row">
+			<span class="string-box">
+				// WTF: magic-templ-empty-string
+				// Ok, I don't even have an explanation for this one
+				<div class="string">{" "}</div>
+			</span>
+			<span class="tweet__vertical-container">
+				<div class="tweet-content">
+					if main_tweet.TombstoneType != "" {
+						<div class="tombstone">
+							{ main_tweet.TombstoneText }
+						</div>
+					}
+					@TextWithEntitiesComponent(main_tweet.Text)
+					for _, image := range main_tweet.Images {
+						// WTF: magic-templ-empty-string
+						{}
+
+						// Some stuff
+						<img class="tweet__embedded-image"
+							if image.IsDownloaded {
+								src={ fmt.Sprintf("/content/images/%s", image.LocalFilename) }
+							} else {
+								src={ image.RemoteURL }
+							}
+							width={ fmt.Sprint(image.Width) }
+							height={ fmt.Sprint(image.Height) }
+							if len(main_tweet.Images) > 1 {
+								style="max-width: 45%"
+							}
+							hx-trigger="click consume"
+							onclick="image_carousel.querySelector('img').src = this.src; image_carousel.showModal();"
+						>
+					}
+					for _, vid := range main_tweet.Videos {
+						// WTF: magic-templ-empty-string
+						{}
+
+						<div class="video">
+							if vid.IsGif {
+								<div class="video__gif-controls labelled-icon">
+									<img class="svg-icon" src="/static/icons/play.svg" width="24" height="24" />
+									<label class="video__gif-label">GIF</label>
+								</div>
+								<script>
+									function gif_on_click(video) {
+										if (video.paused) {
+											video.play();
+											video.parentElement.querySelector(".svg-icon").src = "/static/icons/pause.svg";
+										} else {
+											video.pause();
+											video.parentElement.querySelector(".svg-icon").src = "/static/icons/play.svg";
+										}
+									}
+								</script>
+							}
+							<video hx-trigger="click consume" width={ fmt.Sprint(vid.Width) } height={ fmt.Sprint(vid.Height) }
+								if vid.IsGif {
+									loop muted playsinline onclick="gif_on_click(this)" class="gif"
+								} else {
+									controls class="video"
+								}
+								if vid.IsDownloaded {
+									poster={ fmt.Sprintf("/content/video_thumbnails/%s", vid.ThumbnailLocalPath) }
+								} else {
+									poster={ vid.ThumbnailRemoteUrl }
+								}
+							>
+								if vid.IsDownloaded {
+									<source src={ fmt.Sprintf("/content/videos/%s", vid.LocalFilename) }>
+								} else {
+									<source src={ vid.RemoteURL }>
+								}
+							</video>
+						</div>
+					}
+					for _, url := range main_tweet.Urls {
+						// WTF: magic-templ-empty-string
+						{}
+
+						<div class="click-eater" hx-trigger="click consume">
+							@templ.FromGoHTML(go_tpl.Lookup("embedded-link"), url)
+						</div>
+					}
+					for _, poll := range main_tweet.Polls {
+						// WTF: magic-templ-empty-string
+						{}
+
+						@templ.FromGoHTML(go_tpl.Lookup("poll"), poll)
+					}
+
+					if main_tweet.QuotedTweetID != 0 && quote_nesting_level < 1 {
+						<div class="tweet__quoted-tweet rounded-gray-outline" hx-trigger="click consume">
+							@TweetComponent(go_tpl, global_data, main_tweet.QuotedTweetID, 0, quote_nesting_level + 1)
+						</div>
+					}
+					if main_tweet.SpaceID != SpaceID("") {
+						@templ.FromGoHTML(go_tpl.Lookup("space"), global_data.Spaces[main_tweet.SpaceID])
+					}
+				</div>
+
+				<div class="interactions row">
+					<div class="interactions__stat">
+						<img class="svg-icon" src="/static/icons/quote.svg" width="24" height="24" />
+						<span>{ fmt.Sprint(main_tweet.NumQuoteTweets) }</span>
+					</div>
+					<div class="interactions__stat">
+						<img class="svg-icon" src="/static/icons/reply.svg" width="24" height="24" />
+						<span>{ fmt.Sprint(main_tweet.NumReplies) }</span>
+					</div>
+					@templ.FromGoHTML(go_tpl.Lookup("retweets-count"), main_tweet)
+					@templ.FromGoHTML(go_tpl.Lookup("likes-count"), main_tweet)
+					<div class="interactions__dummy"></div>
+					<div class="row" hx-trigger="click consume">
+						<a class="button" title="Copy link" onclick={ templ.JSUnsafeFuncCall(fmt.Sprintf("navigator.clipboard.writeText('https://twitter.com/%s/status/%d')", author.Handle, main_tweet.ID)) }>
+							<img class="svg-icon" src="/static/icons/copy.svg" width="24" height="24" />
+						</a>
+						<a
+							class="button"
+							target="_blank"
+							href={ templ.URL(fmt.Sprintf("https://twitter.com/%s/status/%d", author.Handle, main_tweet.ID)) }
+							title="Open on twitter.com"
+						>
+							<img class="svg-icon" src="/static/icons/external-link.svg" width="24" height="24" />
+						</a>
+						<a
+							class="button"
+							hx-get={ fmt.Sprintf("/tweet/%d?scrape", main_tweet.ID) }
+							hx-target="body"
+							hx-indicator="closest .tweet"
+							title="Refresh"
+						>
+							<img class="svg-icon" src="/static/icons/refresh.svg" width="24" height="24" />
+						</a>
+					</div>
+				</div>
+			</span>
+		</div>
+		<div class="htmx-spinner">
+			<div class="htmx-spinner__background"></div>
+			<img class="svg-icon htmx-spinner__icon" src="/static/icons/spinner.svg" />
+		</div>
+	</div>
+}

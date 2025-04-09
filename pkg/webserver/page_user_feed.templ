@@ -25,13 +25,9 @@ templ UserFeedPage(go_tpl *template.Template, global_data PageGlobalData, data U
 					<img class="svg-icon pinned-tweet__pin-icon" src="/static/icons/pin.svg" width="24" height="24" />
 					<label>Pinned</label>
 				</div>
-				@templ.FromGoHTML(go_tpl.Lookup("tweet"), map[string]interface{}{
-					"TweetID": data.PinnedTweet.ID,
-					"RetweetID": 0,
-					"QuoteNestingLevel": 0,
-				})
+				@TweetComponent(go_tpl, global_data, data.PinnedTweet.ID, 0, 0)
 			</div>
 		}
-		@TimelineComponent(go_tpl, data.Feed)
+		@TimelineComponent(go_tpl, global_data, data.Feed)
 	</div>
 }
