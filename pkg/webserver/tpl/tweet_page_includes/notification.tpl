@@ -46,7 +46,7 @@
           <b>{{(user $notification.ActionUserID).DisplayName}} replied to you</b>
         {{else if (eq $notification.Type 5)}} {{/* FOLLOW */}}
           {{if (gt (len $notification.UserIDs) 1)}}
-            <b>{{(user $notification.ActionUserID).DisplayName}} and {{(len (slice $notification.UserIDs 1))}} others followed you</b>
+            <b>{{(user $notification.ActionUserID).DisplayName}} and {{(len (slice $notification.UserIDs 1))}} others followed you!</b>
           {{else}}
             <b>{{(user $notification.ActionUserID).DisplayName}} followed you!</b>
           {{end}}

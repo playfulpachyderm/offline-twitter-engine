@@ -1,6 +1,6 @@
 {{define "chat-list-entry"}}
   {{$room := $.room}}
-  <div class="chat-list-entry {{if .is_active}}chat-list-entry--active-chat{{end}} {{if .is_unread}}chat-list-entry--unread{{end}}"
+  <div class="chat-list-entry{{if .is_active}} chat-list-entry--active-chat{{end}}{{if .is_unread}} chat-list-entry--unread{{end}}"
     hx-get="/messages/{{$room.ID}}"
     hx-push-url="true"
     hx-swap="outerHTML"

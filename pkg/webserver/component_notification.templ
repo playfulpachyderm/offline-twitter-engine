@@ -1,0 +1,98 @@
+package webserver
+
+import (
+	"fmt"
+	"html/template"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+)
+
+templ NotificationComponent(go_tpl *template.Template, global_data PageGlobalData, item FeedItem) {
+	{{ notification := global_data.Notifications[item.NotificationID] }}
+	{{ action_user := global_data.Users[notification.ActionUserID] }}
+
+	<div class="notification" data-notification-id={ string(notification.ID) }>
+		<div class="notification__header">
+			if notification.ActionUserID != 0 {
+				<div class="notification__users">
+					@CircleProfileImgComponent(action_user)
+					if len(notification.UserIDs) > 1 {
+						{{ max_display_users := 10 }}
+						// TODO: user the UsersListComponent here
+						for i, user_id := range notification.UserIDs {
+							if i >= max_display_users {
+								// Only render the first 10-ish users
+								break
+							}
+							if user_id != notification.ActionUserID {
+								// don't duplicate main user
+								@CircleProfileImgComponent(global_data.Users[user_id])
+							}
+						}
+						if len(notification.UserIDs) > max_display_users + 1 {
+							<span class="ellipsis">...</span>
+						}
+					}
+				</div>
+			}
+
+			<div class="notification__text">
+				switch notification.Type {
+				case 1: // LIKE
+					{{ num_liked_items := len(notification.RetweetIDs) + len(notification.TweetIDs) }}
+					if len(notification.UserIDs) > 1 {
+						<b>
+							{ fmt.Sprintf("%s and %d others liked your tweet",
+								action_user.DisplayName,
+								len(notification.UserIDs) - 1,
+							)}
+						</b>
+					} else if num_liked_items > 1 {
+						<b>
+							{ fmt.Sprintf("%s liked %d of your tweets",
+								action_user.DisplayName,
+								num_liked_items,
+							)}
+						</b>
+					} else {
+						<b>{ fmt.Sprintf("%s liked your tweet", action_user.DisplayName) }</b>
+					}
+				case 2: // RETWEET
+					if len(notification.UserIDs) > 1 {
+						<b>{ fmt.Sprintf("%s and %d others retweeted you", action_user.DisplayName, len(notification.UserIDs) - 1) }</b>
+					} else {
+						<b>{ fmt.Sprintf("%s retweeted you", action_user.DisplayName) }</b>
+					}
+				case 3: // QUOTE_TWEET
+					<b>{ fmt.Sprintf("%s quote-tweeted you", action_user.DisplayName) }</b>
+				case 4: // REPLY
+					<b>{ fmt.Sprintf("%s replied to you", action_user.DisplayName) }</b>
+				case 5: // FOLLOW
+					if len(notification.UserIDs) > 1 {
+						<b>{ fmt.Sprintf("%s and %d others followed you!", action_user.DisplayName, len(notification.UserIDs) - 1) }</b>
+					} else {
+						<b>{ fmt.Sprintf("%s followed you!", action_user.DisplayName) }</b>
+					}
+				case 6: // MENTION
+					<b>{ fmt.Sprintf("%s mentioned you", action_user.DisplayName) }</b>
+				case 7: // USER_IS_LIVE
+					<b>{ fmt.Sprintf("%s is live", action_user.DisplayName) }</b>
+				case 8: // POLL_ENDED
+					<b>Poll ended.</b>
+				case 9: // LOGIN
+					<b>New login on your account.</b>
+				case 10: // COMMUNITY_PINNED_POST
+					<b>{ fmt.Sprintf("%s posted in community", action_user.DisplayName) }</b>
+				case 11: // RECOMMENDED_POST
+					<b>{ fmt.Sprintf("You've been recommended a post from %s", action_user.DisplayName) }</b>
+				default:
+					<b>{ fmt.Sprintf("<<UNKNOWN ID>>: %d", notification.Type) }</b>
+				}
+			</div>
+		</div>
+
+		if item.TweetID != 0 {
+			@TweetComponent(go_tpl, global_data, item.TweetID, item.RetweetID, 0)
+		}
+	</div>
+}

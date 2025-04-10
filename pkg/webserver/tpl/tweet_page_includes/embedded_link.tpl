@@ -3,7 +3,7 @@
     class="embedded-link rounded-gray-outline"
     target="_blank"
     href="{{.Text}}"
-    style="max-width: {{if (ne .ThumbnailWidth 0)}}{{.ThumbnailWidth}}px {{else}}fit-content {{end}}"
+    style="max-width: {{if (ne .ThumbnailWidth 0)}}{{.ThumbnailWidth}}px;{{else}}fit-content{{end}}"
   >
     <img
       {{if .IsContentDownloaded}}

@@ -18,7 +18,7 @@ func cursor_to_query_params(c Cursor) string {
 templ TimelineComponent(go_tpl *template.Template, global_data PageGlobalData, feed Feed) {
 	for _, item := range feed.Items {
 		if item.NotificationID != "" {
-			@templ.FromGoHTML(go_tpl.Lookup("notification"), item)
+			@NotificationComponent(go_tpl, global_data, item)
 		} else {
 			@TweetComponent(go_tpl, global_data, item.TweetID, item.RetweetID, 0)
 		}

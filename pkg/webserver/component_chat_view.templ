@@ -1,191 +1,55 @@
-{{define "message"}}
-  {{$user := (user .SenderID)}}
-  {{$is_us := (eq .SenderID (active_user).ID)}}
-  <div class="dm-message{{if $is_us}} our-message{{end}}" data-message-id="{{ .ID }}" hx-ext="json-enc" hx-swap="outerHTML">
-    <div class="dm-message__row row">
-      <div class="dm-message__sender-profile-img">
-        {{template "circle-profile-img" $user}}
-      </div>
-      <div class="dm-message__contents">
-        {{if (ne .InReplyToID 0)}}
-          <div class="dm-replying-to">
-            <div class="dm-replying-to__label labelled-icon">
-              <img class="svg-icon" src="/static/icons/replying_to.svg" width="24" height="24" />
-              <label>Replying to</label>
-              <span class="dm-replying-to__username"
-                data-replying-to-message-id="{{ .InReplyToID }}"
-                onclick="handleReplyingToClicked(this)"
-              >
-                {{ (user (dm_message .InReplyToID).SenderID).DisplayName }}
-              </span>
-            </div>
-            <div class="dm-replying-to__preview-text"
-              data-replying-to-message-id="{{ .InReplyToID }}"
-              onclick="handleReplyingToClicked(this)"
-            >
-              {{(dm_message .InReplyToID).Text}}
-            </div>
-          </div>
-        {{end}}
-        {{if (ne .EmbeddedTweetID 0)}}
-          <div class="dm-message__tweet-preview">
-            {{template "tweet" (dict
-              "TweetID" .EmbeddedTweetID
-              "RetweetID" 0
-              "QuoteNestingLevel" 1)
-            }}
-          </div>
-        {{end}}
-        {{range .Images}}
-          {{/*
-            DM images can only be loaded with an authenticated session.  So sending the RemoteUrl
-            in an <img> tag is not useful; it will just HTTP 401
-          */}}
-          <img class="dm-message__embedded-image"
-            src="/content/images/{{.LocalFilename}}"
-            width="{{.Width}}" height="{{.Height}}"
-            onclick="image_carousel.querySelector('img').src = this.src; image_carousel.showModal();"
-            onerror="img_load_err(event, this)"
-          >
-        {{end}}
-        {{range .Videos}}
-          <video class="dm-message__embedded-video" controls width="{{.Width}}" height="{{.Height}}"
-            {{if .IsDownloaded}}
-              poster="/content/video_thumbnails/{{.ThumbnailLocalPath}}"
-            {{else}}
-              poster="{{.ThumbnailRemoteUrl}}"
-            {{end}}
-          >
-            {{if .IsDownloaded}}
-              <source src="/content/videos/{{.LocalFilename}}">
-            {{else}}
-              <source src="{{.RemoteURL}}">
-            {{end}}
-          </video>
-        {{end}}
-        {{range .Urls}}
-          {{template "embedded-link" .}}
-        {{end}}
-        {{if .Text}}
-          <div class="dm-message__text-content">
-            {{template "text-with-entities" .Text}}
-          </div>
-        {{end}}
-      </div>
-      <div class="dm-message__button-container">
-        <div class="row">
-          <div class="dm-message__emoji-button button" onclick="
-            show_emoji_picker(function(emoji_info) {
-              htmx.ajax('POST', '/messages/{{$.DMChatRoomID}}/reacc', {values: {
-                message_id: '{{$.ID}}',
-                reacc: emoji_info.unicode,
-              }, source: '[data-message-id=\'{{$.ID}}\']'});
-            });
-          ">
-            <img class="svg-icon" src="/static/icons/emoji-react.svg" width="24" height="24"/>
-          </div>
-          <div class="dm-message__emoji-button button" onclick="handle_reply_clicked(this.closest('.dm-message').getAttribute('data-message-id'))">
-            <img class="svg-icon" src="/static/icons/replying_to.svg" width="24" height="24"/>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="dm-message__reactions">
-      {{range .Reactions}}
-        {{$sender := (user .SenderID)}}
-        <span
-          class="dm-message__reacc{{if (eq $sender.ID (active_user).ID)}} dm-message__reacc--ours{{end}}"
-          title="{{$sender.DisplayName}} (@{{$sender.Handle}})"
-        >{{.Emoji}}</span>
-      {{end}}
-    </div>
-    <div class="sent-at">
-      <p class="sent-at__text">
-        {{.SentAt.Time.Format "Jan 2, 2006 @ 3:04 pm"}}
-      </p>
-    </div>
-  </div>
-{{end}}
+package webserver
 
+import (
+  "fmt"
+  "html/template"
+)
 
-{{define "messages"}}
-  {{range .MessageIDs}}
-    {{template "message" (dm_message .)}}
-  {{end}}
-{{end}}
-
-
-{{define "messages-with-poller"}}
-  {{template "messages" .}}
-
-  <form id="new-messages-poller"
-    hx-swap="outerHTML {{if $.ScrollBottom}}scroll:.chat-messages:bottom{{end}}"
-    hx-trigger="load delay:3s"
-    hx-get="/messages/{{$.ActiveRoomID}}"
-  >
-    <input type="hidden" name="poll">
-    <input type="hidden" name="latest_timestamp" value="{{$.LatestPollingTimestamp}}">
-    <input type="hidden" name="scroll_bottom" value="{{if $.ScrollBottom}}1{{else}}0{{end}}">
-  </form>
-
-  <script>
-    /**
-     * The poller's timestamp will be updated by HTMX, but the POST URL for /send needs updating too
-     */
-    (function() {
-      const composer_form = document.querySelector(".dm-composer form");
-      if (composer_form === null) {
-        // Initial page load; composer isn't rendered yet
-        return;
-      }
-      const [path, qs] = composer_form.attributes["hx-post"].value.split("?");
-      const params = new URLSearchParams(qs);
-      params.set("latest_timestamp", "{{.LatestPollingTimestamp}}");
-      composer_form.setAttribute("hx-post", [path, params.toString()].join("?"));
-      htmx.process(composer_form); // Manually enable HTMX on the manually-added node
-    })();
-  </script>
-{{end}}
-
-
-{{define "chat-view"}}
+templ ChatViewComponent(go_tpl *template.Template, global_data PageGlobalData, data MessageData) {
   <div id="chat-view">
-    {{if .ActiveRoomID}}
+    // TODO: post-templ-cleanup
+    // the whole function can go in an `if data.ActiveRoomID`
+    {{ room := global_data.Rooms[data.ActiveRoomID] }}
+    if data.ActiveRoomID != "" {
       <div class="chat-header">
-        {{ $room := (index $.Rooms $.ActiveRoomID) }}
-        {{template "chat-profile-image" $room}}
+        @chat_profile_image(global_data, room)
         <div class="chat-header__buttons-container row">
-          {{if (ne $room.Type "ONE_TO_ONE")}}
-            <!-- Group chats need an "Info" button -->
+          if room.Type != "ONE_TO_ONE" {
+            // Group chats need an "Info" button
             <a class="button" onclick="toggle_participants_view()" title="Show participants">
               <img class="svg-icon" src="/static/icons/info.svg" width="24" height="24" />
             </a>
-          {{end}}
-          <a class="button" href="https://twitter.com/messages/{{ $room.ID }}" target="_blank" title="Open on twitter.com">
+          }
+          <a class="button"
+            href={ templ.URL(fmt.Sprintf("https://twitter.com/messages/%s", room.ID)) }
+            target="_blank" title="Open on twitter.com"
+          >
             <img class="svg-icon" src="/static/icons/external-link.svg" width="24" height="24" />
           </a>
-          <a class="button" hx-post="/messages/{{ $room.ID }}/mark-as-read" title="Mark as read">
+          <a class="button" hx-post={ fmt.Sprintf("/messages/%s/mark-as-read", room.ID) } title="Mark as read">
             <img class="svg-icon" src="/static/icons/eye.svg" width="24" height="24" />
           </a>
-          <a class="button" hx-post="/messages/{{ $room.ID }}?scrape" hx-target="#chat-view" hx-swap="outerHTML" title="Refresh" hx-indicator=".chat-messages">
+          <a class="button" hx-post={ fmt.Sprintf("/messages/%s?scrape", room.ID) } hx-target="#chat-view" hx-swap="outerHTML" title="Refresh" hx-indicator=".chat-messages">
             <img class="svg-icon" src="/static/icons/refresh.svg" width="24" height="24" />
           </a>
         </div>
       </div>
-    {{end}}
+    }
+
     <div class="chat-messages">
-      {{if .ActiveRoomID}}
-        {{template "conversation-top" .}}
-        {{template "messages-with-poller" .}}
-      {{end}}
+      if data.ActiveRoomID != "" {
+        @conversation_top(global_data, data)
+        @messages_with_poller(go_tpl, global_data, data)
+      }
       <div class="htmx-spinner">
         <div class="htmx-spinner__background"></div>
         <img class="svg-icon htmx-spinner__icon" src="/static/icons/spinner.svg" />
       </div>
     </div>
-    {{if .ActiveRoomID}}
-      <div class="dm-composer">
-        {{/* TODO: replying-to CSS re-use is a mess */}}
+
+    if data.ActiveRoomID != "" {
+     <div class="dm-composer">
+        // TODO: replying-to CSS re-use is a mess
         <div id="composerReplyingTo" class="dm-composer__replying-to-container">
           <div class="dm-replying-to row row--spread">
             <div>
@@ -205,7 +69,7 @@
         </div>
 
         <form
-          hx-post="/messages/{{.ActiveRoomID}}/send?latest_timestamp={{.LatestPollingTimestamp}}"
+          hx-post={ fmt.Sprintf("/messages/%s/send?latest_timestamp=%d", data.ActiveRoomID, data.LatestPollingTimestamp) }
           hx-target="#new-messages-poller"
           hx-swap="outerHTML scroll:.chat-messages:bottom"
           hx-ext="json-enc"
@@ -269,8 +133,7 @@
         }
       </script>
 
-      {{ $room := (index $.Rooms $.ActiveRoomID) }}
-      {{if (ne $room.Type "ONE_TO_ONE")}}
+      if room.Type != "ONE_TO_ONE" {
         <div class="groupchat-participants-list">
           <div class="header row">
             <a onclick="toggle_participants_view()" class="button back-button">
@@ -278,10 +141,10 @@
             </a>
             <h3>People</h3>
           </div>
-          {{template "list" (dict "UserIDs" $room.GetParticipantIDs)}}
+          @UsersListComponent(global_data, room.GetParticipantIDs(), "", "")
         </div>
-      {{end}}
-    {{end}}
+      }
+    }
   </div>
 
   <dialog id="emoji_popup" onmousedown="event.button == 0 && event.target==this && close_emoji_picker()"></dialog>
@@ -386,43 +249,20 @@
         setTimeout(() => {img.src = img.src;}, 500);
       }
     }
-
   </script>
-{{end}}
+}
 
-
-{{define "conversation-top"}}
+templ conversation_top(global_data PageGlobalData, data MessageData) {
   <div class="show-more conversation-top">
-    {{if .Cursor.CursorPosition.IsEnd}}
+    if data.Cursor.CursorPosition.IsEnd() {
       <label class="show-more__eof-label">Beginning of conversation</label>
-    {{else}}
+    } else {
+      // TODO: this might require a `cursor_to_query_params` if the same view is used for searching
       <a class="show-more__button button"
-        hx-get="?cursor={{.Cursor.CursorValue}}" {{/* TODO: this might require a `cursor_to_query_params` if the same view is used for searching */}}
+        hx-get={ fmt.Sprintf("?cursor=%d", data.Cursor.CursorValue) }
         hx-target=".conversation-top"
         hx-swap="outerHTML"
       >Show more</a>
-    {{end}}
+    }
   </div>
-{{end}}
-
-
-{{/* convenience template for htmx requests */}}
-{{define "messages-top"}}
-  {{template "conversation-top" .}}
-  {{template "messages" .}}
-  <script>
-    /**
-     * Scroll the last message into view
-     */
-    (function() {
-      const last_message = document.querySelector(
-        '[data-message-id="{{ index .MessageIDs (sub (len .MessageIDs) 1)}}"]'
-      );
-      last_message.scrollIntoView({behavior: "instant", block: "start"});
-      last_message.classList.add("highlighted");
-      setTimeout(function() {
-        last_message.classList.remove("highlighted");
-      }, 1000);
-    })();
-  </script>
-{{end}}
+}

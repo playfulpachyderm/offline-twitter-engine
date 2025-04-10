@@ -115,7 +115,6 @@ func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file st
 		main_component = MessagesPage(tpl, global_data, messages_data)
 	default:
 		panic(tpl_file)
-		// main_component = templ.FromGoHTML(tpl.Lookup("main"), tpl_data)
 	}
 
 	buf := new(bytes.Buffer)

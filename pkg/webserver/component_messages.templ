@@ -1,0 +1,177 @@
+package webserver
+
+import (
+  "fmt"
+  "html/template"
+  "slices"
+  . "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+)
+
+templ messages_with_poller(go_tpl *template.Template, global_data PageGlobalData, data MessageData) {
+  @messages(go_tpl, global_data, data)
+
+  <form id="new-messages-poller"
+    if data.ScrollBottom {
+      hx-swap="outerHTML scroll:.chat-messages:bottom"
+    } else {
+      hx-swap="outerHTML"
+    }
+    hx-trigger="load delay:3s"
+    hx-get={ fmt.Sprintf("/messages/%s", data.ActiveRoomID) }
+  >
+    <input type="hidden" name="poll">
+    <input type="hidden" name="latest_timestamp" value={ fmt.Sprint(data.LatestPollingTimestamp) }>
+    <input type="hidden" name="scroll_bottom" value={ map[bool]string{true: "1", false: "0"}[data.ScrollBottom] }>
+  </form>
+
+  <script>
+    /**
+     * The poller's timestamp will be updated by HTMX, but the POST URL for /send needs updating too
+     */
+    (function() {
+      const composer_form = document.querySelector(".dm-composer form");
+      if (composer_form === null) {
+        // Initial page load; composer isn't rendered yet
+        return;
+      }
+      const [path, qs] = composer_form.attributes["hx-post"].value.split("?");
+      const params = new URLSearchParams(qs);
+      params.set("latest_timestamp", "{{ data.LatestPollingTimestamp }}");
+      composer_form.setAttribute("hx-post", [path, params.toString()].join("?"));
+      htmx.process(composer_form); // Manually enable HTMX on the manually-added node
+    })();
+  </script>
+}
+
+templ messages(go_tpl *template.Template, global_data PageGlobalData, data MessageData) {
+  for _, m_id := range data.MessageIDs {
+    @message(go_tpl, global_data, global_data.Messages[m_id])
+  }
+}
+
+templ message(go_tpl *template.Template, global_data PageGlobalData, m DMMessage) {
+  {{ user := global_data.Users[m.SenderID] }}
+  <div
+    class={
+      "dm-message",
+      templ.KV("our-message", m.SenderID == global_data.ActiveUser.ID),
+    }
+    data-message-id={ fmt.Sprint(m.ID) } hx-ext="json-enc" hx-swap="outerHTML"
+  >
+    <div class="dm-message__row row">
+      <div class="dm-message__sender-profile-img">
+        @CircleProfileImgComponent(user)
+      </div>
+      <div class="dm-message__contents">
+        if m.InReplyToID != 0 {
+          {{ replied_msg := global_data.Messages[m.InReplyToID] }}
+          <div class="dm-replying-to">
+            <div class="dm-replying-to__label labelled-icon">
+              <img class="svg-icon" src="/static/icons/replying_to.svg" width="24" height="24" />
+              <label>Replying to</label>
+              <span class="dm-replying-to__username"
+                data-replying-to-message-id={ fmt.Sprint(m.InReplyToID) }
+                onclick="handleReplyingToClicked(this)"
+              >
+                { global_data.Users[replied_msg.SenderID].DisplayName }
+              </span>
+            </div>
+            <div class="dm-replying-to__preview-text"
+              data-replying-to-message-id={ fmt.Sprint(m.InReplyToID) }
+              onclick="handleReplyingToClicked(this)"
+            >
+              { replied_msg.Text }
+            </div>
+          </div>
+        }
+        if m.EmbeddedTweetID != 0 {
+          <div class="dm-message__tweet-preview">
+            @TweetComponent(go_tpl, global_data, m.EmbeddedTweetID, 0, 1)
+          </div>
+        }
+        // TODO: dupe-check embedded images
+        for _, image := range m.Images {
+          // DM images can only be loaded with an authenticated session.  So sending the RemoteUrl
+          // in an <img> tag is not useful; it will just HTTP 401
+          <img class="dm-message__embedded-image"
+            src={ fmt.Sprintf("/content/images/%s", image.LocalFilename) }
+            width={ fmt.Sprint(image.Width) } height={ fmt.Sprint(image.Height) }
+            onclick="image_carousel.querySelector('img').src = this.src; image_carousel.showModal();"
+            onerror="img_load_err(event, this)"
+          >
+        }
+        // TODO: dupe-check embedded videos
+        for _, vid := range m.Videos {
+          <video class="dm-message__embedded-video" controls width={ fmt.Sprint(vid.Width) } height={ fmt.Sprint(vid.Height) }
+            if vid.IsDownloaded {
+              poster={ fmt.Sprintf("/content/video_thumbnails/%s", vid.ThumbnailLocalPath) }
+            } else {
+              poster={ vid.ThumbnailRemoteUrl }
+            }
+          >
+            if vid.IsDownloaded {
+              <source src={ fmt.Sprintf("/content/videos/%s", vid.LocalFilename) }>
+            } else {
+              <source src={ vid.RemoteURL }>
+            }
+          </video>
+        }
+        for _, url := range m.Urls {
+          @EmbeddedLinkComponent(url)
+        }
+        if m.Text != "" {
+          <div class="dm-message__text-content">
+            @TextWithEntitiesComponent(m.Text)
+          </div>
+        }
+      </div>
+      <div class="dm-message__button-container">
+        <div class="row">
+          // TODO: javascript
+          <div class="dm-message__emoji-button button" onclick={ templ.JSUnsafeFuncCall(fmt.Sprintf(`
+            show_emoji_picker(function(emoji_info) {
+              htmx.ajax('POST', '/messages/%s/reacc', {values: {
+                message_id: '%d',
+                reacc: emoji_info.unicode,
+              }, source: '[data-message-id=\'%d\']'});
+            });
+          `, m.DMChatRoomID, m.ID, m.ID)) }>
+            <img class="svg-icon" src="/static/icons/emoji-react.svg" width="24" height="24"/>
+          </div>
+          <div class="dm-message__emoji-button button" onclick="handle_reply_clicked(this.closest('.dm-message').getAttribute('data-message-id'))">
+            <img class="svg-icon" src="/static/icons/replying_to.svg" width="24" height="24"/>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="dm-message__reactions">
+      // TODO: post-templ-cleanup
+      {{
+        keys := make([]UserID, 0, len(m.Reactions))
+        for k := range m.Reactions {
+            keys = append(keys, k)
+        }
+        slices.Sort(keys)
+      }}
+
+      // WTF: magic-templ-empty-string
+      {}
+      for _, k := range keys {
+        {{ r := m.Reactions[k] }}
+        {{ sender := global_data.Users[r.SenderID] }}
+        <span
+          class={
+            "dm-message__reacc",
+            templ.KV("dm-message__reacc--ours", sender.ID == global_data.ActiveUser.ID),
+          }
+          title={ fmt.Sprintf("%s (@%s)", sender.DisplayName, sender.Handle) }
+        >{ r.Emoji }</span>
+      }
+    </div>
+    <div class="sent-at">
+      <p class="sent-at__text">
+        { m.SentAt.Time.Format("Jan 2, 2006 @ 3:04 pm") }
+      </p>
+    </div>
+  </div>
+}

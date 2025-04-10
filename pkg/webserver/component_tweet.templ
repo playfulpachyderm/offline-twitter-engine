@@ -39,7 +39,7 @@ templ TweetComponent(go_tpl *template.Template, global_data PageGlobalData, t_id
 		}
 		<div class="tweet__header-container">
 			<div class="author-info-container" hx-trigger="click consume">
-				@templ.FromGoHTML(go_tpl.Lookup("author-info"), author)
+				@AuthorInfoComponent(author)
 			</div>
 			if len(main_tweet.ReplyMentions) != 0 {
 				<div class="reply-mentions" hx-trigger="click consume">
@@ -76,9 +76,6 @@ templ TweetComponent(go_tpl *template.Template, global_data PageGlobalData, t_id
 					}
 					@TextWithEntitiesComponent(main_tweet.Text)
 					for _, image := range main_tweet.Images {
-						// WTF: magic-templ-empty-string
-						{}
-
 						// Some stuff
 						<img class="tweet__embedded-image"
 							if image.IsDownloaded {
@@ -96,9 +93,6 @@ templ TweetComponent(go_tpl *template.Template, global_data PageGlobalData, t_id
 						>
 					}
 					for _, vid := range main_tweet.Videos {
-						// WTF: magic-templ-empty-string
-						{}
-
 						<div class="video">
 							if vid.IsGif {
 								<div class="video__gif-controls labelled-icon">
@@ -138,18 +132,33 @@ templ TweetComponent(go_tpl *template.Template, global_data PageGlobalData, t_id
 						</div>
 					}
 					for _, url := range main_tweet.Urls {
-						// WTF: magic-templ-empty-string
-						{}
-
 						<div class="click-eater" hx-trigger="click consume">
-							@templ.FromGoHTML(go_tpl.Lookup("embedded-link"), url)
+							@EmbeddedLinkComponent(url)
 						</div>
 					}
 					for _, poll := range main_tweet.Polls {
-						// WTF: magic-templ-empty-string
-						{}
+						<div class="poll rounded-gray-outline">
+							@poll_choice(poll, poll.Choice1, poll.Choice1_Votes)
+							@poll_choice(poll, poll.Choice2, poll.Choice2_Votes)
+							if poll.NumChoices > 2 {
+								@poll_choice(poll, poll.Choice3, poll.Choice3_Votes)
+							}
+							if poll.NumChoices > 3 {
+								@poll_choice(poll, poll.Choice4, poll.Choice4_Votes)
+							}
 
-						@templ.FromGoHTML(go_tpl.Lookup("poll"), poll)
+							<p class="poll__metadata">
+								<span class="poll__metadata__state">
+									if poll.IsOpen() {
+										{ fmt.Sprintf("Poll open, voting ends at %s", poll.FormatEndsAt()) }
+									} else {
+										{ fmt.Sprintf("Poll ended %s", poll.FormatEndsAt()) }
+									}
+								</span>
+								-
+								<span class="poll-vote-count">{ fmt.Sprintf("%d votes", poll.TotalVotes()) }</span>
+							</p>
+						</div>
 					}
 
 					if main_tweet.QuotedTweetID != 0 && quote_nesting_level < 1 {
@@ -158,7 +167,43 @@ templ TweetComponent(go_tpl *template.Template, global_data PageGlobalData, t_id
 						</div>
 					}
 					if main_tweet.SpaceID != SpaceID("") {
-						@templ.FromGoHTML(go_tpl.Lookup("space"), global_data.Spaces[main_tweet.SpaceID])
+						{{ space := global_data.Spaces[main_tweet.SpaceID] }}
+						<div class="space">
+							<div class="space__host row">
+								@AuthorInfoComponent(global_data.Users[space.CreatedById])
+								<span class="space__host__label">(Host)</span>
+								<div class="space__layout-spacer"></div>
+								<div class="space__date">
+									{ space.StartedAt.Format("Jan 2, 2006") }
+									<br>
+									{ space.StartedAt.Format("3:04pm") }
+								</div>
+							</div>
+							<h3 class="space__title">{ space.Title }</h3>
+							<div class="space__info row">
+								<span class="space-state">
+									if space.State == "Ended" {
+										<ul class="space__info__list inline-dotted-list">
+											<li>{ space.State }</li>
+											<li>{ fmt.Sprintf("%d participants", len(space.ParticipantIds)) }</li>
+											<li>{ fmt.Sprintf("%d tuned in", space.LiveListenersCount) }</li>
+											<li>{ fmt.Sprintf("Lasted %s", space.FormatDuration()) }</li>
+										</ul>
+									} else {
+										{ space.State }
+									}
+								</span>
+							</div>
+							<ul class="space__participants-list">
+								for _, participant_id := range space.ParticipantIds {
+									if participant_id != space.CreatedById {
+										<li>
+											@AuthorInfoComponent(global_data.Users[participant_id])
+										</li>
+									}
+								}
+							</ul>
+						</div>
 					}
 				</div>
 
@@ -171,8 +216,8 @@ templ TweetComponent(go_tpl *template.Template, global_data PageGlobalData, t_id
 						<img class="svg-icon" src="/static/icons/reply.svg" width="24" height="24" />
 						<span>{ fmt.Sprint(main_tweet.NumReplies) }</span>
 					</div>
-					@templ.FromGoHTML(go_tpl.Lookup("retweets-count"), main_tweet)
-					@templ.FromGoHTML(go_tpl.Lookup("likes-count"), main_tweet)
+					@RetweetsCountComponent(main_tweet)
+					@LikesCountComponent(main_tweet)
 					<div class="interactions__dummy"></div>
 					<div class="row" hx-trigger="click consume">
 						<a class="button" title="Copy link" onclick={ templ.JSUnsafeFuncCall(fmt.Sprintf("navigator.clipboard.writeText('https://twitter.com/%s/status/%d')", author.Handle, main_tweet.ID)) }>
@@ -204,4 +249,87 @@ templ TweetComponent(go_tpl *template.Template, global_data PageGlobalData, t_id
 			<img class="svg-icon htmx-spinner__icon" src="/static/icons/spinner.svg" />
 		</div>
 	</div>
+}
+
+templ poll_choice(p Poll, label string, votes int) {
+	<div class="row poll__choice">
+		<div
+			if p.IsWinner(votes) {
+				class="poll__choice-fill-bar poll__choice-fill-bar--winner"
+			} else {
+				class="poll__choice-fill-bar "
+			}
+			style={ fmt.Sprintf("width: %.1f%%", p.VotePercentage(votes)) }
+		></div>
+		<div class="poll__choice-info row">
+			<span class="poll__choice-label">{ label }</span>
+			<span class="poll__choice-votes">{ fmt.Sprintf("%d (%.1f%%)", votes, p.VotePercentage(votes)) }</span>
+		</div>
+	</div>
+}
+
+templ LikesCountComponent(tweet Tweet) {
+	<div class="interactions__stat" hx-trigger="click consume">
+		if tweet.IsLikedByCurrentUser {
+			<img class="svg-icon interactions__like-icon interactions__like-icon--liked" src="/static/icons/like_filled.svg" width="24" height="24"
+				hx-get={ fmt.Sprintf("/tweet/%d/unlike", tweet.ID) }
+				hx-target="closest .interactions__stat"
+				hx-push-url="false"
+				hx-swap="outerHTML focus-scroll:false"
+			/>
+		} else {
+			<img class="svg-icon interactions__like-icon" src="/static/icons/like.svg" width="24" height="24"
+				hx-get={ fmt.Sprintf("/tweet/%d/like", tweet.ID) }
+				hx-target="closest .interactions__stat"
+				hx-push-url="false"
+				hx-swap="outerHTML focus-scroll:false"
+			/>
+		}
+		<span>{ fmt.Sprint(tweet.NumLikes) }</span>
+	</div>
+}
+
+
+templ RetweetsCountComponent(tweet Tweet) {
+	<div class="interactions__stat" hx-trigger="click consume">
+		if tweet.IsRetweetedByCurrentUser {
+			<img class="svg-icon interactions__retweet-icon interactions__retweet-icon--retweeted"
+				src="/static/icons/retweet.svg" width="24" height="24"
+			/>
+		} else {
+			<img class="svg-icon interactions__retweet-icon"
+				src="/static/icons/retweet.svg" width="24" height="24"
+			/>
+		}
+		<span>{ fmt.Sprint(tweet.NumRetweets) }</span>
+	</div>
+}
+
+templ EmbeddedLinkComponent(url Url) {
+	<a
+		class="embedded-link rounded-gray-outline"
+		target="_blank"
+		href={ templ.URL(url.Text) }
+		if url.ThumbnailWidth != 0 {
+			style={ fmt.Sprintf("max-width: %dpx", url.ThumbnailWidth) }
+		} else {
+			style="max-width: fit-content"
+		}
+	>
+		<img
+			if url.IsContentDownloaded {
+				src={ fmt.Sprintf("/content/link_preview_images/%s", url.ThumbnailLocalPath) }
+			} else {
+				src={ url.ThumbnailRemoteUrl }
+			}
+			class="embedded-link__preview-image"
+			width={ fmt.Sprint(url.ThumbnailWidth) } height={ fmt.Sprint(url.ThumbnailHeight) }
+		/>
+		<h3 class="embedded-link__title">{ url.Title }</h3>
+		<p class="embedded-link__description">{ url.Description }</p>
+		<span class="row embedded-link__domain">
+			<img class="svg-icon" src="/static/icons/link3.svg" width="24" height="24" />
+			<span class="embedded-link__domain__contents">{ url.GetDomain() }</span>
+		</span>
+	</a>
 }

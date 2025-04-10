@@ -1,0 +1,94 @@
+package webserver
+
+import (
+	"fmt"
+	"html/template"
+
+	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+)
+
+templ ChatListComponent(go_tpl *template.Template, global_data PageGlobalData, data MessageData) {
+	<div class="chat-list"
+		hx-get={ fmt.Sprintf("/messages/refresh-list?active-chat=%s", data.ActiveRoomID) }
+		hx-swap="outerHTML" hx-trigger="load delay:3s"
+	>
+		for _, room_id := range data.RoomIDs {
+			{{ _, is_unread := data.UnreadRoomIDs[room_id] }}
+			@chat_list_entry(global_data, global_data.Rooms[room_id], data.ActiveRoomID == room_id, is_unread)
+		}
+
+		// Scroll the active chat into view, if there is one
+		if data.ActiveRoomID != DMChatRoomID("") {
+			<script>
+				document.querySelector(".chat-list-entry.chat-list-entry--active-chat").scrollIntoViewIfNeeded(true)
+			</script>
+		}
+	</div>
+}
+
+templ chat_list_entry(global_data PageGlobalData, room DMChatRoom, is_active bool, is_unread bool) {
+	<div
+		class={
+			"chat-list-entry",
+			templ.KV("chat-list-entry--active-chat", is_active),
+			templ.KV("chat-list-entry--unread", is_unread)
+		}
+		hx-get={ fmt.Sprintf("/messages/%s", room.ID) }
+		hx-push-url="true"
+		hx-swap="outerHTML"
+		hx-target="body"
+	>
+		<div class="chat-list-entry__header">
+			@chat_profile_image(global_data, room)
+			<div class="posted-at">
+				<p class="posted-at__text">
+					{ room.LastMessagedAt.Time.Format("Jan 2, 2006") }
+					<br/>
+					{ room.LastMessagedAt.Time.Format("3:04 pm") }
+				</p>
+			</div>
+		</div>
+		<div class="chat-list-entry__preview-and-unread-container row">
+			<p class="chat-list-entry__message-preview">
+				{{ message := global_data.Messages[room.LastMessageID] }}
+				{{ sender  := global_data.Users[message.SenderID] }}
+				if message.Text != "" {
+					if room.Type == "GROUP_DM" {
+						{ fmt.Sprintf("%s:", sender.DisplayName) }
+					}
+					{ message.Text }
+				} else if message.EmbeddedTweetID != 0 {
+					<span class="chat-list-entry__preview-no-text">{ fmt.Sprintf("%s sent a Tweet", sender.DisplayName) }</span>
+				} else if len(message.Images) != 0 {
+					<span class="chat-list-entry__preview-no-text">{ fmt.Sprintf("%s sent an image", sender.DisplayName) }</span>
+				} else if len(message.Videos) != 0 {
+					<span class="chat-list-entry__preview-no-text">{ fmt.Sprintf("%s sent a video", sender.DisplayName) }</span>
+				} else if len(message.Urls) != 0 {
+					<span class="chat-list-entry__preview-no-text">{ fmt.Sprintf("%s sent a link", sender.DisplayName) }</span>
+				}
+			</p>
+			<span class="chat-list-entry__unread-indicator"></span>
+		</div>
+	</div>
+}
+
+templ chat_profile_image(global_data PageGlobalData, room DMChatRoom) {
+	if room.Type == "ONE_TO_ONE" {
+		for _, p := range room.Participants {
+			if p.UserID != global_data.ActiveUser.ID {
+				// This is some fuckery; I have no idea why "hx-target" is needed, but otherwise it
+				// targets the #chat-view.
+				<div class="click-eater" hx-trigger="click consume" hx-target="body">
+					@AuthorInfoComponent(global_data.Users[p.UserID])
+				</div>
+			}
+		}
+	} else {
+		<div class="groupchat-info row">
+			@CircleProfileImgComponentWithLink(User{IsContentDownloaded: false, ProfileImageUrl: room.AvatarImageRemoteURL}, false)
+			<div class="click-eater" hx-trigger="click consume" hx-target="body">
+				<div class="groupchat-info__display-name">{ room.Name }</div>
+			</div>
+		</div>
+	}
+}

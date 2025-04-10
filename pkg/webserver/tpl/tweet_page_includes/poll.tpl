@@ -1,6 +1,6 @@
 {{define "poll-choice"}}
   <div class="row poll__choice">
-    <div class="poll__choice-fill-bar {{if (.poll.IsWinner .votes)}}poll__choice-fill-bar--winner{{end}}" style="width: {{printf "%.1f" (.poll.VotePercentage .votes)}}%"></div>
+    <div class="poll__choice-fill-bar {{if (.poll.IsWinner .votes)}}poll__choice-fill-bar--winner{{end}}" style="width: {{printf "%.1f" (.poll.VotePercentage .votes)}}%;"></div>
     <div class="poll__choice-info row">
       <span class="poll__choice-label">{{.label}}</span>
       <span class="poll__choice-votes">{{.votes}} ({{printf "%.1f" (.poll.VotePercentage .votes)}}%)</span>
