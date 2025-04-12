@@ -172,7 +172,7 @@ templ Base(global_data PageGlobalData, main_component templ.Component) {
 					/>
 				</form>
 			</header>
-			@NavSidebar(global_data)
+			@NavSidebarComponent(global_data)
 			<main>
 				@main_component
 			</main>
@@ -188,7 +188,7 @@ templ Base(global_data PageGlobalData, main_component templ.Component) {
 			</dialog>
 			<div class="toasts" id="toasts">
 				for _, toast := range global_data.Toasts {
-					@ToastTpl(toast)
+					@ToastComponent(toast)
 				}
 			</div>
 		</body>

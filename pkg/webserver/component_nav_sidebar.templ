@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-templ NavSidebar(global_data PageGlobalData) {
+templ NavSidebarComponent(global_data PageGlobalData) {
 	<nav id="nav-sidebar" class="nav-sidebar" hx-trigger="load delay:3s" hx-get="/nav-sidebar-poll-updates" hx-swap="outerHTML">
 		<div id="logged-in-user-info">
 			<div class="button row" hx-get="/login" hx-trigger="click" hx-target="body" hx-push-url="true">

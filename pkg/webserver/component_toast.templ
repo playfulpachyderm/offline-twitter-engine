@@ -4,7 +4,7 @@ import (
   "fmt"
 )
 
-templ ToastTpl(toast Toast) {
+templ ToastComponent(toast Toast) {
   <div class={ fmt.Sprintf("toast toast--%s", toast.Type) }
     if toast.AutoCloseDelay != 0 {
       hx-on::load={ templ.JSUnsafeFuncCall(fmt.Sprintf("setTimeout(() => this.remove(), %d + 2000); setTimeout(() => this.classList.add('disappearing'), %d)", toast.AutoCloseDelay, toast.AutoCloseDelay)) }
@@ -14,7 +14,7 @@ templ ToastTpl(toast Toast) {
       <h2 class="toast__title">{ toast.Title }</h2>
     }
     <span class="toast__message">{ toast.Message }</span>
-    if toast.AutoCloseDelay != 0 {
+    if toast.AutoCloseDelay == 0 {
       <button class="suicide" onclick="this.parentElement.remove()">X</button>
     }
   </div>
