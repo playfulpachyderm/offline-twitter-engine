@@ -13,6 +13,108 @@ import (
 	diffs "gitlab.com/offline-twitter/twitter_offline_engine/pkg/webserver/tmp_templ_diff"
 )
 
+func (app *Application) buffered_render_htmx2(w http.ResponseWriter, r *http.Request, tpl_name string, global_data PageGlobalData, tpl_data interface{}) {
+	_span := tracing.GetActiveSpan(r.Context()).AddChild("buffered_render_htmx2")
+	defer _span.End()
+
+	global_data.ActiveUser = app.ActiveUser
+
+
+	var component templ.Component
+	switch tpl_name {
+	case "timeline":
+		var feed_data Feed
+		switch data := tpl_data.(type) {
+		case Feed:
+			feed_data = data
+		case SearchPageData:
+			feed_data = data.Feed
+		case UserFeedData:
+			feed_data = data.Feed
+		default:
+			panic(fmt.Sprintf("%T", data))
+		}
+		component = TimelineComponent(global_data, feed_data)
+	case "likes-count":
+		tweet_data, is_ok := tpl_data.(Tweet)
+		if !is_ok {
+			panic(tpl_data)
+		}
+		component = LikesCountComponent(tweet_data)
+	case "nav-sidebar":
+		component = NavSidebarComponent(global_data)
+	case "message":
+		msg_data, is_ok := tpl_data.(DMMessage)
+		if !is_ok {
+			panic(tpl_data)
+		}
+		component = message(global_data, msg_data)
+	case "messages-with-poller":
+		msg_data, is_ok := tpl_data.(MessageData)
+		if !is_ok {
+			panic(tpl_data)
+		}
+		component = messages_with_poller(global_data, msg_data)
+	case "messages-top":
+		msg_data, is_ok := tpl_data.(MessageData)
+		if !is_ok {
+			panic(tpl_data)
+		}
+		component = messages_top(global_data, msg_data)
+	case "chat-view":
+		msg_data, is_ok := tpl_data.(MessageData)
+		if !is_ok {
+			panic(tpl_data)
+		}
+		component = ChatViewComponent(global_data, msg_data)
+	case "chat-list":
+		msg_data, is_ok := tpl_data.(MessageData)
+		if !is_ok {
+			panic(tpl_data)
+		}
+		component = ChatListComponent(global_data, msg_data)
+	case "following-button":
+		user_data, is_ok := tpl_data.(User)
+		if !is_ok {
+			panic(tpl_data)
+		}
+		component = FollowingButtonComponent(user_data)
+	case "toast":
+		toast_data, is_ok := tpl_data.(Toast)
+		if !is_ok {
+			panic(fmt.Sprintf("%#v", tpl_data))
+		}
+		component = ToastComponent(toast_data)
+	default:
+		panic(tpl_name)
+	}
+
+
+	buf := new(bytes.Buffer)
+	span := tracing.GetActiveSpan(r.Context()).AddChild("templ_render")
+	rec := httptest.NewRecorder()
+	component.Render(context.Background(), rec)
+	span.End()
+	buf.Write(rec.Body.Bytes())
+
+	// Check against old version
+	span = tracing.GetActiveSpan(r.Context()).AddChild("html_template_render")
+	rec2 := httptest.NewRecorder()
+	app.buffered_render_htmx(rec2, tpl_name, global_data, tpl_data)
+	span.End()
+	buf2 := new(bytes.Buffer)
+	buf2.Write(rec2.Body.Bytes())
+	diff, err := diffs.DiffStrings(rec2.Body.String(), buf.String())
+	panic_if(err)
+	if diff != "" {
+		panic(diff)
+	}
+
+	_, err = buf.WriteTo(w)
+	panic_if(err)
+}
+
+
 // Render the "base" template, creating a full HTML page corresponding to the given template file,
 // with all available partials.
 func (app *Application) buffered_render_page2(w http.ResponseWriter, r *http.Request, tpl_file string, global_data PageGlobalData, tpl_data interface{}) {
