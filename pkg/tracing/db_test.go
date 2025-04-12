@@ -18,7 +18,6 @@ func init() {
 		panic(err)
 	}
 
-
 	_, err = DBConnect(test_db_path)
 	if err != nil {
 		panic(err)

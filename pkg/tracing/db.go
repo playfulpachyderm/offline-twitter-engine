@@ -19,7 +19,7 @@ var ENGINE_DATABASE_VERSION = len(MIGRATIONS)
 
 var (
 	ErrTargetExists = errors.New("target already exists")
-	ErrNotInDB = errors.New("not in db")
+	ErrNotInDB      = errors.New("not in db")
 )
 
 type DB struct {
