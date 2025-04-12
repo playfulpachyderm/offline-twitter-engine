@@ -175,3 +175,23 @@ templ message(global_data PageGlobalData, m DMMessage) {
     </div>
   </div>
 }
+
+templ messages_top(global_data PageGlobalData, data MessageData) {
+  @conversation_top(global_data, data)
+  @messages(global_data, data)
+  <script>
+    /**
+     * Scroll the last message into view
+     */
+    (function() {
+      const last_message = document.querySelector(
+        '[data-message-id="{{ data.MessageIDs[len(data.MessageIDs)-1] }}"]'
+      );
+      last_message.scrollIntoView({behavior: "instant", block: "start"});
+      last_message.classList.add("highlighted");
+      setTimeout(function() {
+        last_message.classList.remove("highlighted");
+      }, 1000);
+    })();
+  </script>
+}
