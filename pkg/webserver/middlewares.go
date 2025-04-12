@@ -1,9 +1,9 @@
 package webserver
 
 import (
+	"context"
 	"fmt"
 	"net/http"
-	"context"
 	"time"
 
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/tracing"
