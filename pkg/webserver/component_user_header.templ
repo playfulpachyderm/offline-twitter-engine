@@ -2,7 +2,6 @@ package webserver
 
 import (
 	"fmt"
-	"html/template"
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
@@ -28,7 +27,7 @@ templ FollowingButtonComponent(user User) {
 	</div>
 }
 
-templ UserHeaderComponent(go_tpl *template.Template, global_data PageGlobalData, user User) {
+templ UserHeaderComponent(global_data PageGlobalData, user User) {
 	<div class="user-header">
 		if user.BannerImageLocalPath != "" {
 			<img class="user-header__profile-banner-image"

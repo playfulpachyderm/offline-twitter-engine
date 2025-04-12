@@ -2,10 +2,9 @@ package webserver
 
 import (
   "fmt"
-  "html/template"
 )
 
-templ ChatViewComponent(go_tpl *template.Template, global_data PageGlobalData, data MessageData) {
+templ ChatViewComponent(global_data PageGlobalData, data MessageData) {
   <div id="chat-view">
     // TODO: post-templ-cleanup
     // the whole function can go in an `if data.ActiveRoomID`
@@ -39,7 +38,7 @@ templ ChatViewComponent(go_tpl *template.Template, global_data PageGlobalData, d
     <div class="chat-messages">
       if data.ActiveRoomID != "" {
         @conversation_top(global_data, data)
-        @messages_with_poller(go_tpl, global_data, data)
+        @messages_with_poller(global_data, data)
       }
       <div class="htmx-spinner">
         <div class="htmx-spinner__background"></div>

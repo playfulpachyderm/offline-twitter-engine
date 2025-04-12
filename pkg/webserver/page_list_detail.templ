@@ -2,11 +2,9 @@ package webserver
 
 import (
 	"fmt"
-
-	"html/template"
 )
 
-templ ListDetailPage(go_tpl *template.Template, global_data PageGlobalData, data ListData) {
+templ ListDetailPage(global_data PageGlobalData, data ListData) {
 	<div class="list-feed-header">
 		<h1>{ data.List.Name }</h1>
 
@@ -18,7 +16,7 @@ templ ListDetailPage(go_tpl *template.Template, global_data PageGlobalData, data
 
 	if data.ActiveTab == "feed" {
 		<div class="timeline list-feed-timeline">
-			@TimelineComponent(go_tpl, global_data, data.Feed)
+			@TimelineComponent(global_data, data.Feed)
 		</div>
 	} else {
 		<div class="add-users-container">

@@ -1,26 +1,22 @@
 package webserver
 
-import (
-	"html/template"
-)
-
-templ TweetDetailPage(go_tpl *template.Template, global_data PageGlobalData, data TweetDetailData) {
+templ TweetDetailPage(global_data PageGlobalData, data TweetDetailData) {
 	<div class="tweet-detail">
 		for _, parent_id := range data.ParentIDs {
 			<div class="thread-parent-tweet">
-				@TweetComponent(go_tpl, global_data, parent_id, 0, 0)
+				@TweetComponent(global_data, parent_id, 0, 0)
 			</div>
 		}
 
 		<div id="focused-tweet" class="focused-tweet">
-			@TweetComponent(go_tpl, global_data, data.MainTweetID, 0, 0)
+			@TweetComponent(global_data, data.MainTweetID, 0, 0)
 		</div>
 
 		if len(data.ThreadIDs) != 0 {
 			<div class="reply-chain">
 				for _, thread_id := range data.ThreadIDs {
 					<div class="reply-tweet">
-						@TweetComponent(go_tpl, global_data, thread_id, 0, 0)
+						@TweetComponent(global_data, thread_id, 0, 0)
 					</div>
 				}
 			</div>
@@ -30,7 +26,7 @@ templ TweetDetailPage(go_tpl *template.Template, global_data PageGlobalData, dat
 			<div class="reply-chain">
 				for _, t_id := range chain {
 					<div class="reply-tweet">
-						@TweetComponent(go_tpl, global_data, t_id, 0, 0)
+						@TweetComponent(global_data, t_id, 0, 0)
 					</div>
 				}
 			</div>

@@ -2,12 +2,11 @@ package webserver
 
 import (
 	"fmt"
-	"html/template"
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
-templ NotificationComponent(go_tpl *template.Template, global_data PageGlobalData, item FeedItem) {
+templ NotificationComponent(global_data PageGlobalData, item FeedItem) {
 	{{ notification := global_data.Notifications[item.NotificationID] }}
 	{{ action_user := global_data.Users[notification.ActionUserID] }}
 
@@ -92,7 +91,7 @@ templ NotificationComponent(go_tpl *template.Template, global_data PageGlobalDat
 		</div>
 
 		if item.TweetID != 0 {
-			@TweetComponent(go_tpl, global_data, item.TweetID, item.RetweetID, 0)
+			@TweetComponent(global_data, item.TweetID, item.RetweetID, 0)
 		}
 	</div>
 }

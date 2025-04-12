@@ -2,12 +2,11 @@ package webserver
 
 import (
 	"fmt"
-	"html/template"
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
-templ TweetComponent(go_tpl *template.Template, global_data PageGlobalData, t_id TweetID, r_id TweetID, quote_nesting_level int) {
+templ TweetComponent(global_data PageGlobalData, t_id TweetID, r_id TweetID, quote_nesting_level int) {
 	{{ main_tweet := global_data.Tweets[t_id] }}
 	{{ author := global_data.Users[main_tweet.UserID] }}
 
@@ -163,7 +162,7 @@ templ TweetComponent(go_tpl *template.Template, global_data PageGlobalData, t_id
 
 					if main_tweet.QuotedTweetID != 0 && quote_nesting_level < 1 {
 						<div class="tweet__quoted-tweet rounded-gray-outline" hx-trigger="click consume">
-							@TweetComponent(go_tpl, global_data, main_tweet.QuotedTweetID, 0, quote_nesting_level + 1)
+							@TweetComponent(global_data, main_tweet.QuotedTweetID, 0, quote_nesting_level + 1)
 						</div>
 					}
 					if main_tweet.SpaceID != SpaceID("") {

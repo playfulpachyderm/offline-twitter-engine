@@ -1,14 +1,10 @@
 package webserver
 
-import (
-	"html/template"
-)
-
-templ MessagesPage(go_tpl *template.Template, global_data PageGlobalData, data MessageData) {
+templ MessagesPage(global_data PageGlobalData, data MessageData) {
 	<div class="messages-page">
 		<script type="module" src="/static/vendor/emoji-picker/picker.js"></script>
-		@ChatListComponent(go_tpl, global_data, data)
-		@ChatViewComponent(go_tpl, global_data, data)
+		@ChatListComponent(global_data, data)
+		@ChatViewComponent(global_data, data)
 	</div>
 	<div class="spacer"></div>
 }

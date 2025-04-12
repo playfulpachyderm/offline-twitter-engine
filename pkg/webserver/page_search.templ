@@ -2,12 +2,11 @@ package webserver
 
 import (
 	"fmt"
-	"html/template"
 	"strings"
 	"net/url"
 )
 
-templ SearchPage(go_tpl *template.Template, global_data PageGlobalData, data SearchPageData) {
+templ SearchPage(global_data PageGlobalData, data SearchPageData) {
 	<div class="search-header">
 		<div class="row row--spread">
 			// Extra div to take up a slot in the `row`
@@ -54,7 +53,7 @@ templ SearchPage(go_tpl *template.Template, global_data PageGlobalData, data Sea
 			</select>
 		</div>
 		<div class="timeline">
-			@TimelineComponent(go_tpl, global_data, data.Feed)
+			@TimelineComponent(global_data, data.Feed)
 		</div>
 	}
 }

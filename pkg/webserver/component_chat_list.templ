@@ -2,12 +2,11 @@ package webserver
 
 import (
 	"fmt"
-	"html/template"
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
-templ ChatListComponent(go_tpl *template.Template, global_data PageGlobalData, data MessageData) {
+templ ChatListComponent(global_data PageGlobalData, data MessageData) {
 	<div class="chat-list"
 		hx-get={ fmt.Sprintf("/messages/refresh-list?active-chat=%s", data.ActiveRoomID) }
 		hx-swap="outerHTML" hx-trigger="load delay:3s"

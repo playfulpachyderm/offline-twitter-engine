@@ -2,13 +2,13 @@ package webserver
 
 import (
   "fmt"
-  "html/template"
   "slices"
+
   . "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 )
 
-templ messages_with_poller(go_tpl *template.Template, global_data PageGlobalData, data MessageData) {
-  @messages(go_tpl, global_data, data)
+templ messages_with_poller(global_data PageGlobalData, data MessageData) {
+  @messages(global_data, data)
 
   <form id="new-messages-poller"
     if data.ScrollBottom {
@@ -43,13 +43,13 @@ templ messages_with_poller(go_tpl *template.Template, global_data PageGlobalData
   </script>
 }
 
-templ messages(go_tpl *template.Template, global_data PageGlobalData, data MessageData) {
+templ messages(global_data PageGlobalData, data MessageData) {
   for _, m_id := range data.MessageIDs {
-    @message(go_tpl, global_data, global_data.Messages[m_id])
+    @message(global_data, global_data.Messages[m_id])
   }
 }
 
-templ message(go_tpl *template.Template, global_data PageGlobalData, m DMMessage) {
+templ message(global_data PageGlobalData, m DMMessage) {
   {{ user := global_data.Users[m.SenderID] }}
   <div
     class={
@@ -86,7 +86,7 @@ templ message(go_tpl *template.Template, global_data PageGlobalData, m DMMessage
         }
         if m.EmbeddedTweetID != 0 {
           <div class="dm-message__tweet-preview">
-            @TweetComponent(go_tpl, global_data, m.EmbeddedTweetID, 0, 1)
+            @TweetComponent(global_data, m.EmbeddedTweetID, 0, 1)
           </div>
         }
         // TODO: dupe-check embedded images

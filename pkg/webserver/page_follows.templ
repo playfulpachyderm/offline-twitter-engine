@@ -2,12 +2,11 @@ package webserver
 
 import (
 	"fmt"
-	"html/template"
 )
 
-templ FollowsPage(go_tpl *template.Template, global_data PageGlobalData, data FollowsData) {
+templ FollowsPage(global_data PageGlobalData, data FollowsData) {
 	{{ user := global_data.Users[data.HeaderUserID] }}
-	@UserHeaderComponent(go_tpl, global_data, user)
+	@UserHeaderComponent(global_data, user)
 
 	<div class="tabs row" hx-boost="true">
 		@tab("Followers", data.Title == "Followers", fmt.Sprintf("/%s/followers", user.Handle))
