@@ -15,8 +15,6 @@ import (
 // Render the "base" template, creating a full HTML page corresponding to the given template file,
 // with all available partials.
 func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file string, global_data PageGlobalData, tpl_data interface{}) {
-	partials := append(glob("tpl/includes/*.tpl"), glob("tpl/tweet_page_includes/*.tpl")...)
-
 	global_data.NotificationBubbles.NumMessageNotifications = len(app.Profile.GetUnreadConversations(app.ActiveUser.ID))
 	if app.LastReadNotificationSortIndex != 0 {
 		global_data.NotificationBubbles.NumRegularNotifications = app.Profile.GetUnreadNotificationsCount(
@@ -99,7 +97,7 @@ func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file st
 	}
 
 	buf := new(bytes.Buffer)
-	Base(global_data, main_component).Render(context.Background(), rec)
+	Base(global_data, main_component).Render(context.Background(), buf)
 
 	// Check against old version
 	rec := httptest.NewRecorder()
