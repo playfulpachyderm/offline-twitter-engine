@@ -3,7 +3,10 @@ package webserver
 import (
 	"fmt"
 	"net/http"
+	"context"
 	"time"
+
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/tracing"
 )
 
 func secureHeaders(next http.Handler) http.Handler {
@@ -22,6 +25,19 @@ func secureHeaders(next http.Handler) http.Handler {
 func (app *Application) logRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t := time.Now()
+
+		var span *tracing.Span
+		var ctx context.Context
+		if is_htmx(r) {
+			ctx, span = tracing.InitTrace(r.Context(), "htmx")
+		} else {
+			ctx, span = tracing.InitTrace(r.Context(), "main")
+		}
+		r = r.WithContext(ctx)
+		defer func() {
+			span.End()
+		}()
+
 		next.ServeHTTP(w, r)
 		duration := time.Since(t)
 

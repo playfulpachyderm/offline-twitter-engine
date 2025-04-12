@@ -13,6 +13,7 @@ import (
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/tracing"
 )
 
 type MessageData struct {
@@ -23,8 +24,10 @@ type MessageData struct {
 }
 
 func (app *Application) messages_index(w http.ResponseWriter, r *http.Request) {
-	chat_view_data, global_data := app.get_message_global_data()
-	app.buffered_render_page2(w, "tpl/messages.tpl", global_data, chat_view_data)
+	_span := tracing.GetActiveSpan(r.Context()).AddChild("messages_index")
+	defer _span.End()
+	chat_view_data, global_data := app.get_message_global_data(r)
+	app.buffered_render_page2(w, r, "tpl/messages.tpl", global_data, chat_view_data)
 }
 
 func (app *Application) message_mark_as_read(w http.ResponseWriter, r *http.Request) {
@@ -84,12 +87,14 @@ func (app *Application) message_send(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
+	_span := tracing.GetActiveSpan(r.Context()).AddChild("message_detail")
+	defer _span.End()
 	room_id := get_room_id_from_context(r.Context())
 
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 	is_sending := len(parts) == 1 && parts[0] == "send"
 
-	chat_view_data, global_data := app.get_message_global_data()
+	chat_view_data, global_data := app.get_message_global_data(r)
 	if _, is_ok := chat_view_data.Rooms[room_id]; !is_ok {
 		app.error_404(w, r)
 		return
@@ -137,7 +142,7 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 			Emoji:       data.Reacc,
 		}
 		global_data.Messages[dm_message.ID] = dm_message
-		app.buffered_render_htmx(w, "message", global_data, dm_message)
+		app.buffered_render_htmx2(w, r, "message", global_data, dm_message)
 		return
 	}
 
@@ -175,7 +180,9 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 		panic_if(err) // TODO: 400 not 500
 		c.UntilTimestamp = TimestampFromUnixMilli(int64(until_time))
 	}
+	span := tracing.GetActiveSpan(r.Context()).AddChild("cursor_next_page")
 	chat_contents := app.Profile.GetChatRoomMessagesByCursor(c)
+	span.End()
 	chat_view_data.DMChatView.MergeWith(chat_contents.TweetTrove)
 	chat_view_data.MessageIDs = chat_contents.MessageIDs
 	chat_view_data.Cursor = chat_contents.Cursor
@@ -185,35 +192,45 @@ func (app *Application) message_detail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if is_htmx(r) {
+		defer span.End()
 		// Polling for updates and sending a message should add messages at the bottom of the page (newest)
 		if r.URL.Query().Has("poll") || is_sending {
-			app.buffered_render_htmx(w, "messages-with-poller", global_data, chat_view_data)
+			app.buffered_render_htmx2(w, r, "messages-with-poller", global_data, chat_view_data)
 			return
 		}
 
 		// Scrolling-back should add new messages to the top of the page
 		if r.URL.Query().Has("cursor") {
-			app.buffered_render_htmx(w, "messages-top", global_data, chat_view_data)
+			app.buffered_render_htmx2(w, r, "messages-top", global_data, chat_view_data)
 			return
 		}
 
 		// Reload the whole chat view pane
 		if r.URL.Query().Has("scrape") {
-			app.buffered_render_htmx(w, "chat-view", global_data, chat_view_data)
+			app.buffered_render_htmx2(w, r, "chat-view", global_data, chat_view_data)
 			return
 		}
 	}
+	// This isn't an "else"; an HTMX request for message detail can still rerender the whole page
 
-	app.buffered_render_page2(w, "tpl/messages.tpl", global_data, chat_view_data)
+	app.buffered_render_page2(w, r, "tpl/messages.tpl", global_data, chat_view_data)
 }
 
-func (app *Application) get_message_global_data() (MessageData, PageGlobalData) {
+func (app *Application) get_message_global_data(r *http.Request) (MessageData, PageGlobalData) {
 	// Get message list previews
+	span := tracing.GetActiveSpan(r.Context()).AddChild("get_message_global_data")
+	defer span.End()
+
+	span1 := tracing.GetActiveSpan(r.Context()).AddChild("chat_view_data")
 	chat_view_data := MessageData{DMChatView: app.Profile.GetChatRoomsPreview(app.ActiveUser.ID)}
+	span1.End()
+
+	span1 = tracing.GetActiveSpan(r.Context()).AddChild("unread_rooms")
 	chat_view_data.UnreadRoomIDs = make(map[DMChatRoomID]bool)
 	for _, id := range app.Profile.GetUnreadConversations(app.ActiveUser.ID) {
 		chat_view_data.UnreadRoomIDs[id] = true
 	}
+	span1.End()
 
 	// Initialize the Global Data from the chat list data (last message previews, etc)
 	global_data := PageGlobalData{Title: "Messages", TweetTrove: chat_view_data.DMChatView.TweetTrove}
@@ -222,9 +239,9 @@ func (app *Application) get_message_global_data() (MessageData, PageGlobalData) 
 }
 
 func (app *Application) messages_refresh_list(w http.ResponseWriter, r *http.Request) {
-	chat_view_data, global_data := app.get_message_global_data()
+	chat_view_data, global_data := app.get_message_global_data(r)
 	chat_view_data.ActiveRoomID = DMChatRoomID(r.URL.Query().Get("active-chat"))
-	app.buffered_render_htmx(w, "chat-list", global_data, chat_view_data)
+	app.buffered_render_htmx2(w, r, "chat-list", global_data, chat_view_data)
 }
 
 func (app *Application) Messages(w http.ResponseWriter, r *http.Request) {

@@ -8,13 +8,17 @@ import (
 	"net/http/httptest"
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/tracing"
 
 	diffs "gitlab.com/offline-twitter/twitter_offline_engine/pkg/webserver/tmp_templ_diff"
 )
 
 // Render the "base" template, creating a full HTML page corresponding to the given template file,
 // with all available partials.
-func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file string, global_data PageGlobalData, tpl_data interface{}) {
+func (app *Application) buffered_render_page2(w http.ResponseWriter, r *http.Request, tpl_file string, global_data PageGlobalData, tpl_data interface{}) {
+	_span := tracing.GetActiveSpan(r.Context()).AddChild("buffered_render_page2")
+	defer _span.End()
+
 	global_data.NotificationBubbles.NumMessageNotifications = len(app.Profile.GetUnreadConversations(app.ActiveUser.ID))
 	if app.LastReadNotificationSortIndex != 0 {
 		global_data.NotificationBubbles.NumRegularNotifications = app.Profile.GetUnreadNotificationsCount(
@@ -97,12 +101,18 @@ func (app *Application) buffered_render_page2(w http.ResponseWriter, tpl_file st
 	}
 
 	buf := new(bytes.Buffer)
-	Base(global_data, main_component).Render(context.Background(), buf)
+	span := tracing.GetActiveSpan(r.Context()).AddChild("templ_render")
+	rec := httptest.NewRecorder()
+	Base(global_data, main_component).Render(context.Background(), rec)
+	span.End()
+	buf.Write(rec.Body.Bytes())
 
 	// Check against old version
-	rec := httptest.NewRecorder()
-	app.buffered_render_page(rec, tpl_file, global_data, tpl_data)
-	diff, err := diffs.DiffStrings(rec.Body.String(), buf.String())
+	span = tracing.GetActiveSpan(r.Context()).AddChild("html_template_render")
+	rec2 := httptest.NewRecorder()
+	app.buffered_render_page(rec2, tpl_file, global_data, tpl_data)
+	span.End()
+	diff, err := diffs.DiffStrings(rec2.Body.String(), buf.String())
 	panic_if(err)
 	if diff != "" {
 		panic(diff)

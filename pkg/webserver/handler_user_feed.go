@@ -8,6 +8,7 @@ import (
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/tracing"
 )
 
 type UserFeedData struct {
@@ -18,11 +19,15 @@ type UserFeedData struct {
 }
 
 func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
+	_span := tracing.GetActiveSpan(r.Context()).AddChild("user_feed")
+	defer _span.End()
 	app.TraceLog.Printf("'UserFeed' handler (path: %q)", r.URL.Path)
 
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
 
+	span := tracing.GetActiveSpan(r.Context()).AddChild("get_user_by_handle")
 	user, err := app.Profile.GetUserByHandle(UserHandle(parts[0]))
+	span.End()
 
 	if errors.Is(err, ErrNotInDatabase) {
 		if !app.IsScrapingDisabled {
@@ -101,10 +106,18 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add more stuff to the user (this has to be done after scraping or else it will get clobbered)
+	span = tracing.GetActiveSpan(r.Context()).AddChild("check_followed")
 	user.IsFollowed = app.Profile.IsXFollowingY(app.ActiveUser.ID, user.ID)
 	user.IsFollowingYou = app.Profile.IsXFollowingY(user.ID, app.ActiveUser.ID)
+	span.End()
+
+	span = tracing.GetActiveSpan(r.Context()).AddChild("get_lists")
 	user.Lists = app.Profile.GetListsForUser(user.ID)
+	span.End()
+
+	span = tracing.GetActiveSpan(r.Context()).AddChild("followers_you_know")
 	user.FollowersYouKnow = app.Profile.GetFollowersYouKnow(app.ActiveUser.ID, user.ID)
+	span.End()
 
 	var c Cursor
 	if len(parts) > 1 && parts[1] == "likes" {
@@ -124,7 +137,9 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	span = tracing.GetActiveSpan(r.Context()).AddChild("next_page")
 	feed, err := app.Profile.NextPage(c, app.ActiveUser.ID)
+	span.End()
 	if err != nil && !errors.Is(err, ErrEndOfFeed) {
 		panic(err)
 	}
@@ -162,10 +177,10 @@ func (app *Application) UserFeed(w http.ResponseWriter, r *http.Request) {
 
 	if is_htmx(r) && c.CursorPosition == CURSOR_MIDDLE {
 		// It's a Show More request
-		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, data)
+		app.buffered_render_htmx2(w, r, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, data)
 	} else {
 		app.buffered_render_page2(
-			w,
+			w, r,
 			"tpl/user_feed.tpl",
 			PageGlobalData{Title: fmt.Sprintf("@%s", user.Handle), TweetTrove: feed.TweetTrove},
 			data,
@@ -213,7 +228,7 @@ func (app *Application) UserFollowees(w http.ResponseWriter, r *http.Request, us
 	trove.Users[user.ID] = user // Not loaded otherwise; needed to profile image in the login button on the sidebar
 	data.Title = "Followees"
 	data.HeaderUserID = user.ID
-	app.buffered_render_page2(w, "tpl/follows.tpl", PageGlobalData{Title: "Followees", TweetTrove: trove}, data)
+	app.buffered_render_page2(w, r, "tpl/follows.tpl", PageGlobalData{Title: "Followees", TweetTrove: trove}, data)
 }
 
 func (app *Application) UserFollowers(w http.ResponseWriter, r *http.Request, user User) {
@@ -238,7 +253,7 @@ func (app *Application) UserFollowers(w http.ResponseWriter, r *http.Request, us
 	trove.Users[user.ID] = user
 	data.Title = "Followers"
 	data.HeaderUserID = user.ID
-	app.buffered_render_page2(w, "tpl/follows.tpl", PageGlobalData{Title: "Followers", TweetTrove: trove}, data)
+	app.buffered_render_page2(w, r, "tpl/follows.tpl", PageGlobalData{Title: "Followers", TweetTrove: trove}, data)
 }
 
 func (app *Application) UserFollowersYouKnow(w http.ResponseWriter, r *http.Request, user User) {
@@ -263,7 +278,7 @@ func (app *Application) UserFollowersYouKnow(w http.ResponseWriter, r *http.Requ
 	trove.Users[user.ID] = user
 	data.Title = "Followers you know"
 	data.HeaderUserID = user.ID
-	app.buffered_render_page2(w, "tpl/follows.tpl", PageGlobalData{Title: "Followers you know", TweetTrove: trove}, data)
+	app.buffered_render_page2(w, r, "tpl/follows.tpl", PageGlobalData{Title: "Followers you know", TweetTrove: trove}, data)
 }
 
 func (app *Application) UserFolloweesYouKnow(w http.ResponseWriter, r *http.Request, user User) {
@@ -276,7 +291,7 @@ func (app *Application) UserFolloweesYouKnow(w http.ResponseWriter, r *http.Requ
 	trove.Users[user.ID] = user
 	data.Title = "Followees you know"
 	data.HeaderUserID = user.ID
-	app.buffered_render_page2(w, "tpl/follows.tpl", PageGlobalData{Title: "Followees you know", TweetTrove: trove}, data)
+	app.buffered_render_page2(w, r, "tpl/follows.tpl", PageGlobalData{Title: "Followees you know", TweetTrove: trove}, data)
 }
 
 func (app *Application) UserMutualFollowers(w http.ResponseWriter, r *http.Request, user User) {
@@ -289,5 +304,5 @@ func (app *Application) UserMutualFollowers(w http.ResponseWriter, r *http.Reque
 	trove.Users[user.ID] = user
 	data.Title = "Mutual followers"
 	data.HeaderUserID = user.ID
-	app.buffered_render_page2(w, "tpl/follows.tpl", PageGlobalData{Title: "Mutual followers", TweetTrove: trove}, data)
+	app.buffered_render_page2(w, r, "tpl/follows.tpl", PageGlobalData{Title: "Mutual followers", TweetTrove: trove}, data)
 }

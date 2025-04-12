@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/tracing"
 )
 
 type ListData struct {
@@ -33,6 +34,8 @@ func NewListData(users []User) (ListData, TweetTrove) {
 }
 
 func (app *Application) ListDetailFeed(w http.ResponseWriter, r *http.Request) {
+	_span := tracing.GetActiveSpan(r.Context()).AddChild("list_feed")
+	defer _span.End()
 	list := get_list_from_context(r.Context())
 
 	c := NewListCursor(list.ID)
@@ -41,16 +44,19 @@ func (app *Application) ListDetailFeed(w http.ResponseWriter, r *http.Request) {
 		app.error_400_with_message(w, r, "invalid cursor (must be a number)")
 		return
 	}
+	span := tracing.GetActiveSpan(r.Context()).AddChild("cursor_next_page")
 	feed, err := app.Profile.NextPage(c, app.ActiveUser.ID)
 	if err != nil && !errors.Is(err, ErrEndOfFeed) {
 		panic(err)
 	}
+	span.End()
+
 	if is_htmx(r) && c.CursorPosition == CURSOR_MIDDLE {
 		// It's a Show More request
-		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
+		app.buffered_render_htmx2(w, r, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
 	} else {
 		app.buffered_render_page2(
-			w,
+			w, r,
 			"tpl/list.tpl",
 			PageGlobalData{Title: list.Name, TweetTrove: feed.TweetTrove},
 			ListData{Feed: feed, List: list, ActiveTab: "feed"},
@@ -65,7 +71,7 @@ func (app *Application) ListDetailUsers(w http.ResponseWriter, r *http.Request) 
 	data, trove := NewListData(users)
 	data.List = list
 	data.ActiveTab = "users"
-	app.buffered_render_page2(w, "tpl/list.tpl", PageGlobalData{Title: list.Name, TweetTrove: trove}, data)
+	app.buffered_render_page2(w, r, "tpl/list.tpl", PageGlobalData{Title: list.Name, TweetTrove: trove}, data)
 }
 
 func (app *Application) ListDelete(w http.ResponseWriter, r *http.Request) {
@@ -132,6 +138,8 @@ func (app *Application) ListRemoveUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) Lists(w http.ResponseWriter, r *http.Request) {
+	_span := tracing.GetActiveSpan(r.Context()).AddChild("lists")
+	defer _span.End()
 	app.TraceLog.Printf("'Lists' handler (path: %q)", r.URL.Path)
 
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
@@ -177,7 +185,7 @@ func (app *Application) Lists(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	app.buffered_render_page2(
-		w,
+		w, r,
 		"tpl/list_of_lists.tpl",
 		PageGlobalData{Title: "Lists", TweetTrove: trove},
 		lists,

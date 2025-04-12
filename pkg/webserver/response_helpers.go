@@ -63,7 +63,7 @@ func (app *Application) toast(w http.ResponseWriter, r *http.Request, status_cod
 
 	w.WriteHeader(status_code) // Must be called after all `Header.Set(...)`
 
-	app.buffered_render_htmx(w, "toast", PageGlobalData{}, t)
+	app.buffered_render_htmx2(w, r, "toast", PageGlobalData{}, t)
 }
 
 // `Type` can be:

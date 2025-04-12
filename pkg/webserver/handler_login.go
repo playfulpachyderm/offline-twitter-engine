@@ -9,6 +9,7 @@ import (
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/tracing"
 )
 
 type LoginData struct {
@@ -36,6 +37,8 @@ func (f *LoginForm) Validate() {
 }
 
 func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
+	_span := tracing.GetActiveSpan(r.Context()).AddChild("login")
+	defer _span.End()
 	app.TraceLog.Printf("'Login' handler (path: %q)", r.URL.Path)
 	var form LoginForm
 	if r.Method == "POST" {
@@ -70,7 +73,7 @@ func (app *Application) Login(w http.ResponseWriter, r *http.Request) {
 		LoginForm:        form,
 		ExistingSessions: app.Profile.ListSessions(),
 	}
-	app.buffered_render_page2(w, "tpl/login.tpl", PageGlobalData{Title: "Login"}, &data)
+	app.buffered_render_page2(w, r, "tpl/login.tpl", PageGlobalData{Title: "Login"}, &data)
 }
 
 func (app *Application) after_login(w http.ResponseWriter, r *http.Request, api scraper.API) {
@@ -144,5 +147,5 @@ func (app *Application) ChangeSession(w http.ResponseWriter, r *http.Request) {
 	if app.LastReadNotificationSortIndex != 0 {
 		data.NumRegularNotifications = app.Profile.GetUnreadNotificationsCount(app.ActiveUser.ID, app.LastReadNotificationSortIndex)
 	}
-	app.buffered_render_htmx(w, "nav-sidebar", PageGlobalData{}, data)
+	app.buffered_render_htmx2(w, r, "nav-sidebar", PageGlobalData{}, data)
 }

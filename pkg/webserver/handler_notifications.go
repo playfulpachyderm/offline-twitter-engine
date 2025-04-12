@@ -4,9 +4,13 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/tracing"
 )
 
 func (app *Application) Notifications(w http.ResponseWriter, r *http.Request) {
+	_span := tracing.GetActiveSpan(r.Context()).AddChild("notifications")
+	defer _span.End()
 	app.TraceLog.Printf("'Notifications' handler (path: %q)", r.URL.Path)
 
 	if app.ActiveUser.ID == 0 {
@@ -35,9 +39,9 @@ func (app *Application) Notifications(w http.ResponseWriter, r *http.Request) {
 
 	if is_htmx(r) && cursor_val != 0 {
 		// It's a Show More request
-		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
+		app.buffered_render_htmx2(w, r, "timeline", PageGlobalData{TweetTrove: feed.TweetTrove}, feed)
 	} else {
-		app.buffered_render_page2(w, "tpl/notifications.tpl", PageGlobalData{Title: "Notifications", TweetTrove: feed.TweetTrove}, feed)
+		app.buffered_render_page2(w, r, "tpl/notifications.tpl", PageGlobalData{Title: "Notifications", TweetTrove: feed.TweetTrove}, feed)
 	}
 }
 

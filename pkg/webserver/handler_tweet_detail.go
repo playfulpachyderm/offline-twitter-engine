@@ -10,6 +10,7 @@ import (
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/tracing"
 )
 
 var ErrNotFound = errors.New("not found")
@@ -82,7 +83,7 @@ func (app *Application) LikeTweet(w http.ResponseWriter, r *http.Request) {
 	panic_if(err)
 	tweet.IsLikedByCurrentUser = true
 
-	app.buffered_render_htmx(w, "likes-count", PageGlobalData{}, tweet)
+	app.buffered_render_htmx2(w, r, "likes-count", PageGlobalData{}, tweet)
 }
 func (app *Application) UnlikeTweet(w http.ResponseWriter, r *http.Request) {
 	tweet := get_tweet_from_context(r.Context())
@@ -96,10 +97,12 @@ func (app *Application) UnlikeTweet(w http.ResponseWriter, r *http.Request) {
 	panic_if(err)
 	tweet.IsLikedByCurrentUser = false
 
-	app.buffered_render_htmx(w, "likes-count", PageGlobalData{}, tweet)
+	app.buffered_render_htmx2(w, r, "likes-count", PageGlobalData{}, tweet)
 }
 
 func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
+	_span := tracing.GetActiveSpan(r.Context()).AddChild("tweet_detail")
+	defer _span.End()
 	app.TraceLog.Printf("'TweetDetail' handler (path: %q)", r.URL.Path)
 
 	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
@@ -158,7 +161,7 @@ func (app *Application) TweetDetail(w http.ResponseWriter, r *http.Request) {
 	data.TweetDetailView = twt_detail
 
 	app.buffered_render_page2(
-		w,
+		w, r,
 		"tpl/tweet_detail.tpl",
 		PageGlobalData{Title: "Tweet", TweetTrove: twt_detail.TweetTrove, FocusedTweetID: data.MainTweetID, Toasts: toasts},
 		data,

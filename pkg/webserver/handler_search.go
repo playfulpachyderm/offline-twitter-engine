@@ -10,6 +10,7 @@ import (
 
 	. "gitlab.com/offline-twitter/twitter_offline_engine/pkg/persistence"
 	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/scraper"
+	"gitlab.com/offline-twitter/twitter_offline_engine/pkg/tracing"
 )
 
 type SearchPageData struct {
@@ -31,16 +32,20 @@ func NewSearchPageData() SearchPageData {
 }
 
 func (app *Application) SearchUsers(w http.ResponseWriter, r *http.Request) {
+	_span := tracing.GetActiveSpan(r.Context()).AddChild("search_users")
+	defer _span.End()
 	ret := NewSearchPageData()
 	ret.IsUsersSearch = true
 	ret.SearchText = strings.Trim(r.URL.Path, "/")
 	ret.UserIDs = []UserID{}
+	span := tracing.GetActiveSpan(r.Context()).AddChild("db_search_users")
 	for _, u := range app.Profile.SearchUsers(ret.SearchText) {
 		ret.TweetTrove.Users[u.ID] = u
 		ret.UserIDs = append(ret.UserIDs, u.ID)
 	}
+	span.End()
 	app.buffered_render_page2(
-		w,
+		w, r,
 		"tpl/search.tpl",
 		PageGlobalData{Title: "Search", TweetTrove: ret.Feed.TweetTrove, SearchText: ret.SearchText},
 		ret,
@@ -48,6 +53,8 @@ func (app *Application) SearchUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
+	_span := tracing.GetActiveSpan(r.Context()).AddChild("search")
+	defer _span.End()
 	app.TraceLog.Printf("'Search' handler (path: %q)", r.URL.Path)
 
 	search_text := strings.Trim(r.URL.Path, "/")
@@ -131,10 +138,12 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 		app.error_400_with_message(w, r, "Invalid sort order")
 	}
 
+	span := tracing.GetActiveSpan(r.Context()).AddChild("cursor_next_page")
 	feed, err := app.Profile.NextPage(c, app.ActiveUser.ID)
 	if err != nil && !errors.Is(err, ErrEndOfFeed) {
 		panic(err)
 	}
+	span.End()
 
 	data := NewSearchPageData()
 	data.Feed = feed
@@ -143,10 +152,10 @@ func (app *Application) Search(w http.ResponseWriter, r *http.Request) {
 
 	if is_htmx(r) && c.CursorPosition == CURSOR_MIDDLE {
 		// It's a Show More request
-		app.buffered_render_htmx(w, "timeline", PageGlobalData{TweetTrove: data.Feed.TweetTrove, SearchText: search_text}, data)
+		app.buffered_render_htmx2(w, r, "timeline", PageGlobalData{TweetTrove: data.Feed.TweetTrove, SearchText: search_text}, data)
 	} else {
 		app.buffered_render_page2(
-			w,
+			w, r,
 			"tpl/search.tpl",
 			PageGlobalData{Title: "Search", TweetTrove: data.Feed.TweetTrove, SearchText: search_text},
 			data,
