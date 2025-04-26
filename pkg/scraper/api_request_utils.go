@@ -92,7 +92,8 @@ func (api API) add_authentication_headers(req *http.Request) {
 	// Params for every request
 	req.Header.Set("Authorization", "Bearer "+BEARER_TOKEN)
 	req.Header.Set("x-twitter-client-language", "en")
-	req.Header.Set("x-client-transaction-id", "CDpGx9ZBJxmrJG6fvznOkovq/j33HjsDl/LHzCGB68usKP7ZcaY/NDEdlkbpPD1LQxoNvgsFK7XaWhsZGRZptbzURPTvCw")
+	req.Header.Set("x-client-transaction-id",
+		"CDpGx9ZBJxmrJG6fvznOkovq/j33HjsDl/LHzCGB68usKP7ZcaY/NDEdlkbpPD1LQxoNvgsFK7XaWhsZGRZptbzURPTvCw")
 
 	if api.IsAuthenticated {
 		if api.CSRFToken == "" {
